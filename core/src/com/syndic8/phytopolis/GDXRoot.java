@@ -1,31 +1,49 @@
+/*
+ * GDXRoot.java
+ *
+ * Authors: Syndic8
+ */
 package com.syndic8.phytopolis;
 
-import com.badlogic.gdx.ApplicationAdapter;
-import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import com.badlogic.gdx.utils.ScreenUtils;
+import com.badlogic.gdx.Game;
+import com.badlogic.gdx.Screen;
+import com.syndic8.phytopolis.assets.AssetDirectory;
+import com.syndic8.phytopolis.util.ScreenListener;
 
-public class GDXRoot extends ApplicationAdapter {
-	SpriteBatch batch;
-	Texture img;
-	
-	@Override
-	public void create () {
-		batch = new SpriteBatch();
-		img = new Texture("badlogic.jpg");
-	}
+/**
+ * LibGDX's root class.
+ */
+public class GDXRoot extends Game implements ScreenListener {
 
-	@Override
-	public void render () {
-		ScreenUtils.clear(1, 0, 0, 1);
-		batch.begin();
-		batch.draw(img, 0, 0);
-		batch.end();
-	}
-	
-	@Override
-	public void dispose () {
-		batch.dispose();
-		img.dispose();
-	}
+    /**
+     * Directory for game assets.
+     */
+    AssetDirectory directory;
+    /**
+     * Drawing context to display graphics (view).
+     */
+    private GameCanvas canvas;
+
+    public GDXRoot() {
+    }
+
+    public void create() {
+        canvas = new GameCanvas();
+    }
+
+    public void dispose() {
+        if (directory != null) {
+            directory.unloadAssets();
+            directory.dispose();
+            directory = null;
+        }
+        super.dispose();
+    }
+
+    public void resize(int width, int height) {
+    }
+
+    public void exitScreen(Screen screen, int exitCode) {
+    }
+
 }
