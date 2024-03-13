@@ -15,7 +15,8 @@ import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.utils.GdxRuntimeException;
 import com.badlogic.gdx.utils.JsonValue;
 import com.badlogic.gdx.utils.ObjectMap;
-import edu.cornell.gdiac.util.*;
+import com.syndic8.phytopolis.util.FilmStrip;
+import com.syndic8.phytopolis.util.*;
 
 /**
  * This class parses a JSON entry into a {@link FilmStrip}.
