@@ -252,6 +252,17 @@ public class GameCanvas {
         spriteBatch.getProjectionMatrix().setToOrtho2D(0, 0, getWidth(), getHeight());
     }
 
+    public void drawBackground(Texture image, float x, float y) {
+        if (active != DrawPass.STANDARD) {
+            Gdx.app.error("GameCanvas", "Cannot draw without active begin()", new IllegalStateException());
+            return;
+        }
+
+        float h = getHeight();
+        spriteBatch.draw(image, x,   y);
+        spriteBatch.draw(image, x, y+h);
+    }
+
     /**
      * Returns the current color blending state for this canvas.
      *
@@ -727,7 +738,6 @@ public class GameCanvas {
             return;
         }
 
-        // Unlike Lab 1, we can shortcut without a master drawing method
         spriteBatch.setColor(tint);
         spriteBatch.draw(region, x,  y, width, height);
     }
