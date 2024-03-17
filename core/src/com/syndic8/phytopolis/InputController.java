@@ -62,6 +62,20 @@ public class InputController {
 
     private boolean mousePressedPrevious;
 
+    private boolean growRightPressed;
+    private boolean growLeftPressed;
+    private boolean growUpPressed;
+    private boolean growRightPrevious;
+    private boolean growLeftPrevious;
+    private boolean growUpPrevious;
+
+
+    private boolean dropPressed;
+    private boolean dropPrevious;
+    private boolean extinguishFirePressed;
+    private boolean extinguishFirePrevious;
+
+
     private float growX;
 
     private float growY;
@@ -160,6 +174,23 @@ public class InputController {
     public boolean didMousePress() {
         return mousePressed && !mousePressedPrevious;
     }
+    public boolean didDrop(){
+        return dropPressed & !dropPrevious;
+    }
+    public boolean didExtinguish(){
+        return extinguishFirePressed & !extinguishFirePrevious;
+    }
+    public boolean didGrowRight() {
+        return growRightPressed && !growRightPrevious;
+    }
+
+    public boolean didGrowLeft() {
+        return growLeftPressed && !growLeftPrevious;
+    }
+
+    public boolean didGrowUp() {
+        return growUpPressed && !growUpPrevious;
+    }
 
 
     /**
@@ -245,7 +276,12 @@ public class InputController {
         exitPrevious = exitPressed;
         nextPrevious = nextPressed;
         prevPrevious = prevPressed;
+        growRightPrevious = growRightPressed;
+        growLeftPrevious = growLeftPressed;
+        growUpPrevious = growUpPressed;
         mousePressedPrevious = mousePressed;
+        dropPrevious = dropPressed;
+        extinguishFirePrevious = extinguishFirePressed;
 
         // Check to see if a GamePad is connected
         if (xbox != null && xbox.isConnected()) {
@@ -332,19 +368,36 @@ public class InputController {
         if (Gdx.input.isKeyPressed(Input.Keys.W)) {
             vertical += 1.0f;
         }
+
+        dropPressed = (secondary && dropPressed);
         if (Gdx.input.isKeyPressed(Input.Keys.S)) {
-            vertical -= 1.0f;
+            dropPressed = true;
         }
+
         mousePressed = (secondary && mousePressed);
-        if (Gdx.input.isButtonPressed(Input.Buttons.LEFT)
-                || Gdx.input.isKeyPressed(Input.Keys.UP)){
+        if (Gdx.input.isButtonPressed(Input.Buttons.LEFT)){
             mousePressed = true;
             growX = Gdx.input.getX();
             growY =
                     Gdx.graphics.getHeight() - Gdx.input.getY();
-
         }
-
+        extinguishFirePressed =
+                (secondary && extinguishFirePressed);
+        if (Gdx.input.isKeyPressed(Input.Keys.E)){
+            extinguishFirePressed = true;
+        }
+        growRightPressed = (secondary && growRightPressed);
+        if (Gdx.input.isKeyPressed(Input.Keys.RIGHT)){
+            growRightPressed = true;
+        }
+        growLeftPressed = (secondary && growLeftPressed);
+        if (Gdx.input.isKeyPressed(Input.Keys.LEFT)){
+            growLeftPressed = true;
+        }
+        growUpPressed = (secondary && growUpPressed);
+        if (Gdx.input.isKeyPressed(Input.Keys.UP)){
+            growUpPressed = true;
+        }
         // Mouse results
         tertiaryPressed = Gdx.input.isButtonPressed(Input.Buttons.LEFT);
         crosshair.set(Gdx.input.getX(), Gdx.input.getY());
