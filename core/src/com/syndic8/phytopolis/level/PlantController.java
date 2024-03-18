@@ -294,6 +294,10 @@ public class PlantController {
          * height of the leaf at this node
          */
         private final int leafHeight = 5;
+        /**
+         * if a leaf exists at this node
+         */
+        private boolean leafExists = false;
 
 
 
@@ -339,6 +343,7 @@ public class PlantController {
          */
         public void makeLeaf(leafType type, TextureRegion texture, World world) {
             leaf = new Leaf(x, y, leafWidth, leafHeight);
+            leafExists = true;
         }
 
         /**
@@ -355,7 +360,10 @@ public class PlantController {
             }
         }
 
-        //TODO: set return type to branch object instead of boolean
+        public void unmakeLeaf(){
+            leafExists = false;
+            leaf = null;
+        }
 
         /**
          * get the branch at a given direction
@@ -419,6 +427,21 @@ public class PlantController {
                 default:
                     return false;
             }
+        }
+
+        public boolean hasLeaf(){
+            return leafExists;
+        }
+
+        /**
+         * returns whether this branch is empty or not
+         * @return if the branch is empty
+         */
+        public boolean nodeIsEmpty(){
+            return !(hasBranchInDirection(branchDirection.LEFT) ||
+                    hasBranchInDirection(branchDirection.RIGHT) ||
+                    hasBranchInDirection(branchDirection.MIDDLE) ||
+                    hasLeaf());
         }
 
     }
