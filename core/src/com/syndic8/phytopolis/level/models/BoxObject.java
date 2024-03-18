@@ -1,9 +1,10 @@
-package com.syndic8.phytopolis.level;
+package com.syndic8.phytopolis.level.models;
 
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.Fixture;
 import com.badlogic.gdx.physics.box2d.PolygonShape;
+import com.syndic8.phytopolis.GameCanvas;
 
 public abstract class BoxObject extends GameObject {
     /** Shape information for this box */
@@ -176,14 +177,14 @@ public abstract class BoxObject extends GameObject {
     }
 
 
-//    /**
-//     * Draws the outline of the physics body.
-//     *
-//     * This method can be helpful for understanding issues with collisions.
-//     *
-//     * @param canvas Drawing context
-//     */
-//    public void drawDebug(GameCanvas canvas) {
-//        canvas.drawPhysics(shape, Color.YELLOW,getX(),getY(),getAngle(),drawScale.x,drawScale.y);
-//    }
+    /**
+     * Draws the outline of the physics body.
+     *
+     * This method can be helpful for understanding issues with collisions.
+     *
+     * @param canvas Drawing context
+     */
+    public void drawDebug(GameCanvas canvas) {
+        canvas.drawPhysics(shape, Color.YELLOW,getX(),getY(),getAngle(),drawScale.x,drawScale.y);
+    }
 }

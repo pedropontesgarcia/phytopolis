@@ -1,4 +1,4 @@
-package com.syndic8.phytopolis.level;
+package com.syndic8.phytopolis.level.models;
 
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.math.Vector2;
@@ -115,7 +115,11 @@ public class Branch extends Model {
      * @param canvas The drawing context
      */
     public void draw(GameCanvas canvas) {
-        canvas.draw(animator, Color.WHITE, origin.x, origin.y,
+        canvas.draw(texture, Color.WHITE, origin.x, origin.y,
                 position.x, position.y, 0.0f, 1.0f, 1.f);
+    }
+
+    public void drawDebug(GameCanvas canvas) {
+        draw(canvas);
     }
 }

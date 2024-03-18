@@ -1,7 +1,8 @@
-package com.syndic8.phytopolis.level;
+package com.syndic8.phytopolis.level.models;
 
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Vector2;
 import com.syndic8.phytopolis.GameCanvas;
 import com.syndic8.phytopolis.util.FilmStrip;
@@ -19,21 +20,26 @@ public abstract class Model {
         /** A star, which is created by a shell explosion */
         FIRE,
         WATER,
-        SUN
+        SUN,
+        PLATFORM
     }
     /** Reference to texture origin */
     protected Vector2 origin;
-    /** CURRENT image for this object. May change over time. */
-    protected FilmStrip animator;
+    /** Whether the object should be removed from the world on next pass */
+    protected boolean toRemove;
+    /** The texture for the shape. */
+    protected TextureRegion texture;
+//    /** CURRENT image for this object. May change over time. */
+//    protected FilmStrip animator;
 
     public void setTexture(Texture texture) {
-        animator = new FilmStrip(texture,1,1,1);
+        this.texture = new FilmStrip(texture,1,1,1);
 //        radius = animator.getRegionHeight() / 2.0f;
-        origin = new Vector2(animator.getRegionWidth()/2.0f, animator.getRegionHeight()/2.0f);
+        origin = new Vector2(texture.getWidth()/2.0f, texture.getHeight()/2.0f);
     }
 
     public Texture getTexture() {
-        return animator == null ? null : animator.getTexture();
+        return texture == null ? null : texture.getTexture();
     }
 
     /**
@@ -74,6 +80,31 @@ public abstract class Model {
      */
     public abstract void setY(float value);
 
+    /// Garbage Collection Methods
+    /**
+     * Returns true if our object has been flagged for garbage collection
+     *
+     * A garbage collected object will be removed from the physics world at
+     * the next time step.
+     *
+     * @return true if our object has been flagged for garbage collection
+     */
+    public boolean isRemoved() {
+        return toRemove;
+    }
+
+    /**
+     * Sets whether our object has been flagged for garbage collection
+     *
+     * A garbage collected object will be removed from the physics world at
+     * the next time step.
+     *
+     * @param value  whether our object has been flagged for garbage collection
+     */
+    public void markRemoved(boolean value) {
+        toRemove = value;
+    }
+
     /**
      * Returns the type of this object.
      *
@@ -104,4 +135,6 @@ public abstract class Model {
      * @param canvas The drawing context
      */
     public abstract void draw(GameCanvas canvas);
+
+    public abstract void drawDebug(GameCanvas canvas);
 }

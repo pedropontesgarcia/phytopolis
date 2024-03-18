@@ -8,6 +8,8 @@ import com.badlogic.gdx.physics.box2d.BodyDef;
 import com.badlogic.gdx.physics.box2d.World;
 import com.syndic8.phytopolis.GameCanvas;
 import com.syndic8.phytopolis.assets.AssetDirectory;
+import com.syndic8.phytopolis.level.models.Branch;
+import com.syndic8.phytopolis.level.models.Leaf;
 
 public class PlantController {
 
@@ -106,9 +108,9 @@ public class PlantController {
      * @param type      the type of branch to grow
      */
     public void growBranch(float x,
-                                      float y,
-                                      branchDirection direction,
-                                      branchType type) {
+                           float y,
+                           branchDirection direction,
+                           branchType type) {
         int xIndex = xCoordToIndex(x * 10);
         int yIndex = yCoordToIndex(y * 10);
         plantGrid[xIndex][yIndex].makeBranch(direction,
@@ -318,9 +320,9 @@ public class PlantController {
          * @param world     world to assign the branch to
          */
         public void makeBranch(branchDirection direction,
-                                          branchType type,
-                                          TextureRegion texture,
-                                          World world) {
+                               branchType type,
+                               TextureRegion texture,
+                               World world) {
             switch (direction) {
                 case LEFT:
                 case MIDDLE:

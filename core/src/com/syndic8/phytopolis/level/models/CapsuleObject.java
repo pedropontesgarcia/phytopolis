@@ -1,4 +1,4 @@
-package com.syndic8.phytopolis.level;
+package com.syndic8.phytopolis.level.models;
 
 /*
  * CapsuleObstacle.java
@@ -14,7 +14,7 @@ package com.syndic8.phytopolis.level;
  */
 
 import com.badlogic.gdx.math.*;
-import com.badlogic.gdx.graphics.*;
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.physics.box2d.*;
 import com.syndic8.phytopolis.GameCanvas;
 
@@ -476,43 +476,43 @@ public abstract class CapsuleObject extends GameObject {
         }
     }
 
-//    /**
-//     * Draws the outline of the physics body.
-//     *
-//     * This method can be helpful for understanding issues with collisions.
-//     *
-//     * @param canvas Drawing context
-//     */
-//    public void drawDebug(GameCanvas canvas) {
-//        canvas.drawPhysics(shape,Color.YELLOW,getX(),getY(),getAngle(),drawScale.x,drawScale.y);
-//        if (cap1 != null) {
-//            // Need to manually rotate caps off axis
-//            float dx; float dy;
-//            if (isHorizontal(orient)) {
-//                float r = -center.x;
-//                dx = (float)(r*Math.cos(Math.PI+getAngle()));
-//                dy = (float)(r*Math.sin(Math.PI+getAngle()));
-//            } else {
-//                float r = center.y+center.height;
-//                dx = (float)(r*Math.cos(Math.PI/2.0f+getAngle()));
-//                dy = (float)(r*Math.sin(Math.PI/2.0f+getAngle()));
-//            }
-//            canvas.drawPhysics(end1,Color.YELLOW,getX()+dx,getY()+dy,drawScale.x,drawScale.y);
-//        }
-//        if (cap2 != null) {
-//            // Need to manually rotate caps off axis
-//            float dx; float dy;
-//            if (isHorizontal(orient)) {
-//                float r = center.x+center.width;
-//                dx = (float)(r*Math.cos(getAngle()));
-//                dy = (float)(r*Math.sin(getAngle()));
-//            } else {
-//                float r = -center.y;
-//                dx = (float)(r*Math.cos(-Math.PI/2.0f+getAngle()));
-//                dy = (float)(r*Math.sin(-Math.PI/2.0f+getAngle()));
-//            }
-//            canvas.drawPhysics(end2,Color.YELLOW,getX()+dx,getY()+dy,drawScale.x,drawScale.y);
-//        }
-//    }
+    /**
+     * Draws the outline of the physics body.
+     *
+     * This method can be helpful for understanding issues with collisions.
+     *
+     * @param canvas Drawing context
+     */
+    public void drawDebug(GameCanvas canvas) {
+        canvas.drawPhysics(shape,Color.YELLOW,getX(),getY(),getAngle(),drawScale.x,drawScale.y);
+        if (cap1 != null) {
+            // Need to manually rotate caps off axis
+            float dx; float dy;
+            if (isHorizontal(orient)) {
+                float r = -center.x;
+                dx = (float)(r*Math.cos(Math.PI+getAngle()));
+                dy = (float)(r*Math.sin(Math.PI+getAngle()));
+            } else {
+                float r = center.y+center.height;
+                dx = (float)(r*Math.cos(Math.PI/2.0f+getAngle()));
+                dy = (float)(r*Math.sin(Math.PI/2.0f+getAngle()));
+            }
+            canvas.drawPhysics(end1,Color.YELLOW,getX()+dx,getY()+dy,drawScale.x,drawScale.y);
+        }
+        if (cap2 != null) {
+            // Need to manually rotate caps off axis
+            float dx; float dy;
+            if (isHorizontal(orient)) {
+                float r = center.x+center.width;
+                dx = (float)(r*Math.cos(getAngle()));
+                dy = (float)(r*Math.sin(getAngle()));
+            } else {
+                float r = -center.y;
+                dx = (float)(r*Math.cos(-Math.PI/2.0f+getAngle()));
+                dy = (float)(r*Math.sin(-Math.PI/2.0f+getAngle()));
+            }
+            canvas.drawPhysics(end2,Color.YELLOW,getX()+dx,getY()+dy,drawScale.x,drawScale.y);
+        }
+    }
 
 }

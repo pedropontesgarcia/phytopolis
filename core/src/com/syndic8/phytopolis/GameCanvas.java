@@ -11,6 +11,8 @@ import com.badlogic.gdx.math.Affine2;
 import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.Body;
+import com.badlogic.gdx.physics.box2d.CircleShape;
+import com.badlogic.gdx.physics.box2d.PolygonShape;
 
 public class GameCanvas {
     /** Enumeration to track which pass we are in */
@@ -385,6 +387,33 @@ public class GameCanvas {
     public void end() {
         spriteBatch.end();
         active = DrawPass.INACTIVE;
+    }
+
+    /**
+     * Draws the tinted texture at the given position.
+     * <p>
+     * The texture colors will be multiplied by the given color.  This will turn
+     * any white into the given color.  Other colors will be similarly affected.
+     * <p>
+     * Unless otherwise transformed by the global transform (@see begin(Affine2)),
+     * the texture will be unscaled.  The bottom left of the texture will be positioned
+     * at the given coordinates.
+     *
+     * @param image The texture to draw
+     * @param x     The x-coordinate of the bottom left corner
+     * @param y     The y-coordinate of the bottom left corner
+     */
+    public void draw(Texture image, float x, float y) {
+        if (active != DrawPass.STANDARD) {
+            Gdx.app.error("GameCanvas",
+                    "Cannot draw without active begin()",
+                    new IllegalStateException());
+            return;
+        }
+
+        // Unlike Lab 1, we can shortcut without a master drawing method
+        spriteBatch.setColor(Color.WHITE);
+        spriteBatch.draw(image, x, y);
     }
 
     /**
@@ -980,6 +1009,203 @@ public class GameCanvas {
     public void endDebug() {
         debugRender.end();
         active = DrawPass.INACTIVE;
+    }
+
+    /**
+     * Draws the outline of the given shape in the specified color
+     *
+     * @param shape The Box2d shape
+     * @param color The outline color
+     * @param x     The x-coordinate of the shape position
+     * @param y     The y-coordinate of the shape position
+     */
+    public void drawPhysics(PolygonShape shape, Color color, float x, float y) {
+        if (active != DrawPass.DEBUG) {
+            Gdx.app.error("GameCanvas",
+                    "Cannot draw without active beginDebug()",
+                    new IllegalStateException());
+            return;
+        }
+
+        float x0, y0, x1, y1;
+        debugRender.setColor(color);
+        for (int ii = 0; ii < shape.getVertexCount() - 1; ii++) {
+            shape.getVertex(ii, vertex);
+            x0 = x + vertex.x;
+            y0 = y + vertex.y;
+            shape.getVertex(ii + 1, vertex);
+            x1 = x + vertex.x;
+            y1 = y + vertex.y;
+            debugRender.line(x0, y0, x1, y1);
+        }
+        // Close the loop
+        shape.getVertex(shape.getVertexCount() - 1, vertex);
+        x0 = x + vertex.x;
+        y0 = y + vertex.y;
+        shape.getVertex(0, vertex);
+        x1 = x + vertex.x;
+        y1 = y + vertex.y;
+        debugRender.line(x0, y0, x1, y1);
+    }
+
+    /**
+     * Draws the outline of the given shape in the specified color
+     *
+     * @param shape The Box2d shape
+     * @param color The outline color
+     * @param x     The x-coordinate of the shape position
+     * @param y     The y-coordinate of the shape position
+     * @param angle The shape angle of rotation
+     */
+    public void drawPhysics(PolygonShape shape,
+                            Color color,
+                            float x,
+                            float y,
+                            float angle) {
+        if (active != DrawPass.DEBUG) {
+            Gdx.app.error("GameCanvas",
+                    "Cannot draw without active beginDebug()",
+                    new IllegalStateException());
+            return;
+        }
+
+        local.setToTranslation(x, y);
+        local.rotateRad(angle);
+
+        float x0, y0, x1, y1;
+        debugRender.setColor(color);
+        for (int ii = 0; ii < shape.getVertexCount() - 1; ii++) {
+            shape.getVertex(ii, vertex);
+            local.applyTo(vertex);
+            x0 = vertex.x;
+            y0 = vertex.y;
+            shape.getVertex(ii + 1, vertex);
+            local.applyTo(vertex);
+            x1 = vertex.x;
+            y1 = vertex.y;
+            debugRender.line(x0, y0, x1, y1);
+        }
+        // Close the loop
+        shape.getVertex(shape.getVertexCount() - 1, vertex);
+        local.applyTo(vertex);
+        x0 = vertex.x;
+        y0 = vertex.y;
+        shape.getVertex(0, vertex);
+        local.applyTo(vertex);
+        x1 = vertex.x;
+        y1 = vertex.y;
+        debugRender.line(x0, y0, x1, y1);
+    }
+
+    /**
+     * Draws the outline of the given shape in the specified color
+     *
+     * @param shape The Box2d shape
+     * @param color The outline color
+     * @param x     The x-coordinate of the shape position
+     * @param y     The y-coordinate of the shape position
+     * @param angle The shape angle of rotation
+     * @param sx    The amount to scale the x-axis
+     * @param sx    The amount to scale the y-axis
+     */
+    public void drawPhysics(PolygonShape shape,
+                            Color color,
+                            float x,
+                            float y,
+                            float angle,
+                            float sx,
+                            float sy) {
+        if (active != DrawPass.DEBUG) {
+            Gdx.app.error("GameCanvas",
+                    "Cannot draw without active beginDebug()",
+                    new IllegalStateException());
+            return;
+        }
+
+        local.setToScaling(sx, sy);
+        local.translate(x, y);
+        local.rotateRad(angle);
+
+        float x0, y0, x1, y1;
+        debugRender.setColor(color);
+        for (int ii = 0; ii < shape.getVertexCount() - 1; ii++) {
+            shape.getVertex(ii, vertex);
+            local.applyTo(vertex);
+            x0 = vertex.x;
+            y0 = vertex.y;
+            shape.getVertex(ii + 1, vertex);
+            local.applyTo(vertex);
+            x1 = vertex.x;
+            y1 = vertex.y;
+            debugRender.line(x0, y0, x1, y1);
+        }
+        // Close the loop
+        shape.getVertex(shape.getVertexCount() - 1, vertex);
+        local.applyTo(vertex);
+        x0 = vertex.x;
+        y0 = vertex.y;
+        shape.getVertex(0, vertex);
+        local.applyTo(vertex);
+        x1 = vertex.x;
+        y1 = vertex.y;
+        debugRender.line(x0, y0, x1, y1);
+    }
+
+    /**
+     * Draws the outline of the given shape in the specified color
+     * <p>
+     * The position of the circle is ignored.  Only the radius is used. To move the
+     * circle, change the x and y parameters.
+     *
+     * @param shape The Box2d shape
+     * @param color The outline color
+     * @param x     The x-coordinate of the shape position
+     * @param y     The y-coordinate of the shape position
+     */
+    public void drawPhysics(CircleShape shape, Color color, float x, float y) {
+        if (active != DrawPass.DEBUG) {
+            Gdx.app.error("GameCanvas",
+                    "Cannot draw without active beginDebug()",
+                    new IllegalStateException());
+            return;
+        }
+
+        debugRender.setColor(color);
+        debugRender.circle(x, y, shape.getRadius(), 12);
+    }
+
+    /**
+     * Draws the outline of the given shape in the specified color
+     * <p>
+     * The position of the circle is ignored.  Only the radius is used. To move the
+     * circle, change the x and y parameters.
+     *
+     * @param shape The Box2d shape
+     * @param color The outline color
+     * @param x     The x-coordinate of the shape position
+     * @param y     The y-coordinate of the shape position
+     * @param sx    The amount to scale the x-axis
+     * @param sx    The amount to scale the y-axis
+     */
+    public void drawPhysics(CircleShape shape,
+                            Color color,
+                            float x,
+                            float y,
+                            float sx,
+                            float sy) {
+        if (active != DrawPass.DEBUG) {
+            Gdx.app.error("GameCanvas",
+                    "Cannot draw without active beginDebug()",
+                    new IllegalStateException());
+            return;
+        }
+
+        float x0 = x * sx;
+        float y0 = y * sy;
+        float w = shape.getRadius() * sx;
+        float h = shape.getRadius() * sy;
+        debugRender.setColor(color);
+        debugRender.ellipse(x0 - w, y0 - h, 2 * w, 2 * h, 12);
     }
 
     private void computeTransform(float ox, float oy, float x, float y, float angle, float sx, float sy) {
