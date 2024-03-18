@@ -31,8 +31,11 @@ import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.JsonValue;
 import com.badlogic.gdx.utils.ObjectMap;
-import com.syndic8.phytopolis.audio.*;
+import edu.cornell.gdiac.audio.*;
 import com.syndic8.phytopolis.util.*;
+import edu.cornell.gdiac.audio.AudioSource;
+import edu.cornell.gdiac.audio.MusicQueue;
+import edu.cornell.gdiac.audio.SoundEffect;
 
 /**
  * An asset manager that uses a JSON file to define its assets.

@@ -221,6 +221,29 @@ public class PlantController {
     }
 
     /**
+     * returns if the node at the specified x and y has no branches or leaf
+     * @param xArg x coord of the node to be accessed
+     * @param yArg y coord of the node to be accessed
+     * @return if the node has no branches or leaf
+     */
+    public boolean nodeIsEmpty(int xArg, int yArg){
+        return plantGrid[xArg][yArg].isEmpty();
+    }
+
+    /**
+     * destroys add branches and leaves attatched to specified node
+     * @param xArg x coord of the node to be accessed
+     * @param yArg y coord of the node to be accessed
+     */
+    public void destroyAll(int xArg, int yArg){
+        PlantNode nodeToDestroy = plantGrid[xArg][yArg];
+        nodeToDestroy.unmakeLeaf();
+        nodeToDestroy.unmakeBranch(branchDirection.LEFT);
+        nodeToDestroy.unmakeBranch(branchDirection.MIDDLE);
+        nodeToDestroy.unmakeBranch(branchDirection.RIGHT);
+    }
+
+    /**
      * Converts a screen x coordinate to the corresponding node index in the plant
      *
      * @param xArg x coordinate to be converted
@@ -294,6 +317,10 @@ public class PlantController {
          * height of the leaf at this node
          */
         private final int leafHeight = 5;
+        /**
+         * if a leaf exists at this node
+         */
+        private boolean leafExists = false;
 
 
 
@@ -325,8 +352,11 @@ public class PlantController {
                                World world) {
             switch (direction) {
                 case LEFT:
+                    left = new Branch(x, y, -60);
                 case MIDDLE:
+                    middle = new Branch(x, y, 0);
                 case RIGHT:
+                    right = new Branch(x, y, 60);
             }
 
         }
@@ -339,6 +369,7 @@ public class PlantController {
          */
         public void makeLeaf(leafType type, TextureRegion texture, World world) {
             leaf = new Leaf(x, y, leafWidth, leafHeight);
+            leafExists = true;
         }
 
         /**
@@ -355,7 +386,10 @@ public class PlantController {
             }
         }
 
-        //TODO: set return type to branch object instead of boolean
+        public void unmakeLeaf(){
+            leafExists = false;
+            leaf = null;
+        }
 
         /**
          * get the branch at a given direction
@@ -419,6 +453,21 @@ public class PlantController {
                 default:
                     return false;
             }
+        }
+
+        public boolean hasLeaf(){
+            return leafExists;
+        }
+
+        /**
+         * returns whether this branch is empty or not
+         * @return if the branch is empty
+         */
+        public boolean isEmpty(){
+            return !(hasBranchInDirection(branchDirection.LEFT) ||
+                    hasBranchInDirection(branchDirection.RIGHT) ||
+                    hasBranchInDirection(branchDirection.MIDDLE) ||
+                    hasLeaf());
         }
 
     }

@@ -11,6 +11,7 @@ public class Branch extends Model {
     protected Vector2 position;
     /** Whether or not the object should be removed at next timestep. */
     protected boolean destroyed;
+    private float angle;
 
     /**
      * Returns the position of this object (e.g. location of the center pixel)
@@ -91,8 +92,10 @@ public class Branch extends Model {
         return ModelType.BRANCH;
     }
 
-    public Branch(float x, float y) {
+    public Branch(float x, float y, float angle) {
+
         position = new Vector2(x, y);
+        this.angle = angle;
     }
 
     /**

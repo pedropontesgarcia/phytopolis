@@ -12,7 +12,7 @@ package com.syndic8.phytopolis.assets;
 import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.utils.JsonValue;
 import com.badlogic.gdx.utils.ObjectMap;
-import com.syndic8.phytopolis.audio.MusicQueue;
+import edu.cornell.gdiac.audio.MusicQueue;
 
 /**
  * This class parses a JSON entry into a {@link MusicQueue}.

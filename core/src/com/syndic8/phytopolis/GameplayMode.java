@@ -286,25 +286,24 @@ public class GameplayMode extends WorldController implements ContactListener {
         // TODO: position branch correctly
         float avatarX = avatar.getX();
         float avatarY = avatar.getY();
-        /*if (InputController.getInstance().didGrowUp() &&
+        if (InputController.getInstance().didGrowUp() &&
                 (plantController.canGrowAt(avatarX, avatarY))) {
-            addObject(plantController.growBranch(avatarX,
-                                                 avatarY,
-                                                 PlantController.branchDirection.MIDDLE,
-                                                 PlantController.branchType.NORMAL));
+            plantController.growBranch(avatarX,
+                    avatarY,
+                    PlantController.branchDirection.MIDDLE,
+                    PlantController.branchType.NORMAL);
         } else if (InputController.getInstance().didGrowRight() &&
                 (plantController.canGrowAt(avatarX, avatarY))) {
-            addObject(plantController.growBranch(avatarX,
-                                                 avatarY,
-                                                 PlantController.branchDirection.RIGHT,
-                                                 PlantController.branchType.NORMAL));
+            plantController.growBranch(avatarX,
+                    avatarY,
+                    PlantController.branchDirection.RIGHT,
+                    PlantController.branchType.NORMAL);
         } else if (InputController.getInstance().didGrowLeft() &&
-                (plantController.canGrowAt(avatarX, avatarY))) {
-            addObject(plantController.growBranch(avatarX,
-                                                 avatarY,
-                                                 PlantController.branchDirection.LEFT,
-                                                 PlantController.branchType.NORMAL));
-        } else return false;*/
+                (plantController.canGrowAt(avatarX, avatarY))) {plantController.growBranch(avatarX,
+                    avatarY,
+                    PlantController.branchDirection.LEFT,
+                    PlantController.branchType.NORMAL);
+        } else return false;
         return false;
     }
 
@@ -336,45 +335,45 @@ public class GameplayMode extends WorldController implements ContactListener {
 
     }
 
-    //    /**
-    //     * Handles the drop mechanic when the player has
-    //     * pressed S
-    //     */
-    //    private void handleDrop() {
-    //        if (avatar.isPlayerOnPlatform(world) &&
-    //                InputController.getInstance().dropped()) {
-    //            for (Fixture fixture : avatar.getBody().getFixtureList()) {
-    //                originalCollisionProperties.put(fixture,
-    //                        fixture.getFilterData());
-    //            }
-    //            fall = true;
-    //        }
-    //        if (fall) {
-    //            for (Fixture fixture : avatar.getBody().getFixtureList()) {
-    //                fixture.setFilterData(createFilterData(
-    //                        CATEGORY_PLAYER_FALL_THROUGH,
-    //                        MASK_PLAYER_FALL_THROUGH,
-    //                        false));
-    //                fixture.setSensor(true);
-    //                startHeight = avatar.getY();
-    //            }
-    //            fall = false;
-    //        }
-    //        if ((avatar.getY() <= startHeight - distance)) {
-    //            Array<Fixture> fixtures = avatar.getBody().getFixtureList();
-    //            for (Fixture fixture : fixtures) {
-    //                Filter originalProperties = originalCollisionProperties.get(
-    //                        fixture);
-    //                if (originalProperties != null) {
-    //                    fixture.setFilterData(originalProperties);
-    //                    //                    fixture.setSensor(false);
-    //                }
-    //            }
-    //            originalCollisionProperties.clear();
-    //
-    //            startHeight = 0;
-    //        }
-    //    }
+//    /**
+//     * Handles the drop mechanic when the player has
+//     * pressed S
+//     */
+//    private void handleDrop() {
+//        if (avatar.isPlayerOnPlatform(world) &&
+//                InputController.getInstance().dropped()) {
+//            for (Fixture fixture : avatar.getBody().getFixtureList()) {
+//                originalCollisionProperties.put(fixture,
+//                        fixture.getFilterData());
+//            }
+//            fall = true;
+//        }
+//        if (fall) {
+//            for (Fixture fixture : avatar.getBody().getFixtureList()) {
+//                fixture.setFilterData(createFilterData(
+//                        CATEGORY_PLAYER_FALL_THROUGH,
+//                        MASK_PLAYER_FALL_THROUGH,
+//                        false));
+//                fixture.setSensor(true);
+//                startHeight = avatar.getY();
+//            }
+//            fall = false;
+//        }
+//        if ((avatar.getY() <= startHeight - distance)) {
+//            Array<Fixture> fixtures = avatar.getBody().getFixtureList();
+//            for (Fixture fixture : fixtures) {
+//                Filter originalProperties = originalCollisionProperties.get(
+//                        fixture);
+//                if (originalProperties != null) {
+//                    fixture.setFilterData(originalProperties);
+//                    //                    fixture.setSensor(false);
+//                }
+//            }
+//            originalCollisionProperties.clear();
+//
+//            startHeight = 0;
+//        }
+//    }
 
     /**
      * @param categoryBits the collision category for the

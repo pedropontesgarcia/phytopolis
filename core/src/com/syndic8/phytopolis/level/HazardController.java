@@ -1,6 +1,7 @@
 package com.syndic8.phytopolis.level;
 
 import com.badlogic.gdx.math.Vector2;
+import com.syndic8.phytopolis.level.PlantController;
 
 import java.util.*;
 
@@ -42,6 +43,9 @@ public class HazardController {
      * Cached ArrayList to keep track of drone nodes
      */
     ArrayList<Integer> droneNodes = new ArrayList<>();
+
+    /** The duration that a fire continues to burn. */
+    private int burnTime;
 
     /**
      * Initializes a HazardController with the given parameters.
@@ -98,11 +102,11 @@ public class HazardController {
         ArrayList<Integer> effectedNodes = new ArrayList<>();
         if (fireHeight != -1) {
             // Check if the plant node exists and append to effected nodes
-            /*for (int w = 0; w < width; w++) {
-                if (plantController.branchExists(w, fireHeight)) {
+            for (int w = 0; w < width; w++) {
+                if (plantController.nodeIsEmpty(w, fireHeight)) {
                     effectedNodes.add(w);
                 }
-            }*/
+            }
             // Choose a node at random to destroy from effectedNodes
             if (!effectedNodes.isEmpty()) {
                 int randomIndex = random.nextInt(effectedNodes.size());
@@ -145,17 +149,17 @@ public class HazardController {
         }
         if (droneHeight != -1) {
             // Check if the plant node exists and append to effected nodes
-            /*for (int w = 0; w < width; w++) {
-                if (plantController.existsBranch(w, droneHeight)) {
+            for (int w = 0; w < width; w++) {
+                if (plantController.nodeIsEmpty(w, droneHeight)) {
                     System.out.println("width " + w);
                     droneNodes.add(w);
                 }
-            }*/
+            }
             // Choose a node at random to destroy from droneNodes
             if (!droneNodes.isEmpty()) {
                 int randomIndex = random.nextInt(droneNodes.size());
                 int nodeToDestroy = droneNodes.get(randomIndex);
-                //plantController.destroyNode(nodeToDestroy, droneHeight);
+                plantController.destroyAll(nodeToDestroy, droneHeight);
             }
             droneNodes.clear();
         }
@@ -167,9 +171,8 @@ public class HazardController {
      * on plant nodes.
      */
     public void updateHazards() {
-        //        generateFire();
+//        generateFire();
         generateDrone();
-        //        updateBurnTimer();
+//        updateBurnTimer();
     }
-
 }
