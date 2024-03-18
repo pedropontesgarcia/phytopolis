@@ -1,4 +1,4 @@
-package com.syndic8.phytopolis.level;
+package com.syndic8.phytopolis.level.models;
 
 public class Water extends Resource {
     @Override

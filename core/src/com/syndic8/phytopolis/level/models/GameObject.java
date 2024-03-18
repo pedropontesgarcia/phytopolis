@@ -15,7 +15,7 @@
  * Based on original PhysicsDemo Lab by Don Holden, 2007
  * LibGDX version, 2/6/2015
  */
-package com.syndic8.phytopolis.level;
+package com.syndic8.phytopolis.level.models;
 
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
@@ -54,8 +54,6 @@ public abstract class GameObject extends Model {
     protected Vector2 drawScale;
 
     /// Track garbage collection status
-    /** Whether the object should be removed from the world on next pass */
-    private boolean toRemove;
     /** Whether the object has changed shape and needs a new fixture */
     private boolean isDirty;
 
@@ -888,29 +886,6 @@ public abstract class GameObject extends Model {
     }
 
     /// Garbage Collection Methods
-    /**
-     * Returns true if our object has been flagged for garbage collection
-     *
-     * A garbage collected object will be removed from the physics world at
-     * the next time step.
-     *
-     * @return true if our object has been flagged for garbage collection
-     */
-    public boolean isRemoved() {
-        return toRemove;
-    }
-
-    /**
-     * Sets whether our object has been flagged for garbage collection
-     *
-     * A garbage collected object will be removed from the physics world at
-     * the next time step.
-     *
-     * @param value  whether our object has been flagged for garbage collection
-     */
-    public void markRemoved(boolean value) {
-        toRemove = value;
-    }
 
     /**
      * Returns true if the shape information must be updated.
@@ -1145,23 +1120,36 @@ public abstract class GameObject extends Model {
     }
 
     /**
+     * Sets the object texture for drawing purposes.
+     *
+     * In order for drawing to work properly, you MUST set the drawScale.
+     * The drawScale converts the physics units to pixels.
+     *
+     * @param value  the object texture for drawing purposes.
+     */
+    public void setTexture(TextureRegion value) {
+        texture = value;
+        origin.set(texture.getRegionWidth()/2.0f, texture.getRegionHeight()/2.0f);
+    }
+
+    /**
      * Draws the physics object.
      *
      * @param canvas Drawing context
      */
     public void draw(GameCanvas canvas) {
-        if (animator != null) {
-            canvas.draw(animator, Color.WHITE,origin.x,origin.y,getX()*drawScale.x,getY()*drawScale.x,getAngle(),1,1);
+        if (texture != null) {
+            canvas.draw(texture, Color.WHITE,origin.x,origin.y,getX()*drawScale.x,getY()*drawScale.x,getAngle(),1,1);
         }
     }
 
-//    /**
-//     * Draws the outline of the physics body.
-//     *
-//     * This method can be helpful for understanding issues with collisions.
-//     *
-//     * @param canvas Drawing context
-//     */
-//    public abstract void drawDebug(GameCanvas canvas);
+    /**
+     * Draws the outline of the physics body.
+     *
+     * This method can be helpful for understanding issues with collisions.
+     *
+     * @param canvas Drawing context
+     */
+    public abstract void drawDebug(GameCanvas canvas);
 
 }

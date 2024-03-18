@@ -1,4 +1,4 @@
-package com.syndic8.phytopolis.level;
+package com.syndic8.phytopolis.level.models;
 
 public class Leaf extends BoxObject {
     public Leaf(float x, float y, float width, float height) {

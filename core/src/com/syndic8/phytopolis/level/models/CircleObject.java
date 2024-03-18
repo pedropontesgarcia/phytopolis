@@ -1,9 +1,9 @@
-package com.syndic8.phytopolis.level;
+package com.syndic8.phytopolis.level.models;
 
-import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.physics.box2d.CircleShape;
 import com.badlogic.gdx.physics.box2d.Fixture;
 import com.syndic8.phytopolis.GameCanvas;
+import com.badlogic.gdx.graphics.Color;
 
 public abstract class CircleObject extends GameObject {
     /** Shape information for this circle */
@@ -90,14 +90,14 @@ public abstract class CircleObject extends GameObject {
         }
     }
 
-//    /**
-//     * Draws the outline of the physics body.
-//     *
-//     * This method can be helpful for understanding issues with collisions.
-//     *
-//     * @param canvas Drawing context
-//     */
-//    public void drawDebug(GameCanvas canvas) {
-//        canvas.drawPhysics(shape, Color.YELLOW,getX(),getY(),drawScale.x,drawScale.y);
-//    }
+    /**
+     * Draws the outline of the physics body.
+     *
+     * This method can be helpful for understanding issues with collisions.
+     *
+     * @param canvas Drawing context
+     */
+    public void drawDebug(GameCanvas canvas) {
+        canvas.drawPhysics(shape, Color.YELLOW,getX(),getY(),drawScale.x,drawScale.y);
+    }
 }
