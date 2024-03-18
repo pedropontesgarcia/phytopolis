@@ -10,6 +10,7 @@ import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Affine2;
 import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.physics.box2d.Body;
 
 public class GameCanvas {
     /** Enumeration to track which pass we are in */
@@ -71,6 +72,13 @@ public class GameCanvas {
     private TextureRegion holder;
 
     /**
+     * PPM = ScreenWidthInPixels / WorldWidthInMeters
+     * or
+     * PPM = ScreenHeightInPixels / WorldHeightInMeters
+     */
+    private float PPM;
+
+    /**
      * Creates a new GameCanvas determined by the application configuration.
      *
      * Width, height, and fullscreen are taken from the LWGJApplicationConfig
@@ -93,6 +101,16 @@ public class GameCanvas {
         local  = new Affine2();
         global = new Matrix4();
         vertex = new Vector2();
+    }
+    public void cameraUpdate(Body target){
+        Vector2 position = new Vector2();
+        position.x =
+                camera.position.x + (target.getPosition().x * PPM - camera.position.x) *.1f;
+        position.y =
+                camera.position.y + (target.getPosition().y * PPM - camera.position.y) *.1f;
+        camera.position.set(position, 0);
+        camera.update();
+
     }
 
     /**
