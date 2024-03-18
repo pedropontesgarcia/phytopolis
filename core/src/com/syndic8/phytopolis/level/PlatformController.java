@@ -291,22 +291,21 @@ public class PlatformController extends WorldController
         float avatarY = avatar.getY();
         if (InputController.getInstance().didGrowUp() &&
                 (plantController.canGrowAt(avatarX, avatarY))) {
-            addObject(plantController.growBranch(avatarX,
+            plantController.growBranch(avatarX,
                     avatarY,
                     PlantController.branchDirection.MIDDLE,
-                    PlantController.branchType.NORMAL));
+                    PlantController.branchType.NORMAL);
         } else if (InputController.getInstance().didGrowRight() &&
                 (plantController.canGrowAt(avatarX, avatarY))) {
-            addObject(plantController.growBranch(avatarX,
+            plantController.growBranch(avatarX,
                     avatarY,
                     PlantController.branchDirection.RIGHT,
-                    PlantController.branchType.NORMAL));
+                    PlantController.branchType.NORMAL);
         } else if (InputController.getInstance().didGrowLeft() &&
-                (plantController.canGrowAt(avatarX, avatarY))) {
-            addObject(plantController.growBranch(avatarX,
+                (plantController.canGrowAt(avatarX, avatarY))) {plantController.growBranch(avatarX,
                     avatarY,
                     PlantController.branchDirection.LEFT,
-                    PlantController.branchType.NORMAL));
+                    PlantController.branchType.NORMAL);
         } else return false;
         return false;
     }
