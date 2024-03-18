@@ -1,38 +1,47 @@
 package com.syndic8.phytopolis.level;
 
 import com.badlogic.gdx.math.Vector2;
-import com.syndic8.phytopolis.level.PlantController;
 
 import java.util.*;
 
-public class HazardController
-{
-    /** The frequency at which fires are generated (probability = 1 / fireFrequency). */
-    private int fireFrequency;
+public class HazardController {
 
-    /** The frequency at which drones are generated (probability = 1 / droneFrequency). */
-    private int droneFrequency;
-
-    /** Random number generator for various hazard generation. */
-    private Random random = new Random();
-
-    /** Reference to the PlantController. */
-    private PlantController plantController;
-
-    /** The height of the game area. */
-    private int height;
-
-    /** The width of the game area. */
-    private int width;
-
-    /** HashMap to track active fires and their remaining burn time. */
+    /**
+     * The frequency at which fires are generated (probability = 1 / fireFrequency).
+     */
+    private final int fireFrequency;
+    /**
+     * The frequency at which drones are generated (probability = 1 / droneFrequency).
+     */
+    private final int droneFrequency;
+    /**
+     * Random number generator for various hazard generation.
+     */
+    private final Random random = new Random();
+    /**
+     * Reference to the PlantController.
+     */
+    private final PlantController plantController;
+    /**
+     * The height of the game area.
+     */
+    private final int height;
+    /**
+     * The width of the game area.
+     */
+    private final int width;
+    /**
+     * The duration that a fire continues to burn.
+     */
+    private final int burnTime;
+    /**
+     * HashMap to track active fires and their remaining burn time.
+     */
     Map<Vector2, Integer> fires;
-
-    /** Cached ArrayList to keep track of drone nodes */
+    /**
+     * Cached ArrayList to keep track of drone nodes
+     */
     ArrayList<Integer> droneNodes = new ArrayList<>();
-
-    /** The duration that a fire continues to burn. */
-    private int burnTime;
 
     /**
      * Initializes a HazardController with the given parameters.
@@ -42,7 +51,10 @@ public class HazardController
      * @param droneFrequency  The frequency at which drones are generated.
      * @param burnTime        The time duration for which fires burn.
      */
-    public HazardController(PlantController plantController, int fireFrequency, int droneFrequency, int burnTime) {
+    public HazardController(PlantController plantController,
+                            int fireFrequency,
+                            int droneFrequency,
+                            int burnTime) {
         this.fireFrequency = fireFrequency;
         this.droneFrequency = droneFrequency;
         this.plantController = plantController;
@@ -86,11 +98,11 @@ public class HazardController
         ArrayList<Integer> effectedNodes = new ArrayList<>();
         if (fireHeight != -1) {
             // Check if the plant node exists and append to effected nodes
-            for (int w = 0; w < width; w++) {
-                if (plantController.existsBranch(w, fireHeight)) {
+            /*for (int w = 0; w < width; w++) {
+                if (plantController.branchExists(w, fireHeight)) {
                     effectedNodes.add(w);
                 }
-            }
+            }*/
             // Choose a node at random to destroy from effectedNodes
             if (!effectedNodes.isEmpty()) {
                 int randomIndex = random.nextInt(effectedNodes.size());
@@ -133,17 +145,17 @@ public class HazardController
         }
         if (droneHeight != -1) {
             // Check if the plant node exists and append to effected nodes
-            for (int w = 0; w < width; w++) {
+            /*for (int w = 0; w < width; w++) {
                 if (plantController.existsBranch(w, droneHeight)) {
                     System.out.println("width " + w);
                     droneNodes.add(w);
                 }
-            }
+            }*/
             // Choose a node at random to destroy from droneNodes
             if (!droneNodes.isEmpty()) {
                 int randomIndex = random.nextInt(droneNodes.size());
                 int nodeToDestroy = droneNodes.get(randomIndex);
-                plantController.destroyNode(nodeToDestroy, droneHeight);
+                //plantController.destroyNode(nodeToDestroy, droneHeight);
             }
             droneNodes.clear();
         }
@@ -155,8 +167,9 @@ public class HazardController
      * on plant nodes.
      */
     public void updateHazards() {
-//        generateFire();
+        //        generateFire();
         generateDrone();
-//        updateBurnTimer();
+        //        updateBurnTimer();
     }
+
 }

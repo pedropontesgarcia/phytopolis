@@ -8,9 +8,8 @@
  * Based on original PhysicsDemo Lab by Don Holden, 2007
  * Updated asset version, 2/6/2021
  */
-package com.syndic8.phytopolis.level;
+package com.syndic8.phytopolis;
 
-import com.badlogic.gdx.Game;
 import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
@@ -20,9 +19,8 @@ import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.JsonValue;
 import com.badlogic.gdx.utils.ObjectSet;
 import com.syndic8.phytopolis.assets.AssetDirectory;
-import com.syndic8.phytopolis.InputController;
+import com.syndic8.phytopolis.level.HazardController;
 import com.syndic8.phytopolis.level.PlantController;
-import com.syndic8.phytopolis.WorldController;
 import com.syndic8.phytopolis.level.models.*;
 
 import java.util.HashMap;
@@ -36,8 +34,7 @@ import java.util.HashMap;
  * This is the purpose of our AssetState variable; it ensures that multiple instances
  * place nicely with the static assets.
  */
-public class PlatformController extends WorldController
-        implements ContactListener {
+public class GameplayMode extends WorldController implements ContactListener {
 
     // Define collision categories (bits)
     final short CATEGORY_PLAYER = 0x0001;
@@ -121,7 +118,7 @@ public class PlatformController extends WorldController
      * <p>
      * The game has default gravity and other settings
      */
-    public PlatformController() {
+    public GameplayMode() {
         super(DEFAULT_WIDTH, DEFAULT_HEIGHT, DEFAULT_GRAVITY);
         setDebug(false);
         setComplete(false);
@@ -129,12 +126,12 @@ public class PlatformController extends WorldController
         world.setContactListener(this);
         sensorFixtures = new ObjectSet<Fixture>();
         plantController = new PlantController(10,
-                13,
-                59f,
-                20f,
-                20f,
-                world,
-                scale);
+                                              13,
+                                              59f,
+                                              20f,
+                                              20f,
+                                              world,
+                                              scale);
         hazardController = new HazardController(plantController, 20, 300, 10);
 
     }
@@ -149,13 +146,13 @@ public class PlatformController extends WorldController
      */
     public void gatherAssets(AssetDirectory directory) {
         avatarTexture = new TextureRegion(directory.getEntry("platform:dude",
-                Texture.class));
+                                                             Texture.class));
         barrierTexture = new TextureRegion(directory.getEntry("platform:barrier",
-                Texture.class));
+                                                              Texture.class));
         bulletTexture = new TextureRegion(directory.getEntry("platform:bullet",
-                Texture.class));
+                                                             Texture.class));
         bridgeTexture = new TextureRegion(directory.getEntry("platform:rope",
-                Texture.class));
+                                                             Texture.class));
         //nodeTexture = directory.getEntry("shared:node", Texture.class);
         plantController.gatherAssets(directory);
 
@@ -181,7 +178,7 @@ public class PlatformController extends WorldController
 
         for (Model obj : objects) {
             if (obj instanceof GameObject) {
-                ((GameObject)obj).deactivatePhysics(world);
+                ((GameObject) obj).deactivatePhysics(world);
             }
         }
         objects.clear();
@@ -289,25 +286,25 @@ public class PlatformController extends WorldController
         // TODO: position branch correctly
         float avatarX = avatar.getX();
         float avatarY = avatar.getY();
-        if (InputController.getInstance().didGrowUp() &&
+        /*if (InputController.getInstance().didGrowUp() &&
                 (plantController.canGrowAt(avatarX, avatarY))) {
             addObject(plantController.growBranch(avatarX,
-                    avatarY,
-                    PlantController.branchDirection.MIDDLE,
-                    PlantController.branchType.NORMAL));
+                                                 avatarY,
+                                                 PlantController.branchDirection.MIDDLE,
+                                                 PlantController.branchType.NORMAL));
         } else if (InputController.getInstance().didGrowRight() &&
                 (plantController.canGrowAt(avatarX, avatarY))) {
             addObject(plantController.growBranch(avatarX,
-                    avatarY,
-                    PlantController.branchDirection.RIGHT,
-                    PlantController.branchType.NORMAL));
+                                                 avatarY,
+                                                 PlantController.branchDirection.RIGHT,
+                                                 PlantController.branchType.NORMAL));
         } else if (InputController.getInstance().didGrowLeft() &&
                 (plantController.canGrowAt(avatarX, avatarY))) {
             addObject(plantController.growBranch(avatarX,
-                    avatarY,
-                    PlantController.branchDirection.LEFT,
-                    PlantController.branchType.NORMAL));
-        } else return false;
+                                                 avatarY,
+                                                 PlantController.branchDirection.LEFT,
+                                                 PlantController.branchType.NORMAL));
+        } else return false;*/
         return false;
     }
 
@@ -324,7 +321,7 @@ public class PlatformController extends WorldController
     public void update(float dt) {
         // Process actions in object model
         avatar.setMovement(InputController.getInstance().getHorizontal() *
-                avatar.getForce());
+                                   avatar.getForce());
         avatar.setJumping(InputController.getInstance().didPrimary());
         avatar.setShooting(InputController.getInstance().didSecondary());
         processPlantGrowth();
@@ -333,51 +330,51 @@ public class PlatformController extends WorldController
         if (avatar.isJumping()) {
             jumpId = playSound(jumpSound, jumpId, volume);
         }
-//        hazardController.updateHazards();
+        //        hazardController.updateHazards();
 
         //handleDrop();
 
     }
 
-//    /**
-//     * Handles the drop mechanic when the player has
-//     * pressed S
-//     */
-//    private void handleDrop() {
-//        if (avatar.isPlayerOnPlatform(world) &&
-//                InputController.getInstance().dropped()) {
-//            for (Fixture fixture : avatar.getBody().getFixtureList()) {
-//                originalCollisionProperties.put(fixture,
-//                        fixture.getFilterData());
-//            }
-//            fall = true;
-//        }
-//        if (fall) {
-//            for (Fixture fixture : avatar.getBody().getFixtureList()) {
-//                fixture.setFilterData(createFilterData(
-//                        CATEGORY_PLAYER_FALL_THROUGH,
-//                        MASK_PLAYER_FALL_THROUGH,
-//                        false));
-//                fixture.setSensor(true);
-//                startHeight = avatar.getY();
-//            }
-//            fall = false;
-//        }
-//        if ((avatar.getY() <= startHeight - distance)) {
-//            Array<Fixture> fixtures = avatar.getBody().getFixtureList();
-//            for (Fixture fixture : fixtures) {
-//                Filter originalProperties = originalCollisionProperties.get(
-//                        fixture);
-//                if (originalProperties != null) {
-//                    fixture.setFilterData(originalProperties);
-//                    //                    fixture.setSensor(false);
-//                }
-//            }
-//            originalCollisionProperties.clear();
-//
-//            startHeight = 0;
-//        }
-//    }
+    //    /**
+    //     * Handles the drop mechanic when the player has
+    //     * pressed S
+    //     */
+    //    private void handleDrop() {
+    //        if (avatar.isPlayerOnPlatform(world) &&
+    //                InputController.getInstance().dropped()) {
+    //            for (Fixture fixture : avatar.getBody().getFixtureList()) {
+    //                originalCollisionProperties.put(fixture,
+    //                        fixture.getFilterData());
+    //            }
+    //            fall = true;
+    //        }
+    //        if (fall) {
+    //            for (Fixture fixture : avatar.getBody().getFixtureList()) {
+    //                fixture.setFilterData(createFilterData(
+    //                        CATEGORY_PLAYER_FALL_THROUGH,
+    //                        MASK_PLAYER_FALL_THROUGH,
+    //                        false));
+    //                fixture.setSensor(true);
+    //                startHeight = avatar.getY();
+    //            }
+    //            fall = false;
+    //        }
+    //        if ((avatar.getY() <= startHeight - distance)) {
+    //            Array<Fixture> fixtures = avatar.getBody().getFixtureList();
+    //            for (Fixture fixture : fixtures) {
+    //                Filter originalProperties = originalCollisionProperties.get(
+    //                        fixture);
+    //                if (originalProperties != null) {
+    //                    fixture.setFilterData(originalProperties);
+    //                    //                    fixture.setSensor(false);
+    //                }
+    //            }
+    //            originalCollisionProperties.clear();
+    //
+    //            startHeight = 0;
+    //        }
+    //    }
 
     /**
      * @param categoryBits the collision category for the
@@ -428,8 +425,8 @@ public class PlatformController extends WorldController
                     (avatar.getSensorName().equals(fd1) && avatar != bd2)) {
                 avatar.setGrounded(true);
                 sensorFixtures.add(avatar == bd1 ?
-                        fix2 :
-                        fix1); // Could have more than one ground
+                                           fix2 :
+                                           fix1); // Could have more than one ground
             }
 
             // Check for win condition

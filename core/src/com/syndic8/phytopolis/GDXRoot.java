@@ -6,9 +6,9 @@
 package com.syndic8.phytopolis;
 
 import com.badlogic.gdx.Game;
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
 import com.syndic8.phytopolis.assets.AssetDirectory;
-import com.syndic8.phytopolis.level.PlatformController;
 import com.syndic8.phytopolis.util.ScreenListener;
 
 /**
@@ -42,8 +42,9 @@ public class GDXRoot extends Game implements ScreenListener {
 
     public void create() {
         canvas = new GameCanvas();
+        canvas.setSize(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
         menu = new MainMenuMode("assets.json", canvas, 1);
-        controller = new PlatformController();
+        controller = new GameplayMode();
         menu.setScreenListener(this);
         setScreen(menu);
     }
@@ -56,7 +57,7 @@ public class GDXRoot extends Game implements ScreenListener {
         canvas.dispose();
         canvas = null;
 
-        // Unload all of the resources
+        // Unload all the resources
         if (directory != null) {
             directory.unloadAssets();
             directory.dispose();
@@ -69,6 +70,19 @@ public class GDXRoot extends Game implements ScreenListener {
     }
 
     public void exitScreen(Screen screen, int exitCode) {
+        if (screen == menu) {
+            directory = menu.getAssets();
+            controller.gatherAssets(directory);
+            controller.setScreenListener(this);
+            controller.setCanvas(canvas);
+            controller.reset();
+            setScreen(controller);
+            menu.dispose();
+            menu = null;
+        } else if (exitCode == WorldController.EXIT_QUIT) {
+            // We quit the main application
+            Gdx.app.exit();
+        }
     }
 
 }

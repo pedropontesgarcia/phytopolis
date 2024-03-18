@@ -1,0 +1,7 @@
+{
+  "textures": {
+    "background": "mainmenu/back.png",
+    "play": "mainmenu/play.png",
+    "logo": "mainmenu/logo.png"
+  }
+}

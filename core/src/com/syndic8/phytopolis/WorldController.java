@@ -25,9 +25,9 @@ import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.World;
+import com.syndic8.phytopolis.assets.AssetDirectory;
 import com.syndic8.phytopolis.level.models.GameObject;
 import com.syndic8.phytopolis.level.models.Model;
-import com.syndic8.phytopolis.assets.AssetDirectory;
 import com.syndic8.phytopolis.util.PooledList;
 import com.syndic8.phytopolis.util.ScreenListener;
 
@@ -159,7 +159,7 @@ public abstract class WorldController implements Screen {
      */
     protected WorldController() {
         this(new Rectangle(0, 0, DEFAULT_WIDTH, DEFAULT_HEIGHT),
-                new Vector2(0, DEFAULT_GRAVITY));
+             new Vector2(0, DEFAULT_GRAVITY));
     }
 
     /**
@@ -174,7 +174,7 @@ public abstract class WorldController implements Screen {
      * @param gravity The downward gravity
      */
     protected WorldController(float width, float height, float gravity) {
-        this(new Rectangle(0, 0, width, height), new Vector2(0, gravity));
+        this(new Rectangle(0, 0, 16, 9), new Vector2(0, DEFAULT_GRAVITY));
     }
 
     /**
@@ -310,7 +310,7 @@ public abstract class WorldController implements Screen {
     public void dispose() {
         for (Model obj : objects) {
             if (obj instanceof GameObject) {
-                ((GameObject)obj).deactivatePhysics(world);
+                ((GameObject) obj).deactivatePhysics(world);
             }
         }
         objects.clear();
@@ -335,9 +335,9 @@ public abstract class WorldController implements Screen {
     public void gatherAssets(AssetDirectory directory) {
         // Allocate the tiles
         earthTile = new TextureRegion(directory.getEntry("shared:earth",
-                Texture.class));
+                                                         Texture.class));
         goalTile = new TextureRegion(directory.getEntry("shared:goal",
-                Texture.class));
+                                                        Texture.class));
         displayFont = directory.getEntry("shared:retro", BitmapFont.class);
     }
 
@@ -363,7 +363,7 @@ public abstract class WorldController implements Screen {
         assert inBounds(obj) : "Object is not in bounds";
         objects.add(obj);
         if (obj instanceof GameObject) {
-            ((GameObject)obj).activatePhysics(world);
+            ((GameObject) obj).activatePhysics(world);
         }
     }
 
@@ -483,7 +483,7 @@ public abstract class WorldController implements Screen {
             Model obj = entry.getValue();
             if (obj.isRemoved()) {
                 if (obj instanceof GameObject) {
-                    ((GameObject)obj).deactivatePhysics(world);
+                    ((GameObject) obj).deactivatePhysics(world);
                 }
                 entry.remove();
             } else {
