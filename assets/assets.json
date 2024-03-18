@@ -1,4 +1,6 @@
 {
   "textures": {
+    "fire": "hazards/fire.png",
+    "drone": "hazards/drone.png"
   }
 }
