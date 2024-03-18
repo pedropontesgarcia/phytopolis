@@ -1,7 +1,6 @@
 package com.syndic8.phytopolis.level;
 
 import com.badlogic.gdx.math.Vector2;
-import com.syndic8.phytopolis.level.PlantController;
 
 import java.util.*;
 
@@ -43,9 +42,6 @@ public class HazardController {
      * Cached ArrayList to keep track of drone nodes
      */
     ArrayList<Integer> droneNodes = new ArrayList<>();
-
-    /** The duration that a fire continues to burn. */
-    private int burnTime;
 
     /**
      * Initializes a HazardController with the given parameters.
@@ -171,8 +167,9 @@ public class HazardController {
      * on plant nodes.
      */
     public void updateHazards() {
-//        generateFire();
+        //        generateFire();
         generateDrone();
-//        updateBurnTimer();
+        //        updateBurnTimer();
     }
+
 }
