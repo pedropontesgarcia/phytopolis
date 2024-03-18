@@ -87,7 +87,7 @@ public class HazardController
         if (fireHeight != -1) {
             // Check if the plant node exists and append to effected nodes
             for (int w = 0; w < width; w++) {
-                if (plantController.existsBranch(w, fireHeight)) {
+                if (plantController.nodeIsEmpty(w, fireHeight)) {
                     effectedNodes.add(w);
                 }
             }
@@ -134,7 +134,7 @@ public class HazardController
         if (droneHeight != -1) {
             // Check if the plant node exists and append to effected nodes
             for (int w = 0; w < width; w++) {
-                if (plantController.existsBranch(w, droneHeight)) {
+                if (plantController.nodeIsEmpty(w, droneHeight)) {
                     System.out.println("width " + w);
                     droneNodes.add(w);
                 }
@@ -143,7 +143,7 @@ public class HazardController
             if (!droneNodes.isEmpty()) {
                 int randomIndex = random.nextInt(droneNodes.size());
                 int nodeToDestroy = droneNodes.get(randomIndex);
-                plantController.destroyNode(nodeToDestroy, droneHeight);
+                plantController.destroyAll(nodeToDestroy, droneHeight);
             }
             droneNodes.clear();
         }
