@@ -221,6 +221,29 @@ public class PlantController {
     }
 
     /**
+     * returns if the node at the specified x and y has no branches or leaf
+     * @param xArg x coord of the node to be accessed
+     * @param yArg y coord of the node to be accessed
+     * @return if the node has no branches or leaf
+     */
+    public boolean nodeIsEmpty(int xArg, int yArg){
+        return plantGrid[xArg][yArg].isEmpty();
+    }
+
+    /**
+     * destroys add branches and leaves attatched to specified node
+     * @param xArg x coord of the node to be accessed
+     * @param yArg y coord of the node to be accessed
+     */
+    public void destroyAll(int xArg, int yArg){
+        PlantNode nodeToDestroy = plantGrid[xArg][yArg];
+        nodeToDestroy.unmakeLeaf();
+        nodeToDestroy.unmakeBranch(branchDirection.LEFT);
+        nodeToDestroy.unmakeBranch(branchDirection.MIDDLE);
+        nodeToDestroy.unmakeBranch(branchDirection.RIGHT);
+    }
+
+    /**
      * Converts a screen x coordinate to the corresponding node index in the plant
      *
      * @param xArg x coordinate to be converted
@@ -437,7 +460,7 @@ public class PlantController {
          * returns whether this branch is empty or not
          * @return if the branch is empty
          */
-        public boolean nodeIsEmpty(){
+        public boolean isEmpty(){
             return !(hasBranchInDirection(branchDirection.LEFT) ||
                     hasBranchInDirection(branchDirection.RIGHT) ||
                     hasBranchInDirection(branchDirection.MIDDLE) ||
