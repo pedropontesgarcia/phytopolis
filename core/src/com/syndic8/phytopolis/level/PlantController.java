@@ -352,8 +352,11 @@ public class PlantController {
                                World world) {
             switch (direction) {
                 case LEFT:
+                    left = new Branch(x, y, -60);
                 case MIDDLE:
+                    middle = new Branch(x, y, 0);
                 case RIGHT:
+                    right = new Branch(x, y, 60);
             }
 
         }
