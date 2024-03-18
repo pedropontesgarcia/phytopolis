@@ -4,4 +4,7 @@ public abstract class Hazard extends CircleObject {
     public Hazard() {
         super(10);
     }
+
+    @Override
+    public abstract ModelType getType();
 }
