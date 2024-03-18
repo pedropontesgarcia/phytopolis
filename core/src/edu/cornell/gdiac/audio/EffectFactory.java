@@ -7,7 +7,7 @@
  * @date   6/25/22
  */
 
-package com.syndic8.phytopolis.audio;
+package edu.cornell.gdiac.audio;
 
 /**
  * This is a factory class for creating {@link EffectFilter} Objects

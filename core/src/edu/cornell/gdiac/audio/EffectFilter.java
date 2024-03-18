@@ -1,4 +1,4 @@
-package com.syndic8.phytopolis.audio;
+package edu.cornell.gdiac.audio;
 
 /**
  * This class represents external sound effects in OpenAL,

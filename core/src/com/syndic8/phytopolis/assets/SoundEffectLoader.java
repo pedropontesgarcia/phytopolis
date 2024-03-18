@@ -22,9 +22,9 @@ import com.badlogic.gdx.assets.loaders.resolvers.InternalFileHandleResolver;
 import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.GdxRuntimeException;
-import com.syndic8.phytopolis.audio.AudioEngine;
-import com.syndic8.phytopolis.audio.AudioSource;
-import com.syndic8.phytopolis.audio.SoundEffect;
+import edu.cornell.gdiac.audio.AudioEngine;
+import edu.cornell.gdiac.audio.AudioSource;
+import edu.cornell.gdiac.audio.SoundEffect;
 
 /**
  * This class is an {@link AssetLoader} to load {@link SoundEffect} assets.

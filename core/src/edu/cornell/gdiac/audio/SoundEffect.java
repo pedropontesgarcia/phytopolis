@@ -8,7 +8,7 @@
  * @author Walker M. White
  * @date   4/15/20
  */
-package com.syndic8.phytopolis.audio;
+package edu.cornell.gdiac.audio;
 
 import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.audio.Sound;
@@ -34,7 +34,7 @@ import com.badlogic.gdx.files.FileHandle;
  * interfaces be interacted with in the main application thread (for much the same
  * reason that OpenGL requires this).
  */
-public interface SoundBuffer extends Sound {
+public interface SoundEffect extends Sound {
 
     /**
      * The interface for a callback invoked as a sound instance is completed
@@ -51,7 +51,7 @@ public interface SoundBuffer extends Sound {
          * @param buffer    The sound buffer that finished playing
          * @param instance     The particular instance that has completed
          */
-        public abstract void onCompletion(SoundBuffer buffer, long instance);
+        public abstract void onCompletion(SoundEffect buffer, long instance);
     }
     
     /** 
@@ -202,5 +202,20 @@ public interface SoundBuffer extends Sound {
      * @param seconds   The current position of this instance in seconds.
      */
     public void setPosition(long soundId, float seconds);
+
+    /**
+     * Sets the effect that this music is played through
+     *
+     * @param effect the effect to add
+     * */
+    public void addEffect(long soundId, EffectFilter effect);
+
+    /**
+     * Removes the effect that this music is played through.
+     *
+     * @param effect the effect to remove
+     * */
+
+    public void removeEffect(long soundId, EffectFilter effect);
 
 }
