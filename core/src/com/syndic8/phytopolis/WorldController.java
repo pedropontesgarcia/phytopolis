@@ -19,7 +19,6 @@ package com.syndic8.phytopolis;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Rectangle;
@@ -80,11 +79,11 @@ public abstract class WorldController implements Screen {
     /**
      * Width of the game world in Box2d units
      */
-    protected static final float DEFAULT_WIDTH = 50.0f;
+    protected static final float DEFAULT_WIDTH = 16;
     /**
      * Height of the game world in Box2d units
      */
-    protected static final float DEFAULT_HEIGHT = 80.0f;
+    protected static final float DEFAULT_HEIGHT = 36;
     /**
      * The default value of gravity (going down)
      */
@@ -334,11 +333,11 @@ public abstract class WorldController implements Screen {
      */
     public void gatherAssets(AssetDirectory directory) {
         // Allocate the tiles
-        earthTile = new TextureRegion(directory.getEntry("shared:earth",
-                                                         Texture.class));
-        goalTile = new TextureRegion(directory.getEntry("shared:goal",
-                                                        Texture.class));
-        displayFont = directory.getEntry("shared:retro", BitmapFont.class);
+        //earthTile = new TextureRegion(directory.getEntry("shared:earth",
+        //                                                 Texture.class));
+        //goalTile = new TextureRegion(directory.getEntry("shared:goal",
+        //                                                Texture.class));
+        //displayFont = directory.getEntry("shared:retro", BitmapFont.class);
     }
 
     /**
