@@ -241,6 +241,7 @@ public class PlantController {
                     //                                1.0f);
                     try {
                         node.drawBranches(canvas);
+                        node.drawLeaf(canvas);
                     } catch (Exception ignore) {
                     }
                 }
@@ -507,6 +508,12 @@ public class PlantController {
             if (left != null) left.draw(canvas);
             if (right != null) right.draw(canvas);
             if (middle != null) middle.draw(canvas);
+        }
+
+        public void drawLeaf(GameCanvas canvas) {
+            if (leaf != null) {
+                leaf.draw(canvas);
+            }
         }
 
         /**

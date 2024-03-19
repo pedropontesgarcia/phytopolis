@@ -47,6 +47,7 @@ public class GameplayMode extends WorldController implements ContactListener {
     private final float distance = 120f;
     private final PlantController plantController;
     private final HazardController hazardController;
+    private Player player;
     private final long fireId = -1;
     private final long plopId = -1;
     private final long jumpId = -1;
@@ -171,6 +172,13 @@ public class GameplayMode extends WorldController implements ContactListener {
     }
 
     /**
+     *
+     */
+    private void setPlayer(Player player) {
+        this.player = player;
+    }
+
+    /**
      * Resets the status of the game so that we can play again.
      * <p>
      * This method disposes of the world and creates a new one.
@@ -244,6 +252,7 @@ public class GameplayMode extends WorldController implements ContactListener {
         avatar.setTexture(avatarTexture);
         avatar.setName("dude");
         addObject(avatar);
+        setPlayer(avatar);
 
         originalCollisionProperties = new HashMap<>();
 
@@ -511,6 +520,7 @@ public class GameplayMode extends WorldController implements ContactListener {
         super.draw(dt);
         canvas.begin();
         plantController.draw(canvas);
+        player.draw(canvas);
         canvas.end();
     }
 
