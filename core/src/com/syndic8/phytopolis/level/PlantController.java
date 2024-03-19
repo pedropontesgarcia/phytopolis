@@ -183,7 +183,7 @@ public class PlantController {
             int xIndex = currentNode[0];
             int yIndex = currentNode[1] + 1;
             for (int i = -1; i < 2; i++) {
-                if (yIndex < height && xIndex >= 0 && xIndex < width &&
+                if (yIndex < height && xIndex + i >= 0 && xIndex + i < width &&
                         !canGrowAt(xIndex + i, yIndex) && !plantGrid[xIndex + i][yIndex].isEmpty()) {
                     destroyAll(xIndex + i, yIndex);
                     destructionQueue.addLast(new int[]{xIndex + i, yIndex});
