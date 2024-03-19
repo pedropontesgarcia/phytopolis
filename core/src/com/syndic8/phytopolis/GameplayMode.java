@@ -52,6 +52,7 @@ public class GameplayMode extends WorldController implements ContactListener {
     private final long jumpId = -1;
 
     // Physics objects for the game
+    private final Vector2 cameraVector;
     /**
      * Mark set to handle more sophisticated collision callbacks
      */
@@ -123,6 +124,7 @@ public class GameplayMode extends WorldController implements ContactListener {
         setComplete(false);
         setFailure(false);
         world.setContactListener(this);
+        cameraVector = new Vector2();
         sensorFixtures = new ObjectSet<Fixture>();
         plantController = new PlantController(10,
                                               13,
@@ -327,6 +329,8 @@ public class GameplayMode extends WorldController implements ContactListener {
         //        hazardController.updateHazards();
 
         //handleDrop();
+        cameraVector.set(8 * 1920 / 16.0f,
+                         (avatar.getY() + 3.5f) * 1080 / 9.0f);
 
     }
 
@@ -498,6 +502,7 @@ public class GameplayMode extends WorldController implements ContactListener {
      */
     @Override
     public void draw(float dt) {
+        canvas.cameraUpdate(cameraVector);
         super.draw(dt);
         canvas.begin();
         plantController.draw(canvas);

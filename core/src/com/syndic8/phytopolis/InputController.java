@@ -5,6 +5,7 @@ import com.badlogic.gdx.Input;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Array;
+import com.syndic8.phytopolis.util.Controllers;
 import com.syndic8.phytopolis.util.XBoxController;
 
 /**
@@ -27,11 +28,19 @@ public class InputController {
      */
     private static InputController theController = null;
     /**
+     * The crosshair position (for raddoll)
+     */
+    private final Vector2 crosshair;
+
+    // Fields to manage buttons
+    /**
+     * The crosshair cache (for using as a return value)
+     */
+    private final Vector2 crosscache;
+    /**
      * An X-Box controller (if it is connected)
      */
     XBoxController xbox;
-
-    // Fields to manage buttons
     /**
      * Whether the reset button was pressed.
      */
@@ -71,27 +80,20 @@ public class InputController {
      */
     private boolean exitPressed;
     private boolean exitPrevious;
-
     private boolean mousePressed;
-
     private boolean mousePressedPrevious;
-
     private boolean growRightPressed;
     private boolean growLeftPressed;
     private boolean growUpPressed;
     private boolean growRightPrevious;
     private boolean growLeftPrevious;
     private boolean growUpPrevious;
-
     private boolean dropPressed;
     private boolean dropPrevious;
     private boolean extinguishFirePressed;
     private boolean extinguishFirePrevious;
-
     private float growX;
-
     private float growY;
-
     /**
      * How much did we move horizontally?
      */
@@ -100,14 +102,6 @@ public class InputController {
      * How much did we move vertically?
      */
     private float vertical;
-    /**
-     * The crosshair position (for raddoll)
-     */
-    private final Vector2 crosshair;
-    /**
-     * The crosshair cache (for using as a return value)
-     */
-    private final Vector2 crosscache;
     /**
      * For the gamepad crosshair control
      */
@@ -121,9 +115,9 @@ public class InputController {
      */
     public InputController() {
         // If we have a game-pad for id, then use it.
-        //Array<XBoxController> controllers = Controllers.get()
-        // .getXBoxControllers();
-        Array<XBoxController> controllers = new Array<>();
+        Array<XBoxController> controllers = Controllers.get()
+                .getXBoxControllers();
+        //Array<XBoxController> controllers = new Array<>();
         if (controllers.size > 0) {
             xbox = controllers.get(0);
         } else {
