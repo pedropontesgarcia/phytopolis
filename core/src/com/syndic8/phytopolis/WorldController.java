@@ -191,7 +191,7 @@ public abstract class WorldController implements Screen {
     protected WorldController(Rectangle bounds, Vector2 gravity) {
         world = new World(gravity, false);
         this.bounds = new Rectangle(bounds);
-        this.scale = new Vector2(1, 1);
+        this.scale = new Vector2(120, 120);
         complete = false;
         failed = false;
         debug = false;
@@ -306,8 +306,6 @@ public abstract class WorldController implements Screen {
      */
     public void setCanvas(GameCanvas canvas) {
         this.canvas = canvas;
-        this.scale.x = canvas.getWidth() / bounds.getWidth();
-        this.scale.y = canvas.getHeight() / bounds.getHeight();
     }
 
     /**

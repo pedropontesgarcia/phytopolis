@@ -163,13 +163,16 @@ public class PlantController {
      * @param yArg y index of the node to be accessed
      */
     public void destroyAll(int xArg, int yArg, WorldController wldc) {
-        PlantNode nodeToDestroy = plantGrid[xArg][yArg];
-        nodeToDestroy.unmakeLeaf(wldc);
-        nodeToDestroy.unmakeBranch(branchDirection.LEFT);
-        nodeToDestroy.unmakeBranch(branchDirection.MIDDLE);
-        nodeToDestroy.unmakeBranch(branchDirection.RIGHT);
-        plantCoyoteTimeRemaining = plantCoyoteTime;
-        destructionQueue.addLast(new int[]{xArg, yArg});
+        try {
+            PlantNode nodeToDestroy = plantGrid[xArg][yArg];
+            nodeToDestroy.unmakeLeaf(wldc);
+            nodeToDestroy.unmakeBranch(branchDirection.LEFT);
+            nodeToDestroy.unmakeBranch(branchDirection.MIDDLE);
+            nodeToDestroy.unmakeBranch(branchDirection.RIGHT);
+            plantCoyoteTimeRemaining = plantCoyoteTime;
+            destructionQueue.addLast(new int[]{xArg, yArg});
+        } catch (ArrayIndexOutOfBoundsException ign) {
+        }
     }
 
     /**
@@ -288,7 +291,11 @@ public class PlantController {
      * @return boolean value of whether or not a branch exists here
      */
     public boolean branchExists(int xArg, int yArg, branchDirection direction) {
-        return plantGrid[xArg][yArg].hasBranchInDirection(direction);
+        try {
+            return plantGrid[xArg][yArg].hasBranchInDirection(direction);
+        } catch (ArrayIndexOutOfBoundsException ign) {
+            return false;
+        }
     }
 
     /**
