@@ -9,7 +9,6 @@ import com.syndic8.phytopolis.WorldController;
 import com.syndic8.phytopolis.assets.AssetDirectory;
 import com.syndic8.phytopolis.level.models.Branch;
 import com.syndic8.phytopolis.level.models.Leaf;
-import com.syndic8.phytopolis.level.models.Resource;
 
 public class PlantController {
 
@@ -55,7 +54,9 @@ public class PlantController {
      */
     private final int plantCoyoteTime = 30;
     private final Queue<int[]> destructionQueue = new Queue<>();
-    /** Reference to the ResourceController */
+    /**
+     * Reference to the ResourceController
+     */
     private final ResourceController resourceController;
     /**
      * node texture
@@ -131,9 +132,7 @@ public class PlantController {
                            branchType type) {
         int xIndex = xCoordToIndex(x * worldToPixelConversionRatio);
         int yIndex = yCoordToIndex(y * worldToPixelConversionRatio);
-        plantGrid[xIndex][yIndex].makeBranch(direction,
-                                             type,
-                                             world);
+        plantGrid[xIndex][yIndex].makeBranch(direction, type, world);
     }
 
     public void growLeaf(float x,
@@ -216,15 +215,17 @@ public class PlantController {
         if (lowerNode) yOff = 1;
 
         boolean below = false;
-        if (yIndex > 0)
+        if (inBounds(xIndex, yIndex - 1))
             below = plantGrid[xIndex][yIndex - 1].hasBranchInDirection(
                     branchDirection.MIDDLE);
         boolean downLeft = false;
-        if (xIndex >= 1) downLeft = plantGrid[xIndex - 1][yIndex -
-                yOff].hasBranchInDirection(branchDirection.RIGHT);
+        if (inBounds(xIndex - 1, yIndex - yOff))
+            downLeft = plantGrid[xIndex - 1][yIndex -
+                    yOff].hasBranchInDirection(branchDirection.RIGHT);
         boolean downRight = false;
-        if (xIndex < width - 1) downRight = plantGrid[xIndex + 1][yIndex -
-                yOff].hasBranchInDirection(branchDirection.LEFT);
+        if (inBounds(xIndex + 1, yIndex - yOff))
+            downRight = plantGrid[xIndex + 1][yIndex -
+                    yOff].hasBranchInDirection(branchDirection.LEFT);
         //System.out.println("Below: " + below + " downLeft: " + downLeft + " downRight: " + downRight);
         return below || downLeft || downRight;
     }
@@ -233,10 +234,13 @@ public class PlantController {
         return canGrowAt(xArg, yArg) && resourceController.canGrow();
     }
 
-    public boolean branchGrowableAt(float xArg, float yArg, branchDirection dir) {
+    public boolean branchGrowableAt(float xArg,
+                                    float yArg,
+                                    branchDirection dir) {
         int xIndex = xCoordToIndex(xArg * worldToPixelConversionRatio);
         int yIndex = yCoordToIndex(yArg * worldToPixelConversionRatio);
-        return growableAt(xArg, yArg) && !plantGrid[xIndex][yIndex].hasBranchInDirection(dir);
+        return growableAt(xArg, yArg) &&
+                !plantGrid[xIndex][yIndex].hasBranchInDirection(dir);
     }
 
     /**
@@ -287,7 +291,6 @@ public class PlantController {
     }
 
     /**
-     *
      * @return the ResourceController
      */
     public ResourceController getResourceController() {
@@ -481,7 +484,7 @@ public class PlantController {
          *
          * @param direction direction branch is facing
          * @param type      type of branch to create
-//         * @param texture   texture the branch should use
+         *                  //         * @param texture   texture the branch should use
          * @param world     world to assign the branch to
          */
         public void makeBranch(branchDirection direction,
@@ -520,10 +523,9 @@ public class PlantController {
                              World world,
                              WorldController wldc) {
             if (yCoordToIndex(y / worldToPixelConversionRatio) > 0 &&
-                    !leafExists &&
-                    hasBranch() ||
+                    !leafExists && hasBranch() ||
                     growableAt(x / worldToPixelConversionRatio,
-                              y / worldToPixelConversionRatio)) {
+                               y / worldToPixelConversionRatio)) {
                 leaf = new Leaf(x / worldToPixelConversionRatio,
                                 y / worldToPixelConversionRatio - 0.5f,
                                 leafWidth,
