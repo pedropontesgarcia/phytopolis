@@ -5,6 +5,8 @@
     "gameplay:node": "gameplay/node.png",
     "gameplay:barrier": "gameplay/barrier.png",
     "gameplay:branch": "gameplay/branch.png",
+    "water_outline": "gameplay/water_woutline.png",
+    "water_nooutline": "gameplay/water_nooutline.png",
     "fire": "hazards/fire.png",
     "drone": "hazards/drone.png",
     "gameplay:background": "gameplay/back.jpg"
