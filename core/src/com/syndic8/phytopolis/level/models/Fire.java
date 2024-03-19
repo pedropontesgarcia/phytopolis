@@ -93,13 +93,4 @@ public class Fire extends Hazard {
         this.duration = duration;
     }
 
-    /**
-     * Renders the fire on the provided GameCanvas.
-     *
-     * @param canvas The GameCanvas on which to draw the fire.
-     */
-    public void draw(GameCanvas canvas, Texture tex, float x, float y) {
-        canvas.draw(tex, Color.RED, origin.x, origin.y, x, y, 0f, .1f, .1f);
-    }
-
 }
