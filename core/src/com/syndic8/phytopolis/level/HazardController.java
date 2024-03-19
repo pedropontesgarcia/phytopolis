@@ -102,13 +102,19 @@ public class HazardController {
         if (hazardHeight == -1) return;
         int hazardWidth = generateHazardWidth(hazardHeight);
         if (hazardWidth == -1) return;
+        addHazard(type, width, height);
+    }
+
+    public void addHazard(Model.ModelType type, int width, int height) {
         Hazard hazard;
         switch (type) {
             case FIRE:
-                hazard = new Fire(new Vector2(hazardWidth, hazardHeight), burnTime);
+                hazard = new Fire(new Vector2(width, height), burnTime);
+                hazard.setTexture(fireTexture);
                 break;
             case DRONE:
-                hazard = new Drone(new Vector2(hazardWidth, hazardHeight), explodeTime);
+                hazard = new Drone(new Vector2(width, height), explodeTime);
+                hazard.setTexture(droneTexture);
                 break;
             default:
                 return;
@@ -213,18 +219,18 @@ public class HazardController {
         // check bottom left
         if (x-1 >= 0) {
             if (plantController.branchExists(x-1, y-1, PlantController.branchDirection.RIGHT)) {
-                hazards.add(new Fire(new Vector2(x-1, y-1), burnTime));
+                addHazard(Model.ModelType.FIRE, x-1, y-1);
             }
         }
         // check bottom right
         if (x+1 <= width) {
             if (plantController.branchExists(x+1, y-1, PlantController.branchDirection.LEFT)) {
-                hazards.add(new Fire(new Vector2(x+1, y-1), burnTime));
+                addHazard(Model.ModelType.FIRE, x+1, y-1);
             }
         }
         // check bottom middle
         if (plantController.branchExists(x, y-1, PlantController.branchDirection.RIGHT)) {
-            hazards.add(new Fire(new Vector2(x, y-1), burnTime));
+            addHazard(Model.ModelType.FIRE, x, y-1);
         }
     }
 
@@ -263,12 +269,12 @@ public class HazardController {
                 case FIRE:
                     Fire f = (Fire) h;
                     Vector2 worldCoords = plantController.indexToScreenCoord((int) f.getLocation().x, (int) f.getLocation().y);
-                    f.draw(canvas, fireTexture, worldCoords.x, worldCoords.y);
+                    f.draw(canvas, worldCoords.x, worldCoords.y);
                     break;
                 case DRONE:
                     Drone d = (Drone) h;
                     Vector2 worldCoords2 = plantController.indexToScreenCoord((int) d.getLocation().x, (int) d.getLocation().y);
-                    d.draw(canvas, droneTexture, worldCoords2.x, worldCoords2.y);
+                    d.draw(canvas, worldCoords2.x, worldCoords2.y);
                     break;
                 default:
                     return;
