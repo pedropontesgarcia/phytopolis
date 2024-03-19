@@ -231,6 +231,24 @@ public class HazardController {
     }
 
     /**
+     * Extinguish fire.
+     *
+     * @param x x coord of fire node.
+     * @param y y coord of fire node.
+     */
+    public void extinguishFire(int x, int y) {
+        Fire f = null;
+        for (Hazard h : hazards) {
+            if (h.getType().equals(Model.ModelType.FIRE)) {
+                f = (Fire) h;
+                if ((int) f.getLocation().x == x && (int) f.getLocation().y == y) break;
+            }
+        }
+        if (f == null) return;
+        if ((int) f.getLocation().x == x && (int) f.getLocation().y == y) hazards.remove(f);
+    }
+
+    /**
      * Sets the texture of hazards.
      */
     public void gatherAssets(AssetDirectory directory) {
