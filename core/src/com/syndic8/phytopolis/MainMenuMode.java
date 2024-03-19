@@ -123,7 +123,7 @@ public class MainMenuMode implements Screen {
     public MainMenuMode(String file, GameCanvas canvas, int millis) {
         this.canvas = canvas;
         budget = millis;
-        bounds = new Rectangle();
+        bounds = new Rectangle(0, 0, 16, 9);
 
         // Compute the dimensions from the canvas
         resize(canvas.getWidth(), canvas.getHeight());
@@ -225,6 +225,8 @@ public class MainMenuMode implements Screen {
             if (progress >= 1.0f) {
                 this.progress = 1.0f;
                 playButton = internal.getEntry("play", Texture.class);
+                playButton.setFilter(TextureFilter.Linear,
+                                     TextureFilter.Linear);
             }
         } else if (InputController.getInstance().didSecondary()) {
             pressState = 1;
@@ -252,10 +254,10 @@ public class MainMenuMode implements Screen {
                     logo.getWidth() / 2.0f,
                     logo.getHeight() / 2.0f,
                     canvas.getWidth() / 2.0f,
-                    canvas.getHeight() * 3.0f / 4.0f,
+                    canvas.getHeight() * 2.0f / 3.0f,
                     0,
-                    0.00015f * scale,
-                    0.00015f * scale);
+                    0.0008f * scale,
+                    0.0008f * scale);
         Color tint = (pressState == 1 ? Color.GRAY : Color.WHITE);
         if (progress == 1.0f) {
             canvas.draw(playButton,

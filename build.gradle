@@ -51,6 +51,11 @@ project(":desktop") {
         api "com.badlogicgames.gdx-controllers:gdx-controllers-desktop:$gdxControllersVersion"
         api "com.badlogicgames.gdx:gdx-box2d-platform:$gdxVersion:natives-desktop"
         implementation files("../dependencies/soundlib.jar")
+        constraints {
+            implementation("com.badlogicgames.jamepad:jamepad:2.26.5.0") {
+                because("Default jamepad version 2.0.14.1 is missing macOS arm64 binaries.")
+            }
+        }
 
     }
 }

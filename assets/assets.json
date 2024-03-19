@@ -1,6 +1,13 @@
 {
   "textures": {
+    "gameplay:player": "gameplay/idle-character.png",
+    "gameplay:leaf": "gameplay/leaf2.png",
+    "gameplay:barrier": "gameplay/barrier.png",
+    "gameplay:branch": "gameplay/branch.png",
     "fire": "hazards/fire.png",
     "drone": "hazards/drone.png"
+  },
+  "jsons": {
+    "gameplay:constants": "gameplay/constants.json"
   }
 }

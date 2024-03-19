@@ -49,12 +49,13 @@ public class GameplayMode extends WorldController implements ContactListener {
     private final HazardController hazardController;
     private final long fireId = -1;
     private final long plopId = -1;
+    private final long jumpId = -1;
+
+    // Physics objects for the game
     /**
      * Mark set to handle more sophisticated collision callbacks
      */
     protected ObjectSet<Fixture> sensorFixtures;
-
-    // Physics objects for the game
     /**
      * branch texture
      */
@@ -75,7 +76,6 @@ public class GameplayMode extends WorldController implements ContactListener {
      * Texture asset for the bridge plank
      */
     private TextureRegion bridgeTexture;
-
     /**
      * Texture asset for a node
      */
@@ -84,7 +84,6 @@ public class GameplayMode extends WorldController implements ContactListener {
      * The jump sound.  We only want to play once.
      */
     private Sound jumpSound;
-    private long jumpId = -1;
     /**
      * The weapon fire sound.  We only want to play once.
      */
@@ -127,9 +126,9 @@ public class GameplayMode extends WorldController implements ContactListener {
         sensorFixtures = new ObjectSet<Fixture>();
         plantController = new PlantController(10,
                                               13,
-                                              59f,
-                                              20f,
-                                              20f,
+                                              300f,
+                                              100,
+                                              100,
                                               world,
                                               scale);
         hazardController = new HazardController(plantController, 20, 300, 10);
@@ -145,25 +144,20 @@ public class GameplayMode extends WorldController implements ContactListener {
      * @param directory Reference to global asset manager.
      */
     public void gatherAssets(AssetDirectory directory) {
-        avatarTexture = new TextureRegion(directory.getEntry("platform:dude",
+        avatarTexture = new TextureRegion(directory.getEntry("gameplay:player",
                                                              Texture.class));
-        barrierTexture = new TextureRegion(directory.getEntry("platform:barrier",
+        barrierTexture = new TextureRegion(directory.getEntry("gameplay:barrier",
                                                               Texture.class));
-        bulletTexture = new TextureRegion(directory.getEntry("platform:bullet",
-                                                             Texture.class));
-        bridgeTexture = new TextureRegion(directory.getEntry("platform:rope",
-                                                             Texture.class));
-        //nodeTexture = directory.getEntry("shared:node", Texture.class);
         plantController.gatherAssets(directory);
 
-        jumpSound = directory.getEntry("platform:jump", Sound.class);
-        fireSound = directory.getEntry("platform:pew", Sound.class);
-        plopSound = directory.getEntry("platform:plop", Sound.class);
+        //jumpSound = directory.getEntry("platform:jump", Sound.class);
+        //fireSound = directory.getEntry("platform:pew", Sound.class);
+        //plopSound = directory.getEntry("platform:plop", Sound.class);
 
-        constants = directory.getEntry("platform:constants", JsonValue.class);
+        constants = directory.getEntry("gameplay:constants", JsonValue.class);
 
         this.branchTexture = new TextureRegion(directory.getEntry(
-                "shared:branch",
+                "gameplay:branch",
                 Texture.class));
         super.gatherAssets(directory);
     }
@@ -211,7 +205,7 @@ public class GameplayMode extends WorldController implements ContactListener {
             obj.setFriction(defaults.getFloat("friction", 0.0f));
             obj.setRestitution(defaults.getFloat("restitution", 0.0f));
             obj.setDrawScale(scale);
-            obj.setTexture(earthTile);
+            obj.setTexture(barrierTexture);
             obj.setName(wname + ii);
             addObject(obj);
         }
@@ -226,7 +220,7 @@ public class GameplayMode extends WorldController implements ContactListener {
             obj.setFriction(defaults.getFloat("friction", 0.0f));
             obj.setRestitution(defaults.getFloat("restitution", 0.0f));
             obj.setDrawScale(scale);
-            obj.setTexture(earthTile);
+            obj.setTexture(barrierTexture);
             obj.setName(pname + ii);
             addObject(obj);
         }
@@ -289,20 +283,21 @@ public class GameplayMode extends WorldController implements ContactListener {
         if (InputController.getInstance().didGrowUp() &&
                 (plantController.canGrowAt(avatarX, avatarY))) {
             plantController.growBranch(avatarX,
-                    avatarY,
-                    PlantController.branchDirection.MIDDLE,
-                    PlantController.branchType.NORMAL);
+                                       avatarY,
+                                       PlantController.branchDirection.MIDDLE,
+                                       PlantController.branchType.NORMAL);
         } else if (InputController.getInstance().didGrowRight() &&
                 (plantController.canGrowAt(avatarX, avatarY))) {
             plantController.growBranch(avatarX,
-                    avatarY,
-                    PlantController.branchDirection.RIGHT,
-                    PlantController.branchType.NORMAL);
+                                       avatarY,
+                                       PlantController.branchDirection.RIGHT,
+                                       PlantController.branchType.NORMAL);
         } else if (InputController.getInstance().didGrowLeft() &&
-                (plantController.canGrowAt(avatarX, avatarY))) {plantController.growBranch(avatarX,
-                    avatarY,
-                    PlantController.branchDirection.LEFT,
-                    PlantController.branchType.NORMAL);
+                (plantController.canGrowAt(avatarX, avatarY))) {
+            plantController.growBranch(avatarX,
+                                       avatarY,
+                                       PlantController.branchDirection.LEFT,
+                                       PlantController.branchType.NORMAL);
         } else return false;
         return false;
     }
@@ -327,7 +322,7 @@ public class GameplayMode extends WorldController implements ContactListener {
 
         avatar.applyForce();
         if (avatar.isJumping()) {
-            jumpId = playSound(jumpSound, jumpId, volume);
+            //jumpId = playSound(jumpSound, jumpId, volume);
         }
         //        hazardController.updateHazards();
 
@@ -335,45 +330,45 @@ public class GameplayMode extends WorldController implements ContactListener {
 
     }
 
-//    /**
-//     * Handles the drop mechanic when the player has
-//     * pressed S
-//     */
-//    private void handleDrop() {
-//        if (avatar.isPlayerOnPlatform(world) &&
-//                InputController.getInstance().dropped()) {
-//            for (Fixture fixture : avatar.getBody().getFixtureList()) {
-//                originalCollisionProperties.put(fixture,
-//                        fixture.getFilterData());
-//            }
-//            fall = true;
-//        }
-//        if (fall) {
-//            for (Fixture fixture : avatar.getBody().getFixtureList()) {
-//                fixture.setFilterData(createFilterData(
-//                        CATEGORY_PLAYER_FALL_THROUGH,
-//                        MASK_PLAYER_FALL_THROUGH,
-//                        false));
-//                fixture.setSensor(true);
-//                startHeight = avatar.getY();
-//            }
-//            fall = false;
-//        }
-//        if ((avatar.getY() <= startHeight - distance)) {
-//            Array<Fixture> fixtures = avatar.getBody().getFixtureList();
-//            for (Fixture fixture : fixtures) {
-//                Filter originalProperties = originalCollisionProperties.get(
-//                        fixture);
-//                if (originalProperties != null) {
-//                    fixture.setFilterData(originalProperties);
-//                    //                    fixture.setSensor(false);
-//                }
-//            }
-//            originalCollisionProperties.clear();
-//
-//            startHeight = 0;
-//        }
-//    }
+    //    /**
+    //     * Handles the drop mechanic when the player has
+    //     * pressed S
+    //     */
+    //    private void handleDrop() {
+    //        if (avatar.isPlayerOnPlatform(world) &&
+    //                InputController.getInstance().dropped()) {
+    //            for (Fixture fixture : avatar.getBody().getFixtureList()) {
+    //                originalCollisionProperties.put(fixture,
+    //                        fixture.getFilterData());
+    //            }
+    //            fall = true;
+    //        }
+    //        if (fall) {
+    //            for (Fixture fixture : avatar.getBody().getFixtureList()) {
+    //                fixture.setFilterData(createFilterData(
+    //                        CATEGORY_PLAYER_FALL_THROUGH,
+    //                        MASK_PLAYER_FALL_THROUGH,
+    //                        false));
+    //                fixture.setSensor(true);
+    //                startHeight = avatar.getY();
+    //            }
+    //            fall = false;
+    //        }
+    //        if ((avatar.getY() <= startHeight - distance)) {
+    //            Array<Fixture> fixtures = avatar.getBody().getFixtureList();
+    //            for (Fixture fixture : fixtures) {
+    //                Filter originalProperties = originalCollisionProperties.get(
+    //                        fixture);
+    //                if (originalProperties != null) {
+    //                    fixture.setFilterData(originalProperties);
+    //                    //                    fixture.setSensor(false);
+    //                }
+    //            }
+    //            originalCollisionProperties.clear();
+    //
+    //            startHeight = 0;
+    //        }
+    //    }
 
     /**
      * @param categoryBits the collision category for the
