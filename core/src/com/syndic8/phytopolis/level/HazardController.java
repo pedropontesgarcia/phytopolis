@@ -235,25 +235,48 @@ public class HazardController {
     private void spreadFire(Vector2 node) {
         int x = (int) node.x;
         int y = (int) node.y;
-        if (y-1 < 0) return;
-        // check bottom left
-        if (plantController.inBounds(x-1, y-1)) {
-            if (plantController.branchExists(x-1, y-1, PlantController.branchDirection.RIGHT)) {
-                generateHazard(Model.ModelType.FIRE, x-1, y-1);
+        if (y+1 <= height) {
+            // check top left
+            if (plantController.inBounds(x-1, y+1)) {
+                if (!plantController.nodeIsEmpty(x-1, y+1)) {
+                    generateHazard(Model.ModelType.FIRE, x-1, y+1);
+                }
+            }
+            // check top right
+            if (plantController.inBounds(x+1, y+1)) {
+                if (!plantController.nodeIsEmpty(x+1, y+1)) {
+                    generateHazard(Model.ModelType.FIRE, x+1, y+1);
+                }
+            }
+            // check top middle
+            if (plantController.inBounds(x, y+1)) {
+                if (!plantController.nodeIsEmpty(x, y+1)) {
+                    generateHazard(Model.ModelType.FIRE, x, y+1);
+                }
             }
         }
-        // check bottom right
-        if (plantController.inBounds(x+1, y-1)) {
-            if (plantController.branchExists(x+1, y-1, PlantController.branchDirection.LEFT)) {
-                generateHazard(Model.ModelType.FIRE, x+1, y-1);
+
+        if (y-1 >= 0) {
+            // check bottom left
+            if (plantController.inBounds(x-1, y-1)) {
+                if (plantController.branchExists(x-1, y-1, PlantController.branchDirection.RIGHT)) {
+                    generateHazard(Model.ModelType.FIRE, x-1, y-1);
+                }
+            }
+            // check bottom right
+            if (plantController.inBounds(x+1, y-1)) {
+                if (plantController.branchExists(x+1, y-1, PlantController.branchDirection.LEFT)) {
+                    generateHazard(Model.ModelType.FIRE, x+1, y-1);
+                }
+            }
+            // check bottom middle
+            if (plantController.inBounds(x, y-1)) {
+                if (plantController.branchExists(x, y-1, PlantController.branchDirection.MIDDLE)) {
+                    generateHazard(Model.ModelType.FIRE, x, y-1);
+                }
             }
         }
-        // check bottom middle
-        if (plantController.inBounds(x, y-1)) {
-            if (plantController.branchExists(x, y-1, PlantController.branchDirection.MIDDLE)) {
-                generateHazard(Model.ModelType.FIRE, x, y-1);
-            }
-        }
+
     }
 
     /**
