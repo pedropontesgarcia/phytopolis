@@ -425,17 +425,21 @@ public class PlantController {
             leafExists = true;
         }
 
+        //TODO: less hacky unmakeBranch implementation
         /**
          * destroy target branch
          */
         public void unmakeBranch(branchDirection direction) {
             switch (direction) {
                 case MIDDLE:
-                    middle.setDestroyed(true);
+                    //middle.setDestroyed(true);
+                    middle = null;
                 case RIGHT:
-                    right.setDestroyed(true);
+                    //right.setDestroyed(true);
+                    right = null;
                 case LEFT:
-                    left.setDestroyed(true);
+                    //left.setDestroyed(true);
+                    left = null;
             }
         }
 
