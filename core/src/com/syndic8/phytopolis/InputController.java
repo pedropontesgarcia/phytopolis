@@ -380,7 +380,8 @@ public class InputController {
         debugPressed = (secondary && debugPressed) ||
                 (Gdx.input.isKeyPressed(Input.Keys.K));
         primePressed = (secondary && primePressed) ||
-                (Gdx.input.isKeyPressed(Input.Keys.W));
+                (Gdx.input.isKeyPressed(Input.Keys.W) ||
+                        Gdx.input.isKeyPressed(Input.Keys.SPACE));
         secondPressed = (secondary && secondPressed) ||
                 (Gdx.input.isKeyPressed(Input.Keys.ENTER));
         prevPressed = (secondary && prevPressed) ||
@@ -400,7 +401,8 @@ public class InputController {
         }
 
         vertical = (secondary ? vertical : 0.0f);
-        if (Gdx.input.isKeyPressed(Input.Keys.W)) {
+        if (Gdx.input.isKeyPressed(Input.Keys.W) ||
+                Gdx.input.isKeyPressed(Input.Keys.SPACE)) {
             vertical += 1.0f;
         }
 

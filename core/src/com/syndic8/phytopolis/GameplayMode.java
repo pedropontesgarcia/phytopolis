@@ -443,7 +443,7 @@ public class GameplayMode extends WorldController implements ContactListener {
             }
 
             // Check for win condition
-            if ((bd1 == avatar && bd1.getY() > 75f)) {
+            if ((bd1 == avatar && bd1.getY() > 34)) {
                 setComplete(true);
             }
         } catch (Exception e) {
