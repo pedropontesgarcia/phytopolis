@@ -271,6 +271,10 @@ public class PlantController {
         return height;
     }
 
+    public boolean inBounds(int x, int y) {
+        return x >= 0 && y >= 0 && x < width && y < height;
+    }
+
     /**
      * sets the texture to use when drawing nodes
      */
