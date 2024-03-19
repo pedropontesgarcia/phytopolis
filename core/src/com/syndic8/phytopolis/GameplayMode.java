@@ -50,7 +50,6 @@ public class GameplayMode extends WorldController implements ContactListener {
     private final long fireId = -1;
     private final long plopId = -1;
     private final long jumpId = -1;
-
     // Physics objects for the game
     private final Vector2 cameraVector;
     /**
@@ -61,6 +60,7 @@ public class GameplayMode extends WorldController implements ContactListener {
      * branch texture
      */
     protected TextureRegion branchTexture;
+    private TextureRegion background;
     /**
      * Texture asset for character avatar
      */
@@ -135,6 +135,7 @@ public class GameplayMode extends WorldController implements ContactListener {
                                               scale);
         hazardController = new HazardController(plantController, 20, 300, 10);
 
+        background = null;
     }
 
     /**
@@ -150,6 +151,10 @@ public class GameplayMode extends WorldController implements ContactListener {
                                                              Texture.class));
         barrierTexture = new TextureRegion(directory.getEntry("gameplay:barrier",
                                                               Texture.class));
+        background = new TextureRegion(directory.getEntry("gameplay:background",
+                                                          Texture.class));
+        background.setRegion(0, 0, 1920, 1080);
+        //super.setBackground(background.getTexture());
         plantController.gatherAssets(directory);
 
         //jumpSound = directory.getEntry("platform:jump", Sound.class);
@@ -485,9 +490,9 @@ public class GameplayMode extends WorldController implements ContactListener {
      * Pausing happens when we switch game modes.
      */
     public void pause() {
-        jumpSound.stop(jumpId);
-        plopSound.stop(plopId);
-        fireSound.stop(fireId);
+        //jumpSound.stop(jumpId);
+        //plopSound.stop(plopId);
+        //fireSound.stop(fireId);
     }
 
     /**
@@ -500,7 +505,6 @@ public class GameplayMode extends WorldController implements ContactListener {
      *
      * @param dt Number of seconds since last animation frame
      */
-    @Override
     public void draw(float dt) {
         canvas.cameraUpdate(cameraVector);
         super.draw(dt);
