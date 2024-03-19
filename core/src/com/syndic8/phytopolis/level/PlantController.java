@@ -434,7 +434,7 @@ public class PlantController {
         public void makeLeaf(leafType type,
                              TextureRegion texture,
                              World world) {
-            leaf = new Leaf(x, y, leafWidth, leafHeight);
+            leaf = new Leaf(x/worldToPixelConversionRatio, y/worldToPixelConversionRatio, leafWidth, leafHeight);
             leafExists = true;
         }
 

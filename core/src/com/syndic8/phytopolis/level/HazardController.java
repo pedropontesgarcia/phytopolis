@@ -1,6 +1,8 @@
 package com.syndic8.phytopolis.level;
 
+import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.math.Vector2;
+import com.syndic8.phytopolis.assets.AssetDirectory;
 import com.syndic8.phytopolis.level.models.Drone;
 import com.syndic8.phytopolis.level.models.Fire;
 import com.syndic8.phytopolis.level.models.Hazard;
@@ -8,7 +10,6 @@ import com.syndic8.phytopolis.level.models.Model;
 
 import java.util.*;
 
-import static com.syndic8.phytopolis.level.models.Model.ModelType.DRONE;
 
 public class HazardController {
 
@@ -41,6 +42,14 @@ public class HazardController {
      */
     private final int burnTime;
     /**
+     * Texture for fire hazard.
+     */
+    protected Texture fireTexture;
+    /**
+     * Texture for drone hazard.
+     */
+    protected Texture droneTexture;
+    /**
      * List to track active hazards and their remaining time.
      */
     ArrayList<Hazard> hazards;
@@ -55,6 +64,7 @@ public class HazardController {
         this.droneFrequency = 3;
         this.plantController = plantController;
         this.burnTime = 5;
+
         hazards = new ArrayList<>();
         height = plantController.getHeight();
         width = plantController.getWidth();
@@ -162,6 +172,7 @@ public class HazardController {
                     // spread fire if the time is right, otherwise decrement timer
                     if (time == 1) {
                         hazards.remove(f);
+                        f.markRemoved(true);
                         plantController.destroyAll((int) f.getLocation().x, (int) f.getLocation().y);
                         spreadFire(f.getLocation());
                     }
@@ -171,6 +182,7 @@ public class HazardController {
                     // destroy plant at location
                     Drone d = (Drone) h;
                     hazards.remove(d);
+                    d.markRemoved(true);
                     plantController.destroyAll((int) d.getLocation().x, (int) d.getLocation().y);
                     break;
                 default:
@@ -202,6 +214,14 @@ public class HazardController {
         if (plantController.branchExists(x, y-1, PlantController.branchDirection.RIGHT)) {
             hazards.add(new Fire(new Vector2(x, y-1), burnTime));
         }
+    }
+
+    /**
+     * Sets the texture of hazards.
+     */
+    public void gatherAssets(AssetDirectory directory) {
+        this.fireTexture = directory.getEntry("fire", Texture.class);
+        this.droneTexture = directory.getEntry("drone", Texture.class);
     }
 
 }

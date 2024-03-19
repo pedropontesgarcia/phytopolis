@@ -156,6 +156,7 @@ public class GameplayMode extends WorldController implements ContactListener {
         background.setRegion(0, 0, 1920, 1080);
         super.setBackground(background.getTexture());
         plantController.gatherAssets(directory);
+        hazardController.gatherAssets(directory);
 
         //jumpSound = directory.getEntry("platform:jump", Sound.class);
         //fireSound = directory.getEntry("platform:pew", Sound.class);
