@@ -53,7 +53,7 @@ public class PlantController {
     /**
      * branch texture
      */
-    protected TextureRegion branchTexture;
+    protected Texture branchTexture;
     /**
      * leaf texture
      */
@@ -267,9 +267,7 @@ public class PlantController {
     public void gatherAssets(AssetDirectory directory) {
 
         this.nodeTexture = directory.getEntry("gameplay:leaf", Texture.class);
-        this.branchTexture = new TextureRegion(directory.getEntry(
-                "gameplay:branch",
-                Texture.class));
+        this.branchTexture = directory.getEntry("gameplay:branch", Texture.class);
     }
 
     /**
@@ -398,15 +396,18 @@ public class PlantController {
          */
         public void makeBranch(branchDirection direction,
                                branchType type,
-                               TextureRegion texture,
+                               Texture texture,
                                World world) {
             switch (direction) {
                 case LEFT:
                     left = new Branch(x, y, -60);
+                    left.setTexture(branchTexture);
                 case MIDDLE:
                     middle = new Branch(x, y, 0);
+                    middle.setTexture(branchTexture);
                 case RIGHT:
                     right = new Branch(x, y, 60);
+                    right.setTexture(branchTexture);
             }
 
         }
