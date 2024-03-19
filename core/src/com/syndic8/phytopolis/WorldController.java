@@ -533,17 +533,17 @@ public abstract class WorldController implements Screen {
         }
 
         // Final message
-        if (complete && !failed) {
-            displayFont.setColor(Color.YELLOW);
-            canvas.begin(); // DO NOT SCALE
-            canvas.drawTextCentered("VICTORY!", displayFont, 0.0f);
-            canvas.end();
-        } else if (failed) {
-            displayFont.setColor(Color.RED);
-            canvas.begin(); // DO NOT SCALE
-            canvas.drawTextCentered("FAILURE!", displayFont, 0.0f);
-            canvas.end();
-        }
+        //        if (complete && !failed) {
+        //            displayFont.setColor(Color.YELLOW);
+        //            canvas.begin(); // DO NOT SCALE
+        //            canvas.drawTextCentered("VICTORY!", displayFont, 0.0f);
+        //            canvas.end();
+        //        } else if (failed) {
+        //            displayFont.setColor(Color.RED);
+        //            canvas.begin(); // DO NOT SCALE
+        //            canvas.drawTextCentered("FAILURE!", displayFont, 0.0f);
+        //            canvas.end();
+        //        }
     }
 
     /**
