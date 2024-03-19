@@ -509,6 +509,7 @@ public class GameplayMode extends WorldController implements ContactListener {
      * double jumping.
      */
     public void endContact(Contact contact) {
+        contact.setEnabled(true);
         Fixture fix1 = contact.getFixtureA();
         Fixture fix2 = contact.getFixtureB();
 
@@ -540,6 +541,28 @@ public class GameplayMode extends WorldController implements ContactListener {
      * Unused ContactListener method
      */
     public void preSolve(Contact contact, Manifold oldManifold) {
+        Fixture fix1 = contact.getFixtureA();
+        Fixture fix2 = contact.getFixtureB();
+        boolean isCollisionBetweenPlayerAndLeaf =
+                (fix1.getBody() == avatar.getBody() &&
+                        ((Model) fix2.getBody().getUserData()).getType() ==
+                                Model.ModelType.LEAF) ||
+                        (fix2.getBody() == avatar.getBody() &&
+                                ((Model) fix1.getBody()
+                                        .getUserData()).getType() ==
+                                        Model.ModelType.LEAF);
+        boolean isPlayerGoingUp = avatar.getVY() >= 0;
+        boolean isPlayerBelow = false;
+        if (fix1.getBody() == avatar.getBody()) isPlayerBelow =
+                fix1.getBody().getPosition().y - 1f <
+                        fix2.getBody().getPosition().y;
+        else if (fix2.getBody() == avatar.getBody()) isPlayerBelow =
+                fix2.getBody().getPosition().y - 1f <
+                        fix1.getBody().getPosition().y;
+        if (isCollisionBetweenPlayerAndLeaf && isPlayerGoingUp ||
+                isPlayerBelow) {
+            contact.setEnabled(false);
+        }
     }
 
     /**
