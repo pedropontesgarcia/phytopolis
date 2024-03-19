@@ -10,5 +10,8 @@
   },
   "jsons": {
     "gameplay:constants": "gameplay/constants.json"
+  },
+  "music": {
+    "viridian": "gameplay/ViridianEXP1_16bit.wav"
   }
 }
