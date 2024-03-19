@@ -32,6 +32,10 @@ public class HazardController {
      */
     private final PlantController plantController;
     /**
+     * Reference to the PlantController.
+     */
+    private final ResourceController resourceController;
+    /**
      * The height of the game area.
      */
     private final int height;
@@ -85,6 +89,7 @@ public class HazardController {
         this.fireFrequency = fireFrequency;
         this.droneFrequency = droneFrequency;
         this.plantController = plantController;
+        this.resourceController = plantController.getResourceController();
         this.burnTime = burnTime;
         this.explodeTime = explodeTime;
         hazards = new ArrayList<>();
@@ -286,15 +291,21 @@ public class HazardController {
      * @param y y coord of fire node.
      */
     public void extinguishFire(int x, int y) {
-        Fire f = null;
-        for (Hazard h : hazards) {
-            if (h.getType().equals(Model.ModelType.FIRE)) {
-                f = (Fire) h;
-                if ((int) f.getLocation().x == x && (int) f.getLocation().y == y) break;
+        if (resourceController.canExtinguish()) {
+            Fire f = null;
+            for (Hazard h : hazards) {
+                if (h.getType().equals(Model.ModelType.FIRE)) {
+                    f = (Fire) h;
+                    if ((int) f.getLocation().x == x && (int) f.getLocation().y == y) break;
+                }
             }
+            if (f == null) return;
+            if ((int) f.getLocation().x == x && (int) f.getLocation().y == y) {
+                hazards.remove(f);
+                resourceController.decrementExtinguish();
+            }
+
         }
-        if (f == null) return;
-        if ((int) f.getLocation().x == x && (int) f.getLocation().y == y) hazards.remove(f);
     }
 
     /**
