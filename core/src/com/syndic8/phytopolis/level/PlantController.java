@@ -162,9 +162,9 @@ public class PlantController {
      * @param xArg x index of the node to be accessed
      * @param yArg y index of the node to be accessed
      */
-    public void destroyAll(int xArg, int yArg) {
+    public void destroyAll(int xArg, int yArg, WorldController wldc) {
         PlantNode nodeToDestroy = plantGrid[xArg][yArg];
-        nodeToDestroy.unmakeLeaf();
+        nodeToDestroy.unmakeLeaf(wldc);
         nodeToDestroy.unmakeBranch(branchDirection.LEFT);
         nodeToDestroy.unmakeBranch(branchDirection.MIDDLE);
         nodeToDestroy.unmakeBranch(branchDirection.RIGHT);
@@ -176,7 +176,7 @@ public class PlantController {
      * method to destroy branches no longer attatched to the plant,
      * should be called every frame
      */
-    public void propagateDestruction() {
+    public void propagateDestruction(WorldController wldc) {
         if (plantCoyoteTimeRemaining == 0 && !destructionQueue.isEmpty()) {
             int[] currentNode = destructionQueue.removeFirst();
             int xIndex = currentNode[0];
@@ -185,7 +185,7 @@ public class PlantController {
                 if (yIndex < height && xIndex + i >= 0 && xIndex + i < width &&
                         !canGrowAt(xIndex + i, yIndex) &&
                         !plantGrid[xIndex + i][yIndex].isEmpty()) {
-                    destroyAll(xIndex + i, yIndex);
+                    destroyAll(xIndex + i, yIndex, wldc);
                     destructionQueue.addLast(new int[]{xIndex + i, yIndex});
                 }
             }
@@ -520,8 +520,9 @@ public class PlantController {
             }
         }
 
-        public void unmakeLeaf() {
+        public void unmakeLeaf(WorldController wldc) {
             leafExists = false;
+            leaf.markRemoved(true);
             leaf = null;
         }
 
