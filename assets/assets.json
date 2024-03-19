@@ -16,5 +16,11 @@
   },
   "music": {
     "viridian": "gameplay/ViridianEXP1_16bit.wav"
+  },
+  "fonts": {
+    "times": {
+      "file": "fonts/TimesRoman.ttf",
+      "size": 32
+    }
   }
 }

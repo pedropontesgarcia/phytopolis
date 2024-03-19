@@ -114,6 +114,15 @@ public class Player extends CapsuleObject {
     }
 
     /**
+     * Checks whether the player is at the bottom (for water purposes)
+     *
+     * @return whether or not the player is at the bottom of the game
+     */
+    public boolean atBottom() {
+        return Math.abs(getY() - 2) < 0.01;
+    }
+
+    /**
      * Returns true if the dude is on the ground.
      *
      * @return true if the dude is on the ground.

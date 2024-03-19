@@ -12,7 +12,9 @@ package com.syndic8.phytopolis;
 
 import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.audio.Sound;
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.*;
@@ -22,6 +24,7 @@ import com.badlogic.gdx.utils.ObjectSet;
 import com.syndic8.phytopolis.assets.AssetDirectory;
 import com.syndic8.phytopolis.level.HazardController;
 import com.syndic8.phytopolis.level.PlantController;
+import com.syndic8.phytopolis.level.ResourceController;
 import com.syndic8.phytopolis.level.models.*;
 
 import java.util.HashMap;
@@ -48,6 +51,7 @@ public class GameplayMode extends WorldController implements ContactListener {
     private final float distance = 120f;
     private final PlantController plantController;
     private final HazardController hazardController;
+    private final ResourceController resourceController;
     private final long fireId = -1;
     private final long plopId = -1;
     private final long jumpId = -1;
@@ -62,11 +66,17 @@ public class GameplayMode extends WorldController implements ContactListener {
      */
     protected TextureRegion branchTexture;
     private Player player;
+    /** The font for giving messages to the player */
+    private BitmapFont timesFont;
     private TextureRegion background;
     /**
      * Texture asset for character avatar
      */
     private TextureRegion avatarTexture;
+    /**
+     * Texture asset for water symbol
+     */
+    private Texture waterTexture;
     /**
      * Texture asset for the spinning barrier
      */
@@ -129,12 +139,13 @@ public class GameplayMode extends WorldController implements ContactListener {
         world.setContactListener(this);
         cameraVector = new Vector2();
         sensorFixtures = new ObjectSet<Fixture>();
-        plantController = new PlantController(13, 40, 1.4f, 1, 1, world, scale);
+        resourceController = new ResourceController();
+        plantController = new PlantController(13, 40, 1.4f, 1, 1, world, scale, resourceController);
         hazardController = new HazardController(plantController,
-                                                3000,
-                                                3000,
-                                                600,
-                                                200);
+                3000,
+                3000,
+                600,
+                200);
 
         background = null;
         scale = new Vector2(120, 120);
@@ -151,11 +162,14 @@ public class GameplayMode extends WorldController implements ContactListener {
      */
     public void gatherAssets(AssetDirectory directory) {
         avatarTexture = new TextureRegion(directory.getEntry("gameplay:player",
-                                                             Texture.class));
+                Texture.class));
         barrierTexture = new TextureRegion(directory.getEntry("gameplay:barrier",
-                                                              Texture.class));
+                Texture.class));
+        waterTexture = directory.getEntry("water_nooutline", Texture.class);
+        timesFont = directory.getEntry("times", BitmapFont.class);
         background = new TextureRegion(directory.getEntry("gameplay:background",
-                                                          Texture.class));
+                Texture.class));
+
         background.setRegion(0, 0, 1920, 1080);
         super.setBackground(background.getTexture());
         plantController.gatherAssets(directory);
@@ -303,30 +317,30 @@ public class GameplayMode extends WorldController implements ContactListener {
         float avatarX = avatar.getX();
         float avatarY = avatar.getY();
         if (InputController.getInstance().didGrowUp() &&
-                (plantController.canGrowAt(avatarX, avatarY))) {
+                (plantController.branchGrowableAt(avatarX, avatarY, PlantController.branchDirection.MIDDLE))) {
             plantController.growBranch(avatarX,
-                                       avatarY,
-                                       PlantController.branchDirection.MIDDLE,
-                                       PlantController.branchType.NORMAL);
+                    avatarY,
+                    PlantController.branchDirection.MIDDLE,
+                    PlantController.branchType.NORMAL);
         } else if (InputController.getInstance().didGrowRight() &&
-                (plantController.canGrowAt(avatarX, avatarY))) {
+                (plantController.branchGrowableAt(avatarX, avatarY, PlantController.branchDirection.RIGHT))) {
             plantController.growBranch(avatarX,
-                                       avatarY,
-                                       PlantController.branchDirection.RIGHT,
-                                       PlantController.branchType.NORMAL);
+                    avatarY,
+                    PlantController.branchDirection.RIGHT,
+                    PlantController.branchType.NORMAL);
         } else if (InputController.getInstance().didGrowLeft() &&
-                (plantController.canGrowAt(avatarX, avatarY))) {
+                (plantController.branchGrowableAt(avatarX, avatarY, PlantController.branchDirection.LEFT))) {
             plantController.growBranch(avatarX,
-                                       avatarY,
-                                       PlantController.branchDirection.LEFT,
-                                       PlantController.branchType.NORMAL);
+                    avatarY,
+                    PlantController.branchDirection.LEFT,
+                    PlantController.branchType.NORMAL);
 
         } else if (InputController.getInstance().didMousePress()) {
             plantController.growLeaf(InputController.getInstance().getGrowX(),
-                                     InputController.getInstance().getGrowY() +
-                                             cameraVector.y - 500,
-                                     PlantController.leafType.NORMAL,
-                                     this);
+                    InputController.getInstance().getGrowY() +
+                            cameraVector.y - 500,
+                    PlantController.leafType.NORMAL,
+                    this);
         }
         return false;
     }
@@ -344,21 +358,23 @@ public class GameplayMode extends WorldController implements ContactListener {
     public void update(float dt) {
         // Process actions in object model
         avatar.setMovement(InputController.getInstance().getHorizontal() *
-                                   avatar.getForce());
+                avatar.getForce());
         avatar.setJumping(InputController.getInstance().didPrimary());
         //avatar.setShooting(InputController.getInstance().didSecondary());
         processPlantGrowth();
 
         avatar.applyForce();
-        if (avatar.isJumping()) {
-            //jumpId = playSound(jumpSound, jumpId, volume);
-        }
-        //        hazardController.updateHazards();
+        System.out.println(avatar.getY());
+        System.out.println(avatar.atBottom());
+//        if (avatar.isJumping()) {
+        //jumpId = playSound(jumpSound, jumpId, volume);
+//        }
 
         //handleDrop();
         cameraVector.set(8 * 1920 / 16.0f,
-                         Math.max((avatar.getY() - 2) * 1080 / 9.0f, 600));
+                Math.max((avatar.getY() - 2) * 1080 / 9.0f, 600));
         // generate hazards please
+        resourceController.update(avatar);
         hazardController.updateHazards(this);
         plantController.propagateDestruction(this);
     }
@@ -452,8 +468,8 @@ public class GameplayMode extends WorldController implements ContactListener {
                     (avatar.getSensorName().equals(fd1) && avatar != bd2)) {
                 avatar.setGrounded(true);
                 sensorFixtures.add(avatar == bd1 ?
-                                           fix2 :
-                                           fix1); // Could have more than one ground
+                        fix2 :
+                        fix1); // Could have more than one ground
             }
 
             // Check for win condition
@@ -533,6 +549,8 @@ public class GameplayMode extends WorldController implements ContactListener {
         canvas.cameraUpdate(cameraVector);
         super.draw(dt);
         canvas.begin();
+        canvas.draw(waterTexture, Color.WHITE, waterTexture.getWidth() / 2.0f, waterTexture.getHeight() / 2.0f, 50.0f, canvas.getHeight()- 5.0f, 0, 0.1f, 0.1f);
+        canvas.drawText(Integer.toString(resourceController.getCurrWater()), timesFont, 35.0f, canvas.getHeight()-15.0f);
         plantController.draw(canvas);
         player.draw(canvas);
         hazardController.draw(canvas);
