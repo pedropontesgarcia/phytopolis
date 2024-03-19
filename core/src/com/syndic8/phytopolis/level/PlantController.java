@@ -313,6 +313,24 @@ public class PlantController {
         return (int) ((yArg - yOrigin) / gridSpacing);
     }
 
+    /**
+     * Convert x world coord to an index in PlantController
+     * @param xArg x world coordinate
+     * @return the corresponding index
+     */
+    public int xWorldCoordToIndex(float xArg){
+        return xCoordToIndex(xArg * worldToPixelConversionRatio);
+    }
+
+    /**
+     * Convert y world coord to an index in PlantController
+     * @param yArg y world coordinate
+     * @return the corresponding index
+     */
+    public int yWorldCoordToIndex(float yArg){
+        return yCoordToIndex(yArg * worldToPixelConversionRatio);
+    }
+
     //TODO: Update with new branch type
 
     /**
