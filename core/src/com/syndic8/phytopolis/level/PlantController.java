@@ -450,7 +450,8 @@ public class PlantController {
          * @param texture texture of the leaf
          * @param world   world to assign the leaf to
          */
-        public void makeLeaf(leafType type,
+        public void makeLeaf(
+                             leafType type,
                              TextureRegion texture,
                              World world) {
             leaf = new Leaf(x/worldToPixelConversionRatio, y/worldToPixelConversionRatio, leafWidth, leafHeight);
