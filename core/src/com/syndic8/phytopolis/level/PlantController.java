@@ -61,7 +61,7 @@ public class PlantController {
     /**
      * conversion ratio from world units to pixels
      */
-    private final int worldToPixelConversionRatio = 120;
+    private final float worldToPixelConversionRatio = 120;
     /**
      * how many frames between propagations of destruction
      */
@@ -75,8 +75,8 @@ public class PlantController {
     /**
      * Initialize a PlantController with specified height and width
      *
-     * @param height      the height of the plant grid in world units
-     * @param width       the width of the plant grid in world units
+     * @param height      the height of the plant grid
+     * @param width       the width of the plant grid
      * @param gridSpacing the spacing between nodes of the plant in world units
      * @param world       world to assign physics objects to
      * @param xOrigin     x origin of the plant in world units
@@ -93,21 +93,21 @@ public class PlantController {
         this.world = world;
         this.xOrigin = xOrigin * worldToPixelConversionRatio;
         this.yOrigin = yOrigin * worldToPixelConversionRatio;
-        this.width = width * worldToPixelConversionRatio;
-        this.height = height * worldToPixelConversionRatio;
+        this.width = width;
+        this.height = height;
         this.gridSpacing = gridSpacing * worldToPixelConversionRatio;
-        this.xSpacing = (float) (Math.sqrt((gridSpacing * gridSpacing) -
-                                                  ((gridSpacing / 2f) *
-                                                          (gridSpacing / 2f))) * worldToPixelConversionRatio);
+        this.xSpacing = (float) (Math.sqrt((this.gridSpacing * this.gridSpacing) -
+                                                  ((this.gridSpacing / 2f) *
+                                                          (this.gridSpacing / 2f))));
         this.scale = scale;
         for (int x = 0; x < width; x++) {
             for (int y = 0; y < height; y++) {
                 float yOffset = 0;
                 //set the yOffset
-                if (x % 2 == 1) yOffset = gridSpacing / 2f;
-                plantGrid[x][y] = new PlantNode((x * xSpacing) + xOrigin,
-                                                yOrigin + yOffset +
-                                                        (y * gridSpacing));
+                if (x % 2 == 1) yOffset = this.gridSpacing / 2f;
+                plantGrid[x][y] = new PlantNode((x * this.xSpacing) + this.xOrigin,
+                                                this.yOrigin + yOffset + (y * this.gridSpacing),
+                                                    this.worldToPixelConversionRatio);
             }
         }
     }
@@ -124,8 +124,8 @@ public class PlantController {
                            float y,
                            branchDirection direction,
                            branchType type) {
-        int xIndex = xCoordToIndex(x * 10);
-        int yIndex = yCoordToIndex(y * 10);
+        int xIndex = xCoordToIndex(x * worldToPixelConversionRatio);
+        int yIndex = yCoordToIndex(y * worldToPixelConversionRatio);
         plantGrid[xIndex][yIndex].makeBranch(direction,
                                              type,
                                              branchTexture,
@@ -133,8 +133,8 @@ public class PlantController {
     }
 
     public void growLeaf(float x, float y, leafType type) {
-        int xIndex = xCoordToIndex(x * 10);
-        int yIndex = yCoordToIndex(y * 10);
+        int xIndex = xCoordToIndex(x * worldToPixelConversionRatio);
+        int yIndex = yCoordToIndex(y * worldToPixelConversionRatio);
         plantGrid[xIndex][yIndex].makeLeaf(type, leafTexture, world);
     }
 
@@ -371,6 +371,10 @@ public class PlantController {
          * if a leaf exists at this node
          */
         private boolean leafExists = false;
+        /**
+         * conversion ration for converting between world coords and pixels
+         */
+        private float worldToPixelConversionRatio;
 
         /**
          * initialize a new PlantNode object
@@ -378,12 +382,13 @@ public class PlantController {
          * @param x x coordinate of the node
          * @param y y coordinate of the node
          */
-        public PlantNode(float x, float y) {
+        public PlantNode(float x, float y, float worldToPixelConversionRatio) {
             //            this.left = false;
             //            this.middle = false;
             //            this.right = false;
             this.x = x;
             this.y = y;
+            this.worldToPixelConversionRatio = worldToPixelConversionRatio;
         }
 
         /**
