@@ -77,7 +77,7 @@ public class PlantController {
      *
      * @param height      the height of the plant grid in world units
      * @param width       the width of the plant grid in world units
-     * @param gridSpacing the spacing between nodes of the plant
+     * @param gridSpacing the spacing between nodes of the plant in world units
      * @param world       world to assign physics objects to
      * @param xOrigin     x origin of the plant in world units
      * @param yOrigin     y origin of the plant in world units
@@ -95,10 +95,10 @@ public class PlantController {
         this.yOrigin = yOrigin * worldToPixelConversionRatio;
         this.width = width * worldToPixelConversionRatio;
         this.height = height * worldToPixelConversionRatio;
-        this.gridSpacing = gridSpacing;
-        this.xSpacing = (float) Math.sqrt((gridSpacing * gridSpacing) -
+        this.gridSpacing = gridSpacing * worldToPixelConversionRatio;
+        this.xSpacing = (float) (Math.sqrt((gridSpacing * gridSpacing) -
                                                   ((gridSpacing / 2f) *
-                                                          (gridSpacing / 2f)));
+                                                          (gridSpacing / 2f))) * worldToPixelConversionRatio);
         this.scale = scale;
         for (int x = 0; x < width; x++) {
             for (int y = 0; y < height; y++) {
@@ -197,8 +197,8 @@ public class PlantController {
      * @return whether or not a node can be grown at
      */
     public boolean canGrowAt(float xArg, float yArg) {
-        int xIndex = xCoordToIndex(xArg * 10 * worldToPixelConversionRatio);
-        int yIndex = yCoordToIndex(yArg * 10 * worldToPixelConversionRatio);
+        int xIndex = xCoordToIndex(xArg * worldToPixelConversionRatio);
+        int yIndex = yCoordToIndex(yArg * worldToPixelConversionRatio);
         boolean lowerNode = xIndex % 2 == 0;
         //If this is a node at the base of the plant, return true
         if (yIndex == 0 && lowerNode) return true;
