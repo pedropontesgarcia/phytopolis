@@ -1,6 +1,6 @@
 {
   "textures": {
-    "gameplay:player": "gameplay/idle-character.png",
+    "gameplay:player": "gameplay/charo2.png",
     "gameplay:leaf": "gameplay/leaf2.png",
     "gameplay:barrier": "gameplay/barrier.png",
     "gameplay:branch": "gameplay/branch.png",
