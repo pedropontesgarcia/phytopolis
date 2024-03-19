@@ -66,15 +66,7 @@ public class HazardController {
      * @param plantController The PlantController instance associated with this HazardController.
      */
     public HazardController(PlantController plantController) {
-        this.fireFrequency = 300; // 1/300 chance to spawn fire at each update
-        this.droneFrequency = 300;
-        this.plantController = plantController;
-        this.burnTime = 100;
-        this.explodeTime = 100;
-
-        hazards = new ArrayList<>();
-        height = plantController.getHeight();
-        width = plantController.getWidth();
+        this(plantController, 300, 300, 100, 100);
     }
 
     /**
