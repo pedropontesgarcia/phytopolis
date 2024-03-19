@@ -401,7 +401,7 @@ public class PlantController {
         /**
          * width of the leaf at this node
          */
-        private final float leafWidth = 1;
+        private final float leafWidth = 1.5f;
         /**
          * height of the leaf at this node
          */
@@ -488,10 +488,12 @@ public class PlantController {
                              World world,
                              WorldController wldc) {
             if (!leafExists && (hasBranchInDirection(branchDirection.LEFT) ||
-                    hasBranchInDirection((branchDirection.MIDDLE)) ||
-                    hasBranchInDirection(branchDirection.RIGHT))) {
+                    hasBranchInDirection(branchDirection.MIDDLE) ||
+                    hasBranchInDirection(branchDirection.RIGHT)) ||
+                    canGrowAt(x / worldToPixelConversionRatio,
+                              y / worldToPixelConversionRatio)) {
                 leaf = new Leaf(x / worldToPixelConversionRatio,
-                                y / worldToPixelConversionRatio + 1,
+                                y / worldToPixelConversionRatio + 0.3f,
                                 leafWidth,
                                 leafHeight);
                 leaf.setTexture(texture);
