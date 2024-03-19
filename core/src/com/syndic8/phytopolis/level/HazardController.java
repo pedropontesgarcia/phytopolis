@@ -1,8 +1,14 @@
 package com.syndic8.phytopolis.level;
 
 import com.badlogic.gdx.math.Vector2;
+import com.syndic8.phytopolis.level.models.Drone;
+import com.syndic8.phytopolis.level.models.Fire;
+import com.syndic8.phytopolis.level.models.Hazard;
+import com.syndic8.phytopolis.level.models.Model;
 
 import java.util.*;
+
+import static com.syndic8.phytopolis.level.models.Model.ModelType.DRONE;
 
 public class HazardController {
 
@@ -35,13 +41,24 @@ public class HazardController {
      */
     private final int burnTime;
     /**
-     * HashMap to track active fires and their remaining burn time.
+     * List to track active hazards and their remaining time.
      */
-    Map<Vector2, Integer> fires;
+    ArrayList<Hazard> hazards;
+
     /**
-     * Cached ArrayList to keep track of drone nodes
+     * Initializes a HazardController with the given parameters.
+     *
+     * @param plantController The PlantController instance associated with this HazardController.
      */
-    ArrayList<Integer> droneNodes = new ArrayList<>();
+    public HazardController(PlantController plantController) {
+        this.fireFrequency = 3; // 1/3 chance to spawn fire whenever method is called
+        this.droneFrequency = 3;
+        this.plantController = plantController;
+        this.burnTime = 5;
+        hazards = new ArrayList<>();
+        height = plantController.getHeight();
+        width = plantController.getWidth();
+    }
 
     /**
      * Initializes a HazardController with the given parameters.
@@ -59,117 +76,78 @@ public class HazardController {
         this.droneFrequency = droneFrequency;
         this.plantController = plantController;
         this.burnTime = burnTime;
-        fires = new HashMap<>();
+        hazards = new ArrayList<>();
         height = plantController.getHeight();
         width = plantController.getWidth();
     }
 
     /**
-     * Generates a random height for a fire based on the fire frequency.
+     * Generates a hazard at random node at a generated height if the time is right.
      *
-     * @return The height at which the fire is generated, or -1 if no fire is generated.
+     * @param type The type of hazard.
      */
-    private int generateFireHeight() {
-        if (random.nextDouble() < 1.0 / fireFrequency) {
-            return random.nextInt(height);
-        } else {
-            return -1;
+    public void generateHazard(Model.ModelType type) {
+        int hazardHeight = generateHazardHeight(type);
+        if (hazardHeight == -1) return;
+        int hazardWidth = generateHazardWidth(hazardHeight);
+        if (hazardWidth == -1) return;
+        Hazard hazard;
+        switch (type) {
+            case FIRE:
+                hazard = new Fire(new Vector2(hazardWidth, hazardHeight), burnTime);
+                break;
+            case DRONE:
+                hazard = new Drone(new Vector2(hazardWidth, hazardHeight));
+                break;
+            default:
+                return;
         }
+        hazards.add(hazard);
     }
 
     /**
-     * Generates a random height for a drone based on the drone frequency.
+     * Generates a random height for a hazard based on the frequency.
      *
-     * @return The height at which the drone is generated, or -1 if no drone is generated.
+     * @return The height at which the hazard is generated, or -1 if no hazard is generated.
      */
-    private int generateDroneHeight() {
-        if (random.nextDouble() < 1.0 / droneFrequency) {
-            return random.nextInt(height);
-        } else {
-            return -1;
+    private int generateHazardHeight(Model.ModelType type) {
+        int hazardHeight = -1;
+        switch (type) {
+            case FIRE:
+                if (random.nextDouble() < 1.0 / fireFrequency)
+                    hazardHeight = random.nextInt(height);
+                break;
+            case DRONE:
+                if (random.nextDouble() < 1.0 / droneFrequency)
+                    hazardHeight = random.nextInt(height);
+                break;
+            default:
+                break;
         }
+        return hazardHeight;
     }
 
     /**
-     * Generates a fire at random node at a generated height if the time is right.
+     * Generates a random width for a hazard based on the frequency.
+     *
+     * @return The width at which the hazard is generated, or -1 if no plant at that height.
      */
-    private void generateFire() {
-        int fireHeight = generateFireHeight();
+    private int generateHazardWidth(int hazardHeight) {
         ArrayList<Integer> effectedNodes = new ArrayList<>();
-        if (fireHeight != -1) {
-            // Check if the plant node exists and append to effected nodes
-            for (int w = 0; w < width; w++) {
-                if (plantController.nodeIsEmpty(w, fireHeight)) {
-                    effectedNodes.add(w);
-                }
-            }
-            // Choose a node at random to destroy from effectedNodes
-            if (!effectedNodes.isEmpty()) {
-                int randomIndex = random.nextInt(effectedNodes.size());
-                int fireWidth = effectedNodes.get(randomIndex);
-                fires.put(new Vector2(fireWidth, fireHeight), burnTime);
+        // Check if the plant node exists and append to effected nodes
+        for (int w = 0; w < width; w++) {
+            if (!plantController.nodeIsEmpty(w, hazardHeight)) {
+                effectedNodes.add(w);
             }
         }
-    }
-
-    /**
-     * Spreads the fire to adjacent nodes if the burn timer has finished.
-     */
-    private void spreadFire(Vector2 node) {
-
-    }
-
-    /**
-     * Decrements the burn timers
-     */
-    public void updateBurnTimer() {
-        Set<Vector2> keys = fires.keySet();
-        for (Vector2 k : keys) {
-            int timer = fires.get(k);
-            if (timer - 1 <= 0) {
-                spreadFire(k);
-                fires.remove(k);
-            } else {
-                fires.put(k, timer - 1);
-            }
+        // Choose a node at random to destroy from effectedNodes
+        if (!effectedNodes.isEmpty()) {
+            int randomIndex = random.nextInt(effectedNodes.size());
+            return effectedNodes.get(randomIndex);
         }
+        return -1;
     }
 
-    /**
-     * Generates a drone at random node at a generated height if the time is right.
-     */
-    private void generateDrone() {
-        int droneHeight = generateDroneHeight();
-        if (droneHeight != -1) {
-            System.out.println(droneHeight);
-        }
-        if (droneHeight != -1) {
-            // Check if the plant node exists and append to effected nodes
-            for (int w = 0; w < width; w++) {
-                if (plantController.nodeIsEmpty(w, droneHeight)) {
-                    System.out.println("width " + w);
-                    droneNodes.add(w);
-                }
-            }
-            // Choose a node at random to destroy from droneNodes
-            if (!droneNodes.isEmpty()) {
-                int randomIndex = random.nextInt(droneNodes.size());
-                int nodeToDestroy = droneNodes.get(randomIndex);
-                plantController.destroyAll(nodeToDestroy, droneHeight);
-            }
-            droneNodes.clear();
-        }
-    }
 
-    /**
-     * Updates the hazards for the current state of the game. This method is responsible
-     * for generating and managing both fire and drone hazards, including their effects
-     * on plant nodes.
-     */
-    public void updateHazards() {
-        //        generateFire();
-        generateDrone();
-        //        updateBurnTimer();
-    }
 
 }
