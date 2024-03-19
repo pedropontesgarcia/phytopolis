@@ -65,6 +65,7 @@ public class MainMenuMode implements Screen {
      */
     private final GameCanvas canvas;
     private final Rectangle bounds;
+    private float tmr;
     /**
      * The current state of the play button
      */
@@ -121,6 +122,7 @@ public class MainMenuMode implements Screen {
      * @param millis The loading budget in milliseconds
      */
     public MainMenuMode(String file, GameCanvas canvas, int millis) {
+        tmr = 0;
         this.canvas = canvas;
         budget = millis;
         bounds = new Rectangle(0, 0, 16, 9);
@@ -218,6 +220,7 @@ public class MainMenuMode implements Screen {
      * @param delta Number of seconds since last animation frame
      */
     private void update(float delta) {
+        tmr += delta;
         InputController.getInstance().readInput(bounds, Vector2.Zero.add(1, 1));
         if (playButton == null) {
             assets.update(budget);
@@ -258,7 +261,9 @@ public class MainMenuMode implements Screen {
                     0,
                     0.0008f * scale,
                     0.0008f * scale);
-        Color tint = (pressState == 1 ? Color.GRAY : Color.WHITE);
+        Color tint = (pressState == 1 ?
+                Color.GRAY :
+                new Color(1f, 1f, 1f, (float) Math.pow(Math.sin(tmr), 2)));
         if (progress == 1.0f) {
             canvas.draw(playButton,
                         tint,
