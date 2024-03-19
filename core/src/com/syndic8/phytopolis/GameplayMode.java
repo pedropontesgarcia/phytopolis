@@ -131,8 +131,8 @@ public class GameplayMode extends WorldController implements ContactListener {
         sensorFixtures = new ObjectSet<Fixture>();
         plantController = new PlantController(13, 40, 1.4f, 1, 1, world, scale);
         hazardController = new HazardController(plantController,
-                                                300,
-                                                300,
+                                                3000,
+                                                3000,
                                                 600,
                                                 200);
 
