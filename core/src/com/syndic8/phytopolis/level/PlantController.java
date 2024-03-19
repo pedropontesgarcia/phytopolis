@@ -342,6 +342,17 @@ public class PlantController {
         return yCoordToIndex(yArg * worldToPixelConversionRatio);
     }
 
+    /**
+     * returns the world coordinates of the node at the specified index
+     * @param xArg x index
+     * @param yArg y index
+     * @return vector of world coordinates
+     */
+    public Vector2 indexToWorldCoord(int xArg, int yArg){
+        PlantNode n = plantGrid[xArg][yArg];
+        return new Vector2(n.x / worldToPixelConversionRatio, n.y / worldToPixelConversionRatio);
+    }
+
     //TODO: Update with new branch type
 
     /**
@@ -461,8 +472,8 @@ public class PlantController {
                              Texture texture,
                              World world,
                              WorldController wldc) {
-            leaf = new Leaf(x / worldToPixelConversionRatio,
-                            y / worldToPixelConversionRatio,
+            leaf = new Leaf(x,
+                            y,
                             leafWidth,
                             leafHeight);
             leaf.setTexture(texture);
