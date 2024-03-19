@@ -374,11 +374,11 @@ public class PlantController {
         /**
          * width of the leaf at this node
          */
-        private final int leafWidth = 10;
+        private final float leafWidth = 1;
         /**
          * height of the leaf at this node
          */
-        private final int leafHeight = 1;
+        private final float leafHeight = 0.25f;
         /**
          * conversion ration for converting between world coords and pixels
          */
