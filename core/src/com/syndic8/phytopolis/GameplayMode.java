@@ -10,6 +10,7 @@
  */
 package com.syndic8.phytopolis;
 
+import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
@@ -113,6 +114,7 @@ public class GameplayMode extends WorldController implements ContactListener {
     private boolean fall;
     private float startHeight;
     private HashMap<Fixture, Filter> originalCollisionProperties;
+    private Music backgroundMusic;
 
     /**
      * Creates and initialize a new instance of the platformer game
@@ -137,6 +139,8 @@ public class GameplayMode extends WorldController implements ContactListener {
         hazardController = new HazardController(plantController, 20, 300, 10);
 
         background = null;
+
+
     }
 
     /**
@@ -169,6 +173,9 @@ public class GameplayMode extends WorldController implements ContactListener {
                 "gameplay:branch",
                 Texture.class));
         super.gatherAssets(directory);
+        backgroundMusic = directory.getEntry("viridian", Music.class);
+        backgroundMusic.setLooping(true);
+        backgroundMusic.play();
     }
 
     /**
