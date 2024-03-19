@@ -1,6 +1,7 @@
 package com.syndic8.phytopolis.level.models;
 
 import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.math.Vector2;
 import com.syndic8.phytopolis.GameCanvas;
 
@@ -22,6 +23,11 @@ public class Drone extends Hazard {
     private Vector2 location;
 
     /**
+     * Time til explosion.
+     */
+    private int timer;
+
+    /**
      * Returns the type of the model.
      *
      * @return ModelType.DRONE, representing the type of this object.
@@ -37,7 +43,8 @@ public class Drone extends Hazard {
      *
      * @param location The initial location of the drone.
      */
-    public Drone(Vector2 location) {
+    public Drone(Vector2 location, int timeTilExplosion) {
+        this.timer = timeTilExplosion;
         this.location = location;
         isAlive = true;
     }
@@ -70,11 +77,27 @@ public class Drone extends Hazard {
     }
 
     /**
+     * Gets the time till explosion.
+     *
+     * @return The current location of the drone.
+     */
+    public int getTimer() {
+        return timer;
+    }
+
+    /**
+     * Sets the time till explosion.
+     */
+    public void setTimer(int time) {
+        timer = time;
+    }
+
+    /**
      * Renders the drone on the provided GameCanvas.
      *
      * @param canvas The GameCanvas on which to draw the drone.
      */
-    public void draw(GameCanvas canvas) {
-        canvas.draw(texture, Color.RED, origin.x, origin.y, location.x, location.y, 0f, 1f, 1f);
+    public void draw(GameCanvas canvas, Texture tex, float x, float y) {
+        canvas.draw(tex, Color.RED, origin.x, origin.y, x, y, 0f, .1f, .1f);
     }
 }

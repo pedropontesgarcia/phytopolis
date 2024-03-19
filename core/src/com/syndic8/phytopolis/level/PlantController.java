@@ -177,13 +177,13 @@ public class PlantController {
      * should be called every frame
      */
     public void propagateDestruction() {
-        if (plantCoyoteTimeRemaining == 0) {
+        if (plantCoyoteTimeRemaining == 0 && !destructionQueue.isEmpty()) {
             int[] currentNode = destructionQueue.removeFirst();
             int xIndex = currentNode[0];
             int yIndex = currentNode[1] + 1;
             for (int i = -1; i < 2; i++) {
                 if (yIndex < height && xIndex >= 0 && xIndex < width &&
-                        !canGrowAt(xIndex + i, yIndex)) {
+                        !canGrowAt(xIndex + i, yIndex) && !plantGrid[xIndex + i][yIndex].isEmpty()) {
                     destroyAll(xIndex + i, yIndex);
                     destructionQueue.addLast(new int[]{xIndex + i, yIndex});
                 }
@@ -339,6 +339,17 @@ public class PlantController {
      */
     public int yWorldCoordToIndex(float yArg) {
         return yCoordToIndex(yArg * worldToPixelConversionRatio);
+    }
+
+    /**
+     * returns the world coordinates of the node at the specified index
+     * @param xArg x index
+     * @param yArg y index
+     * @return vector of world coordinates
+     */
+    public Vector2 indexToWorldCoord(int xArg, int yArg){
+        PlantNode n = plantGrid[xArg][yArg];
+        return new Vector2(n.x / worldToPixelConversionRatio, n.y / worldToPixelConversionRatio);
     }
 
     //TODO: Update with new branch type

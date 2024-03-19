@@ -2,6 +2,7 @@ package com.syndic8.phytopolis.level;
 
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.math.Vector2;
+import com.syndic8.phytopolis.GameCanvas;
 import com.syndic8.phytopolis.assets.AssetDirectory;
 import com.syndic8.phytopolis.level.models.Drone;
 import com.syndic8.phytopolis.level.models.Fire;
@@ -42,6 +43,10 @@ public class HazardController {
      */
     private final int burnTime;
     /**
+     * The time until drone explodes after it spawns.
+     */
+    private final int explodeTime;
+    /**
      * Texture for fire hazard.
      */
     protected Texture fireTexture;
@@ -60,10 +65,11 @@ public class HazardController {
      * @param plantController The PlantController instance associated with this HazardController.
      */
     public HazardController(PlantController plantController) {
-        this.fireFrequency = 3; // 1/3 chance to spawn fire whenever method is called
-        this.droneFrequency = 3;
+        this.fireFrequency = 300; // 1/300 chance to spawn fire at each update
+        this.droneFrequency = 300;
         this.plantController = plantController;
-        this.burnTime = 5;
+        this.burnTime = 100;
+        this.explodeTime = 100;
 
         hazards = new ArrayList<>();
         height = plantController.getHeight();
@@ -81,11 +87,13 @@ public class HazardController {
     public HazardController(PlantController plantController,
                             int fireFrequency,
                             int droneFrequency,
-                            int burnTime) {
+                            int burnTime,
+                            int explodeTime) {
         this.fireFrequency = fireFrequency;
         this.droneFrequency = droneFrequency;
         this.plantController = plantController;
         this.burnTime = burnTime;
+        this.explodeTime = explodeTime;
         hazards = new ArrayList<>();
         height = plantController.getHeight();
         width = plantController.getWidth();
@@ -107,7 +115,7 @@ public class HazardController {
                 hazard = new Fire(new Vector2(hazardWidth, hazardHeight), burnTime);
                 break;
             case DRONE:
-                hazard = new Drone(new Vector2(hazardWidth, hazardHeight));
+                hazard = new Drone(new Vector2(hazardWidth, hazardHeight), explodeTime);
                 break;
             default:
                 return;
@@ -164,30 +172,36 @@ public class HazardController {
      * on plant nodes.
      */
     public void updateHazards() {
-        for (Hazard h : hazards) {
-            switch (h.getType()) {
-                case FIRE:
-                    Fire f = (Fire) h;
-                    int time = f.getDuration();
-                    // spread fire if the time is right, otherwise decrement timer
-                    if (time == 1) {
-                        hazards.remove(f);
-                        f.markRemoved(true);
-                        plantController.destroyAll((int) f.getLocation().x, (int) f.getLocation().y);
-                        spreadFire(f.getLocation());
-                    }
-                    f.setDuration(time - 1);
-                    break;
-                case DRONE:
-                    // destroy plant at location
-                    Drone d = (Drone) h;
+        generateHazard(Model.ModelType.FIRE);
+        generateHazard(Model.ModelType.DRONE);
+        if (hazards.isEmpty()) return;
+        Hazard h = hazards.get(0);
+        System.out.println(hazards);
+        switch (h.getType()) {
+            case FIRE:
+                Fire f = (Fire) h;
+                int time = f.getDuration();
+                // spread fire if the time is right, otherwise decrement timer
+                if (time == 1) {
+                    hazards.remove(f);
+                    f.markRemoved(true);
+                    plantController.destroyAll((int) f.getLocation().x, (int) f.getLocation().y);
+                    spreadFire(f.getLocation());
+                }
+                f.setDuration(time - 1);
+                break;
+            case DRONE:
+                // destroy plant at location
+                Drone d = (Drone) h;
+                int time2 = d.getTimer();
+                if (time2 == 1) {
                     hazards.remove(d);
                     d.markRemoved(true);
                     plantController.destroyAll((int) d.getLocation().x, (int) d.getLocation().y);
-                    break;
-                default:
-                    return;
-            }
+                }
+                d.setTimer(time2 - 1);
+            default:
+                return;
         }
     }
 
@@ -217,11 +231,49 @@ public class HazardController {
     }
 
     /**
+     * Extinguish fire.
+     *
+     * @param x x coord of fire node.
+     * @param y y coord of fire node.
+     */
+    public void extinguishFire(int x, int y) {
+        Fire f = null;
+        for (Hazard h : hazards) {
+            if (h.getType().equals(Model.ModelType.FIRE)) {
+                f = (Fire) h;
+                if ((int) f.getLocation().x == x && (int) f.getLocation().y == y) break;
+            }
+        }
+        if (f == null) return;
+        if ((int) f.getLocation().x == x && (int) f.getLocation().y == y) hazards.remove(f);
+    }
+
+    /**
      * Sets the texture of hazards.
      */
     public void gatherAssets(AssetDirectory directory) {
         this.fireTexture = directory.getEntry("fire", Texture.class);
         this.droneTexture = directory.getEntry("drone", Texture.class);
+    }
+
+    /**
+     * Draw each hazard.
+     */
+    public void draw (GameCanvas canvas) {
+        for (Hazard h : hazards) {
+            switch (h.getType()) {
+                case FIRE:
+                    Fire f = (Fire) h;
+                    f.draw(canvas, fireTexture, f.getLocation().x, f.getLocation().y);
+                    break;
+                case DRONE:
+                    Drone d = (Drone) h;
+                    d.draw(canvas, droneTexture, d.getLocation().x, d.getLocation().y);
+                default:
+                    return;
+            }
+
+        }
     }
 
 }
