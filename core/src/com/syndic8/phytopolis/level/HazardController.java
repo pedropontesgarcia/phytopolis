@@ -217,20 +217,22 @@ public class HazardController {
         int y = (int) node.y;
         if (y-1 < 0) return;
         // check bottom left
-        if (x-1 >= 0) {
+        if (plantController.inBounds(x-1, y-1)) {
             if (plantController.branchExists(x-1, y-1, PlantController.branchDirection.RIGHT)) {
                 addHazard(Model.ModelType.FIRE, x-1, y-1);
             }
         }
         // check bottom right
-        if (x+1 <= width) {
+        if (plantController.inBounds(x+1, y-1)) {
             if (plantController.branchExists(x+1, y-1, PlantController.branchDirection.LEFT)) {
                 addHazard(Model.ModelType.FIRE, x+1, y-1);
             }
         }
         // check bottom middle
-        if (plantController.branchExists(x, y-1, PlantController.branchDirection.RIGHT)) {
-            addHazard(Model.ModelType.FIRE, x, y-1);
+        if (plantController.inBounds(x, y-1)) {
+            if (plantController.branchExists(x, y-1, PlantController.branchDirection.RIGHT)) {
+                addHazard(Model.ModelType.FIRE, x, y-1);
+            }
         }
     }
 

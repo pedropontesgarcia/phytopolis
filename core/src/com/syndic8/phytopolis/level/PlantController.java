@@ -163,13 +163,15 @@ public class PlantController {
      * @param yArg y index of the node to be accessed
      */
     public void destroyAll(int xArg, int yArg, WorldController wldc) {
-        PlantNode nodeToDestroy = plantGrid[xArg][yArg];
-        nodeToDestroy.unmakeLeaf(wldc);
-        nodeToDestroy.unmakeBranch(branchDirection.LEFT);
-        nodeToDestroy.unmakeBranch(branchDirection.MIDDLE);
-        nodeToDestroy.unmakeBranch(branchDirection.RIGHT);
-        plantCoyoteTimeRemaining = plantCoyoteTime;
-        destructionQueue.addLast(new int[]{xArg, yArg});
+        try {
+            PlantNode nodeToDestroy = plantGrid[xArg][yArg];
+            nodeToDestroy.unmakeLeaf(wldc);
+            nodeToDestroy.unmakeBranch(branchDirection.LEFT);
+            nodeToDestroy.unmakeBranch(branchDirection.MIDDLE);
+            nodeToDestroy.unmakeBranch(branchDirection.RIGHT);
+            plantCoyoteTimeRemaining = plantCoyoteTime;
+            destructionQueue.addLast(new int[]{xArg, yArg});
+        } catch (Exception ignore) {}
     }
 
     /**
@@ -266,6 +268,10 @@ public class PlantController {
      */
     public int getHeight() {
         return height;
+    }
+
+    public boolean inBounds(int x, int y) {
+        return x >= 0 && x < width && y >= 0 && y < height;
     }
 
     /**
