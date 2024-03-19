@@ -355,6 +355,19 @@ public class PlantController {
                            n.y / worldToPixelConversionRatio);
     }
 
+    /**
+     * Converts grid indices to screen coordinates.
+     *
+     * @param xIndex The x index in the grid.
+     * @param yIndex The y index in the grid.
+     * @return A Vector2 object representing the screen coordinates.
+     */
+    public Vector2 indexToScreenCoord(int xIndex, int yIndex) {
+        float screenX = xOrigin + xIndex * xSpacing;
+        float screenY = yOrigin + yIndex * gridSpacing;
+        return new Vector2(screenX, screenY);
+    }
+
     //TODO: Update with new branch type
 
     /**
