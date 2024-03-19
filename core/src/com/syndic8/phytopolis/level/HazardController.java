@@ -66,15 +66,7 @@ public class HazardController {
      * @param plantController The PlantController instance associated with this HazardController.
      */
     public HazardController(PlantController plantController) {
-        this.fireFrequency = 300; // 1/300 chance to spawn fire at each update
-        this.droneFrequency = 300;
-        this.plantController = plantController;
-        this.burnTime = 100;
-        this.explodeTime = 100;
-
-        hazards = new ArrayList<>();
-        height = plantController.getHeight();
-        width = plantController.getWidth();
+        this(plantController, 300, 300, 100, 100);
     }
 
     /**
@@ -110,14 +102,18 @@ public class HazardController {
         if (hazardHeight == -1) return;
         int hazardWidth = generateHazardWidth(hazardHeight);
         if (hazardWidth == -1) return;
+        addHazard(type, width, height);
+    }
+
+    public void addHazard(Model.ModelType type, int width, int height) {
         Hazard hazard;
         switch (type) {
             case FIRE:
-                hazard = new Fire(new Vector2(hazardWidth, hazardHeight), burnTime);
+                hazard = new Fire(new Vector2(width, height), burnTime);
                 hazard.setTexture(fireTexture);
                 break;
             case DRONE:
-                hazard = new Drone(new Vector2(hazardWidth, hazardHeight), explodeTime);
+                hazard = new Drone(new Vector2(width, height), explodeTime);
                 hazard.setTexture(droneTexture);
                 break;
             default:
@@ -177,35 +173,40 @@ public class HazardController {
     public void updateHazards(WorldController wldc) {
         generateHazard(Model.ModelType.FIRE);
         generateHazard(Model.ModelType.DRONE);
-        if (hazards.isEmpty()) return;
-        Hazard h = hazards.get(0);
-        System.out.println(hazards);
-        switch (h.getType()) {
-            case FIRE:
-                Fire f = (Fire) h;
-                int time = f.getDuration();
-                // spread fire if the time is right, otherwise decrement timer
-                if (time == 1) {
-                    hazards.remove(f);
-                    f.markRemoved(true);
-                    plantController.destroyAll((int) f.getLocation().x, (int) f.getLocation().y, wldc);
-                    spreadFire(f.getLocation());
-                }
-                f.setDuration(time - 1);
-                break;
-            case DRONE:
-                // destroy plant at location
-                Drone d = (Drone) h;
-                int time2 = d.getTimer();
-                if (time2 == 1) {
-                    hazards.remove(d);
-                    d.markRemoved(true);
-                    plantController.destroyAll((int) d.getLocation().x, (int) d.getLocation().y, wldc);
-                }
-                d.setTimer(time2 - 1);
-            default:
-                return;
+        int i = 0;
+        while (i < hazards.size()) {
+            Hazard h = hazards.get(i);
+            switch (h.getType()) {
+                case FIRE:
+                    Fire f = (Fire) h;
+                    int time = f.getDuration();
+                    // spread fire if the time is right, otherwise decrement timer
+                    if (time == 1) {
+                        i--;
+                        hazards.remove(f);
+                        f.markRemoved(true);
+                        plantController.destroyAll((int) f.getLocation().x, (int) f.getLocation().y, wldc);
+                        spreadFire(f.getLocation());
+                    }
+                    f.setDuration(time - 1);
+                    break;
+                case DRONE:
+                    // destroy plant at location
+                    Drone d = (Drone) h;
+                    int time2 = d.getTimer();
+                    if (time2 == 1) {
+                        i--;
+                        hazards.remove(d);
+                        d.markRemoved(true);
+                        plantController.destroyAll((int) d.getLocation().x, (int) d.getLocation().y, wldc);
+                    }
+                    d.setTimer(time2 - 1);
+                default:
+                    return;
+            }
+            i++;
         }
+
     }
 
     /**
@@ -218,18 +219,18 @@ public class HazardController {
         // check bottom left
         if (x-1 >= 0) {
             if (plantController.branchExists(x-1, y-1, PlantController.branchDirection.RIGHT)) {
-                hazards.add(new Fire(new Vector2(x-1, y-1), burnTime));
+                addHazard(Model.ModelType.FIRE, x-1, y-1);
             }
         }
         // check bottom right
         if (x+1 <= width) {
             if (plantController.branchExists(x+1, y-1, PlantController.branchDirection.LEFT)) {
-                hazards.add(new Fire(new Vector2(x+1, y-1), burnTime));
+                addHazard(Model.ModelType.FIRE, x+1, y-1);
             }
         }
         // check bottom middle
         if (plantController.branchExists(x, y-1, PlantController.branchDirection.RIGHT)) {
-            hazards.add(new Fire(new Vector2(x, y-1), burnTime));
+            addHazard(Model.ModelType.FIRE, x, y-1);
         }
     }
 
@@ -267,11 +268,14 @@ public class HazardController {
             switch (h.getType()) {
                 case FIRE:
                     Fire f = (Fire) h;
-                    f.draw(canvas, f.getLocation().x, f.getLocation().y);
+                    Vector2 worldCoords = plantController.indexToScreenCoord((int) f.getLocation().x, (int) f.getLocation().y);
+                    f.draw(canvas, worldCoords.x, worldCoords.y);
                     break;
                 case DRONE:
                     Drone d = (Drone) h;
-                    d.draw(canvas, d.getLocation().x, d.getLocation().y);
+                    Vector2 worldCoords2 = plantController.indexToScreenCoord((int) d.getLocation().x, (int) d.getLocation().y);
+                    d.draw(canvas, worldCoords2.x, worldCoords2.y);
+                    break;
                 default:
                     return;
             }

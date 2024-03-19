@@ -91,13 +91,4 @@ public class Drone extends Hazard {
     public void setTimer(int time) {
         timer = time;
     }
-
-    /**
-     * Renders the drone on the provided GameCanvas.
-     *
-     * @param canvas The GameCanvas on which to draw the drone.
-     */
-    public void draw(GameCanvas canvas, float x, float y) {
-        canvas.draw(texture, Color.RED, origin.x, origin.y, x, y, 0f, .1f, .1f);
-    }
 }
