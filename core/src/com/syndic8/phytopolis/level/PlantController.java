@@ -178,13 +178,13 @@ public class PlantController {
      * should be called every frame
      */
     public void propagateDestruction() {
-        if (plantCoyoteTimeRemaining == 0) {
+        if (plantCoyoteTimeRemaining == 0 && !destructionQueue.isEmpty()) {
             int[] currentNode = destructionQueue.removeFirst();
             int xIndex = currentNode[0];
             int yIndex = currentNode[1] + 1;
             for (int i = -1; i < 2; i++) {
                 if (yIndex < height && xIndex >= 0 && xIndex < width &&
-                        !canGrowAt(xIndex + i, yIndex)) {
+                        !canGrowAt(xIndex + i, yIndex) && !plantGrid[xIndex + i][yIndex].isEmpty()) {
                     destroyAll(xIndex + i, yIndex);
                     destructionQueue.addLast(new int[]{xIndex + i, yIndex});
                 }
