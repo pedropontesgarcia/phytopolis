@@ -5,7 +5,6 @@ import com.badlogic.gdx.Input;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Array;
-import com.syndic8.phytopolis.util.Controllers;
 import com.syndic8.phytopolis.util.XBoxController;
 
 /**
@@ -115,9 +114,9 @@ public class InputController {
      */
     public InputController() {
         // If we have a game-pad for id, then use it.
-        Array<XBoxController> controllers = Controllers.get()
-                .getXBoxControllers();
-        //Array<XBoxController> controllers = new Array<>();
+        //        Array<XBoxController> controllers = Controllers.get()
+        //                .getXBoxControllers();
+        Array<XBoxController> controllers = new Array<>();
         if (controllers.size > 0) {
             xbox = controllers.get(0);
         } else {

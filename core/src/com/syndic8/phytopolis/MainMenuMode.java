@@ -267,8 +267,8 @@ public class MainMenuMode implements Screen {
                         canvas.getWidth() / 2.0f,
                         canvas.getHeight() / 4.0f,
                         0,
-                        0.0002f * scale,
-                        0.0002f * scale);
+                        0.0001f * scale,
+                        0.0001f * scale);
         }
         canvas.end();
     }
