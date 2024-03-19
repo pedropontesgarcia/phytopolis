@@ -47,6 +47,7 @@ public class GameplayMode extends WorldController implements ContactListener {
     private final float distance = 120f;
     private final PlantController plantController;
     private final HazardController hazardController;
+    private Player player;
     private final long fireId = -1;
     private final long plopId = -1;
     private final long jumpId = -1;
@@ -125,7 +126,14 @@ public class GameplayMode extends WorldController implements ContactListener {
         setFailure(false);
         world.setContactListener(this);
         cameraVector = new Vector2();
-        sensorFixtures = new ObjectSet<Fixture>();plantController = new PlantController(13, 13, 1.4f, 1, 1, world, scale);
+        sensorFixtures = new ObjectSet<Fixture>();
+        plantController = new PlantController(13,
+                                              13,
+                                              1.4f,
+                                              1.5f,
+                                              1,
+                                              world,
+                                              scale);
         hazardController = new HazardController(plantController, 20, 300, 10);
 
         background = null;
@@ -149,6 +157,7 @@ public class GameplayMode extends WorldController implements ContactListener {
         background.setRegion(0, 0, 1920, 1080);
         super.setBackground(background.getTexture());
         plantController.gatherAssets(directory);
+        hazardController.gatherAssets(directory);
 
         //jumpSound = directory.getEntry("platform:jump", Sound.class);
         //fireSound = directory.getEntry("platform:pew", Sound.class);
@@ -160,6 +169,13 @@ public class GameplayMode extends WorldController implements ContactListener {
                 "gameplay:branch",
                 Texture.class));
         super.gatherAssets(directory);
+    }
+
+    /**
+     *
+     */
+    private void setPlayer(Player player) {
+        this.player = player;
     }
 
     /**
@@ -236,6 +252,7 @@ public class GameplayMode extends WorldController implements ContactListener {
         avatar.setTexture(avatarTexture);
         avatar.setName("dude");
         addObject(avatar);
+        setPlayer(avatar);
 
         originalCollisionProperties = new HashMap<>();
 
@@ -298,7 +315,7 @@ public class GameplayMode extends WorldController implements ContactListener {
                                        avatarY,
                                        PlantController.branchDirection.LEFT,
                                        PlantController.branchType.NORMAL);
-        } else return false;
+        }
         return false;
     }
 
@@ -317,7 +334,7 @@ public class GameplayMode extends WorldController implements ContactListener {
         avatar.setMovement(InputController.getInstance().getHorizontal() *
                                    avatar.getForce());
         avatar.setJumping(InputController.getInstance().didPrimary());
-        avatar.setShooting(InputController.getInstance().didSecondary());
+        //avatar.setShooting(InputController.getInstance().didSecondary());
         processPlantGrowth();
 
         avatar.applyForce();
@@ -503,6 +520,7 @@ public class GameplayMode extends WorldController implements ContactListener {
         super.draw(dt);
         canvas.begin();
         plantController.draw(canvas);
+        player.draw(canvas);
         canvas.end();
     }
 

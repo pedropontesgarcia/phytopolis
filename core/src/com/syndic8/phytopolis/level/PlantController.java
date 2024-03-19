@@ -1,6 +1,5 @@
 package com.syndic8.phytopolis.level;
 
-import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Vector2;
@@ -47,6 +46,15 @@ public class PlantController {
     private final World world;
     private final Vector2 scale;
     /**
+     * conversion ratio from world units to pixels
+     */
+    private final float worldToPixelConversionRatio = 120;
+    /**
+     * how many frames between propagations of destruction
+     */
+    private final int plantCoyoteTime = 30;
+    private final Queue<int[]> destructionQueue = new Queue<>();
+    /**
      * node texture
      */
     protected Texture nodeTexture;
@@ -59,18 +67,9 @@ public class PlantController {
      */
     protected TextureRegion leafTexture;
     /**
-     * conversion ratio from world units to pixels
-     */
-    private final float worldToPixelConversionRatio = 120;
-    /**
-     * how many frames between propagations of destruction
-     */
-    private final int plantCoyoteTime = 30;
-    /**
      * how many more frames until the next propagation of destruction
      */
     private int plantCoyoteTimeRemaining = 0;
-    private Queue<int[]> destructionQueue = new Queue<>();
 
     /**
      * Initialize a PlantController with specified height and width
@@ -96,18 +95,19 @@ public class PlantController {
         this.width = width;
         this.height = height;
         this.gridSpacing = gridSpacing * worldToPixelConversionRatio;
-        this.xSpacing = (float) (Math.sqrt((this.gridSpacing * this.gridSpacing) -
-                                                  ((this.gridSpacing / 2f) *
-                                                          (this.gridSpacing / 2f))));
+        this.xSpacing = (float) (Math.sqrt(
+                (this.gridSpacing * this.gridSpacing) -
+                        ((this.gridSpacing / 2f) * (this.gridSpacing / 2f))));
         this.scale = scale;
         for (int x = 0; x < width; x++) {
             for (int y = 0; y < height; y++) {
                 float yOffset = 0;
                 //set the yOffset
                 if (x % 2 == 1) yOffset = this.gridSpacing / 2f;
-                plantGrid[x][y] = new PlantNode((x * this.xSpacing) + this.xOrigin,
-                                                this.yOrigin + yOffset + (y * this.gridSpacing),
-                                                    this.worldToPixelConversionRatio);
+                plantGrid[x][y] = new PlantNode(
+                        (x * this.xSpacing) + this.xOrigin,
+                        this.yOrigin + yOffset + (y * this.gridSpacing),
+                        this.worldToPixelConversionRatio);
             }
         }
     }
@@ -173,25 +173,27 @@ public class PlantController {
      * method to destroy branches no longer attatched to the plant,
      * should be called every frame
      */
-    public void propagateDestruction(){
-        if (plantCoyoteTimeRemaining == 0){
+    public void propagateDestruction() {
+        if (plantCoyoteTimeRemaining == 0) {
             int[] currentNode = destructionQueue.removeFirst();
             int xIndex = currentNode[0];
             int yIndex = currentNode[1] + 1;
             for (int i = -1; i < 2; i++) {
-                if(yIndex < height && xIndex >= 0 && xIndex < width && !canGrowAt(xIndex + i, yIndex)){
+                if (yIndex < height && xIndex >= 0 && xIndex < width &&
+                        !canGrowAt(xIndex + i, yIndex)) {
                     destroyAll(xIndex + i, yIndex);
                     destructionQueue.addLast(new int[]{xIndex + i, yIndex});
                 }
             }
             plantCoyoteTimeRemaining = plantCoyoteTime;
-        }else{
+        } else {
             plantCoyoteTimeRemaining--;
         }
     }
 
     /**
      * Returns whether or not a node can be grown at
+     *
      * @param xArg x coordinate of the node in world units
      * @param yArg y coordinate of the node in world units
      * @return whether or not a node can be grown at
@@ -228,17 +230,18 @@ public class PlantController {
         try {
             for (PlantNode[] n : plantGrid) {
                 for (PlantNode node : n) {
-                    canvas.draw(nodeTexture,
-                                Color.WHITE,
-                                nodeTexture.getWidth() / 2f,
-                                nodeTexture.getHeight() / 2f,
-                                node.getX(),
-                                node.getY(),
-                                0.0f,
-                                1.0f,
-                                1.0f);
+                    //                    canvas.draw(nodeTexture,
+                    //                                Color.WHITE,
+                    //                                nodeTexture.getWidth() / 2f,
+                    //                                nodeTexture.getHeight() / 2f,
+                    //                                node.getX(),
+                    //                                node.getY(),
+                    //                                0.0f,
+                    //                                1.0f,
+                    //                                1.0f);
                     try {
                         node.drawBranches(canvas);
+                        node.drawLeaf(canvas);
                     } catch (Exception ignore) {
                     }
                 }
@@ -267,7 +270,8 @@ public class PlantController {
     public void gatherAssets(AssetDirectory directory) {
 
         this.nodeTexture = directory.getEntry("gameplay:leaf", Texture.class);
-        this.branchTexture = directory.getEntry("gameplay:branch", Texture.class);
+        this.branchTexture = directory.getEntry("gameplay:branch",
+                                                Texture.class);
     }
 
     /**
@@ -370,6 +374,10 @@ public class PlantController {
          */
         private final int leafHeight = 1;
         /**
+         * conversion ration for converting between world coords and pixels
+         */
+        private final float worldToPixelConversionRatio;
+        /**
          * whether there is a branch in the leftmost slot of this node
          */
         private Branch left;
@@ -389,10 +397,6 @@ public class PlantController {
          * if a leaf exists at this node
          */
         private boolean leafExists = false;
-        /**
-         * conversion ration for converting between world coords and pixels
-         */
-        private float worldToPixelConversionRatio;
 
         /**
          * initialize a new PlantNode object
@@ -421,16 +425,20 @@ public class PlantController {
                                branchType type,
                                Texture texture,
                                World world) {
+            float pi = (float) Math.PI;
             switch (direction) {
                 case LEFT:
-                    left = new Branch(x, y, -60);
+                    left = new Branch(x, y, pi / 3);
                     left.setTexture(branchTexture);
+                    break;
                 case MIDDLE:
                     middle = new Branch(x, y, 0);
                     middle.setTexture(branchTexture);
+                    break;
                 case RIGHT:
-                    right = new Branch(x, y, 60);
+                    right = new Branch(x, y, -pi / 3);
                     right.setTexture(branchTexture);
+                    break;
             }
 
         }
@@ -450,6 +458,7 @@ public class PlantController {
         }
 
         //TODO: less hacky unmakeBranch implementation
+
         /**
          * destroy target branch
          */
@@ -517,6 +526,12 @@ public class PlantController {
             if (left != null) left.draw(canvas);
             if (right != null) right.draw(canvas);
             if (middle != null) middle.draw(canvas);
+        }
+
+        public void drawLeaf(GameCanvas canvas) {
+            if (leaf != null) {
+                leaf.draw(canvas);
+            }
         }
 
         /**
