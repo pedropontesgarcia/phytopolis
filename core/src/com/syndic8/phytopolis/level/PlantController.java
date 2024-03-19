@@ -5,6 +5,7 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.World;
+import com.badlogic.gdx.utils.Queue;
 import com.syndic8.phytopolis.GameCanvas;
 import com.syndic8.phytopolis.assets.AssetDirectory;
 import com.syndic8.phytopolis.level.models.Branch;
@@ -57,16 +58,29 @@ public class PlantController {
      * leaf texture
      */
     protected TextureRegion leafTexture;
+    /**
+     * conversion ratio from world units to pixels
+     */
+    private final int worldToPixelConversionRatio = 120;
+    /**
+     * how many frames between propagations of destruction
+     */
+    private final int plantCoyoteTime = 30;
+    /**
+     * how many more frames until the next propagation of destruction
+     */
+    private int plantCoyoteTimeRemaining = 0;
+    private Queue<int[]> destructionQueue = new Queue<>();
 
     /**
      * Initialize a PlantController with specified height and width
      *
-     * @param height      the height of the plant grid
-     * @param width       the width of the plant grid
+     * @param height      the height of the plant grid in world units
+     * @param width       the width of the plant grid in world units
      * @param gridSpacing the spacing between nodes of the plant
      * @param world       world to assign physics objects to
-     * @param xOrigin     x origin of the plant
-     * @param yOrigin     y origin of the plant
+     * @param xOrigin     x origin of the plant in world units
+     * @param yOrigin     y origin of the plant in world units
      */
     public PlantController(int width,
                            int height,
@@ -77,10 +91,10 @@ public class PlantController {
                            Vector2 scale) {
         plantGrid = new PlantNode[width][height];
         this.world = world;
-        this.xOrigin = xOrigin;
-        this.yOrigin = yOrigin;
-        this.width = width;
-        this.height = height;
+        this.xOrigin = xOrigin * worldToPixelConversionRatio;
+        this.yOrigin = yOrigin * worldToPixelConversionRatio;
+        this.width = width * worldToPixelConversionRatio;
+        this.height = height * worldToPixelConversionRatio;
         this.gridSpacing = gridSpacing;
         this.xSpacing = (float) Math.sqrt((gridSpacing * gridSpacing) -
                                                   ((gridSpacing / 2f) *
@@ -132,14 +146,61 @@ public class PlantController {
      * @param direction the direction in which to destroy the branch
      */
     public void destroyBranch(int x, int y, branchDirection direction) {
-        if (plantGrid[x][y].getBranch(direction) != null)
+        if (plantGrid[x][y].hasBranchInDirection(direction)) {
             plantGrid[x][y].unmakeBranch(direction);
+            plantCoyoteTimeRemaining = plantCoyoteTime;
+            destructionQueue.addLast(new int[]{x, y});
+        }
     }
 
+    /**
+     * destroys all branches and leaves attatched to specified node
+     *
+     * @param xArg x index of the node to be accessed
+     * @param yArg y index of the node to be accessed
+     */
+    public void destroyAll(int xArg, int yArg) {
+        PlantNode nodeToDestroy = plantGrid[xArg][yArg];
+        nodeToDestroy.unmakeLeaf();
+        nodeToDestroy.unmakeBranch(branchDirection.LEFT);
+        nodeToDestroy.unmakeBranch(branchDirection.MIDDLE);
+        nodeToDestroy.unmakeBranch(branchDirection.RIGHT);
+        plantCoyoteTimeRemaining = plantCoyoteTime;
+        destructionQueue.addLast(new int[]{xArg, yArg});
+    }
+
+    /**
+     * method to destroy branches no longer attatched to the plant,
+     * should be called every frame
+     */
+    public void propagateDestruction(){
+        if (plantCoyoteTimeRemaining == 0){
+            int[] currentNode = destructionQueue.removeFirst();
+            int xIndex = currentNode[0];
+            int yIndex = currentNode[1] + 1;
+            for (int i = -1; i < 2; i++) {
+                if(yIndex < height && xIndex >= 0 && xIndex < width && !canGrowAt(xIndex + i, yIndex)){
+                    destroyAll(xIndex + i, yIndex);
+                    destructionQueue.addLast(new int[]{xIndex + i, yIndex});
+                }
+            }
+            plantCoyoteTimeRemaining = plantCoyoteTime;
+        }else{
+            plantCoyoteTimeRemaining--;
+        }
+    }
+
+    /**
+     * Returns whether or not a node can be grown at
+     * @param xArg x coordinate of the node in world units
+     * @param yArg y coordinate of the node in world units
+     * @return whether or not a node can be grown at
+     */
     public boolean canGrowAt(float xArg, float yArg) {
-        int xIndex = xCoordToIndex(xArg * 10);
-        int yIndex = yCoordToIndex(yArg * 10);
+        int xIndex = xCoordToIndex(xArg * 10 * worldToPixelConversionRatio);
+        int yIndex = yCoordToIndex(yArg * 10 * worldToPixelConversionRatio);
         boolean lowerNode = xIndex % 2 == 0;
+        //If this is a node at the base of the plant, return true
         if (yIndex == 0 && lowerNode) return true;
         int yOff = 0;
         if (lowerNode) yOff = 1;
@@ -154,9 +215,7 @@ public class PlantController {
         boolean downRight = false;
         if (xIndex < width - 1) downRight = plantGrid[xIndex + 1][yIndex -
                 yOff].hasBranchInDirection(branchDirection.LEFT);
-        System.out.println(
-                "Below: " + below + " downLeft: " + downLeft + " downRight: " +
-                        downRight);
+        //System.out.println("Below: " + below + " downLeft: " + downLeft + " downRight: " + downRight);
         return below || downLeft || downRight;
     }
 
@@ -234,20 +293,6 @@ public class PlantController {
      */
     public boolean nodeIsEmpty(int xArg, int yArg) {
         return plantGrid[xArg][yArg].isEmpty();
-    }
-
-    /**
-     * destroys add branches and leaves attatched to specified node
-     *
-     * @param xArg x coord of the node to be accessed
-     * @param yArg y coord of the node to be accessed
-     */
-    public void destroyAll(int xArg, int yArg) {
-        PlantNode nodeToDestroy = plantGrid[xArg][yArg];
-        nodeToDestroy.unmakeLeaf();
-        nodeToDestroy.unmakeBranch(branchDirection.LEFT);
-        nodeToDestroy.unmakeBranch(branchDirection.MIDDLE);
-        nodeToDestroy.unmakeBranch(branchDirection.RIGHT);
     }
 
     /**
