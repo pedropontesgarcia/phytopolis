@@ -143,6 +143,7 @@ public class GameplayMode extends WorldController implements ContactListener {
                                                 200);
 
         background = null;
+        scale = new Vector2(120, 120);
 
     }
 
@@ -329,7 +330,7 @@ public class GameplayMode extends WorldController implements ContactListener {
         } else if (InputController.getInstance().didMousePress()) {
             plantController.growLeaf(InputController.getInstance().getGrowX(),
                                      InputController.getInstance().getGrowY() +
-                                             avatar.getY() * 1080 / 9f - 30,
+                                             avatar.getY() * 1080 / 9f - 50,
                                      PlantController.leafType.NORMAL,
                                      this);
         }
