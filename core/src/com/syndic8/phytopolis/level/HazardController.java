@@ -174,34 +174,40 @@ public class HazardController {
     public void updateHazards() {
         generateHazard(Model.ModelType.FIRE);
         generateHazard(Model.ModelType.DRONE);
-        if (hazards.isEmpty()) return;
-        Hazard h = hazards.get(0);
-        switch (h.getType()) {
-            case FIRE:
-                Fire f = (Fire) h;
-                int time = f.getDuration();
-                // spread fire if the time is right, otherwise decrement timer
-                if (time == 1) {
-                    hazards.remove(f);
-                    f.markRemoved(true);
-                    plantController.destroyAll((int) f.getLocation().x, (int) f.getLocation().y);
-                    spreadFire(f.getLocation());
-                }
-                f.setDuration(time - 1);
-                break;
-            case DRONE:
-                // destroy plant at location
-                Drone d = (Drone) h;
-                int time2 = d.getTimer();
-                if (time2 == 1) {
-                    hazards.remove(d);
-                    d.markRemoved(true);
-                    plantController.destroyAll((int) d.getLocation().x, (int) d.getLocation().y);
-                }
-                d.setTimer(time2 - 1);
-            default:
-                return;
+        int i = 0;
+        while (i < hazards.size()) {
+            Hazard h = hazards.get(i);
+            switch (h.getType()) {
+                case FIRE:
+                    Fire f = (Fire) h;
+                    int time = f.getDuration();
+                    // spread fire if the time is right, otherwise decrement timer
+                    if (time == 1) {
+                        i--;
+                        hazards.remove(f);
+                        f.markRemoved(true);
+                        plantController.destroyAll((int) f.getLocation().x, (int) f.getLocation().y);
+                        spreadFire(f.getLocation());
+                    }
+                    f.setDuration(time - 1);
+                    break;
+                case DRONE:
+                    // destroy plant at location
+                    Drone d = (Drone) h;
+                    int time2 = d.getTimer();
+                    if (time2 == 1) {
+                        i--;
+                        hazards.remove(d);
+                        d.markRemoved(true);
+                        plantController.destroyAll((int) d.getLocation().x, (int) d.getLocation().y);
+                    }
+                    d.setTimer(time2 - 1);
+                default:
+                    return;
+            }
+            i++;
         }
+
     }
 
     /**
@@ -263,11 +269,7 @@ public class HazardController {
             switch (h.getType()) {
                 case FIRE:
                     Fire f = (Fire) h;
-                    System.out.println(f.getLocation().x);
-                    System.out.println(f.getLocation().y);
-
                     Vector2 worldCoords = plantController.indexToScreenCoord((int) f.getLocation().x, (int) f.getLocation().y);
-                    System.out.println(worldCoords);
                     f.draw(canvas, fireTexture, worldCoords.x, worldCoords.y);
                     break;
                 case DRONE:

@@ -136,7 +136,7 @@ public class GameplayMode extends WorldController implements ContactListener {
                                               1.1f,
                                               world,
                                               scale);
-        hazardController = new HazardController(plantController, 300, 300, 600, 200);
+        hazardController = new HazardController(plantController, 300, 300, 1000, 200);
 
         background = null;
 
