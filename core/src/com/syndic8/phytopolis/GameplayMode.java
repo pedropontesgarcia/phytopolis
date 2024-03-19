@@ -134,7 +134,7 @@ public class GameplayMode extends WorldController implements ContactListener {
                                               1,
                                               world,
                                               scale);
-        hazardController = new HazardController(plantController, 20, 300, 10);
+        hazardController = new HazardController(plantController, 30, 30, 300, 200);
 
         background = null;
     }
@@ -346,7 +346,8 @@ public class GameplayMode extends WorldController implements ContactListener {
         //handleDrop();
         cameraVector.set(8 * 1920 / 16.0f,
                          (avatar.getY() + 3.5f) * 1080 / 9.0f);
-
+        // generate hazards please
+        hazardController.updateHazards();
     }
 
     //    /**
@@ -521,6 +522,7 @@ public class GameplayMode extends WorldController implements ContactListener {
         canvas.begin();
         plantController.draw(canvas);
         player.draw(canvas);
+        hazardController.draw(canvas);
         canvas.end();
     }
 

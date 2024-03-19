@@ -1,6 +1,7 @@
 package com.syndic8.phytopolis.level.models;
 
 import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.math.Vector2;
 import com.syndic8.phytopolis.GameCanvas;
 
@@ -97,8 +98,8 @@ public class Fire extends Hazard {
      *
      * @param canvas The GameCanvas on which to draw the fire.
      */
-    public void draw(GameCanvas canvas) {
-        canvas.draw(texture, Color.RED, origin.x, origin.y, location.x, location.y, 0f, 1f, 1f);
+    public void draw(GameCanvas canvas, Texture tex, float x, float y) {
+        canvas.draw(tex, Color.RED, origin.x, origin.y, x, y, 0f, .1f, .1f);
     }
 
 }
