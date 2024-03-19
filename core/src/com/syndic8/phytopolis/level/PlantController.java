@@ -66,7 +66,7 @@ public class PlantController {
     /**
      * leaf texture
      */
-    protected TextureRegion leafTexture;
+    protected Texture leafTexture;
     /**
      * how many more frames until the next propagation of destruction
      */
@@ -273,9 +273,10 @@ public class PlantController {
      */
     public void gatherAssets(AssetDirectory directory) {
 
-        this.nodeTexture = directory.getEntry("gameplay:leaf", Texture.class);
+        this.nodeTexture = directory.getEntry("gameplay:node", Texture.class);
         this.branchTexture = directory.getEntry("gameplay:branch",
                                                 Texture.class);
+        this.leafTexture = directory.getEntry("gameplay:leaf", Texture.class);
     }
 
     /**
@@ -457,13 +458,14 @@ public class PlantController {
          * @param world   world to assign the leaf to
          */
         public void makeLeaf(leafType type,
-                             TextureRegion texture,
+                             Texture texture,
                              World world,
                              WorldController wldc) {
             leaf = new Leaf(x / worldToPixelConversionRatio,
                             y / worldToPixelConversionRatio,
                             leafWidth,
                             leafHeight);
+            leaf.setTexture(texture);
             leafExists = true;
             wldc.addObject(leaf);
         }
