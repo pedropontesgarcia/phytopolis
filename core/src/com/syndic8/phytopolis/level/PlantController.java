@@ -459,19 +459,21 @@ public class PlantController {
                                Texture texture,
                                World world) {
             float pi = (float) Math.PI;
-            switch (direction) {
-                case LEFT:
-                    left = new Branch(x, y, pi / 3);
-                    left.setTexture(branchTexture);
-                    break;
-                case MIDDLE:
-                    middle = new Branch(x, y, 0);
-                    middle.setTexture(branchTexture);
-                    break;
-                case RIGHT:
-                    right = new Branch(x, y, -pi / 3);
-                    right.setTexture(branchTexture);
-                    break;
+            if (branchTexture != null) {
+                switch (direction) {
+                    case LEFT:
+                        left = new Branch(x, y, pi / 3);
+                        left.setTexture(branchTexture);
+                        break;
+                    case MIDDLE:
+                        middle = new Branch(x, y, 0);
+                        middle.setTexture(branchTexture);
+                        break;
+                    case RIGHT:
+                        right = new Branch(x, y, -pi / 3);
+                        right.setTexture(branchTexture);
+                        break;
+                }
             }
 
         }
