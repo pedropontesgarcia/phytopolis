@@ -171,7 +171,8 @@ public class PlantController {
             nodeToDestroy.unmakeBranch(branchDirection.RIGHT);
             plantCoyoteTimeRemaining = plantCoyoteTime;
             destructionQueue.addLast(new int[]{xArg, yArg});
-        } catch (Exception ignore) {}
+        } catch (ArrayIndexOutOfBoundsException ign) {
+        }
     }
 
     /**
@@ -270,10 +271,6 @@ public class PlantController {
         return height;
     }
 
-    public boolean inBounds(int x, int y) {
-        return x >= 0 && x < width && y >= 0 && y < height;
-    }
-
     /**
      * sets the texture to use when drawing nodes
      */
@@ -294,7 +291,11 @@ public class PlantController {
      * @return boolean value of whether or not a branch exists here
      */
     public boolean branchExists(int xArg, int yArg, branchDirection direction) {
-        return plantGrid[xArg][yArg].hasBranchInDirection(direction);
+        try {
+            return plantGrid[xArg][yArg].hasBranchInDirection(direction);
+        } catch (ArrayIndexOutOfBoundsException ign) {
+            return false;
+        }
     }
 
     /**

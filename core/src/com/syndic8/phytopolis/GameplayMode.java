@@ -129,13 +129,7 @@ public class GameplayMode extends WorldController implements ContactListener {
         world.setContactListener(this);
         cameraVector = new Vector2();
         sensorFixtures = new ObjectSet<Fixture>();
-        plantController = new PlantController(13,
-                                              13,
-                                              1.4f,
-                                              1,
-                                              1.1f,
-                                              world,
-                                              scale);
+        plantController = new PlantController(13, 20, 1.4f, 1, 1, world, scale);
         hazardController = new HazardController(plantController,
                                                 3000,
                                                 3000,
@@ -143,6 +137,7 @@ public class GameplayMode extends WorldController implements ContactListener {
                                                 200);
 
         background = null;
+        scale = new Vector2(120, 120);
 
     }
 
@@ -329,7 +324,7 @@ public class GameplayMode extends WorldController implements ContactListener {
         } else if (InputController.getInstance().didMousePress()) {
             plantController.growLeaf(InputController.getInstance().getGrowX(),
                                      InputController.getInstance().getGrowY() +
-                                             avatar.getY() * 1080 / 9f - 30,
+                                             avatar.getY() * 1080 / 9f - 50,
                                      PlantController.leafType.NORMAL,
                                      this);
         }
