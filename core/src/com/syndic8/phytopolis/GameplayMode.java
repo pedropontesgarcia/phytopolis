@@ -126,7 +126,13 @@ public class GameplayMode extends WorldController implements ContactListener {
         world.setContactListener(this);
         cameraVector = new Vector2();
         sensorFixtures = new ObjectSet<Fixture>();
-        plantController = new PlantController(10, 13, 3, 1, 1, world, scale);
+        plantController = new PlantController(13,
+                                              13,
+                                              1.4f,
+                                              1,
+                                              0,
+                                              world,
+                                              scale);
         hazardController = new HazardController(plantController, 20, 300, 10);
 
         background = null;
