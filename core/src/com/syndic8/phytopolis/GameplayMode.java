@@ -316,10 +316,12 @@ public class GameplayMode extends WorldController implements ContactListener {
                                        PlantController.branchDirection.LEFT,
                                        PlantController.branchType.NORMAL);
 
-        }else if (InputController.getInstance().didMousePress()) {
-            plantController.growLeaf(InputController.getInstance().getGrowX() / 120f,
-                    InputController.getInstance().getGrowY() / 120f
-                    , PlantController.leafType.NORMAL);
+        } else if (InputController.getInstance().didMousePress()) {
+            plantController.growLeaf(
+                    InputController.getInstance().getGrowX() / 120f,
+                    InputController.getInstance().getGrowY() / 120f,
+                    PlantController.leafType.NORMAL,
+                    this);
             System.out.println("here");
             System.out.println(InputController.getInstance().getGrowY() / 120f);
             System.out.println(InputController.getInstance().getGrowX());

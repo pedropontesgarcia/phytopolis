@@ -365,7 +365,7 @@ public abstract class WorldController implements Screen {
      * <p>
      * param obj The object to add
      */
-    protected void addObject(Model obj) {
+    public void addObject(Model obj) {
         assert inBounds(obj) : "Object is not in bounds";
         objects.add(obj);
         if (obj instanceof GameObject) {

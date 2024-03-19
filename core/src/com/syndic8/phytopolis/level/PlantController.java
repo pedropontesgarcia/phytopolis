@@ -6,6 +6,7 @@ import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.World;
 import com.badlogic.gdx.utils.Queue;
 import com.syndic8.phytopolis.GameCanvas;
+import com.syndic8.phytopolis.WorldController;
 import com.syndic8.phytopolis.assets.AssetDirectory;
 import com.syndic8.phytopolis.level.models.Branch;
 import com.syndic8.phytopolis.level.models.Leaf;
@@ -132,10 +133,13 @@ public class PlantController {
                                              world);
     }
 
-    public void growLeaf(float x, float y, leafType type) {
+    public void growLeaf(float x,
+                         float y,
+                         leafType type,
+                         WorldController wldc) {
         int xIndex = xCoordToIndex(x * worldToPixelConversionRatio);
         int yIndex = yCoordToIndex(y * worldToPixelConversionRatio);
-        plantGrid[xIndex][yIndex].makeLeaf(type, leafTexture, world);
+        plantGrid[xIndex][yIndex].makeLeaf(type, leafTexture, world, wldc);
     }
 
     /**
@@ -319,19 +323,21 @@ public class PlantController {
 
     /**
      * Convert x world coord to an index in PlantController
+     *
      * @param xArg x world coordinate
      * @return the corresponding index
      */
-    public int xWorldCoordToIndex(float xArg){
+    public int xWorldCoordToIndex(float xArg) {
         return xCoordToIndex(xArg * worldToPixelConversionRatio);
     }
 
     /**
      * Convert y world coord to an index in PlantController
+     *
      * @param yArg y world coordinate
      * @return the corresponding index
      */
-    public int yWorldCoordToIndex(float yArg){
+    public int yWorldCoordToIndex(float yArg) {
         return yCoordToIndex(yArg * worldToPixelConversionRatio);
     }
 
@@ -450,12 +456,16 @@ public class PlantController {
          * @param texture texture of the leaf
          * @param world   world to assign the leaf to
          */
-        public void makeLeaf(
-                             leafType type,
+        public void makeLeaf(leafType type,
                              TextureRegion texture,
-                             World world) {
-            leaf = new Leaf(x/worldToPixelConversionRatio, y/worldToPixelConversionRatio, leafWidth, leafHeight);
+                             World world,
+                             WorldController wldc) {
+            leaf = new Leaf(x / worldToPixelConversionRatio,
+                            y / worldToPixelConversionRatio,
+                            leafWidth,
+                            leafHeight);
             leafExists = true;
+            wldc.addObject(leaf);
         }
 
         //TODO: less hacky unmakeBranch implementation
