@@ -183,7 +183,8 @@ public class PlantController {
             int yIndex = currentNode[1] + 1;
             for (int i = -1; i < 2; i++) {
                 if (yIndex < height && xIndex >= 0 && xIndex < width &&
-                        !canGrowAt(xIndex + i, yIndex) && !plantGrid[xIndex + i][yIndex].isEmpty()) {
+                        !canGrowAt(xIndex + i, yIndex) &&
+                        !plantGrid[xIndex + i][yIndex].isEmpty()) {
                     destroyAll(xIndex + i, yIndex);
                     destructionQueue.addLast(new int[]{xIndex + i, yIndex});
                 }
@@ -343,13 +344,15 @@ public class PlantController {
 
     /**
      * returns the world coordinates of the node at the specified index
+     *
      * @param xArg x index
      * @param yArg y index
      * @return vector of world coordinates
      */
-    public Vector2 indexToWorldCoord(int xArg, int yArg){
+    public Vector2 indexToWorldCoord(int xArg, int yArg) {
         PlantNode n = plantGrid[xArg][yArg];
-        return new Vector2(n.x / worldToPixelConversionRatio, n.y / worldToPixelConversionRatio);
+        return new Vector2(n.x / worldToPixelConversionRatio,
+                           n.y / worldToPixelConversionRatio);
     }
 
     //TODO: Update with new branch type
@@ -471,7 +474,9 @@ public class PlantController {
                              Texture texture,
                              World world,
                              WorldController wldc) {
-            if (!leafExists) {
+            if (!leafExists && (hasBranchInDirection(branchDirection.LEFT) ||
+                    hasBranchInDirection((branchDirection.MIDDLE)) ||
+                    hasBranchInDirection(branchDirection.RIGHT))) {
                 leaf = new Leaf(x / worldToPixelConversionRatio,
                                 y / worldToPixelConversionRatio,
                                 leafWidth,
