@@ -163,16 +163,13 @@ public class PlantController {
      * @param yArg y index of the node to be accessed
      */
     public void destroyAll(int xArg, int yArg, WorldController wldc) {
-        try {
-            PlantNode nodeToDestroy = plantGrid[xArg][yArg];
-            nodeToDestroy.unmakeLeaf(wldc);
-            nodeToDestroy.unmakeBranch(branchDirection.LEFT);
-            nodeToDestroy.unmakeBranch(branchDirection.MIDDLE);
-            nodeToDestroy.unmakeBranch(branchDirection.RIGHT);
-            plantCoyoteTimeRemaining = plantCoyoteTime;
-            destructionQueue.addLast(new int[]{xArg, yArg});
-        } catch (ArrayIndexOutOfBoundsException ign) {
-        }
+        PlantNode nodeToDestroy = plantGrid[xArg][yArg];
+        nodeToDestroy.unmakeLeaf(wldc);
+        nodeToDestroy.unmakeBranch(branchDirection.LEFT);
+        nodeToDestroy.unmakeBranch(branchDirection.MIDDLE);
+        nodeToDestroy.unmakeBranch(branchDirection.RIGHT);
+        plantCoyoteTimeRemaining = plantCoyoteTime;
+        destructionQueue.addLast(new int[]{xArg, yArg});
     }
 
     /**

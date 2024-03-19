@@ -102,24 +102,44 @@ public class HazardController {
         if (hazardHeight == -1) return;
         int hazardWidth = generateHazardWidth(hazardHeight);
         if (hazardWidth == -1) return;
-        addHazard(type, width, height);
-    }
-
-    public void addHazard(Model.ModelType type, int width, int height) {
-        Hazard hazard;
         switch (type) {
             case FIRE:
-                hazard = new Fire(new Vector2(width, height), burnTime);
-                hazard.setTexture(fireTexture);
+                Fire f = new Fire(new Vector2(hazardWidth, hazardHeight), burnTime);
+                f.setTexture(fireTexture);
+                hazards.add(f);
                 break;
             case DRONE:
-                hazard = new Drone(new Vector2(width, height), explodeTime);
-                hazard.setTexture(droneTexture);
+                Drone d = new Drone(new Vector2(hazardWidth, hazardHeight), explodeTime);
+                d.setTexture(droneTexture);
+                hazards.add(d);
                 break;
             default:
                 return;
         }
-        hazards.add(hazard);
+    }
+
+    /**
+     * Generates a hazard at random node at a given x and y.
+     *
+     * @param type The type of hazard.
+     * @param hazardWidth x coordinate
+     * @param hazardHeight y coordinate
+     */
+    public void generateHazard(Model.ModelType type, int hazardWidth, int hazardHeight) {
+        switch (type) {
+            case FIRE:
+                Fire f = new Fire(new Vector2(hazardWidth, hazardHeight), burnTime);
+                f.setTexture(fireTexture);
+                hazards.add(f);
+                break;
+            case DRONE:
+                Drone d = new Drone(new Vector2(hazardWidth, hazardHeight), explodeTime);
+                d.setTexture(droneTexture);
+                hazards.add(d);
+                break;
+            default:
+                return;
+        }
     }
 
     /**
@@ -219,19 +239,19 @@ public class HazardController {
         // check bottom left
         if (plantController.inBounds(x-1, y-1)) {
             if (plantController.branchExists(x-1, y-1, PlantController.branchDirection.RIGHT)) {
-                addHazard(Model.ModelType.FIRE, x-1, y-1);
+                generateHazard(Model.ModelType.FIRE, x-1, y-1);
             }
         }
         // check bottom right
         if (plantController.inBounds(x+1, y-1)) {
             if (plantController.branchExists(x+1, y-1, PlantController.branchDirection.LEFT)) {
-                addHazard(Model.ModelType.FIRE, x+1, y-1);
+                generateHazard(Model.ModelType.FIRE, x+1, y-1);
             }
         }
         // check bottom middle
         if (plantController.inBounds(x, y-1)) {
-            if (plantController.branchExists(x, y-1, PlantController.branchDirection.RIGHT)) {
-                addHazard(Model.ModelType.FIRE, x, y-1);
+            if (plantController.branchExists(x, y-1, PlantController.branchDirection.MIDDLE)) {
+                generateHazard(Model.ModelType.FIRE, x, y-1);
             }
         }
     }
