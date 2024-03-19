@@ -98,8 +98,8 @@ public class Fire extends Hazard {
      *
      * @param canvas The GameCanvas on which to draw the fire.
      */
-    public void draw(GameCanvas canvas, Texture tex, float x, float y) {
-        canvas.draw(tex, Color.RED, origin.x, origin.y, x, y, 0f, .1f, .1f);
+    public void draw(GameCanvas canvas, float x, float y) {
+        canvas.draw(texture, Color.RED, origin.x, origin.y, x, y, 0f, .1f, .1f);
     }
 
 }

@@ -114,9 +114,11 @@ public class HazardController {
         switch (type) {
             case FIRE:
                 hazard = new Fire(new Vector2(hazardWidth, hazardHeight), burnTime);
+                hazard.setTexture(fireTexture);
                 break;
             case DRONE:
                 hazard = new Drone(new Vector2(hazardWidth, hazardHeight), explodeTime);
+                hazard.setTexture(droneTexture);
                 break;
             default:
                 return;
@@ -177,6 +179,7 @@ public class HazardController {
         generateHazard(Model.ModelType.DRONE);
         if (hazards.isEmpty()) return;
         Hazard h = hazards.get(0);
+        System.out.println(hazards);
         switch (h.getType()) {
             case FIRE:
                 Fire f = (Fire) h;
@@ -264,18 +267,11 @@ public class HazardController {
             switch (h.getType()) {
                 case FIRE:
                     Fire f = (Fire) h;
-                    System.out.println(f.getLocation().x);
-                    System.out.println(f.getLocation().y);
-
-                    Vector2 worldCoords = plantController.indexToScreenCoord((int) f.getLocation().x, (int) f.getLocation().y);
-                    System.out.println(worldCoords);
-                    f.draw(canvas, fireTexture, worldCoords.x, worldCoords.y);
+                    f.draw(canvas, f.getLocation().x, f.getLocation().y);
                     break;
                 case DRONE:
                     Drone d = (Drone) h;
-                    Vector2 worldCoords2 = plantController.indexToScreenCoord((int) d.getLocation().x, (int) d.getLocation().y);
-                    d.draw(canvas, droneTexture, worldCoords2.x, worldCoords2.y);
-                    break;
+                    d.draw(canvas, d.getLocation().x, d.getLocation().y);
                 default:
                     return;
             }
