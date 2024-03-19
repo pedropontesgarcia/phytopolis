@@ -47,7 +47,6 @@ public class GameplayMode extends WorldController implements ContactListener {
     private final float distance = 120f;
     private final PlantController plantController;
     private final HazardController hazardController;
-    private Player player;
     private final long fireId = -1;
     private final long plopId = -1;
     private final long jumpId = -1;
@@ -61,6 +60,7 @@ public class GameplayMode extends WorldController implements ContactListener {
      * branch texture
      */
     protected TextureRegion branchTexture;
+    private Player player;
     private TextureRegion background;
     /**
      * Texture asset for character avatar
@@ -130,8 +130,8 @@ public class GameplayMode extends WorldController implements ContactListener {
         plantController = new PlantController(13,
                                               13,
                                               1.4f,
-                                              1.5f,
                                               1,
+                                              1.1f,
                                               world,
                                               scale);
         hazardController = new HazardController(plantController, 20, 300, 10);
