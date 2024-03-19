@@ -183,7 +183,8 @@ public class PlantController {
             int yIndex = currentNode[1] + 1;
             for (int i = -1; i < 2; i++) {
                 if (yIndex < height && xIndex + i >= 0 && xIndex + i < width &&
-                        !canGrowAt(xIndex + i, yIndex) && !plantGrid[xIndex + i][yIndex].isEmpty()) {
+                        !canGrowAt(xIndex + i, yIndex) &&
+                        !plantGrid[xIndex + i][yIndex].isEmpty()) {
                     destroyAll(xIndex + i, yIndex);
                     destructionQueue.addLast(new int[]{xIndex + i, yIndex});
                 }
@@ -477,11 +478,11 @@ public class PlantController {
                     hasBranchInDirection((branchDirection.MIDDLE)) ||
                     hasBranchInDirection(branchDirection.RIGHT))) {
                 leaf = new Leaf(x / worldToPixelConversionRatio,
-                                y / worldToPixelConversionRatio,
+                                y / worldToPixelConversionRatio + 1,
                                 leafWidth,
                                 leafHeight);
                 leaf.setTexture(texture);
-                leaf.setDrawScale(10, 10);
+                leaf.setDrawScale(120, 120);
                 leafExists = true;
                 wldc.addObject(leaf);
             }
