@@ -5,7 +5,8 @@
     "gameplay:barrier": "gameplay/barrier.png",
     "gameplay:branch": "gameplay/branch.png",
     "fire": "hazards/fire.png",
-    "drone": "hazards/drone.png"
+    "drone": "hazards/drone.png",
+    "gameplay:background": "gameplay/back.png"
   },
   "jsons": {
     "gameplay:constants": "gameplay/constants.json"

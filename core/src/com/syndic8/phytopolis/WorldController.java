@@ -19,6 +19,7 @@ package com.syndic8.phytopolis;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Rectangle;
@@ -124,6 +125,7 @@ public abstract class WorldController implements Screen {
      * The world scale
      */
     protected Vector2 scale;
+    private Texture background;
     /**
      * Listener that will update the player mode when we are done
      */
@@ -195,6 +197,7 @@ public abstract class WorldController implements Screen {
         debug = false;
         active = false;
         countdown = -1;
+        background = null;
     }
 
     /**
@@ -217,6 +220,10 @@ public abstract class WorldController implements Screen {
      */
     public void setDebug(boolean value) {
         debug = value;
+    }
+
+    public void setBackground(Texture bg) {
+        background = bg;
     }
 
     /**
@@ -300,9 +307,7 @@ public abstract class WorldController implements Screen {
     public void setCanvas(GameCanvas canvas) {
         this.canvas = canvas;
         this.scale.x = canvas.getWidth() / bounds.getWidth();
-        System.out.println(canvas.getWidth());
         this.scale.y = canvas.getHeight() / bounds.getHeight();
-        System.out.println(canvas.getHeight());
     }
 
     /**
@@ -508,6 +513,14 @@ public abstract class WorldController implements Screen {
         canvas.clear();
 
         canvas.begin();
+        if (background != null) {
+            canvas.draw(background,
+                        Color.WHITE,
+                        0,
+                        0,
+                        canvas.getWidth(),
+                        canvas.getHeight());
+        }
         for (Model obj : objects) {
             obj.draw(canvas);
         }
