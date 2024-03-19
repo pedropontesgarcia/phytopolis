@@ -232,7 +232,7 @@ public class GameplayMode extends WorldController implements ContactListener {
         dwidth = avatarTexture.getRegionWidth() / scale.x;
         dheight = avatarTexture.getRegionHeight() / scale.y;
         avatar = new Player(constants.get("dude"), dwidth, dheight);
-        avatar.setDrawScale(scale.scl(0.1f));
+        avatar.setDrawScale(scale);
         avatar.setTexture(avatarTexture);
         avatar.setName("dude");
         addObject(avatar);
