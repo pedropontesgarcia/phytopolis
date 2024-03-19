@@ -1,7 +1,6 @@
 package com.syndic8.phytopolis.level;
 
 import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.World;
 import com.badlogic.gdx.utils.Queue;
@@ -137,8 +136,8 @@ public class PlantController {
                          float y,
                          leafType type,
                          WorldController wldc) {
-        int xIndex = xCoordToIndex(x * worldToPixelConversionRatio);
-        int yIndex = yCoordToIndex(y * worldToPixelConversionRatio);
+        int xIndex = xCoordToIndex(x);
+        int yIndex = yCoordToIndex(y);
         plantGrid[xIndex][yIndex].makeLeaf(type, leafTexture, world, wldc);
     }
 
@@ -344,13 +343,15 @@ public class PlantController {
 
     /**
      * returns the world coordinates of the node at the specified index
+     *
      * @param xArg x index
      * @param yArg y index
      * @return vector of world coordinates
      */
-    public Vector2 indexToWorldCoord(int xArg, int yArg){
+    public Vector2 indexToWorldCoord(int xArg, int yArg) {
         PlantNode n = plantGrid[xArg][yArg];
-        return new Vector2(n.x / worldToPixelConversionRatio, n.y / worldToPixelConversionRatio);
+        return new Vector2(n.x / worldToPixelConversionRatio,
+                           n.y / worldToPixelConversionRatio);
     }
 
     //TODO: Update with new branch type
@@ -472,13 +473,18 @@ public class PlantController {
                              Texture texture,
                              World world,
                              WorldController wldc) {
-            leaf = new Leaf(x,
-                            y,
-                            leafWidth,
-                            leafHeight);
-            leaf.setTexture(texture);
-            leafExists = true;
-            wldc.addObject(leaf);
+            if (!leafExists && (hasBranchInDirection(branchDirection.LEFT) ||
+                    hasBranchInDirection((branchDirection.MIDDLE)) ||
+                    hasBranchInDirection(branchDirection.RIGHT))) {
+                leaf = new Leaf(x / worldToPixelConversionRatio,
+                                y / worldToPixelConversionRatio,
+                                leafWidth,
+                                leafHeight);
+                leaf.setTexture(texture);
+                leaf.setDrawScale(10, 10);
+                leafExists = true;
+                wldc.addObject(leaf);
+            }
         }
 
         //TODO: less hacky unmakeBranch implementation

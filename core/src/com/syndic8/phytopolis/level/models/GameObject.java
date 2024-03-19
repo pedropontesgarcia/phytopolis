@@ -19,19 +19,18 @@ package com.syndic8.phytopolis.level.models;
 
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
-import com.badlogic.gdx.math.*;
+import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.*;
 import com.badlogic.gdx.physics.box2d.BodyDef.BodyType;
 import com.syndic8.phytopolis.GameCanvas;
 
-
 /**
  * Base model class to support collisions.
- *
+ * <p>
  * Instances represents a body and/or a group of bodies.
  * There should be NO game controlling logic code in a physics objects,
  * that should reside in the Controllers.
- *
+ * <p>
  * This abstract class has no Body or Shape information and should never
  * be instantiated directly. Instead, you should instantiate either
  * SimplePhysicsObject or ComplexPhysicsObject.  This class only exists
@@ -40,39 +39,104 @@ import com.syndic8.phytopolis.GameCanvas;
  */
 public abstract class GameObject extends Model {
     /// Initialization structures to store body information
-    /** Stores the body information for this shape */
+    /**
+     * Stores the body information for this shape
+     */
     protected BodyDef bodyinfo;
-    /** Stores the fixture information for this shape */
+    /**
+     * Stores the fixture information for this shape
+     */
     protected FixtureDef fixture;
-    /** The mass data of this shape (which may override the fixture) */
+    /**
+     * The mass data of this shape (which may override the fixture)
+     */
     protected MassData massdata;
-    /** Whether or not to use the custom mass data */
+    /**
+     * Whether or not to use the custom mass data
+     */
     protected boolean masseffect;
-    /** A tag for debugging purposes */
-    private String nametag;
-    /** Drawing scale to convert physics units to pixels */
+    /**
+     * Drawing scale to convert physics units to pixels
+     */
     protected Vector2 drawScale;
-
-    /// Track garbage collection status
-    /** Whether the object has changed shape and needs a new fixture */
-    private boolean isDirty;
-
-    /** The physics body for Box2D. */
+    /**
+     * The physics body for Box2D.
+     */
     protected Body body;
 
-    /// Caching objects
-    /** A cache value for when the user wants to access the body position */
+    /// Track garbage collection status
+    /**
+     * A cache value for when the user wants to access the body position
+     */
     protected Vector2 positionCache = new Vector2();
-    /** A cache value for when the user wants to access the linear velocity */
+    /**
+     * A cache value for when the user wants to access the linear velocity
+     */
     protected Vector2 velocityCache = new Vector2();
-    /** A cache value for when the user wants to access the center of mass */
+
+    /// Caching objects
+    /**
+     * A cache value for when the user wants to access the center of mass
+     */
     protected Vector2 centroidCache = new Vector2();
-    /** A cache value for when the user wants to access the drawing scale */
+    /**
+     * A cache value for when the user wants to access the drawing scale
+     */
     protected Vector2 scaleCache = new Vector2();
+    /**
+     * A tag for debugging purposes
+     */
+    private String nametag;
+    /**
+     * Whether the object has changed shape and needs a new fixture
+     */
+    private boolean isDirty;
+
+    /**
+     * Create a new physics object at the origin.
+     */
+    protected GameObject() {
+        this(0, 0);
+    }
+
+    /**
+     * Create a new physics object
+     *
+     * @param x Initial x position in world coordinates
+     * @param y Initial y position in world coordinates
+     */
+    protected GameObject(float x, float y) {
+        // Object has yet to be deactivated
+        toRemove = false;
+
+        // Allocate the body information
+        bodyinfo = new BodyDef();
+        bodyinfo.awake = true;
+        bodyinfo.allowSleep = true;
+        bodyinfo.gravityScale = 1.0f;
+        bodyinfo.position.set(x, y);
+        bodyinfo.fixedRotation = false;
+        // Objects are physics objects unless otherwise noted
+        bodyinfo.type = BodyType.DynamicBody;
+
+        // Allocate the fixture information
+        // Default values are okay
+        fixture = new FixtureDef();
+
+        // Allocate the mass information, but turn it off
+        masseffect = false;
+        massdata = new MassData();
+
+        // Set the default drawing scale
+        drawScale = new Vector2(1, 1);
+
+        origin = new Vector2();
+        body = null;
+    }
 
     /**
      * Returns the body type for Box2D physics
-     *
+     * <p>
      * If you want to lock a body in place (e.g. a platform) set this value to STATIC.
      * KINEMATIC allows the object to move (and some limited collisions), but ignores
      * external forces (e.g. gravity). DYNAMIC makes this is a full-blown physics object.
@@ -85,7 +149,7 @@ public abstract class GameObject extends Model {
 
     /**
      * Returns the body type for Box2D physics
-     *
+     * <p>
      * If you want to lock a body in place (e.g. a platform) set this value to STATIC.
      * KINEMATIC allows the object to move (and some limited collisions), but ignores
      * external forces (e.g. gravity). DYNAMIC makes this is a full-blown physics object.
@@ -102,7 +166,7 @@ public abstract class GameObject extends Model {
 
     /**
      * Returns the current position for this physics body
-     *
+     * <p>
      * This method does NOT return a reference to the position vector. Changes to this
      * vector will not affect the body.  However, it returns the same vector each time
      * its is called, and so cannot be used as an allocator.
@@ -110,19 +174,21 @@ public abstract class GameObject extends Model {
      * @return the current position for this physics body
      */
     public Vector2 getPosition() {
-        return (body != null ? body.getPosition() : positionCache.set(bodyinfo.position));
+        return (body != null ?
+                body.getPosition() :
+                positionCache.set(bodyinfo.position));
     }
 
     /**
      * Sets the current position for this physics body
-     *
+     * <p>
      * This method does not keep a reference to the parameter.
      *
-     * @param value  the current position for this physics body
+     * @param value the current position for this physics body
      */
     public void setPosition(Vector2 value) {
         if (body != null) {
-            body.setTransform(value,body.getAngle());
+            body.setTransform(value, body.getAngle());
         } else {
             bodyinfo.position.set(value);
         }
@@ -131,13 +197,13 @@ public abstract class GameObject extends Model {
     /**
      * Sets the current position for this physics body
      *
-     * @param x  the x-coordinate for this physics body
-     * @param y  the y-coordinate for this physics body
+     * @param x the x-coordinate for this physics body
+     * @param y the y-coordinate for this physics body
      */
     public void setPosition(float x, float y) {
         if (body != null) {
-            positionCache.set(x,y);
-            body.setTransform(positionCache,body.getAngle());
+            positionCache.set(x, y);
+            body.setTransform(positionCache, body.getAngle());
         } else {
             bodyinfo.position.set(x, y);
         }
@@ -155,12 +221,12 @@ public abstract class GameObject extends Model {
     /**
      * Sets the x-coordinate for this physics body
      *
-     * @param value  the x-coordinate for this physics body
+     * @param value the x-coordinate for this physics body
      */
     public void setX(float value) {
         if (body != null) {
-            positionCache.set(value,body.getPosition().y);
-            body.setTransform(positionCache,body.getAngle());
+            positionCache.set(value, body.getPosition().y);
+            body.setTransform(positionCache, body.getAngle());
         } else {
             bodyinfo.position.x = value;
         }
@@ -178,12 +244,12 @@ public abstract class GameObject extends Model {
     /**
      * Sets the y-coordinate for this physics body
      *
-     * @param value  the y-coordinate for this physics body
+     * @param value the y-coordinate for this physics body
      */
     public void setY(float value) {
         if (body != null) {
-            positionCache.set(body.getPosition().x,value);
-            body.setTransform(positionCache,body.getAngle());
+            positionCache.set(body.getPosition().x, value);
+            body.setTransform(positionCache, body.getAngle());
         } else {
             bodyinfo.position.y = value;
         }
@@ -191,7 +257,7 @@ public abstract class GameObject extends Model {
 
     /**
      * Returns the angle of rotation for this body (about the center).
-     *
+     * <p>
      * The value returned is in radians
      *
      * @return the angle of rotation for this body
@@ -203,11 +269,11 @@ public abstract class GameObject extends Model {
     /**
      * Sets the angle of rotation for this body (about the center).
      *
-     * @param value  the angle of rotation for this body (in radians)
+     * @param value the angle of rotation for this body (in radians)
      */
     public void setAngle(float value) {
         if (body != null) {
-            body.setTransform(body.getPosition(),value);
+            body.setTransform(body.getPosition(), value);
         } else {
             bodyinfo.angle = value;
         }
@@ -215,7 +281,7 @@ public abstract class GameObject extends Model {
 
     /**
      * Returns the linear velocity for this physics body
-     *
+     * <p>
      * This method does NOT return a reference to the velocity vector. Changes to this
      * vector will not affect the body.  However, it returns the same vector each time
      * its is called, and so cannot be used as an allocator.
@@ -223,15 +289,17 @@ public abstract class GameObject extends Model {
      * @return the linear velocity for this physics body
      */
     public Vector2 getLinearVelocity() {
-        return (body != null ? body.getLinearVelocity() : velocityCache.set(bodyinfo.linearVelocity));
+        return (body != null ?
+                body.getLinearVelocity() :
+                velocityCache.set(bodyinfo.linearVelocity));
     }
 
     /**
      * Sets the linear velocity for this physics body
-     *
+     * <p>
      * This method does not keep a reference to the parameter.
      *
-     * @param value  the linear velocity for this physics body
+     * @param value the linear velocity for this physics body
      */
     public void setLinearVelocity(Vector2 value) {
         if (body != null) {
@@ -247,20 +315,22 @@ public abstract class GameObject extends Model {
      * @return the x-velocity for this physics body
      */
     public float getVX() {
-        return (body != null ? body.getLinearVelocity().x : bodyinfo.linearVelocity.x);
+        return (body != null ?
+                body.getLinearVelocity().x :
+                bodyinfo.linearVelocity.x);
     }
 
     /**
      * Sets the x-velocity for this physics body
      *
-     * @param value  the x-velocity for this physics body
+     * @param value the x-velocity for this physics body
      */
     public void setVX(float value) {
         if (body != null) {
-            velocityCache.set(value,body.getLinearVelocity().y);
+            velocityCache.set(value, body.getLinearVelocity().y);
             body.setLinearVelocity(velocityCache);
         } else {
-            bodyinfo.linearVelocity.x = value;;
+            bodyinfo.linearVelocity.x = value;
         }
     }
 
@@ -270,32 +340,36 @@ public abstract class GameObject extends Model {
      * @return the y-velocity for this physics body
      */
     public float getVY() {
-        return (body != null ? body.getLinearVelocity().y : bodyinfo.linearVelocity.y);
+        return (body != null ?
+                body.getLinearVelocity().y :
+                bodyinfo.linearVelocity.y);
     }
 
     /**
      * Sets the y-velocity for this physics body
      *
-     * @param value  the y-velocity for this physics body
+     * @param value the y-velocity for this physics body
      */
     public void setVY(float value) {
         if (body != null) {
-            velocityCache.set(body.getLinearVelocity().x,value);
+            velocityCache.set(body.getLinearVelocity().x, value);
             body.setLinearVelocity(velocityCache);
         } else {
-            bodyinfo.linearVelocity.y = value;;
+            bodyinfo.linearVelocity.y = value;
         }
     }
 
     /**
      * Returns the angular velocity for this physics body
-     *
+     * <p>
      * The rate of change is measured in radians per step
      *
      * @return the angular velocity for this physics body
      */
     public float getAngularVelocity() {
-        return (body != null ? body.getAngularVelocity() : bodyinfo.angularVelocity);
+        return (body != null ?
+                body.getAngularVelocity() :
+                bodyinfo.angularVelocity);
     }
 
     /**
@@ -313,7 +387,7 @@ public abstract class GameObject extends Model {
 
     /**
      * Returns true if the body is active
-     *
+     * <p>
      * An inactive body not participate in collision or dynamics. This state is similar
      * to sleeping except the body will not be woken by other bodies and the body's
      * fixtures will not be placed in the broad-phase. This means the body will not
@@ -327,13 +401,13 @@ public abstract class GameObject extends Model {
 
     /**
      * Sets whether the body is active
-     *
+     * <p>
      * An inactive body not participate in collision or dynamics. This state is similar
      * to sleeping except the body will not be woken by other bodies and the body's
      * fixtures will not be placed in the broad-phase. This means the body will not
      * participate in collisions, ray casts, etc.
      *
-     * @param value  whether the body is active
+     * @param value whether the body is active
      */
     public void setActive(boolean value) {
         if (body != null) {
@@ -345,7 +419,7 @@ public abstract class GameObject extends Model {
 
     /**
      * Returns true if the body is awake
-     *
+     * <p>
      * An sleeping body is one that has come to rest and the physics engine has decided
      * to stop simulating it to save CPU cycles. If a body is awake and collides with a
      * sleeping body, then the sleeping body wakes up. Bodies will also wake up if a
@@ -359,13 +433,13 @@ public abstract class GameObject extends Model {
 
     /**
      * Sets whether the body is awake
-     *
+     * <p>
      * An sleeping body is one that has come to rest and the physics engine has decided
      * to stop simulating it to save CPU cycles. If a body is awake and collides with a
      * sleeping body, then the sleeping body wakes up. Bodies will also wake up if a
      * joint or contact attached to them is destroyed.  You can also wake a body manually.
      *
-     * @param value  whether the body is awake
+     * @param value whether the body is awake
      */
     public void setAwake(boolean value) {
         if (body != null) {
@@ -377,7 +451,7 @@ public abstract class GameObject extends Model {
 
     /**
      * Returns false if this body should never fall asleep
-     *
+     * <p>
      * An sleeping body is one that has come to rest and the physics engine has decided
      * to stop simulating it to save CPU cycles. If a body is awake and collides with a
      * sleeping body, then the sleeping body wakes up. Bodies will also wake up if a
@@ -391,13 +465,13 @@ public abstract class GameObject extends Model {
 
     /**
      * Sets whether the body should ever fall asleep
-     *
+     * <p>
      * An sleeping body is one that has come to rest and the physics engine has decided
      * to stop simulating it to save CPU cycles. If a body is awake and collides with a
      * sleeping body, then the sleeping body wakes up. Bodies will also wake up if a
      * joint or contact attached to them is destroyed.  You can also wake a body manually.
      *
-     * @param value  whether the body should ever fall asleep
+     * @param value whether the body should ever fall asleep
      */
     public void setSleepingAllowed(boolean value) {
         if (body != null) {
@@ -409,14 +483,14 @@ public abstract class GameObject extends Model {
 
     /**
      * Returns true if this body is a bullet
-     *
+     * <p>
      * By default, Box2D uses continuous collision detection (CCD) to prevent dynamic
      * bodies from tunneling through static bodies. Normally CCD is not used between
      * dynamic bodies. This is done to keep performance reasonable. In some game
      * scenarios you need dynamic bodies to use CCD. For example, you may want to shoot
      * a high speed bullet at a stack of dynamic bricks. Without CCD, the bullet might
      * tunnel through the bricks.
-     *
+     * <p>
      * Fast moving objects in Box2D can be labeled as bullets. Bullets will perform CCD
      * with both static and dynamic bodies. You should decide what bodies should be
      * bullets based on your game design.
@@ -429,19 +503,19 @@ public abstract class GameObject extends Model {
 
     /**
      * Sets whether this body is a bullet
-     *
+     * <p>
      * By default, Box2D uses continuous collision detection (CCD) to prevent dynamic
      * bodies from tunneling through static bodies. Normally CCD is not used between
      * dynamic bodies. This is done to keep performance reasonable. In some game
      * scenarios you need dynamic bodies to use CCD. For example, you may want to shoot
      * a high speed bullet at a stack of dynamic bricks. Without CCD, the bullet might
      * tunnel through the bricks.
-     *
+     * <p>
      * Fast moving objects in Box2D can be labeled as bullets. Bullets will perform CCD
      * with both static and dynamic bodies. You should decide what bodies should be
      * bullets based on your game design.
      *
-     * @param value  whether this body is a bullet
+     * @param value whether this body is a bullet
      */
     public void setBullet(boolean value) {
         if (body != null) {
@@ -453,7 +527,7 @@ public abstract class GameObject extends Model {
 
     /**
      * Returns true if this body be prevented from rotating
-     *
+     * <p>
      * This is very useful for characters that should remain upright.
      *
      * @return true if this body be prevented from rotating
@@ -464,10 +538,10 @@ public abstract class GameObject extends Model {
 
     /**
      * Sets whether this body be prevented from rotating
-     *
+     * <p>
      * This is very useful for characters that should remain upright.
      *
-     * @param value  whether this body be prevented from rotating
+     * @param value whether this body be prevented from rotating
      */
     public void setFixedRotation(boolean value) {
         if (body != null) {
@@ -479,7 +553,7 @@ public abstract class GameObject extends Model {
 
     /**
      * Returns the gravity scale to apply to this body
-     *
+     * <p>
      * This allows isolated objects to float.  Be careful with this, since increased
      * gravity can decrease stability.
      *
@@ -491,11 +565,11 @@ public abstract class GameObject extends Model {
 
     /**
      * Sets the gravity scale to apply to this body
-     *
+     * <p>
      * This allows isolated objects to float.  Be careful with this, since increased
      * gravity can decrease stability.
      *
-     * @param value  the gravity scale to apply to this body
+     * @param value the gravity scale to apply to this body
      */
     public void setGravityScale(float value) {
         if (body != null) {
@@ -507,11 +581,11 @@ public abstract class GameObject extends Model {
 
     /**
      * Returns the linear damping for this body.
-     *
+     * <p>
      * Linear damping is use to reduce the linear velocity. Damping is different than
      * friction because friction only occurs with contact. Damping is not a replacement
      * for friction and the two effects should be used together.
-     *
+     * <p>
      * Damping parameters should be between 0 and infinity, with 0 meaning no damping,
      * and infinity meaning full damping. Normally you will use a damping value between
      * 0 and 0.1. Most people avoid linear damping because it makes bodies look floaty.
@@ -519,21 +593,23 @@ public abstract class GameObject extends Model {
      * @return the linear damping for this body.
      */
     public float getLinearDamping() {
-        return (body != null ? body.getLinearDamping() : bodyinfo.linearDamping);
+        return (body != null ?
+                body.getLinearDamping() :
+                bodyinfo.linearDamping);
     }
 
     /**
      * Sets the linear damping for this body.
-     *
+     * <p>
      * Linear damping is use to reduce the linear velocity. Damping is different than
      * friction because friction only occurs with contact. Damping is not a replacement
      * for friction and the two effects should be used together.
-     *
+     * <p>
      * Damping parameters should be between 0 and infinity, with 0 meaning no damping,
      * and infinity meaning full damping. Normally you will use a damping value between
      * 0 and 0.1. Most people avoid linear damping because it makes bodies look floaty.
      *
-     * @param value  the linear damping for this body.
+     * @param value the linear damping for this body.
      */
     public void setLinearDamping(float value) {
         if (body != null) {
@@ -545,11 +621,11 @@ public abstract class GameObject extends Model {
 
     /**
      * Returns the angular damping for this body.
-     *
+     * <p>
      * Angular damping is use to reduce the angular velocity. Damping is different than
      * friction because friction only occurs with contact. Damping is not a replacement
      * for friction and the two effects should be used together.
-     *
+     * <p>
      * Damping parameters should be between 0 and infinity, with 0 meaning no damping,
      * and infinity meaning full damping. Normally you will use a damping value between
      * 0 and 0.1.
@@ -557,21 +633,25 @@ public abstract class GameObject extends Model {
      * @return the angular damping for this body.
      */
     public float getAngularDamping() {
-        return (body != null ? body.getAngularDamping() : bodyinfo.angularDamping);
+        return (body != null ?
+                body.getAngularDamping() :
+                bodyinfo.angularDamping);
     }
+
+    /// FixtureDef Methods
 
     /**
      * Sets the angular damping for this body.
-     *
+     * <p>
      * Angular damping is use to reduce the angular velocity. Damping is different than
      * friction because friction only occurs with contact. Damping is not a replacement
      * for friction and the two effects should be used together.
-     *
+     * <p>
      * Damping parameters should be between 0 and infinity, with 0 meaning no damping,
      * and infinity meaning full damping. Normally you will use a damping value between
      * 0 and 0.1.
      *
-     * @param value  the angular damping for this body.
+     * @param value the angular damping for this body.
      */
     public void setAngularDamping(float value) {
         if (body != null) {
@@ -583,29 +663,28 @@ public abstract class GameObject extends Model {
 
     /**
      * Copies the state from the given body to the body def.
-     *
+     * <p>
      * This is important if you want to save the state of the body before removing
      * it from the world.
      */
     protected void setBodyState(Body body) {
-        bodyinfo.type   = body.getType();
-        bodyinfo.angle  = body.getAngle();
+        bodyinfo.type = body.getType();
+        bodyinfo.angle = body.getAngle();
         bodyinfo.active = body.isActive();
-        bodyinfo.awake  = body.isAwake();
+        bodyinfo.awake = body.isAwake();
         bodyinfo.bullet = body.isBullet();
         bodyinfo.position.set(body.getPosition());
         bodyinfo.linearVelocity.set(body.getLinearVelocity());
         bodyinfo.allowSleep = body.isSleepingAllowed();
         bodyinfo.fixedRotation = body.isFixedRotation();
-        bodyinfo.gravityScale  = body.getGravityScale();
+        bodyinfo.gravityScale = body.getGravityScale();
         bodyinfo.angularDamping = body.getAngularDamping();
-        bodyinfo.linearDamping  = body.getLinearDamping();
+        bodyinfo.linearDamping = body.getLinearDamping();
     }
 
-    /// FixtureDef Methods
     /**
      * Returns the density of this body
-     *
+     * <p>
      * The density is typically measured in usually in kg/m^2. The density can be zero or
      * positive. You should generally use similar densities for all your fixtures. This
      * will improve stacking stability.
@@ -618,17 +697,17 @@ public abstract class GameObject extends Model {
 
     /**
      * Sets the density of this body
-     *
+     * <p>
      * The density is typically measured in usually in kg/m^2. The density can be zero or
      * positive. You should generally use similar densities for all your fixtures. This
      * will improve stacking stability.
      *
-     * @param value  the density of this body
+     * @param value the density of this body
      */
     public void setDensity(float value) {
         fixture.density = value;
         if (body != null) {
-            for(Fixture f : body.getFixtureList()) {
+            for (Fixture f : body.getFixtureList()) {
                 f.setDensity(value);
             }
         }
@@ -636,7 +715,7 @@ public abstract class GameObject extends Model {
 
     /**
      * Returns the friction coefficient of this body
-     *
+     * <p>
      * The friction parameter is usually set between 0 and 1, but can be any non-negative
      * value. A friction value of 0 turns off friction and a value of 1 makes the friction
      * strong. When the friction force is computed between two shapes, Box2D must combine
@@ -651,19 +730,19 @@ public abstract class GameObject extends Model {
 
     /**
      * Sets the friction coefficient of this body
-     *
+     * <p>
      * The friction parameter is usually set between 0 and 1, but can be any non-negative
      * value. A friction value of 0 turns off friction and a value of 1 makes the friction
      * strong. When the friction force is computed between two shapes, Box2D must combine
      * the friction parameters of the two parent fixtures. This is done with the geometric
      * mean.
      *
-     * @param value  the friction coefficient of this body
+     * @param value the friction coefficient of this body
      */
     public void setFriction(float value) {
         fixture.friction = value;
         if (body != null) {
-            for(Fixture f : body.getFixtureList()) {
+            for (Fixture f : body.getFixtureList()) {
                 f.setFriction(value);
             }
         }
@@ -671,7 +750,7 @@ public abstract class GameObject extends Model {
 
     /**
      * Returns the restitution of this body
-     *
+     * <p>
      * Restitution is used to make objects bounce. The restitution value is usually set
      * to be between 0 and 1. Consider dropping a ball on a table. A value of zero means
      * the ball won't bounce. This is called an inelastic collision. A value of one means
@@ -686,19 +765,19 @@ public abstract class GameObject extends Model {
 
     /**
      * Sets the restitution of this body
-     *
+     * <p>
      * Restitution is used to make objects bounce. The restitution value is usually set
      * to be between 0 and 1. Consider dropping a ball on a table. A value of zero means
      * the ball won't bounce. This is called an inelastic collision. A value of one means
      * the ball's velocity will be exactly reflected. This is called a perfectly elastic
      * collision.
      *
-     * @param value  the restitution of this body
+     * @param value the restitution of this body
      */
     public void setRestitution(float value) {
         fixture.restitution = value;
         if (body != null) {
-            for(Fixture f : body.getFixtureList()) {
+            for (Fixture f : body.getFixtureList()) {
                 f.setRestitution(value);
             }
         }
@@ -706,7 +785,7 @@ public abstract class GameObject extends Model {
 
     /**
      * Returns true if this object is a sensor.
-     *
+     * <p>
      * Sometimes game logic needs to know when two entities overlap yet there should be
      * no collision response. This is done by using sensors. A sensor is an entity that
      * detects collision but does not produce a response.
@@ -719,25 +798,27 @@ public abstract class GameObject extends Model {
 
     /**
      * Sets whether this object is a sensor.
-     *
+     * <p>
      * Sometimes game logic needs to know when two entities overlap yet there should be
      * no collision response. This is done by using sensors. A sensor is an entity that
      * detects collision but does not produce a response.
      *
-     * @param value  whether this object is a sensor.
+     * @param value whether this object is a sensor.
      */
     public void setSensor(boolean value) {
         fixture.isSensor = value;
         if (body != null) {
-            for(Fixture f : body.getFixtureList()) {
+            for (Fixture f : body.getFixtureList()) {
                 f.setSensor(value);
             }
         }
     }
 
+    /// MassData Methods
+
     /**
      * Returns the filter data for this object (or null if there is none)
-     *
+     * <p>
      * Collision filtering allows you to prevent collision between fixtures. For example,
      * say you make a character that rides a bicycle. You want the bicycle to collide
      * with the terrain and the character to collide with the terrain, but you don't want
@@ -752,38 +833,37 @@ public abstract class GameObject extends Model {
 
     /**
      * Sets the filter data for this object
-     *
+     * <p>
      * Collision filtering allows you to prevent collision between fixtures. For example,
      * say you make a character that rides a bicycle. You want the bicycle to collide
      * with the terrain and the character to collide with the terrain, but you don't want
      * the character to collide with the bicycle (because they must overlap). Box2D
      * supports such collision filtering using categories and groups.
-     *
+     * <p>
      * A value of null removes all collision filters.
      *
-     * @param value  the filter data for this object
+     * @param value the filter data for this object
      */
     public void setFilterData(Filter value) {
-        if (value !=  null) {
+        if (value != null) {
             fixture.filter.categoryBits = value.categoryBits;
             fixture.filter.groupIndex = value.groupIndex;
-            fixture.filter.maskBits   = value.maskBits;
+            fixture.filter.maskBits = value.maskBits;
         } else {
             fixture.filter.categoryBits = 0x0001;
             fixture.filter.groupIndex = 0;
-            fixture.filter.maskBits   = -1;
+            fixture.filter.maskBits = -1;
         }
         if (body != null) {
-            for(Fixture f : body.getFixtureList()) {
+            for (Fixture f : body.getFixtureList()) {
                 f.setFilterData(value);
             }
         }
     }
 
-    /// MassData Methods
     /**
      * Returns the center of mass of this body
-     *
+     * <p>
      * This method does NOT return a reference to the centroid position. Changes to this
      * vector will not affect the body.  However, it returns the same vector each time
      * its is called, and so cannot be used as an allocator.
@@ -791,15 +871,17 @@ public abstract class GameObject extends Model {
      * @return the center of mass for this physics body
      */
     public Vector2 getCentroid() {
-        return  (body != null ? body.getLocalCenter() : centroidCache.set(massdata.center));
+        return (body != null ?
+                body.getLocalCenter() :
+                centroidCache.set(massdata.center));
     }
 
     /**
      * Sets the center of mass for this physics body
-     *
+     * <p>
      * This method does not keep a reference to the parameter.
      *
-     * @param value  the center of mass for this physics body
+     * @param value the center of mass for this physics body
      */
     public void setCentroid(Vector2 value) {
         if (!masseffect) {
@@ -815,23 +897,23 @@ public abstract class GameObject extends Model {
 
     /**
      * Returns the rotational inertia of this body
-     *
+     * <p>
      * For static bodies, the mass and rotational inertia are set to zero. When
      * a body has fixed rotation, its rotational inertia is zero.
      *
      * @return the rotational inertia of this body
      */
     public float getInertia() {
-        return  (body != null ? body.getInertia() : massdata.I);
+        return (body != null ? body.getInertia() : massdata.I);
     }
 
     /**
      * Sets the rotational inertia of this body
-     *
+     * <p>
      * For static bodies, the mass and rotational inertia are set to zero. When
      * a body has fixed rotation, its rotational inertia is zero.
      *
-     * @param value  the rotational inertia of this body
+     * @param value the rotational inertia of this body
      */
     public void setInertia(float value) {
         if (!masseffect) {
@@ -847,21 +929,23 @@ public abstract class GameObject extends Model {
 
     /**
      * Returns the mass of this body
-     *
+     * <p>
      * The value is usually in kilograms.
      *
      * @return the mass of this body
      */
     public float getMass() {
-        return  (body != null ? body.getMass() : massdata.mass);
+        return (body != null ? body.getMass() : massdata.mass);
     }
+
+    /// Garbage Collection Methods
 
     /**
      * Sets the mass of this body
-     *
+     * <p>
      * The value is usually in kilograms.
      *
-     * @param value  the mass of this body
+     * @param value the mass of this body
      */
     public void setMass(float value) {
         if (!masseffect) {
@@ -885,11 +969,9 @@ public abstract class GameObject extends Model {
         }
     }
 
-    /// Garbage Collection Methods
-
     /**
      * Returns true if the shape information must be updated.
-     *
+     * <p>
      * Attributes tied to the geometry (and not just forces/position) must wait for
      * collisions to complete before they are reset.  Shapes (and their properties)
      * are reset in the update method.
@@ -900,14 +982,16 @@ public abstract class GameObject extends Model {
         return isDirty;
     }
 
+    /// DRAWING METHODS
+
     /**
      * Sets whether the shape information must be updated.
-     *
+     * <p>
      * Attributes tied to the geometry (and not just forces/position) must wait for
      * collisions to complete before they are reset.  Shapes (and their properties)
      * are reset in the update method.
      *
-     * @param value  whether the shape information must be updated.
+     * @param value whether the shape information must be updated.
      */
     public void markDirty(boolean value) {
         isDirty = value;
@@ -915,7 +999,7 @@ public abstract class GameObject extends Model {
 
     /**
      * Returns the Box2D body for this object.
-     *
+     * <p>
      * You use this body to add joints and apply forces.
      *
      * @return the Box2D body for this object.
@@ -924,19 +1008,18 @@ public abstract class GameObject extends Model {
         return body;
     }
 
-    /// DRAWING METHODS
     /**
      * Returns the drawing scale for this physics object
-     *
+     * <p>
      * The drawing scale is the number of pixels to draw before Box2D unit. Because
      * mass is a function of area in Box2D, we typically want the physics objects
      * to be small.  So we decouple that scale from the physics object.  However,
      * we must track the scale difference to communicate with the scene graph.
-     *
+     * <p>
      * This method does NOT return a reference to the drawing scale. Changes to this
      * vector will not affect the body.  However, it returns the same vector each time
      * its is called, and so cannot be used as an allocator.
-
+     * <p>
      * We allow for the scaling factor to be non-uniform.
      *
      * @return the drawing scale for this physics object
@@ -946,43 +1029,44 @@ public abstract class GameObject extends Model {
         return scaleCache;
     }
 
+    /// DEBUG METHODS
+
     /**
      * Sets the drawing scale for this physics object
-     *
+     * <p>
      * The drawing scale is the number of pixels to draw before Box2D unit. Because
      * mass is a function of area in Box2D, we typically want the physics objects
      * to be small.  So we decouple that scale from the physics object.  However,
      * we must track the scale difference to communicate with the scene graph.
-     *
+     * <p>
      * We allow for the scaling factor to be non-uniform.
      *
-     * @param value  the drawing scale for this physics object
+     * @param value the drawing scale for this physics object
      */
     public void setDrawScale(Vector2 value) {
-        setDrawScale(value.x,value.y);
+        setDrawScale(value.x, value.y);
     }
 
     /**
      * Sets the drawing scale for this physics object
-     *
+     * <p>
      * The drawing scale is the number of pixels to draw before Box2D unit. Because
      * mass is a function of area in Box2D, we typically want the physics objects
      * to be small.  So we decouple that scale from the physics object.  However,
      * we must track the scale difference to communicate with the scene graph.
-     *
+     * <p>
      * We allow for the scaling factor to be non-uniform.
      *
-     * @param x  the x-axis scale for this physics object
-     * @param y  the y-axis scale for this physics object
+     * @param x the x-axis scale for this physics object
+     * @param y the y-axis scale for this physics object
      */
     public void setDrawScale(float x, float y) {
-        drawScale.set(x,y);
+        drawScale.set(x, y);
     }
 
-    /// DEBUG METHODS
     /**
      * Returns the physics object tag.
-     *
+     * <p>
      * A tag is a string attached to an object, in order to identify it in debugging.
      *
      * @return the physics object tag.
@@ -993,65 +1077,22 @@ public abstract class GameObject extends Model {
 
     /**
      * Sets the physics object tag.
-     *
+     * <p>
      * A tag is a string attached to an object, in order to identify it in debugging.
      *
-     * @param  value    the physics object tag
+     * @param value the physics object tag
      */
     public void setName(String value) {
         nametag = value;
     }
 
     /**
-     * Create a new physics object at the origin.
-     */
-    protected GameObject() {
-        this(0,0);
-    }
-
-    /**
-     * Create a new physics object
-     *
-     * @param x Initial x position in world coordinates
-     * @param y Initial y position in world coordinates
-     */
-    protected GameObject(float x, float y) {
-        // Object has yet to be deactivated
-        toRemove = false;
-
-        // Allocate the body information
-        bodyinfo = new BodyDef();
-        bodyinfo.awake  = true;
-        bodyinfo.allowSleep = true;
-        bodyinfo.gravityScale = 1.0f;
-        bodyinfo.position.set(x,y);
-        bodyinfo.fixedRotation = false;
-        // Objects are physics objects unless otherwise noted
-        bodyinfo.type = BodyType.DynamicBody;
-
-        // Allocate the fixture information
-        // Default values are okay
-        fixture = new FixtureDef();
-
-        // Allocate the mass information, but turn it off
-        masseffect = false;
-        massdata = new MassData();
-
-        // Set the default drawing scale
-        drawScale = new Vector2(1,1);
-
-        origin = new Vector2();
-        body = null;
-    }
-
-    /**
      * Creates the physics Body(s) for this object, adding them to the world.
-     *
+     * <p>
      * Implementations of this method should NOT retain a reference to World.
      * That is a tight coupling that we should avoid.
      *
      * @param world Box2D world to store body
-     *
      * @return true if object allocation succeeded
      */
     public boolean activatePhysics(World world) {
@@ -1088,23 +1129,24 @@ public abstract class GameObject extends Model {
     }
 
     /// Abstract Methods
+
     /**
      * Create new fixtures for this body, defining the shape
-     *
+     * <p>
      * This is the primary method to override for custom physics objects
      */
     protected abstract void createFixtures();
 
     /**
      * Release the fixtures for this body, reseting the shape
-     *
+     * <p>
      * This is the primary method to override for custom physics objects.
      */
     protected abstract void releaseFixtures();
 
     /**
      * Updates the object's physics state (NOT GAME LOGIC).
-     *
+     * <p>
      * This method is called AFTER the collision resolution state. Therefore, it
      * should not be used to process actions or any other gameplay information.  Its
      * primary purpose is to adjust changes to the fixture, which have to take place
@@ -1121,15 +1163,16 @@ public abstract class GameObject extends Model {
 
     /**
      * Sets the object texture for drawing purposes.
-     *
+     * <p>
      * In order for drawing to work properly, you MUST set the drawScale.
      * The drawScale converts the physics units to pixels.
      *
-     * @param value  the object texture for drawing purposes.
+     * @param value the object texture for drawing purposes.
      */
     public void setTexture(TextureRegion value) {
         texture = value;
-        origin.set(texture.getRegionWidth()/2.0f, texture.getRegionHeight()/2.0f);
+        origin.set(texture.getRegionWidth() / 2.0f,
+                   texture.getRegionHeight() / 2.0f);
     }
 
     /**
@@ -1139,13 +1182,21 @@ public abstract class GameObject extends Model {
      */
     public void draw(GameCanvas canvas) {
         if (texture != null) {
-            canvas.draw(texture, Color.WHITE,origin.x,origin.y,getX()*drawScale.x,getY()*drawScale.x,getAngle(),1,1);
+            canvas.draw(texture,
+                        Color.WHITE,
+                        origin.x,
+                        origin.y,
+                        getX() * drawScale.x,
+                        getY() * drawScale.x,
+                        getAngle(),
+                        1,
+                        1);
         }
     }
 
     /**
      * Draws the outline of the physics body.
-     *
+     * <p>
      * This method can be helpful for understanding issues with collisions.
      *
      * @param canvas Drawing context
