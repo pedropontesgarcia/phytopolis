@@ -322,6 +322,14 @@ public class GameplayMode extends WorldController implements ContactListener {
                                        avatarY,
                                        PlantController.branchDirection.LEFT,
                                        PlantController.branchType.NORMAL);
+
+        }else if (InputController.getInstance().didMousePress()) {
+            plantController.growLeaf(InputController.getInstance().getGrowX() / 120f,
+                    InputController.getInstance().getGrowY() / 120f
+                    , PlantController.leafType.NORMAL);
+            System.out.println("here");
+            System.out.println(InputController.getInstance().getGrowY() / 120f);
+            System.out.println(InputController.getInstance().getGrowX());
         }
         return false;
     }
@@ -450,7 +458,7 @@ public class GameplayMode extends WorldController implements ContactListener {
             }
 
             // Check for win condition
-            if ((bd1 == avatar && bd1.getY() > 75f)) {
+            if ((bd1 == avatar && bd1.getY() > 34)) {
                 setComplete(true);
             }
         } catch (Exception e) {
