@@ -224,7 +224,7 @@ public class InputController {
     }
 
     public boolean didDrop() {
-        return dropPressed & !dropPrevious;
+        return dropPressed /*& !dropPrevious*/;
     }
 
     public boolean didExtinguish() {
@@ -412,7 +412,8 @@ public class InputController {
         }
 
         mousePressed = (secondary && mousePressed);
-        if (Gdx.input.isButtonPressed(Input.Buttons.LEFT) || Gdx.input.isKeyPressed(Input.Keys.DOWN)) {
+        if (Gdx.input.isButtonPressed(Input.Buttons.LEFT) ||
+                Gdx.input.isKeyPressed(Input.Keys.DOWN)) {
             mousePressed = true;
             growX = Gdx.input.getX();
             growY = Gdx.graphics.getHeight() - Gdx.input.getY();

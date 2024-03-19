@@ -438,7 +438,7 @@ public class PlantController {
         /**
          * height of the leaf at this node
          */
-        private final float leafHeight = 0.25f;
+        private final float leafHeight = 0.05f;
         /**
          * conversion ration for converting between world coords and pixels
          */

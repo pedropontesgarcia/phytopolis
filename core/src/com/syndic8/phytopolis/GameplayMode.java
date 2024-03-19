@@ -554,13 +554,14 @@ public class GameplayMode extends WorldController implements ContactListener {
         boolean isPlayerGoingUp = avatar.getVY() >= 0;
         boolean isPlayerBelow = false;
         if (fix1.getBody() == avatar.getBody()) isPlayerBelow =
-                fix1.getBody().getPosition().y - 1f <
+                fix1.getBody().getPosition().y - avatar.getHeight() / 2f <
                         fix2.getBody().getPosition().y;
         else if (fix2.getBody() == avatar.getBody()) isPlayerBelow =
-                fix2.getBody().getPosition().y - 1f <
+                fix2.getBody().getPosition().y - avatar.getHeight() / 2f <
                         fix1.getBody().getPosition().y;
-        if (isCollisionBetweenPlayerAndLeaf && isPlayerGoingUp ||
-                isPlayerBelow) {
+        if (isCollisionBetweenPlayerAndLeaf &&
+                (isPlayerGoingUp || isPlayerBelow ||
+                        InputController.getInstance().didDrop())) {
             contact.setEnabled(false);
         }
     }
