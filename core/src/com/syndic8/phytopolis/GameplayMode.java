@@ -130,7 +130,7 @@ public class GameplayMode extends WorldController implements ContactListener {
                                               13,
                                               1.4f,
                                               1,
-                                              0,
+                                              1,
                                               world,
                                               scale);
         hazardController = new HazardController(plantController, 20, 300, 10);
