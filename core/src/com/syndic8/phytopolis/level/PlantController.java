@@ -489,13 +489,15 @@ public class PlantController {
                              Texture texture,
                              World world,
                              WorldController wldc) {
-            if (!leafExists && (hasBranchInDirection(branchDirection.LEFT) ||
-                    hasBranchInDirection(branchDirection.MIDDLE) ||
-                    hasBranchInDirection(branchDirection.RIGHT)) ||
+            if (yCoordToIndex(y / worldToPixelConversionRatio) > 0 &&
+                    !leafExists &&
+                    (hasBranchInDirection(branchDirection.LEFT) ||
+                            hasBranchInDirection(branchDirection.MIDDLE) ||
+                            hasBranchInDirection(branchDirection.RIGHT)) ||
                     canGrowAt(x / worldToPixelConversionRatio,
                               y / worldToPixelConversionRatio)) {
                 leaf = new Leaf(x / worldToPixelConversionRatio,
-                                y / worldToPixelConversionRatio + 0.3f,
+                                y / worldToPixelConversionRatio - 0.5f,
                                 leafWidth,
                                 leafHeight);
                 leaf.setTexture(texture);
@@ -526,8 +528,10 @@ public class PlantController {
 
         public void unmakeLeaf(WorldController wldc) {
             leafExists = false;
-            leaf.markRemoved(true);
-            leaf = null;
+            if (leaf != null) {
+                leaf.markRemoved(true);
+                leaf = null;
+            }
         }
 
         /**
