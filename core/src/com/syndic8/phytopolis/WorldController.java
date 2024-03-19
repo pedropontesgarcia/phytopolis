@@ -300,7 +300,9 @@ public abstract class WorldController implements Screen {
     public void setCanvas(GameCanvas canvas) {
         this.canvas = canvas;
         this.scale.x = canvas.getWidth() / bounds.getWidth();
+        System.out.println(canvas.getWidth());
         this.scale.y = canvas.getHeight() / bounds.getHeight();
+        System.out.println(canvas.getHeight());
     }
 
     /**

@@ -303,11 +303,11 @@ public class PlantController {
         /**
          * width of the leaf at this node
          */
-        private final int leafWidth = 60;
+        private final int leafWidth = 10;
         /**
          * height of the leaf at this node
          */
-        private final int leafHeight = 5;
+        private final int leafHeight = 1;
         /**
          * whether there is a branch in the leftmost slot of this node
          */

@@ -49,12 +49,13 @@ public class GameplayMode extends WorldController implements ContactListener {
     private final HazardController hazardController;
     private final long fireId = -1;
     private final long plopId = -1;
+    private final long jumpId = -1;
+
+    // Physics objects for the game
     /**
      * Mark set to handle more sophisticated collision callbacks
      */
     protected ObjectSet<Fixture> sensorFixtures;
-
-    // Physics objects for the game
     /**
      * branch texture
      */
@@ -75,7 +76,6 @@ public class GameplayMode extends WorldController implements ContactListener {
      * Texture asset for the bridge plank
      */
     private TextureRegion bridgeTexture;
-
     /**
      * Texture asset for a node
      */
@@ -84,7 +84,6 @@ public class GameplayMode extends WorldController implements ContactListener {
      * The jump sound.  We only want to play once.
      */
     private Sound jumpSound;
-    private final long jumpId = -1;
     /**
      * The weapon fire sound.  We only want to play once.
      */
@@ -127,9 +126,9 @@ public class GameplayMode extends WorldController implements ContactListener {
         sensorFixtures = new ObjectSet<Fixture>();
         plantController = new PlantController(10,
                                               13,
-                                              59f,
-                                              20f,
-                                              20f,
+                                              300f,
+                                              100,
+                                              100,
                                               world,
                                               scale);
         hazardController = new HazardController(plantController, 20, 300, 10);
@@ -233,7 +232,7 @@ public class GameplayMode extends WorldController implements ContactListener {
         dwidth = avatarTexture.getRegionWidth() / scale.x;
         dheight = avatarTexture.getRegionHeight() / scale.y;
         avatar = new Player(constants.get("dude"), dwidth, dheight);
-        avatar.setDrawScale(scale);
+        avatar.setDrawScale(scale.scl(0.1f));
         avatar.setTexture(avatarTexture);
         avatar.setName("dude");
         addObject(avatar);
