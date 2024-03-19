@@ -512,12 +512,7 @@ public abstract class WorldController implements Screen {
 
         canvas.begin();
         if (background != null) {
-            canvas.draw(background,
-                        Color.WHITE,
-                        0,
-                        0,
-                        canvas.getWidth(),
-                        canvas.getHeight() * 4);
+            canvas.draw(background, Color.WHITE, 0, 0, canvas.getWidth(), 4320);
         }
         for (Model obj : objects) {
             obj.draw(canvas);
