@@ -119,7 +119,7 @@ public class Branch extends Model {
      */
     public void draw(GameCanvas canvas) {
         canvas.draw(texture, Color.WHITE, origin.x, origin.y,
-                position.x, position.y, 0.0f, 1.0f, 1.f);
+                position.x, position.y, angle, 1.0f, 1.f);
     }
 
     public void drawDebug(GameCanvas canvas) {

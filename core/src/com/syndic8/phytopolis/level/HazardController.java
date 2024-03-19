@@ -148,6 +148,60 @@ public class HazardController {
         return -1;
     }
 
+    /**
+     * Updates the hazards for the current state of the game. This method is responsible
+     * for generating and managing both fire and drone hazards, including their effects
+     * on plant nodes.
+     */
+    public void updateHazards() {
+        for (Hazard h : hazards) {
+            switch (h.getType()) {
+                case FIRE:
+                    Fire f = (Fire) h;
+                    int time = f.getDuration();
+                    // spread fire if the time is right, otherwise decrement timer
+                    if (time == 1) {
+                        hazards.remove(f);
+                        plantController.destroyAll((int) f.getLocation().x, (int) f.getLocation().y);
+                        spreadFire(f.getLocation());
+                    }
+                    f.setDuration(time - 1);
+                    break;
+                case DRONE:
+                    // destroy plant at location
+                    Drone d = (Drone) h;
+                    hazards.remove(d);
+                    plantController.destroyAll((int) d.getLocation().x, (int) d.getLocation().y);
+                    break;
+                default:
+                    return;
+            }
+        }
+    }
 
+    /**
+     * Spreads the fire to adjacent nodes.
+     */
+    private void spreadFire(Vector2 node) {
+        int x = (int) node.x;
+        int y = (int) node.y;
+        if (y-1 < 0) return;
+        // check bottom left
+        if (x-1 >= 0) {
+            if (plantController.branchExists(x-1, y-1, PlantController.branchDirection.RIGHT)) {
+                hazards.add(new Fire(new Vector2(x-1, y-1), burnTime));
+            }
+        }
+        // check bottom right
+        if (x+1 <= width) {
+            if (plantController.branchExists(x+1, y-1, PlantController.branchDirection.LEFT)) {
+                hazards.add(new Fire(new Vector2(x+1, y-1), burnTime));
+            }
+        }
+        // check bottom middle
+        if (plantController.branchExists(x, y-1, PlantController.branchDirection.RIGHT)) {
+            hazards.add(new Fire(new Vector2(x, y-1), burnTime));
+        }
+    }
 
 }
