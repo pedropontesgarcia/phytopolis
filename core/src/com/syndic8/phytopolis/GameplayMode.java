@@ -10,6 +10,7 @@
  */
 package com.syndic8.phytopolis;
 
+import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
@@ -47,7 +48,6 @@ public class GameplayMode extends WorldController implements ContactListener {
     private final float distance = 120f;
     private final PlantController plantController;
     private final HazardController hazardController;
-    private Player player;
     private final long fireId = -1;
     private final long plopId = -1;
     private final long jumpId = -1;
@@ -61,6 +61,7 @@ public class GameplayMode extends WorldController implements ContactListener {
      * branch texture
      */
     protected TextureRegion branchTexture;
+    private Player player;
     private TextureRegion background;
     /**
      * Texture asset for character avatar
@@ -113,6 +114,7 @@ public class GameplayMode extends WorldController implements ContactListener {
     private boolean fall;
     private float startHeight;
     private HashMap<Fixture, Filter> originalCollisionProperties;
+    private Music backgroundMusic;
 
     /**
      * Creates and initialize a new instance of the platformer game
@@ -130,13 +132,15 @@ public class GameplayMode extends WorldController implements ContactListener {
         plantController = new PlantController(13,
                                               13,
                                               1.4f,
-                                              1.5f,
                                               1,
+                                              1.1f,
                                               world,
                                               scale);
         hazardController = new HazardController(plantController, 30, 30, 300, 200);
 
         background = null;
+
+
     }
 
     /**
@@ -169,6 +173,9 @@ public class GameplayMode extends WorldController implements ContactListener {
                 "gameplay:branch",
                 Texture.class));
         super.gatherAssets(directory);
+        backgroundMusic = directory.getEntry("viridian", Music.class);
+        backgroundMusic.setLooping(true);
+        backgroundMusic.play();
     }
 
     /**
@@ -315,6 +322,16 @@ public class GameplayMode extends WorldController implements ContactListener {
                                        avatarY,
                                        PlantController.branchDirection.LEFT,
                                        PlantController.branchType.NORMAL);
+
+        } else if (InputController.getInstance().didMousePress()) {
+            plantController.growLeaf(
+                    InputController.getInstance().getGrowX() / 120f,
+                    InputController.getInstance().getGrowY() / 120f,
+                    PlantController.leafType.NORMAL,
+                    this);
+            System.out.println("here");
+            System.out.println(InputController.getInstance().getGrowY() / 120f);
+            System.out.println(InputController.getInstance().getGrowX());
         }
         return false;
     }
@@ -444,7 +461,7 @@ public class GameplayMode extends WorldController implements ContactListener {
             }
 
             // Check for win condition
-            if ((bd1 == avatar && bd1.getY() > 75f)) {
+            if ((bd1 == avatar && bd1.getY() > 34)) {
                 setComplete(true);
             }
         } catch (Exception e) {

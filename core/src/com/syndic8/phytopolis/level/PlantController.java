@@ -6,6 +6,7 @@ import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.World;
 import com.badlogic.gdx.utils.Queue;
 import com.syndic8.phytopolis.GameCanvas;
+import com.syndic8.phytopolis.WorldController;
 import com.syndic8.phytopolis.assets.AssetDirectory;
 import com.syndic8.phytopolis.level.models.Branch;
 import com.syndic8.phytopolis.level.models.Leaf;
@@ -65,7 +66,7 @@ public class PlantController {
     /**
      * leaf texture
      */
-    protected TextureRegion leafTexture;
+    protected Texture leafTexture;
     /**
      * how many more frames until the next propagation of destruction
      */
@@ -132,10 +133,13 @@ public class PlantController {
                                              world);
     }
 
-    public void growLeaf(float x, float y, leafType type) {
+    public void growLeaf(float x,
+                         float y,
+                         leafType type,
+                         WorldController wldc) {
         int xIndex = xCoordToIndex(x * worldToPixelConversionRatio);
         int yIndex = yCoordToIndex(y * worldToPixelConversionRatio);
-        plantGrid[xIndex][yIndex].makeLeaf(type, leafTexture, world);
+        plantGrid[xIndex][yIndex].makeLeaf(type, leafTexture, world, wldc);
     }
 
     /**
@@ -269,9 +273,10 @@ public class PlantController {
      */
     public void gatherAssets(AssetDirectory directory) {
 
-        this.nodeTexture = directory.getEntry("gameplay:leaf", Texture.class);
+        this.nodeTexture = directory.getEntry("gameplay:node", Texture.class);
         this.branchTexture = directory.getEntry("gameplay:branch",
                                                 Texture.class);
+        this.leafTexture = directory.getEntry("gameplay:leaf", Texture.class);
     }
 
     /**
@@ -319,19 +324,21 @@ public class PlantController {
 
     /**
      * Convert x world coord to an index in PlantController
+     *
      * @param xArg x world coordinate
      * @return the corresponding index
      */
-    public int xWorldCoordToIndex(float xArg){
+    public int xWorldCoordToIndex(float xArg) {
         return xCoordToIndex(xArg * worldToPixelConversionRatio);
     }
 
     /**
      * Convert y world coord to an index in PlantController
+     *
      * @param yArg y world coordinate
      * @return the corresponding index
      */
-    public int yWorldCoordToIndex(float yArg){
+    public int yWorldCoordToIndex(float yArg) {
         return yCoordToIndex(yArg * worldToPixelConversionRatio);
     }
 
@@ -368,11 +375,11 @@ public class PlantController {
         /**
          * width of the leaf at this node
          */
-        private final int leafWidth = 10;
+        private final float leafWidth = 1;
         /**
          * height of the leaf at this node
          */
-        private final int leafHeight = 1;
+        private final float leafHeight = 0.25f;
         /**
          * conversion ration for converting between world coords and pixels
          */
@@ -451,10 +458,16 @@ public class PlantController {
          * @param world   world to assign the leaf to
          */
         public void makeLeaf(leafType type,
-                             TextureRegion texture,
-                             World world) {
-            leaf = new Leaf(x/worldToPixelConversionRatio, y/worldToPixelConversionRatio, leafWidth, leafHeight);
+                             Texture texture,
+                             World world,
+                             WorldController wldc) {
+            leaf = new Leaf(x / worldToPixelConversionRatio,
+                            y / worldToPixelConversionRatio,
+                            leafWidth,
+                            leafHeight);
+            leaf.setTexture(texture);
             leafExists = true;
+            wldc.addObject(leaf);
         }
 
         //TODO: less hacky unmakeBranch implementation
