@@ -553,7 +553,7 @@ public class GameplayMode extends WorldController implements ContactListener {
         super.draw(dt);
         canvas.begin();
         canvas.draw(waterTexture, Color.WHITE, waterTexture.getWidth() / 2.0f, waterTexture.getHeight() / 2.0f, 50.0f, canvas.getHeight()- 40.0f, 0, 0.1f, 0.1f);
-        canvas.drawText(Integer.toString(resourceController.getCurrWater()), timesFont, 27.0f, canvas.getHeight()-80.0f);
+        canvas.drawText(Integer.toString(resourceController.getCurrWater()), timesFont, 30.0f, canvas.getHeight()-80.0f);
         plantController.draw(canvas);
         player.draw(canvas);
         hazardController.draw(canvas);
