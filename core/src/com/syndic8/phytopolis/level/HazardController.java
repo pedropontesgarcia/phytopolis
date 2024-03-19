@@ -3,6 +3,7 @@ package com.syndic8.phytopolis.level;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.math.Vector2;
 import com.syndic8.phytopolis.GameCanvas;
+import com.syndic8.phytopolis.WorldController;
 import com.syndic8.phytopolis.assets.AssetDirectory;
 import com.syndic8.phytopolis.level.models.Drone;
 import com.syndic8.phytopolis.level.models.Fire;
@@ -171,7 +172,7 @@ public class HazardController {
      * for generating and managing both fire and drone hazards, including their effects
      * on plant nodes.
      */
-    public void updateHazards() {
+    public void updateHazards(WorldController wldc) {
         generateHazard(Model.ModelType.FIRE);
         generateHazard(Model.ModelType.DRONE);
         int i = 0;
@@ -186,7 +187,7 @@ public class HazardController {
                         i--;
                         hazards.remove(f);
                         f.markRemoved(true);
-                        plantController.destroyAll((int) f.getLocation().x, (int) f.getLocation().y);
+                        plantController.destroyAll((int) f.getLocation().x, (int) f.getLocation().y, wldc);
                         spreadFire(f.getLocation());
                     }
                     f.setDuration(time - 1);
@@ -199,7 +200,7 @@ public class HazardController {
                         i--;
                         hazards.remove(d);
                         d.markRemoved(true);
-                        plantController.destroyAll((int) d.getLocation().x, (int) d.getLocation().y);
+                        plantController.destroyAll((int) d.getLocation().x, (int) d.getLocation().y, wldc);
                     }
                     d.setTimer(time2 - 1);
                 default:

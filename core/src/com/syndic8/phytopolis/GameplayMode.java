@@ -359,8 +359,8 @@ public class GameplayMode extends WorldController implements ContactListener {
         cameraVector.set(8 * 1920 / 16.0f,
                          (avatar.getY() + 3.5f) * 1080 / 9.0f);
         // generate hazards please
-        hazardController.updateHazards();
-        plantController.propagateDestruction();
+        hazardController.updateHazards(this);
+        plantController.propagateDestruction(this);
     }
 
     //    /**
