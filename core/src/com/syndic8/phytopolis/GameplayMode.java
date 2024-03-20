@@ -379,8 +379,8 @@ public class GameplayMode extends WorldController implements ContactListener {
         processPlantGrowth();
 
         avatar.applyForce();
-        System.out.println(avatar.getY());
-        System.out.println(avatar.atBottom());
+        //System.out.println(avatar.getY());
+        //System.out.println(avatar.atBottom());
         //        if (avatar.isJumping()) {
         //jumpId = playSound(jumpSound, jumpId, volume);
         //        }
