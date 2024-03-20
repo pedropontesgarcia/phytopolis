@@ -181,9 +181,9 @@ public class PlantController {
      */
     public void propagateDestruction(WorldController wldc) {
         if (plantCoyoteTimeRemaining == 0 && !destructionQueue.isEmpty()) {
-            System.out.println("Destruction propagation hit");
+            //System.out.println("Destruction propagation hit");
             int[] currentNode = destructionQueue.removeFirst();
-            System.out.println("CurrentNode: " + currentNode[0] + ", " + currentNode[1]);
+            //System.out.println("CurrentNode: " + currentNode[0] + ", " + currentNode[1]);
 
             int xIndex = currentNode[0];
             int yIndex = currentNode[1];
@@ -191,17 +191,17 @@ public class PlantController {
             for (int i = -1; i < 2; i++) {
                 int yOff = 0;
                 if(!lowerNode || i==0) yOff = 1;
-                System.out.println("Checking node x: " + (xIndex + i) + " y: " + (yIndex + yOff));
-                System.out.println("i = " + i);
-                System.out.println("yIndex < height: " + (yIndex+ yOff < height));
-                System.out.println("xIndex + i >= 0: " + (xIndex + i >= 0));
-                System.out.println("xIndex + i < width: " + (xIndex + i < width));
-                System.out.println("Can't grow at node: " + (!canGrowAtIndex(xIndex + i, yIndex+ yOff)));
-                System.out.println("Target node not empty: " + (plantGrid[xIndex + i][yIndex+ yOff].hasBranch() || plantGrid[xIndex + i][yIndex+ yOff].hasLeaf()));
+                //System.out.println("Checking node x: " + (xIndex + i) + " y: " + (yIndex + yOff));
+                //System.out.println("i = " + i);
+                //System.out.println("yIndex < height: " + (yIndex+ yOff < height));
+                //System.out.println("xIndex + i >= 0: " + (xIndex + i >= 0));
+                //System.out.println("xIndex + i < width: " + (xIndex + i < width));
+                //System.out.println("Can't grow at node: " + (!canGrowAtIndex(xIndex + i, yIndex+ yOff)));
+                //System.out.println("Target node not empty: " + (plantGrid[xIndex + i][yIndex+ yOff].hasBranch() || plantGrid[xIndex + i][yIndex+ yOff].hasLeaf()));
                 if (yIndex + yOff < height && xIndex + i >= 0 && xIndex + i < width &&
                         !canGrowAtIndex(xIndex + i, yIndex + yOff) &&
                         (plantGrid[xIndex + i][yIndex+ yOff].hasBranch() || plantGrid[xIndex + i][yIndex+ yOff].hasLeaf())) {
-                    System.out.println("Floating branch found, i = " + i);
+                    //System.out.println("Floating branch found, i = " + i);
                     destroyAll(xIndex + i, yIndex+ yOff, wldc);
                     //destructionQueue.addLast(new int[]{xIndex + i, yIndex});
                 }
@@ -251,7 +251,7 @@ public class PlantController {
         if (inBounds(xIndex + 1, yIndex - yOff))
             downRight = plantGrid[xIndex + 1][yIndex -
                     yOff].hasBranchInDirection(branchDirection.LEFT);
-        System.out.println("Below: " + below + " downLeft: " + downLeft + " downRight: " + downRight);
+        //System.out.println("Below: " + below + " downLeft: " + downLeft + " downRight: " + downRight);
         return below || downLeft || downRight;
     }
 
