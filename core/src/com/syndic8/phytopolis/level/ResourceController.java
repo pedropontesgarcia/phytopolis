@@ -35,7 +35,7 @@ public class ResourceController {
 
     public void decrementGrow() {
         if (!canGrow()) {
-            System.out.println("NOT ENOUGH WATER!");
+            //System.out.println("NOT ENOUGH WATER!");
         } else {
             currWater -= GROW_AMT;
         }
@@ -43,7 +43,7 @@ public class ResourceController {
 
     public void decrementExtinguish() {
         if (!canExtinguish()) {
-            System.out.println("NOT ENOUGH WATER!");
+            //System.out.println("NOT ENOUGH WATER!");
         } else {
             currWater -= FIRE_AMT;
         }
@@ -51,16 +51,16 @@ public class ResourceController {
 
     public void update(Player player) {
         if (player.atBottom()) {
-            System.out.println("AT BOTTOM");
+            //System.out.println("AT BOTTOM");
             framesOnGround++;
         }
-        System.out.println(framesOnGround);
-        System.out.println(currWater);
+        //System.out.println(framesOnGround);
+        //System.out.println(currWater);
         if (framesOnGround >= 4) {
-            System.out.println("IN IF");
+            //System.out.println("IN IF");
             framesOnGround -= 4;
             if (currWater < MAX_WATER) {
-                System.out.println("NOT MAX");
+                //System.out.println("NOT MAX");
                 currWater++;
             }
         }
