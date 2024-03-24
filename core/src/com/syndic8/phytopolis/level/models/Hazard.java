@@ -4,10 +4,21 @@ import com.badlogic.gdx.graphics.Color;
 import com.syndic8.phytopolis.GameCanvas;
 
 public abstract class Hazard extends CircleObject {
+    private static final int HAZARD_RADIUS = 30;
+    /**
+     * Creates an object with the desired hazard radius.
+     */
     public Hazard() {
-        super(30);
+        super(HAZARD_RADIUS);
     }
 
+    /**
+     * Returns the type of this object.
+     *
+     * We use this instead of runtime-typing for performance reasons.
+     *
+     * @return the type of this object.
+     */
     @Override
     public abstract ModelType getType();
 

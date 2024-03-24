@@ -95,6 +95,13 @@ public class Branch extends Model {
         destroyed = value;
     }
 
+    /**
+     * Returns the type of this object.
+     *
+     * We use this instead of runtime-typing for performance reasons.
+     *
+     * @return the type of this object.
+     */
     @Override
     public ModelType getType() {
         return ModelType.BRANCH;
@@ -131,6 +138,13 @@ public class Branch extends Model {
                     1.3f);
     }
 
+    /**
+     * Draws the outline of the physics body.
+     *
+     * This method can be helpful for understanding issues with collisions.
+     *
+     * @param canvas Drawing context
+     */
     public void drawDebug(GameCanvas canvas) {
         draw(canvas);
     }
