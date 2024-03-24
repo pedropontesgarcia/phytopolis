@@ -16,6 +16,7 @@
  */
 package com.syndic8.phytopolis;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.Color;
@@ -68,7 +69,9 @@ public abstract class WorldController implements Screen {
     /**
      * The amount of time for a physics engine step.
      */
-    public static final float WORLD_STEP = 1 / 60.0f;
+    public static final float WORLD_STEP = 1/60f;
+
+    private float accumulator = 0.0f;
     /**
      * Number of velocity iterations for the constrain solvers
      */
@@ -342,7 +345,7 @@ public abstract class WorldController implements Screen {
         //                                                 Texture.class));
         //goalTile = new TextureRegion(directory.getEntry("shared:goal",
         //                                                Texture.class));
-        //displayFont = directory.getEntry("shared:retro", BitmapFont.class);
+        displayFont = directory.getEntry("shared:retro", BitmapFont.class);
     }
 
     /**
@@ -476,7 +479,18 @@ public abstract class WorldController implements Screen {
         }
 
         // Turn the physics engine crank.
-        world.step(WORLD_STEP, WORLD_VELOC, WORLD_POSIT);
+        //world.step(1/35f, WORLD_VELOC, WORLD_POSIT);
+        // Accumulate time
+        accumulator += dt;
+        System.out.println(dt);
+
+
+        // Process fixed time steps
+        while (accumulator >= WORLD_STEP) {
+            world.step(1/35f, WORLD_VELOC, WORLD_POSIT);
+            accumulator -= WORLD_STEP;
+        }
+
 
         // Garbage collect the deleted objects.
         // Note how we use the linked list nodes to delete O(1) in place.
