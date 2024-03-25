@@ -638,7 +638,7 @@ public class PlantController {
         }
 
         public void drawLeaf(GameCanvas canvas) {
-            if (leaf != null) {
+            if (leaf != null && !leaf.isRemoved()) {
                 leaf.draw(canvas);
             }
         }
