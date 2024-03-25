@@ -143,7 +143,7 @@ public class PlantController {
                          WorldController wldc) {
         int xIndex = xCoordToIndex(x);
         int yIndex = yCoordToIndex(y);
-        plantGrid[xIndex][yIndex].makeLeaf(type, leafTexture, world, wldc);
+        if(!plantGrid[xIndex][yIndex].hasLeaf()) plantGrid[xIndex][yIndex].makeLeaf(type, leafTexture, world, wldc);
     }
 
     /**
@@ -588,7 +588,7 @@ public class PlantController {
             leafExists = false;
             if (leaf != null) {
                 leaf.markRemoved(true);
-                leaf = null;
+                //leaf = null;
             }
         }
 
@@ -640,7 +640,7 @@ public class PlantController {
         }
 
         public void drawLeaf(GameCanvas canvas) {
-            if (leaf != null) {
+            if (leaf != null && !leaf.isRemoved()) {
                 leaf.draw(canvas);
             }
         }
