@@ -39,7 +39,9 @@ import java.util.HashMap;
  * place nicely with the static assets.
  */
 public class GameplayMode extends WorldController implements ContactListener {
+    private boolean sunCollected;
 
+    private boolean waterCollected;
     // Define collision categories (bits)
     final short CATEGORY_PLAYER = 0x0001;
     final short CATEGORY_PLATFORM = 0x0002;
@@ -551,6 +553,29 @@ public class GameplayMode extends WorldController implements ContactListener {
                                 ((Model) fix1.getBody()
                                         .getUserData()).getType() ==
                                         Model.ModelType.LEAF);
+        boolean isCollisionBetweenPlayerandWater =
+                (fix1.getBody() == avatar.getBody() &&
+                ((Model) fix2.getBody().getUserData()).getType() ==
+                        Model.ModelType.WATER) ||
+                (fix2.getBody() == avatar.getBody() &&
+                        ((Model) fix1.getBody()
+                                .getUserData()).getType() ==
+                                Model.ModelType.WATER);
+        boolean isCollisionBetweenPlayerAndSun =
+                (fix1.getBody() == avatar.getBody() &&
+                        ((Model) fix2.getBody().getUserData()).getType() ==
+                                Model.ModelType.SUN) ||
+                        (fix2.getBody() == avatar.getBody() &&
+                                ((Model) fix1.getBody()
+                                        .getUserData()).getType() ==
+                                        Model.ModelType.SUN);
+        if (isCollisionBetweenPlayerandWater){
+            sunCollected = true;
+        }
+        if (isCollisionBetweenPlayerandWater){
+            waterCollected = true;
+        }
+
         boolean isPlayerGoingUp = avatar.getVY() >= 0;
         boolean isPlayerBelow = false;
         if (fix1.getBody() == avatar.getBody()) isPlayerBelow =

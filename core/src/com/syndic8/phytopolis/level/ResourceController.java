@@ -11,6 +11,8 @@ public class ResourceController {
     private final int GROW_AMT = 5;
     /** Amount of water required to extinguish a fire */
     private final int FIRE_AMT = 20;
+
+    private int currSun;
     /** Current amount of water stored */
     private int currWater;
     /** Frames on ground (for getting water) */
