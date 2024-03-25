@@ -1,5 +1,6 @@
 package com.syndic8.phytopolis.level;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.World;
@@ -48,7 +49,7 @@ public class PlantController {
     /**
      * conversion ratio from world units to pixels
      */
-    private final float worldToPixelConversionRatio = 120;
+    private final float worldToPixelConversionRatio;
     /**
      * how many frames between propagations of destruction
      */
@@ -95,6 +96,8 @@ public class PlantController {
                            ResourceController rc) {
         plantGrid = new PlantNode[width][height];
         this.world = world;
+        worldToPixelConversionRatio = scale.x;
+        this.scale = scale;
         this.xOrigin = xOrigin * worldToPixelConversionRatio;
         this.yOrigin = yOrigin * worldToPixelConversionRatio;
         this.width = width;
@@ -103,7 +106,6 @@ public class PlantController {
         this.xSpacing = (float) (Math.sqrt(
                 (this.gridSpacing * this.gridSpacing) -
                         ((this.gridSpacing / 2f) * (this.gridSpacing / 2f))));
-        this.scale = scale;
         this.resourceController = rc;
         for (int x = 0; x < width; x++) {
             for (int y = 0; y < height; y++) {
@@ -556,7 +558,7 @@ public class PlantController {
                                 leafWidth,
                                 leafHeight);
                 leaf.setTexture(texture);
-                leaf.setDrawScale(120, 120);
+                leaf.setDrawScale(scale.x, scale.y);
                 leafExists = true;
                 wldc.addObject(leaf);
                 resourceController.decrementGrow();
