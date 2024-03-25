@@ -482,7 +482,6 @@ public abstract class WorldController implements Screen {
         //world.step(1/35f, WORLD_VELOC, WORLD_POSIT);
         // Accumulate time
         accumulator += dt;
-        System.out.println(dt);
 
 
         // Process fixed time steps

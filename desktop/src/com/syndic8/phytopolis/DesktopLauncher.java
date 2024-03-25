@@ -13,8 +13,10 @@ public class DesktopLauncher {
         //		new Lwjgl3Application(new GDXRoot(), config);
 
         Lwjgl3ApplicationConfiguration config = new Lwjgl3ApplicationConfiguration();
-
-        config.setFullscreenMode(Lwjgl3ApplicationConfiguration.getDisplayMode());
+        // windowed fullscreen
+        config.setWindowedMode(Lwjgl3ApplicationConfiguration.getDisplayMode().width, Lwjgl3ApplicationConfiguration.getDisplayMode().height);
+        // fullscreen
+        // config.setFullscreenMode(Lwjgl3ApplicationConfiguration.getDisplayMode());
         config.setTitle("Phytopolis");
         new Lwjgl3Application(new GDXRoot(), config);
     }

@@ -386,8 +386,8 @@ public class GameplayMode extends WorldController implements ContactListener {
         //        }
 
         //handleDrop();
-        cameraVector.set(8 * 1920 / 16.0f,
-                         Math.max((avatar.getY() - 2) * 1080 / 9.0f, 600));
+        cameraVector.set(8 * canvas.width / 16.0f,
+                         Math.max((avatar.getY() - 2) * canvas.height / 9.0f, 600));
         // generate hazards please
         resourceController.update(avatar);
         hazardController.updateHazards(this);
