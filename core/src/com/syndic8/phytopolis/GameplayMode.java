@@ -353,11 +353,11 @@ public class GameplayMode extends WorldController implements ContactListener {
                                        PlantController.branchType.NORMAL);
 
         } else if (InputController.getInstance().didMousePress()) {
-            plantController.growLeaf(InputController.getInstance().getGrowX(),
-                                     InputController.getInstance().getGrowY() +
-                                             cameraVector.y - 500,
-                                     PlantController.leafType.NORMAL,
-                                     this);
+            Model newLeaf = (Model) plantController.growLeaf(InputController.getInstance().getGrowX(),
+                    InputController.getInstance().getGrowY() +
+                            cameraVector.y - 500,
+                    PlantController.leafType.NORMAL);
+            if (newLeaf != null) addObject(newLeaf);
         }
         return false;
     }
@@ -397,7 +397,7 @@ public class GameplayMode extends WorldController implements ContactListener {
             hazardController.extinguishFire(plantController.xCoordToIndex(avatar.getX()),
                                             plantController.yCoordToIndex(avatar.getY()));
         }
-        plantController.propagateDestruction(this);
+        plantController.propagateDestruction();
     }
 
     //    /**
