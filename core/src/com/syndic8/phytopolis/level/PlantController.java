@@ -140,7 +140,8 @@ public class PlantController {
                          leafType type) {
         int xIndex = xCoordToIndex(x);
         int yIndex = yCoordToIndex(y);
-        if(!plantGrid[xIndex][yIndex].hasLeaf()) return plantGrid[xIndex][yIndex].makeLeaf(type, leafTexture);
+        boolean lowerNode = xIndex % 2 == 0;
+        if(!plantGrid[xIndex][yIndex].hasLeaf() && (yIndex>0 || !lowerNode)) return plantGrid[xIndex][yIndex].makeLeaf(type, leafTexture);
         return null;
     }
 
