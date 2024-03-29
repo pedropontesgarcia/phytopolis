@@ -39,9 +39,9 @@ import java.util.HashMap;
  * place nicely with the static assets.
  */
 public class GameplayMode extends WorldController implements ContactListener {
-    private boolean sunCollected;
+    private int sunCollected;
 
-    private boolean waterCollected;
+    private int waterCollected;
     // Define collision categories (bits)
     final short CATEGORY_PLAYER = 0x0001;
     final short CATEGORY_PLATFORM = 0x0002;
@@ -543,6 +543,8 @@ public class GameplayMode extends WorldController implements ContactListener {
      * Unused ContactListener method
      */
     public void preSolve(Contact contact, Manifold oldManifold) {
+        sunCollected = 0;
+        waterCollected = 0;
         Fixture fix1 = contact.getFixtureA();
         Fixture fix2 = contact.getFixtureB();
         boolean isCollisionBetweenPlayerAndLeaf =
@@ -553,7 +555,7 @@ public class GameplayMode extends WorldController implements ContactListener {
                                 ((Model) fix1.getBody()
                                         .getUserData()).getType() ==
                                         Model.ModelType.LEAF);
-        boolean isCollisionBetweenPlayerandWater =
+        boolean isCollisionBetweenPlayerAndWater =
                 (fix1.getBody() == avatar.getBody() &&
                 ((Model) fix2.getBody().getUserData()).getType() ==
                         Model.ModelType.WATER) ||
@@ -569,11 +571,11 @@ public class GameplayMode extends WorldController implements ContactListener {
                                 ((Model) fix1.getBody()
                                         .getUserData()).getType() ==
                                         Model.ModelType.SUN);
-        if (isCollisionBetweenPlayerandWater){
-            sunCollected = true;
+        if (isCollisionBetweenPlayerAndSun){
+            resourceController.setCurrSun(1);
         }
-        if (isCollisionBetweenPlayerandWater){
-            waterCollected = true;
+        if (isCollisionBetweenPlayerAndWater){
+            resourceController.setCurrWater(5);
         }
 
         boolean isPlayerGoingUp = avatar.getVY() >= 0;
