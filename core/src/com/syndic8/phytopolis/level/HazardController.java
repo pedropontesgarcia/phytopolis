@@ -302,6 +302,7 @@ public class HazardController {
             if (f == null) return;
             if ((int) f.getLocation().x == x && (int) f.getLocation().y == y) {
                 hazards.remove(f);
+                f.markRemoved(true);
                 resourceController.decrementExtinguish();
             }
 

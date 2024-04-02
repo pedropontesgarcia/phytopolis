@@ -157,8 +157,6 @@ public class GameplayMode extends WorldController implements ContactListener {
                                                 200);
 
         background = null;
-        scale = new Vector2(120, 120);
-
     }
 
     /**
