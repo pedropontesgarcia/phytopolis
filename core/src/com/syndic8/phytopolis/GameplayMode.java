@@ -39,7 +39,9 @@ import java.util.HashMap;
  * place nicely with the static assets.
  */
 public class GameplayMode extends WorldController implements ContactListener {
+    private int sunCollected;
 
+    private int waterCollected;
     // Define collision categories (bits)
     final short CATEGORY_PLAYER = 0x0001;
     final short CATEGORY_PLATFORM = 0x0002;
@@ -349,11 +351,11 @@ public class GameplayMode extends WorldController implements ContactListener {
                                        PlantController.branchType.NORMAL);
 
         } else if (InputController.getInstance().didMousePress()) {
-            plantController.growLeaf(InputController.getInstance().getGrowX(),
-                                     InputController.getInstance().getGrowY() +
-                                             cameraVector.y - 500,
-                                     PlantController.leafType.NORMAL,
-                                     this);
+            Model newLeaf = (Model) plantController.growLeaf(InputController.getInstance().getGrowX(),
+                    InputController.getInstance().getGrowY() +
+                            cameraVector.y - 500,
+                    PlantController.leafType.NORMAL);
+            if (newLeaf != null) addObject(newLeaf);
         }
         return false;
     }
@@ -393,7 +395,7 @@ public class GameplayMode extends WorldController implements ContactListener {
             hazardController.extinguishFire(plantController.xCoordToIndex(avatar.getX()),
                                             plantController.yCoordToIndex(avatar.getY()));
         }
-        plantController.propagateDestruction(this);
+        plantController.propagateDestruction();
     }
 
     //    /**
@@ -539,6 +541,8 @@ public class GameplayMode extends WorldController implements ContactListener {
      * Unused ContactListener method
      */
     public void preSolve(Contact contact, Manifold oldManifold) {
+        sunCollected = 0;
+        waterCollected = 0;
         Fixture fix1 = contact.getFixtureA();
         Fixture fix2 = contact.getFixtureB();
         boolean isCollisionBetweenPlayerAndLeaf =
@@ -549,6 +553,29 @@ public class GameplayMode extends WorldController implements ContactListener {
                                 ((Model) fix1.getBody()
                                         .getUserData()).getType() ==
                                         Model.ModelType.LEAF);
+        boolean isCollisionBetweenPlayerAndWater =
+                (fix1.getBody() == avatar.getBody() &&
+                ((Model) fix2.getBody().getUserData()).getType() ==
+                        Model.ModelType.WATER) ||
+                (fix2.getBody() == avatar.getBody() &&
+                        ((Model) fix1.getBody()
+                                .getUserData()).getType() ==
+                                Model.ModelType.WATER);
+        boolean isCollisionBetweenPlayerAndSun =
+                (fix1.getBody() == avatar.getBody() &&
+                        ((Model) fix2.getBody().getUserData()).getType() ==
+                                Model.ModelType.SUN) ||
+                        (fix2.getBody() == avatar.getBody() &&
+                                ((Model) fix1.getBody()
+                                        .getUserData()).getType() ==
+                                        Model.ModelType.SUN);
+        if (isCollisionBetweenPlayerAndSun){
+            resourceController.setCurrSun(1);
+        }
+        if (isCollisionBetweenPlayerAndWater){
+            resourceController.setCurrWater(5);
+        }
+
         boolean isPlayerGoingUp = avatar.getVY() >= 0;
         boolean isPlayerBelow = false;
         if (fix1.getBody() == avatar.getBody()) isPlayerBelow =

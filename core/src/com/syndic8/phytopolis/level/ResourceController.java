@@ -2,15 +2,21 @@ package com.syndic8.phytopolis.level;
 
 import com.syndic8.phytopolis.level.models.Player;
 
+import static java.lang.Math.max;
+
 public class ResourceController {
     /** Maximum amount of water that can be stored */
     private final int MAX_WATER = 100;
+
+    private final int MAX_SUN = 8;
 //    /** Amount of water required to grow a branch */
 //    private final int BRANCH_AMT = 5;
     /** Amount of water required to grow a branch/leaf */
     private final int GROW_AMT = 5;
     /** Amount of water required to extinguish a fire */
     private final int FIRE_AMT = 20;
+
+    private int currSun;
     /** Current amount of water stored */
     private int currWater;
     /** Frames on ground (for getting water) */
@@ -19,11 +25,25 @@ public class ResourceController {
     public ResourceController() {
         currWater = MAX_WATER;
         framesOnGround = 0;
+        currSun = 0;
     }
 
     public int getCurrWater() {
         return currWater;
     }
+
+    public int getCurrSun(){return currSun;}
+
+    public void setCurrWater(int water){
+        if (!fullWater()){
+            currWater += water;
+        }
+    }
+
+    public boolean fullWater(){
+        return currWater == MAX_WATER;
+    }
+    public void setCurrSun(int sun){currSun += sun;}
 
     public boolean canGrow() {
         return currWater >= GROW_AMT;

@@ -210,7 +210,7 @@ public class HazardController {
                         i--;
                         hazards.remove(f);
                         f.markRemoved(true);
-                        plantController.destroyAll((int) f.getLocation().x, (int) f.getLocation().y, wldc);
+                        plantController.destroyAll((int) f.getLocation().x, (int) f.getLocation().y);
                         spreadFire(f.getLocation());
                     }
                     f.setDuration(time - 1);
@@ -223,7 +223,7 @@ public class HazardController {
                         i--;
                         hazards.remove(d);
                         d.markRemoved(true);
-                        plantController.destroyAll((int) d.getLocation().x, (int) d.getLocation().y, wldc);
+                        plantController.destroyAll((int) d.getLocation().x, (int) d.getLocation().y);
                     }
                     d.setTimer(time2 - 1);
                 default:

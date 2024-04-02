@@ -137,13 +137,14 @@ public class PlantController {
         plantGrid[xIndex][yIndex].makeBranch(direction, type, world);
     }
 
-    public void growLeaf(float x,
+    public Leaf growLeaf(float x,
                          float y,
-                         leafType type,
-                         WorldController wldc) {
+                         leafType type) {
         int xIndex = xCoordToIndex(x);
         int yIndex = yCoordToIndex(y);
-        if(!plantGrid[xIndex][yIndex].hasLeaf()) plantGrid[xIndex][yIndex].makeLeaf(type, leafTexture, world, wldc);
+        boolean lowerNode = xIndex % 2 == 0;
+        if(!plantGrid[xIndex][yIndex].hasLeaf() && (yIndex>0 || !lowerNode)) return plantGrid[xIndex][yIndex].makeLeaf(type, leafTexture);
+        return null;
     }
 
     /**
@@ -167,9 +168,9 @@ public class PlantController {
      * @param xArg x index of the node to be accessed
      * @param yArg y index of the node to be accessed
      */
-    public void destroyAll(int xArg, int yArg, WorldController wldc) {
+    public void destroyAll(int xArg, int yArg) {
         PlantNode nodeToDestroy = plantGrid[xArg][yArg];
-        nodeToDestroy.unmakeLeaf(wldc);
+        nodeToDestroy.unmakeLeaf();
         nodeToDestroy.unmakeBranch(branchDirection.LEFT);
         nodeToDestroy.unmakeBranch(branchDirection.MIDDLE);
         nodeToDestroy.unmakeBranch(branchDirection.RIGHT);
@@ -181,7 +182,7 @@ public class PlantController {
      * method to destroy branches no longer attatched to the plant,
      * should be called every frame
      */
-    public void propagateDestruction(WorldController wldc) {
+    public void propagateDestruction() {
         if (plantCoyoteTimeRemaining == 0 && !destructionQueue.isEmpty()) {
             //System.out.println("Destruction propagation hit");
             int[] currentNode = destructionQueue.removeFirst();
@@ -204,7 +205,7 @@ public class PlantController {
                         !canGrowAtIndex(xIndex + i, yIndex + yOff) &&
                         (plantGrid[xIndex + i][yIndex+ yOff].hasBranch() || plantGrid[xIndex + i][yIndex+ yOff].hasLeaf())) {
                     //System.out.println("Floating branch found, i = " + i);
-                    destroyAll(xIndex + i, yIndex+ yOff, wldc);
+                    destroyAll(xIndex + i, yIndex+ yOff);
                     //destructionQueue.addLast(new int[]{xIndex + i, yIndex});
                 }
             }
@@ -543,12 +544,9 @@ public class PlantController {
          *
          * @param type    type of leaf to create
          * @param texture texture of the leaf
-         * @param world   world to assign the leaf to
          */
-        public void makeLeaf(leafType type,
-                             Texture texture,
-                             World world,
-                             WorldController wldc) {
+        public Leaf makeLeaf(leafType type,
+                             Texture texture) {
             if (yCoordToIndex(y / worldToPixelConversionRatio) > 0 &&
                     !leafExists && hasBranch() ||
                     growableAt(x / worldToPixelConversionRatio,
@@ -560,9 +558,11 @@ public class PlantController {
                 leaf.setTexture(texture);
                 leaf.setDrawScale(scale.x, scale.y);
                 leafExists = true;
-                wldc.addObject(leaf);
+                //worldcontroller.addObject(leaf);
                 resourceController.decrementGrow();
+                return leaf;
             }
+            return null;
         }
 
         //TODO: less hacky unmakeBranch implementation
@@ -584,7 +584,7 @@ public class PlantController {
             }
         }
 
-        public void unmakeLeaf(WorldController wldc) {
+        public void unmakeLeaf() {
             leafExists = false;
             if (leaf != null) {
                 leaf.markRemoved(true);
