@@ -427,8 +427,6 @@ public class PlantController {
         return new Vector2(screenX, screenY);
     }
 
-    //TODO: Update with new branch type
-
     /**
      * enum containing directions in which a plant can grow from a node
      */
@@ -437,18 +435,17 @@ public class PlantController {
     /**
      * enum containing possible branch types
      */
-    public enum branchType {NORMAL}
+    public enum branchType {NORMAL, REINFORCED}
 
     /**
      * enum containing possible leaf types
      */
-    public enum leafType {NORMAL}
+    public enum leafType {NORMAL, BOUNCY}
 
     /**
      * representation of a node in the plantGrid
      */
     public class PlantNode {
-        //TODO: change this class to contain branch objects instead of booleans
         /**
          * x coordinate of this node
          */
@@ -562,8 +559,6 @@ public class PlantController {
             }
             return null;
         }
-
-        //TODO: less hacky unmakeBranch implementation
 
         /**
          * destroy target branch
