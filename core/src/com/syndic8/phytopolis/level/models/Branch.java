@@ -134,8 +134,8 @@ public class Branch extends Model {
                     position.x,
                     position.y,
                     angle,
-                    1.3f,
-                    1.3f);
+                    scale.x/90f,
+                    scale.x/90f);
     }
 
     /**

@@ -178,7 +178,7 @@ public abstract class WorldController implements Screen {
      * @param gravity The downward gravity
      */
     protected WorldController(float width, float height, float gravity) {
-        this(new Rectangle(0, 0, 16, 9), new Vector2(0, DEFAULT_GRAVITY));
+        this(new Rectangle(0, 0, width, height), new Vector2(0, DEFAULT_GRAVITY));
     }
 
     /**
@@ -194,7 +194,19 @@ public abstract class WorldController implements Screen {
     protected WorldController(Rectangle bounds, Vector2 gravity) {
         world = new World(gravity, false);
         this.bounds = new Rectangle(bounds);
-        this.scale = new Vector2(120, 120);
+
+        // Reference aspect ratio (16:9)
+        float referenceAspectRatio = 16f / 9f;
+
+        // Actual aspect ratio of the canvas
+        float actualAspectRatio = (float) Gdx.graphics.getWidth() / Gdx.graphics.getHeight();
+
+        // Calculate scale factors
+        float scaleX = Gdx.graphics.getWidth() / 16f;
+        float scaleY = scaleX * (referenceAspectRatio / actualAspectRatio);
+
+        this.scale = new Vector2(scaleX, scaleY);
+
         complete = false;
         failed = false;
         debug = false;
@@ -309,6 +321,17 @@ public abstract class WorldController implements Screen {
      */
     public void setCanvas(GameCanvas canvas) {
         this.canvas = canvas;
+        // Reference aspect ratio (16:9)
+        float referenceAspectRatio = 16f / 9f;
+
+        // Actual aspect ratio of the canvas
+        float actualAspectRatio = (float) canvas.getWidth() / canvas.getHeight();
+
+        // Calculate scale factors
+        float scaleX = canvas.getWidth() / 16f;
+        float scaleY = scaleX * (referenceAspectRatio / actualAspectRatio);
+
+        this.scale = new Vector2(scaleX, scaleY);
     }
 
     /**

@@ -351,7 +351,7 @@ public class GameplayMode extends WorldController implements ContactListener {
                                        PlantController.branchType.NORMAL);
 
         } else if (InputController.getInstance().didMousePress()) {
-            Model newLeaf = (Model) plantController.growLeaf(InputController.getInstance().getGrowX(),
+            Model newLeaf = plantController.growLeaf(InputController.getInstance().getGrowX(),
                     InputController.getInstance().getGrowY() +
                             cameraVector.y - 500,
                     PlantController.leafType.NORMAL);
@@ -386,8 +386,8 @@ public class GameplayMode extends WorldController implements ContactListener {
         //        }
 
         //handleDrop();
-        cameraVector.set(8 * canvas.width / 16.0f,
-                         Math.max((avatar.getY() - 2) * canvas.height / 9.0f, 600));
+        cameraVector.set(8 * scale.x,
+                         Math.max((avatar.getY() - 2) * scale.y, 600));
         // generate hazards please
         resourceController.update(avatar);
         hazardController.updateHazards(this);
@@ -631,7 +631,6 @@ public class GameplayMode extends WorldController implements ContactListener {
                         30.0f,
                         cameraVector.y + canvas.getHeight() / 2.0f - 100.0f);
         plantController.draw(canvas);
-        player.draw(canvas);
         hazardController.draw(canvas);
         canvas.end();
     }

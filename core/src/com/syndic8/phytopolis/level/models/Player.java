@@ -1,5 +1,6 @@
 package com.syndic8.phytopolis.level.models;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.Fixture;
@@ -119,7 +120,7 @@ public class Player extends CapsuleObject {
      * @return whether or not the player is at the bottom of the game
      */
     public boolean atBottom() {
-        return Math.abs(getY() - 2) < 0.01;
+        return Math.abs(getY() - 2) < 0.1;
     }
 
     /**
@@ -215,7 +216,7 @@ public class Player extends CapsuleObject {
         maxspeed = data.getFloat("maxspeed", 0);
         damping = data.getFloat("damping", 0);
         force = data.getFloat("force", 0);
-        jump_force = data.getFloat( "jump_force", 0 );
+        jump_force = data.getFloat( "jump_force", 0 ) * (1080f / Gdx.graphics.getHeight());
         jumpLimit = data.getInt( "jump_cool", 0 );
         shotLimit = data.getInt( "shot_cool", 0 );
         sensorName = "DudeGroundSensor";
