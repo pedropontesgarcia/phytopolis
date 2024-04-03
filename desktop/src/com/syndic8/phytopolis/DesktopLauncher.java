@@ -20,7 +20,7 @@ public class DesktopLauncher {
         );
         // config.setWindowedMode(1920, 1080); // 1080p
         // config.setWindowedMode(1280, 720); // 720p
-        config.setWindowedMode(1920, 1200); // Mac 16:10
+        // config.setWindowedMode(1920, 1200); // Mac 16:10
         // config.setFullscreenMode(Lwjgl3ApplicationConfiguration.getDisplayMode()); // fullscreen
         config.setTitle("Phytopolis");
         new Lwjgl3Application(new GDXRoot(), config);
