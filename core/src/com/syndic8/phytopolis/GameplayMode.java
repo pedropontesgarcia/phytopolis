@@ -39,9 +39,9 @@ import java.util.HashMap;
  * place nicely with the static assets.
  */
 public class GameplayMode extends WorldController implements ContactListener {
-    private boolean sunCollected;
+    private int sunCollected;
 
-    private boolean waterCollected;
+    private int waterCollected;
     // Define collision categories (bits)
     final short CATEGORY_PLAYER = 0x0001;
     final short CATEGORY_PLATFORM = 0x0002;
@@ -159,8 +159,6 @@ public class GameplayMode extends WorldController implements ContactListener {
                                                 200);
 
         background = null;
-        scale = new Vector2(120, 120);
-
     }
 
     /**
@@ -353,7 +351,7 @@ public class GameplayMode extends WorldController implements ContactListener {
                                        PlantController.branchType.NORMAL);
 
         } else if (InputController.getInstance().didMousePress()) {
-            Model newLeaf = (Model) plantController.growLeaf(InputController.getInstance().getGrowX(),
+            Model newLeaf = plantController.growLeaf(InputController.getInstance().getGrowX(),
                     InputController.getInstance().getGrowY() +
                             cameraVector.y - 500,
                     PlantController.leafType.NORMAL);
@@ -388,8 +386,8 @@ public class GameplayMode extends WorldController implements ContactListener {
         //        }
 
         //handleDrop();
-        cameraVector.set(8 * canvas.width / 16.0f,
-                         Math.max((avatar.getY() - 2) * canvas.height / 9.0f, 600));
+        cameraVector.set(8 * scale.x,
+                         Math.max((avatar.getY() - 2) * scale.y, 600));
         // generate hazards please
         resourceController.update(avatar);
         hazardController.updateHazards(this);
@@ -543,6 +541,8 @@ public class GameplayMode extends WorldController implements ContactListener {
      * Unused ContactListener method
      */
     public void preSolve(Contact contact, Manifold oldManifold) {
+        sunCollected = 0;
+        waterCollected = 0;
         Fixture fix1 = contact.getFixtureA();
         Fixture fix2 = contact.getFixtureB();
         boolean isCollisionBetweenPlayerAndLeaf =
@@ -553,7 +553,7 @@ public class GameplayMode extends WorldController implements ContactListener {
                                 ((Model) fix1.getBody()
                                         .getUserData()).getType() ==
                                         Model.ModelType.LEAF);
-        boolean isCollisionBetweenPlayerandWater =
+        boolean isCollisionBetweenPlayerAndWater =
                 (fix1.getBody() == avatar.getBody() &&
                 ((Model) fix2.getBody().getUserData()).getType() ==
                         Model.ModelType.WATER) ||
@@ -569,11 +569,11 @@ public class GameplayMode extends WorldController implements ContactListener {
                                 ((Model) fix1.getBody()
                                         .getUserData()).getType() ==
                                         Model.ModelType.SUN);
-        if (isCollisionBetweenPlayerandWater){
-            sunCollected = true;
+        if (isCollisionBetweenPlayerAndSun){
+            resourceController.setCurrSun(1);
         }
-        if (isCollisionBetweenPlayerandWater){
-            waterCollected = true;
+        if (isCollisionBetweenPlayerAndWater){
+            resourceController.setCurrWater(5);
         }
 
         boolean isPlayerGoingUp = avatar.getVY() >= 0;
@@ -631,7 +631,6 @@ public class GameplayMode extends WorldController implements ContactListener {
                         30.0f,
                         cameraVector.y + canvas.getHeight() / 2.0f - 100.0f);
         plantController.draw(canvas);
-        player.draw(canvas);
         hazardController.draw(canvas);
         canvas.end();
     }

@@ -1,5 +1,6 @@
 package com.syndic8.phytopolis.level.models;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
@@ -25,8 +26,13 @@ public abstract class Model {
     }
     /** Reference to texture origin */
     protected Vector2 origin;
+
     /** Whether the object should be removed from the world on next pass */
     protected boolean toRemove;
+
+    /** Scale of the game objects */
+    protected Vector2 scale = new Vector2(Gdx.graphics.getWidth()/16f, Gdx.graphics.getHeight()/9f);
+
     /** The texture for the shape. */
     protected TextureRegion texture;
 //    /** CURRENT image for this object. May change over time. */
