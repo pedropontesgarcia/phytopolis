@@ -16,16 +16,45 @@ public class Timer {
     private long startTime;
 
     private boolean running;
+    public int numStars;
+
+    public int acquiredStars;
+
+    public int starTime;
     public Timer(int second){
         startSeconds = second % 60;
         startMinutes = second / 60;
         seconds = startSeconds;
         minutes = startMinutes;
     }
+    public Timer(int second, int stars, int starTime){
+        new Timer(second);
+        numStars = stars;
+        this.starTime = starTime;
 
+    }
     public void startTimer(){
         startTime = TimeUtils.millis();
         running = true;
+    }
+
+    public void setStars(int stars){
+        numStars = stars;
+    }
+
+    public int getAcquiredStars(){
+        if (!running){
+            int elapsedSeconds =
+                    (startSeconds + startMinutes * 60) - (seconds + minutes * 60);
+
+            acquiredStars =
+                    numStars - (elapsedSeconds/starTime);
+
+            return Math.max(acquiredStars, 0);
+        }
+
+        return 0;
+
     }
 
     public void updateTime(){
@@ -57,7 +86,5 @@ public class Timer {
         font.getData().setScale(scale.x, scale.y);
         displayTime(canvas, font, color, x, y);
     }
-
-
 
 }
