@@ -45,28 +45,53 @@ public class Timer {
      */
     public int starTime;
 
-
+    /**
+     * Creates a new timer representing the amount of
+     * seconds passed in minutes and seconds.
+     * <p>
+     * @param second The total time represented in seconds
+     */
     public Timer(int second){
         startSeconds = second % 60;
         startMinutes = second / 60;
         seconds = startSeconds;
         minutes = startMinutes;
     }
+    /**
+     * Creates a new timer representing the amount of
+     * seconds passed in minutes and seconds.
+     * <p>
+     * @param second The total time represented in seconds
+     * @param stars  The max number of points to acquire
+     * @param starTime Max time passed to get the max number of points
+     */
     public Timer(int second, int stars, int starTime){
         new Timer(second);
         numStars = stars;
         this.starTime = starTime;
 
     }
+
+    /**
+     * Starts the Timer by getting the current system time
+     * and setting running to true
+     */
     public void startTimer(){
         startTime = TimeUtils.millis();
         running = true;
     }
 
+    /**
+     * Sets the max points in the timer
+     * @param stars
+     */
     public void setStars(int stars){
         numStars = stars;
     }
 
+    /**
+     * @return the acquired points in stars
+     */
     public int getAcquiredStars(){
         if (!running){
             int elapsedSeconds =
@@ -80,6 +105,9 @@ public class Timer {
         return 0;
     }
 
+    /**
+     * Updates the timer by displaying the time left
+     */
     public void updateTime(){
         if (running) {
             long elapsedTime = TimeUtils.timeSinceMillis(startTime);
@@ -95,6 +123,14 @@ public class Timer {
         }
     }
 
+    /**
+     *
+     * @param canvas The canvas to draw with
+     * @param font The font to use
+     * @param color The color to render the time with
+     * @param x The x-coordinate of the lower-left corner
+     * @param y The y-coordinate of the lower-left corner
+     */
     public void displayTime(GameCanvas canvas,
                             BitmapFont font, Color color,
                             float x, float y){
@@ -102,6 +138,16 @@ public class Timer {
         font.setColor(color);
         canvas.drawText(timeDisplay, font, x, y);
     }
+
+    /**
+     *
+     * @param canvas The canvas to draw with
+     * @param font The font to use
+     * @param color The color to render the time with
+     * @param x The x-coordinate of the lower-left corner
+     * @param y The y-coordinate of the lower-left corner
+     * @param scale The scale at which to render the text at
+     */
     public void displayTime(GameCanvas canvas,
                             BitmapFont font, Color color,
                             float x, float y,
