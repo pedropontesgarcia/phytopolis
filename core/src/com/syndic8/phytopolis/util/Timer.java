@@ -7,20 +7,45 @@ import com.badlogic.gdx.utils.TimeUtils;
 import com.syndic8.phytopolis.GameCanvas;
 
 public class Timer {
+    /**
+     * The current number of minutes left
+     */
     private int minutes;
-
+    /**
+     * The starting amount of seconds after the minutes
+     */
     private int startSeconds;
+    /**
+     * The starting amount of minutes
+     */
     private int startMinutes;
+    /**
+     * The seconds remaining after the minutes
+     */
     private int seconds;
-
+    /**
+     * The system time at which the timer started
+     */
     private long startTime;
-
+    /**
+     * Whether the timer is running
+     */
     private boolean running;
+    /**
+     * Max number of points that can be acquired
+     */
     public int numStars;
-
+    /**
+     * Number of points acquired
+     */
     public int acquiredStars;
 
+    /**
+     * Max time passed to get the max number of points
+     */
     public int starTime;
+
+
     public Timer(int second){
         startSeconds = second % 60;
         startMinutes = second / 60;
@@ -52,9 +77,7 @@ public class Timer {
 
             return Math.max(acquiredStars, 0);
         }
-
         return 0;
-
     }
 
     public void updateTime(){
