@@ -332,7 +332,7 @@ public class GameplayMode extends WorldController implements ContactListener {
             plantController.growBranch(avatarX,
                                        avatarY,
                                        PlantController.branchDirection.MIDDLE,
-                                       PlantController.branchType.NORMAL);
+                                       Branch.branchType.NORMAL);
         } else if (InputController.getInstance().didGrowRight() &&
                 (plantController.branchGrowableAt(avatarX,
                                                   avatarY,
@@ -340,7 +340,7 @@ public class GameplayMode extends WorldController implements ContactListener {
             plantController.growBranch(avatarX,
                                        avatarY,
                                        PlantController.branchDirection.RIGHT,
-                                       PlantController.branchType.NORMAL);
+                                       Branch.branchType.NORMAL);
         } else if (InputController.getInstance().didGrowLeft() &&
                 (plantController.branchGrowableAt(avatarX,
                                                   avatarY,
@@ -348,13 +348,13 @@ public class GameplayMode extends WorldController implements ContactListener {
             plantController.growBranch(avatarX,
                                        avatarY,
                                        PlantController.branchDirection.LEFT,
-                                       PlantController.branchType.NORMAL);
+                                       Branch.branchType.NORMAL);
 
         } else if (InputController.getInstance().didMousePress()) {
             Model newLeaf = plantController.growLeaf(InputController.getInstance().getGrowX(),
                     InputController.getInstance().getGrowY() +
                             cameraVector.y - 500,
-                    PlantController.leafType.NORMAL);
+                    Leaf.leafType.BOUNCY);
             if (newLeaf != null) addObject(newLeaf);
         }
         return false;
@@ -375,6 +375,9 @@ public class GameplayMode extends WorldController implements ContactListener {
         avatar.setMovement(InputController.getInstance().getHorizontal() *
                                    avatar.getForce());
         avatar.setJumping(InputController.getInstance().didPrimary());
+        //Leaf.leafType ltype = plantController.getLeafType(plantController.xWorldCoordToIndex(avatar.getX()), plantController.yWorldCoordToIndex(avatar.getY()));
+        //avatar.setBouncy(ltype == Leaf.leafType.BOUNCY);
+
         //avatar.setShooting(InputController.getInstance().didSecondary());
         processPlantGrowth();
 

@@ -48,6 +48,15 @@ public class Player extends CapsuleObject {
 
     /** Cache for internal force calculations */
     private final Vector2 forceCache = new Vector2();
+    /**
+     * Multiplier for when standing on bouncy leaf
+     */
+    private float bouncyMultiplier = 2f;
+
+    /**
+     * whether the dude can jump extra high
+     */
+    private boolean bouncy = false;
 
 
     /**
@@ -112,6 +121,14 @@ public class Player extends CapsuleObject {
      */
     public void setJumping(boolean value) {
         isJumping = value;
+    }
+
+    /**
+     * sets whether the dude can jump extra high, for example, if the dude is standing on a bouncy leaf
+     * @param value whether the dude can jump extra high
+     */
+    public void setBouncy(boolean value){
+        bouncy = value;
     }
 
     /**
@@ -300,7 +317,8 @@ public class Player extends CapsuleObject {
 
         // Jump!
         if (isJumping()) {
-            forceCache.set(0, jump_force);
+            if(bouncy) forceCache.set(0, jump_force * bouncyMultiplier);
+            else forceCache.set(0, jump_force);
             body.applyLinearImpulse(forceCache,getPosition(),true);
         }
     }

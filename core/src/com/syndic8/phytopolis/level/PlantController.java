@@ -131,7 +131,7 @@ public class PlantController {
     public void growBranch(float x,
                            float y,
                            branchDirection direction,
-                           branchType type) {
+                           Branch.branchType type) {
         int xIndex = xCoordToIndex(x * worldToPixelConversionRatio);
         int yIndex = yCoordToIndex(y * worldToPixelConversionRatio);
         plantGrid[xIndex][yIndex].makeBranch(direction, type, world);
@@ -139,7 +139,7 @@ public class PlantController {
 
     public Leaf growLeaf(float x,
                          float y,
-                         leafType type) {
+                         Leaf.leafType type) {
         int xIndex = xCoordToIndex(x);
         int yIndex = yCoordToIndex(y);
         boolean lowerNode = xIndex % 2 == 0;
@@ -429,28 +429,39 @@ public class PlantController {
         return new Vector2(screenX, screenY);
     }
 
-    //TODO: Update with new branch type
+    /**
+     * returns type of branch at given indicies and direction
+     * @param xArg x index of the branch to check
+     * @param yArg y index of the branch to check
+     * @return the type of the checked branch
+     */
+    public Branch.branchType getBranchType(int xArg, int yArg, branchDirection direction){
+        return plantGrid[xArg][yArg].getBranchType(direction);
+    }
+
+    /**
+     * returns type of leaf at given indicies
+     * @param xArg x index of the branch to check
+     * @param yArg y index of the branch to check
+     * @return the type of the checked branch
+     */
+    public Leaf.leafType getLeafType(int xArg, int yArg){
+        return plantGrid[xArg][yArg].getLeafType();
+    }
 
     /**
      * enum containing directions in which a plant can grow from a node
      */
     public enum branchDirection {LEFT, MIDDLE, RIGHT}
 
-    /**
-     * enum containing possible branch types
-     */
-    public enum branchType {NORMAL}
 
-    /**
-     * enum containing possible leaf types
-     */
-    public enum leafType {NORMAL}
+
+
 
     /**
      * representation of a node in the plantGrid
      */
     public class PlantNode {
-        //TODO: change this class to contain branch objects instead of booleans
         /**
          * x coordinate of this node
          */
@@ -516,21 +527,21 @@ public class PlantController {
          * @param world     world to assign the branch to
          */
         public void makeBranch(branchDirection direction,
-                               branchType type,
+                               Branch.branchType type,
                                World world) {
             float pi = (float) Math.PI;
             if (branchTexture != null) {
                 switch (direction) {
                     case LEFT:
-                        left = new Branch(x, y, pi / 3);
+                        left = new Branch(x, y, pi / 3, type);
                         left.setTexture(branchTexture);
                         break;
                     case MIDDLE:
-                        middle = new Branch(x, y, 0);
+                        middle = new Branch(x, y, 0, type);
                         middle.setTexture(branchTexture);
                         break;
                     case RIGHT:
-                        right = new Branch(x, y, -pi / 3);
+                        right = new Branch(x, y, -pi / 3, type);
                         right.setTexture(branchTexture);
                         break;
                 }
@@ -545,7 +556,7 @@ public class PlantController {
          * @param type    type of leaf to create
          * @param texture texture of the leaf
          */
-        public Leaf makeLeaf(leafType type,
+        public Leaf makeLeaf(Leaf.leafType type,
                              Texture texture) {
             if (yCoordToIndex(y / worldToPixelConversionRatio) > 0 &&
                     !leafExists && hasBranch() ||
@@ -554,7 +565,7 @@ public class PlantController {
                 leaf = new Leaf(x / worldToPixelConversionRatio,
                                 y / worldToPixelConversionRatio - 0.5f,
                                 leafWidth,
-                                leafHeight);
+                                leafHeight, type);
                 leaf.setTexture(texture);
                 leaf.setDrawScale(scale.x, scale.y);
                 leafExists = true;
@@ -564,8 +575,6 @@ public class PlantController {
             }
             return null;
         }
-
-        //TODO: less hacky unmakeBranch implementation
 
         /**
          * destroy target branch
@@ -683,6 +692,36 @@ public class PlantController {
             return hasBranchInDirection(branchDirection.LEFT) ||
                     hasBranchInDirection(branchDirection.RIGHT) ||
                     hasBranchInDirection(branchDirection.MIDDLE);
+        }
+
+        /**
+         * returns the type of branch in the given direction
+         * @param direction the slot to check
+         * @return the type of branch in the given slot
+         */
+        public Branch.branchType getBranchType(branchDirection direction){
+            switch (direction){
+                case LEFT:
+                    if (hasBranchInDirection(branchDirection.LEFT)) return left.getBranchType();
+                    else return null;
+                case RIGHT:
+                    if (hasBranchInDirection(branchDirection.RIGHT)) return right.getBranchType();
+                    else return null;
+                case MIDDLE:
+                    if (hasBranchInDirection(branchDirection.MIDDLE)) return middle.getBranchType();
+                    else return null;
+            }
+            //There is no branch at this node
+            return null;
+        }
+
+        /**
+         * returns the type of leaf at this node, null if no leaf
+         * @return
+         */
+        public Leaf.leafType getLeafType(){
+            if(hasLeaf()) return leaf.getLeafType();
+            else return null;
         }
 
     }
