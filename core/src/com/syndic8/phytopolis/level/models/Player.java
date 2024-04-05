@@ -217,8 +217,8 @@ public class Player extends CapsuleObject {
         damping = data.getFloat("damping", 0);
         force = data.getFloat("force", 0);
         jump_force = data.getFloat( "jump_force", 0);
-        jumpLimit = data.getInt( "jump_cool", 0) * (int) (Gdx.graphics.getHeight() / 1080f);
-        shotLimit = data.getInt( "shot_cool", 0 );
+        jumpLimit = data.getInt( "jump_cool", 0);
+        shotLimit = data.getInt( "shot_cool", 0);
         sensorName = "DudeGroundSensor";
         this.data = data;
 
@@ -336,7 +336,17 @@ public class Player extends CapsuleObject {
      */
     public void draw(GameCanvas canvas) {
         float effect = faceRight ? 1.0f : -1.0f;
-        canvas.draw(texture,Color.WHITE,origin.x,origin.y,getX()*drawScale.x,getY()*drawScale.y,getAngle(),effect,1.0f);
+        canvas.draw(
+                texture,
+                Color.WHITE,
+                origin.x,
+                origin.y,
+                getX()*drawScale.x,
+                getY()*drawScale.y,
+                getAngle(),
+                1f * effect,
+                1f
+        );
     }
 
     @Override
