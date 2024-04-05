@@ -635,6 +635,7 @@ public class GameplayMode extends WorldController implements ContactListener {
                         cameraVector.y + canvas.getHeight() / 2.0f - 100.0f);
         plantController.draw(canvas);
         hazardController.draw(canvas);
+        player.draw(canvas);
         canvas.end();
     }
 
