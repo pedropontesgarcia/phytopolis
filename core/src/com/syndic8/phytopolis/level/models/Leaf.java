@@ -24,6 +24,14 @@ public class Leaf extends BoxObject {
         this.type = type;
     }
 
+    /**
+     * returns the type of this leaf
+     * @return the type of this leaf
+     */
+    public leafType getLeafType(){
+        return type;
+    }
+
     //    @Override
     //    public boolean activatePhysics(World world) {
     //        boolean success = super.activatePhysics(world);

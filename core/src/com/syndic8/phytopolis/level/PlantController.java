@@ -430,6 +430,26 @@ public class PlantController {
     }
 
     /**
+     * returns type of branch at given indicies and direction
+     * @param xArg x index of the branch to check
+     * @param yArg y index of the branch to check
+     * @return the type of the checked branch
+     */
+    public Branch.branchType getBranchType(int xArg, int yArg, branchDirection direction){
+        return plantGrid[xArg][yArg].getBranchType(direction);
+    }
+
+    /**
+     * returns type of leaf at given indicies
+     * @param xArg x index of the branch to check
+     * @param yArg y index of the branch to check
+     * @return the type of the checked branch
+     */
+    public Leaf.leafType getLeafType(int xArg, int yArg){
+        return plantGrid[xArg][yArg].getLeafType();
+    }
+
+    /**
      * enum containing directions in which a plant can grow from a node
      */
     public enum branchDirection {LEFT, MIDDLE, RIGHT}
@@ -672,6 +692,35 @@ public class PlantController {
             return hasBranchInDirection(branchDirection.LEFT) ||
                     hasBranchInDirection(branchDirection.RIGHT) ||
                     hasBranchInDirection(branchDirection.MIDDLE);
+        }
+
+        /**
+         * returns the type of branch in the given direction
+         * @param direction the slot to check
+         * @return the type of branch in the given slot
+         */
+        public Branch.branchType getBranchType(branchDirection direction){
+            switch (direction){
+                case LEFT:
+                    if (hasBranchInDirection(branchDirection.LEFT)) return left.getBranchType();
+                    else return null;
+                case RIGHT:
+                    if (hasBranchInDirection(branchDirection.RIGHT)) return right.getBranchType();
+                    else return null;
+                case MIDDLE:
+                    if (hasBranchInDirection(branchDirection.MIDDLE)) return middle.getBranchType();
+                    else return null;
+            }
+            //There is no branch at this node
+            return null;
+        }
+
+        /**
+         * returns the type of leaf at this node, null if no leaf
+         * @return
+         */
+        public Leaf.leafType getLeafType(){
+            return leaf.getLeafType();
         }
 
     }

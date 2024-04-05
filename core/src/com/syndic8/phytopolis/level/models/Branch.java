@@ -114,6 +114,12 @@ public class Branch extends Model {
     }
 
     /**
+     * returns the branch type of this branch
+     * @return the type of branch
+     */
+    public branchType getBranchType(){ return type;}
+
+    /**
      * Updates the state of this object.
      * <p>
      * This method only is only intended to update values that change local state in
