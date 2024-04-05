@@ -720,7 +720,8 @@ public class PlantController {
          * @return
          */
         public Leaf.leafType getLeafType(){
-            return leaf.getLeafType();
+            if(hasLeaf()) return leaf.getLeafType();
+            else return null;
         }
 
     }
