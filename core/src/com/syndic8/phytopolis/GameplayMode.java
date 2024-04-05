@@ -332,7 +332,7 @@ public class GameplayMode extends WorldController implements ContactListener {
             plantController.growBranch(avatarX,
                                        avatarY,
                                        PlantController.branchDirection.MIDDLE,
-                                       PlantController.branchType.NORMAL);
+                                       Branch.branchType.NORMAL);
         } else if (InputController.getInstance().didGrowRight() &&
                 (plantController.branchGrowableAt(avatarX,
                                                   avatarY,
@@ -340,7 +340,7 @@ public class GameplayMode extends WorldController implements ContactListener {
             plantController.growBranch(avatarX,
                                        avatarY,
                                        PlantController.branchDirection.RIGHT,
-                                       PlantController.branchType.NORMAL);
+                                       Branch.branchType.NORMAL);
         } else if (InputController.getInstance().didGrowLeft() &&
                 (plantController.branchGrowableAt(avatarX,
                                                   avatarY,
@@ -348,13 +348,13 @@ public class GameplayMode extends WorldController implements ContactListener {
             plantController.growBranch(avatarX,
                                        avatarY,
                                        PlantController.branchDirection.LEFT,
-                                       PlantController.branchType.NORMAL);
+                                       Branch.branchType.NORMAL);
 
         } else if (InputController.getInstance().didMousePress()) {
             Model newLeaf = plantController.growLeaf(InputController.getInstance().getGrowX(),
                     InputController.getInstance().getGrowY() +
                             cameraVector.y - 500,
-                    PlantController.leafType.NORMAL);
+                    Leaf.leafType.NORMAL);
             if (newLeaf != null) addObject(newLeaf);
         }
         return false;

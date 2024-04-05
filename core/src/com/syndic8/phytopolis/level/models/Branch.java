@@ -15,10 +15,16 @@ public class Branch extends Model {
      * Whether or not the object should be removed at next timestep.
      */
     protected boolean destroyed;
+    /**
+     * enum containing possible branch types
+     */
+    public enum branchType {NORMAL, REINFORCED}
+    private branchType type;
 
-    public Branch(float x, float y, float angle) {
+    public Branch(float x, float y, float angle, branchType type) {
         position = new Vector2(x, y);
         this.angle = angle;
+        this.type = type;
     }
 
     /**

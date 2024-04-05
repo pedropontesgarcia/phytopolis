@@ -131,7 +131,7 @@ public class PlantController {
     public void growBranch(float x,
                            float y,
                            branchDirection direction,
-                           branchType type) {
+                           Branch.branchType type) {
         int xIndex = xCoordToIndex(x * worldToPixelConversionRatio);
         int yIndex = yCoordToIndex(y * worldToPixelConversionRatio);
         plantGrid[xIndex][yIndex].makeBranch(direction, type, world);
@@ -139,7 +139,7 @@ public class PlantController {
 
     public Leaf growLeaf(float x,
                          float y,
-                         leafType type) {
+                         Leaf.leafType type) {
         int xIndex = xCoordToIndex(x);
         int yIndex = yCoordToIndex(y);
         boolean lowerNode = xIndex % 2 == 0;
@@ -434,15 +434,9 @@ public class PlantController {
      */
     public enum branchDirection {LEFT, MIDDLE, RIGHT}
 
-    /**
-     * enum containing possible branch types
-     */
-    public enum branchType {NORMAL, REINFORCED}
 
-    /**
-     * enum containing possible leaf types
-     */
-    public enum leafType {NORMAL, BOUNCY}
+
+
 
     /**
      * representation of a node in the plantGrid
@@ -513,21 +507,21 @@ public class PlantController {
          * @param world     world to assign the branch to
          */
         public void makeBranch(branchDirection direction,
-                               branchType type,
+                               Branch.branchType type,
                                World world) {
             float pi = (float) Math.PI;
             if (branchTexture != null) {
                 switch (direction) {
                     case LEFT:
-                        left = new Branch(x, y, pi / 3);
+                        left = new Branch(x, y, pi / 3, type);
                         left.setTexture(branchTexture);
                         break;
                     case MIDDLE:
-                        middle = new Branch(x, y, 0);
+                        middle = new Branch(x, y, 0, type);
                         middle.setTexture(branchTexture);
                         break;
                     case RIGHT:
-                        right = new Branch(x, y, -pi / 3);
+                        right = new Branch(x, y, -pi / 3, type);
                         right.setTexture(branchTexture);
                         break;
                 }
@@ -542,7 +536,7 @@ public class PlantController {
          * @param type    type of leaf to create
          * @param texture texture of the leaf
          */
-        public Leaf makeLeaf(leafType type,
+        public Leaf makeLeaf(Leaf.leafType type,
                              Texture texture) {
             if (yCoordToIndex(y / worldToPixelConversionRatio) > 0 &&
                     !leafExists && hasBranch() ||
@@ -551,7 +545,7 @@ public class PlantController {
                 leaf = new Leaf(x / worldToPixelConversionRatio,
                                 y / worldToPixelConversionRatio - 0.5f,
                                 leafWidth,
-                                leafHeight);
+                                leafHeight, type);
                 leaf.setTexture(texture);
                 leaf.setDrawScale(scale.x, scale.y);
                 leafExists = true;
