@@ -498,6 +498,13 @@ public class GameplayMode extends WorldController implements ContactListener {
             if ((bd1 == avatar && bd1.getY() > 34)) {
                 setComplete(true);
             }
+            //Check for bouncyness
+            if (bd1 == avatar && bd2 instanceof Leaf){
+                Leaf l1 = (Leaf) bd2;
+                if(l1.getLeafType() == Leaf.leafType.BOUNCY && bd1.getY() > bd2.getY() + 1) avatar.setBouncy(true);
+                else avatar.setBouncy(false);
+            }
+
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -531,6 +538,9 @@ public class GameplayMode extends WorldController implements ContactListener {
             if (sensorFixtures.size == 0) {
                 avatar.setGrounded(false);
             }
+        }
+        if (bd1 == avatar && bd2 instanceof Leaf){
+            avatar.setBouncy(false);
         }
     }
 
