@@ -44,9 +44,9 @@ public class UIController {
      * @param sunLvl   level of sun, in percentage between 0 and 1.
      */
     public void update(float waterLvl, float sunLvl) {
-        waterdropStrip.setFrame(Math.round(
-                waterdropStrip.getSize() * waterLvl));
-        sunStrip.setFrame(Math.round(sunStrip.getSize() * sunLvl));
+        waterdropStrip.setFrame(
+                Math.round(waterdropStrip.getSize() * waterLvl) - 1);
+        sunStrip.setFrame(Math.round(sunStrip.getSize() * sunLvl) - 1);
     }
 
     /**
