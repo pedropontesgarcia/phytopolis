@@ -171,9 +171,12 @@ public class PlantController {
     public void destroyAll(int xArg, int yArg) {
         PlantNode nodeToDestroy = plantGrid[xArg][yArg];
         nodeToDestroy.unmakeLeaf();
-        nodeToDestroy.unmakeBranch(branchDirection.LEFT);
-        nodeToDestroy.unmakeBranch(branchDirection.MIDDLE);
-        nodeToDestroy.unmakeBranch(branchDirection.RIGHT);
+        if(!canGrowAt(xArg, yArg) || nodeToDestroy.getBranchType(branchDirection.LEFT) == Branch.branchType.NORMAL) nodeToDestroy.unmakeBranch(branchDirection.LEFT);
+        else nodeToDestroy.setBranchType(branchDirection.LEFT, Branch.branchType.NORMAL);
+        if(!canGrowAt(xArg, yArg) || nodeToDestroy.getBranchType(branchDirection.MIDDLE) == Branch.branchType.NORMAL) nodeToDestroy.unmakeBranch(branchDirection.MIDDLE);
+        else nodeToDestroy.setBranchType(branchDirection.MIDDLE, Branch.branchType.NORMAL);
+        if(!canGrowAt(xArg, yArg) || nodeToDestroy.getBranchType(branchDirection.RIGHT) == Branch.branchType.NORMAL) nodeToDestroy.unmakeBranch(branchDirection.RIGHT);
+        else nodeToDestroy.setBranchType(branchDirection.RIGHT, Branch.branchType.NORMAL);
         plantCoyoteTimeRemaining = plantCoyoteTime;
         destructionQueue.addLast(new int[]{xArg, yArg});
     }
@@ -563,7 +566,7 @@ public class PlantController {
                     growableAt(x / worldToPixelConversionRatio,
                                y / worldToPixelConversionRatio)) {
                 leaf = new Leaf(x / worldToPixelConversionRatio,
-                                y / worldToPixelConversionRatio - 0.5f,
+                                y / worldToPixelConversionRatio, //- 0.5f,
                                 leafWidth,
                                 leafHeight, type);
                 leaf.setTexture(texture);
@@ -713,6 +716,25 @@ public class PlantController {
             }
             //There is no branch at this node
             return null;
+        }
+
+        /**
+         * sets the type of the branch in the given direction
+         * @param direction the slot to set
+         * @param btype the branch type to set the given slot to
+         */
+        public void setBranchType(branchDirection direction, Branch.branchType btype){
+            switch (direction){
+                case LEFT:
+                    if (hasBranchInDirection(branchDirection.LEFT)) left.setBranchType(btype);
+                    break;
+                case RIGHT:
+                    if (hasBranchInDirection(branchDirection.RIGHT)) right.setBranchType(btype);
+                    break;
+                case MIDDLE:
+                    if (hasBranchInDirection(branchDirection.MIDDLE)) middle.setBranchType(btype);
+                    break;
+            }
         }
 
         /**

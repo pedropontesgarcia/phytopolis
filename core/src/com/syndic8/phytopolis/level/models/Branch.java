@@ -120,6 +120,12 @@ public class Branch extends Model {
     public branchType getBranchType(){ return type;}
 
     /**
+     * changes the branch type to the given value
+     * @param t the new branch type to be assigned to this branch
+     */
+    public void setBranchType(branchType t){type = t;}
+
+    /**
      * Updates the state of this object.
      * <p>
      * This method only is only intended to update values that change local state in
