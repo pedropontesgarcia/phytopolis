@@ -342,7 +342,7 @@ public class Player extends CapsuleObject {
      */
     public void update(float dt) {
 
-        if(Math.abs(body.getLinearVelocity().y) >= 0.3){
+        if(Math.abs(body.getLinearVelocity().y) >= 0.2){
             animFrame += ANIMATION_SPEED;
             if (animFrame >= NUM_JUMP_FRAMES) {
                 animFrame -= NUM_JUMP_FRAMES;
@@ -375,7 +375,7 @@ public class Player extends CapsuleObject {
     public void draw(GameCanvas canvas) {
         float effect = faceRight ? 1.0f : -1.0f;
 
-        if (Math.abs(body.getLinearVelocity().y) >= 0.3){
+        if (Math.abs(body.getLinearVelocity().y) >= 0.2){
             jumpAnimator.setFrame((int)animFrame);
             float x = jumpAnimator.getRegionWidth()/2.0f;
             float y = jumpAnimator.getRegionHeight()/2.0f;
