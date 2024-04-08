@@ -10,9 +10,9 @@
  */
 package com.syndic8.phytopolis;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.audio.Sound;
-import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
@@ -39,9 +39,7 @@ import java.util.HashMap;
  * place nicely with the static assets.
  */
 public class GameplayMode extends WorldController implements ContactListener {
-    private int sunCollected;
 
-    private int waterCollected;
     // Define collision categories (bits)
     final short CATEGORY_PLAYER = 0x0001;
     final short CATEGORY_PLATFORM = 0x0002;
@@ -67,6 +65,8 @@ public class GameplayMode extends WorldController implements ContactListener {
      * branch texture
      */
     protected TextureRegion branchTexture;
+    private int sunCollected;
+    private int waterCollected;
     private Player player;
     /**
      * The font for giving messages to the player
@@ -179,10 +179,14 @@ public class GameplayMode extends WorldController implements ContactListener {
         background = new TextureRegion(directory.getEntry("gameplay:background",
                                                           Texture.class));
 
-        background.setRegion(0, 0, 1920, 1080);
+        background.setRegion(0,
+                             0,
+                             Gdx.graphics.getWidth(),
+                             Gdx.graphics.getHeight());
         super.setBackground(background.getTexture());
         plantController.gatherAssets(directory);
         hazardController.gatherAssets(directory);
+        resourceController.gatherAssets(directory);
 
         //jumpSound = directory.getEntry("platform:jump", Sound.class);
         //fireSound = directory.getEntry("platform:pew", Sound.class);
@@ -351,10 +355,13 @@ public class GameplayMode extends WorldController implements ContactListener {
                                        Branch.branchType.NORMAL);
 
         } else if (InputController.getInstance().didMousePress()) {
-            Model newLeaf = plantController.growLeaf(InputController.getInstance().getGrowX(),
-                    InputController.getInstance().getGrowY() +
-                            cameraVector.y - 500,
-                    Leaf.leafType.BOUNCY);
+            Model newLeaf = plantController.growLeaf(InputController.getInstance()
+                                                             .getGrowX(),
+                                                     InputController.getInstance()
+                                                             .getGrowY() +
+                                                             cameraVector.y -
+                                                             500,
+                                                     Leaf.leafType.BOUNCY);
             if (newLeaf != null) addObject(newLeaf);
         }
         return false;
@@ -499,10 +506,10 @@ public class GameplayMode extends WorldController implements ContactListener {
                 setComplete(true);
             }
             //Check for bouncyness
-            if (bd1 == avatar && bd2 instanceof Leaf){
+            if (bd1 == avatar && bd2 instanceof Leaf) {
                 Leaf l1 = (Leaf) bd2;
-                if(l1.getLeafType() == Leaf.leafType.BOUNCY && bd1.getY() > bd2.getY() + 1) avatar.setBouncy(true);
-                else avatar.setBouncy(false);
+                avatar.setBouncy(l1.getLeafType() == Leaf.leafType.BOUNCY &&
+                                         bd1.getY() > bd2.getY() + 1);
             }
 
         } catch (Exception e) {
@@ -539,7 +546,7 @@ public class GameplayMode extends WorldController implements ContactListener {
                 avatar.setGrounded(false);
             }
         }
-        if (bd1 == avatar && bd2 instanceof Leaf){
+        if (bd1 == avatar && bd2 instanceof Leaf) {
             avatar.setBouncy(false);
         }
     }
@@ -568,12 +575,12 @@ public class GameplayMode extends WorldController implements ContactListener {
                                         Model.ModelType.LEAF);
         boolean isCollisionBetweenPlayerAndWater =
                 (fix1.getBody() == avatar.getBody() &&
-                ((Model) fix2.getBody().getUserData()).getType() ==
-                        Model.ModelType.WATER) ||
-                (fix2.getBody() == avatar.getBody() &&
-                        ((Model) fix1.getBody()
-                                .getUserData()).getType() ==
-                                Model.ModelType.WATER);
+                        ((Model) fix2.getBody().getUserData()).getType() ==
+                                Model.ModelType.WATER) ||
+                        (fix2.getBody() == avatar.getBody() &&
+                                ((Model) fix1.getBody()
+                                        .getUserData()).getType() ==
+                                        Model.ModelType.WATER);
         boolean isCollisionBetweenPlayerAndSun =
                 (fix1.getBody() == avatar.getBody() &&
                         ((Model) fix2.getBody().getUserData()).getType() ==
@@ -582,10 +589,10 @@ public class GameplayMode extends WorldController implements ContactListener {
                                 ((Model) fix1.getBody()
                                         .getUserData()).getType() ==
                                         Model.ModelType.SUN);
-        if (isCollisionBetweenPlayerAndSun){
+        if (isCollisionBetweenPlayerAndSun) {
             resourceController.setCurrSun(1);
         }
-        if (isCollisionBetweenPlayerAndWater){
+        if (isCollisionBetweenPlayerAndWater) {
             resourceController.setCurrWater(5);
         }
 
@@ -630,19 +637,7 @@ public class GameplayMode extends WorldController implements ContactListener {
         canvas.cameraUpdate(cameraVector);
         super.draw(dt);
         canvas.begin();
-        canvas.draw(waterTexture,
-                    Color.WHITE,
-                    waterTexture.getWidth() / 2.0f,
-                    waterTexture.getHeight() / 2.0f,
-                    50.0f,
-                    cameraVector.y + canvas.getHeight() / 2.0f - 50.f,
-                    0,
-                    0.1f,
-                    0.1f);
-        canvas.drawText(Integer.toString(resourceController.getCurrWater()),
-                        timesFont,
-                        30.0f,
-                        cameraVector.y + canvas.getHeight() / 2.0f - 100.0f);
+        resourceController.draw(canvas);
         plantController.draw(canvas);
         hazardController.draw(canvas);
         player.draw(canvas);

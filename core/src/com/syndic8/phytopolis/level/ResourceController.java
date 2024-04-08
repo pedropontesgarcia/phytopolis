@@ -1,49 +1,73 @@
 package com.syndic8.phytopolis.level;
 
+import com.syndic8.phytopolis.GameCanvas;
+import com.syndic8.phytopolis.assets.AssetDirectory;
 import com.syndic8.phytopolis.level.models.Player;
 
-import static java.lang.Math.max;
-
 public class ResourceController {
-    /** Maximum amount of water that can be stored */
+
+    /**
+     * Maximum amount of water that can be stored
+     */
     private final int MAX_WATER = 100;
 
     private final int MAX_SUN = 8;
-//    /** Amount of water required to grow a branch */
-//    private final int BRANCH_AMT = 5;
-    /** Amount of water required to grow a branch/leaf */
+    //    /** Amount of water required to grow a branch */
+    //    private final int BRANCH_AMT = 5;
+    /**
+     * Amount of water required to grow a branch/leaf
+     */
     private final int GROW_AMT = 5;
-    /** Amount of water required to extinguish a fire */
+    /**
+     * Amount of water required to extinguish a fire
+     */
     private final int FIRE_AMT = 20;
-
+    /**
+     * Controller for UI.
+     */
+    private final UIController ui;
     private int currSun;
-    /** Current amount of water stored */
+    /**
+     * Current amount of water stored
+     */
     private int currWater;
-    /** Frames on ground (for getting water) */
+    /**
+     * Frames on ground (for getting water)
+     */
     private int framesOnGround;
 
     public ResourceController() {
         currWater = MAX_WATER;
         framesOnGround = 0;
         currSun = 0;
+        ui = new UIController();
+    }
+
+    public void gatherAssets(AssetDirectory directory) {
+        ui.gatherAssets(directory);
     }
 
     public int getCurrWater() {
         return currWater;
     }
 
-    public int getCurrSun(){return currSun;}
-
-    public void setCurrWater(int water){
-        if (!fullWater()){
+    public void setCurrWater(int water) {
+        if (!fullWater()) {
             currWater += water;
         }
     }
 
-    public boolean fullWater(){
+    public int getCurrSun() {
+        return currSun;
+    }
+
+    public void setCurrSun(int sun) {
+        currSun += sun;
+    }
+
+    public boolean fullWater() {
         return currWater == MAX_WATER;
     }
-    public void setCurrSun(int sun){currSun += sun;}
 
     public boolean canGrow() {
         return currWater >= GROW_AMT;
@@ -70,6 +94,7 @@ public class ResourceController {
     }
 
     public void update(Player player) {
+        ui.update((float) currWater / MAX_WATER, (float) currSun / MAX_SUN);
         if (player.atBottom()) {
             //System.out.println("AT BOTTOM");
             framesOnGround++;
@@ -86,6 +111,8 @@ public class ResourceController {
         }
     }
 
-
+    public void draw(GameCanvas c) {
+        ui.draw(c);
+    }
 
 }

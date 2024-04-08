@@ -38,7 +38,11 @@ public class GameCanvas {
      */
     private PolygonSpriteBatch spriteBatch;
     /**
-     * Track whether or not we are active (for error checking)
+     * Drawing context to handle HUD
+     */
+    private SpriteBatch hudBatch;
+    /**
+     * Track whether we are active (for error checking)
      */
     private DrawPass active;
     /**
@@ -77,6 +81,7 @@ public class GameCanvas {
     public GameCanvas() {
         active = DrawPass.INACTIVE;
         spriteBatch = new PolygonSpriteBatch();
+        hudBatch = new SpriteBatch();
         debugRender = new ShapeRenderer();
 
         // Set the projection matrix (for proper scaling)
@@ -113,6 +118,8 @@ public class GameCanvas {
             return;
         }
         spriteBatch.dispose();
+        hudBatch.dispose();
+        hudBatch = null;
         spriteBatch = null;
         local = null;
         global = null;
@@ -298,7 +305,7 @@ public class GameCanvas {
     /**
      * Sets the color blending state for this canvas.
      * <p>
-     * Any texture draw subsequent to this call will use the rules of this blend
+     * Any texture draw after this call will use the rules of this blend
      * state to composite with other textures.  Unlike the other setters, if it is
      * perfectly safe to use this setter while  drawing is active (e.g. in-between
      * a begin-end pair).
@@ -329,7 +336,7 @@ public class GameCanvas {
     }
 
     /**
-     * Clear the screen so we can start a new animation frame
+     * Clear the screen so that we can start a new animation frame
      */
     public void clear() {
         // Clear the screen
@@ -354,6 +361,7 @@ public class GameCanvas {
 
         setBlendState(BlendState.NO_PREMULT);
         spriteBatch.begin();
+        hudBatch.begin();
         active = DrawPass.STANDARD;
     }
 
@@ -372,6 +380,7 @@ public class GameCanvas {
         spriteBatch.setProjectionMatrix(global);
 
         spriteBatch.begin();
+        hudBatch.begin();
         active = DrawPass.STANDARD;
     }
 
@@ -383,6 +392,7 @@ public class GameCanvas {
     public void begin() {
         spriteBatch.setProjectionMatrix(camera.combined);
         spriteBatch.begin();
+        hudBatch.begin();
         active = DrawPass.STANDARD;
     }
 
@@ -391,6 +401,7 @@ public class GameCanvas {
      */
     public void end() {
         spriteBatch.end();
+        hudBatch.end();
         active = DrawPass.INACTIVE;
     }
 
@@ -419,6 +430,17 @@ public class GameCanvas {
         // Unlike Lab 1, we can shortcut without a master drawing method
         spriteBatch.setColor(Color.WHITE);
         spriteBatch.draw(image, x, y);
+    }
+
+    /**
+     * Draws a TextureRegion t to the HUD batch at the given coordinates.
+     *
+     * @param t
+     * @param x
+     * @param y
+     */
+    public void drawHud(TextureRegion t, int x, int y, int w, int h) {
+        hudBatch.draw(t, x, y, w, h);
     }
 
     /**
