@@ -291,22 +291,23 @@ public class HazardController {
      * @param y y coord of fire node.
      */
     public void extinguishFire(int x, int y) {
-        if (resourceController.canExtinguish()) {
-            Fire f = null;
-            for (Hazard h : hazards) {
-                if (h.getType().equals(Model.ModelType.FIRE)) {
-                    f = (Fire) h;
-                    if ((int) f.getLocation().x == x && (int) f.getLocation().y == y) break;
-                }
+        if (!resourceController.canExtinguish()) return;
+        Fire f = null;
+        for (Hazard h : hazards) {
+            if (h.getType().equals(Model.ModelType.FIRE)) {
+                f = (Fire) h;
+                if ((int) f.getLocation().x == x && (int) f.getLocation().y == y) break;
+                //System.out.println("-" + f.getLocation().x + " " + f.getLocation().y);
             }
-            if (f == null) return;
-            if ((int) f.getLocation().x == x && (int) f.getLocation().y == y) {
-                hazards.remove(f);
-                f.markRemoved(true);
-                resourceController.decrementExtinguish();
-            }
-
         }
+        if (f == null) return;
+        if ((int) f.getLocation().x == x && (int) f.getLocation().y == y) {
+            hazards.remove(f);
+            f.markRemoved(true);
+            resourceController.decrementExtinguish();
+        }
+
+
     }
 
     /**

@@ -155,7 +155,7 @@ public class GameplayMode extends WorldController implements ContactListener {
         hazardController = new HazardController(plantController,
                                                 3000,
                                                 3000,
-                                                600,
+                                                2000,
                                                 200);
 
         background = null;
@@ -395,7 +395,7 @@ public class GameplayMode extends WorldController implements ContactListener {
         resourceController.update(avatar);
         hazardController.updateHazards(this);
         if (InputController.getInstance().didExtinguish()) {
-            int[] index = plantController.screenCoordToIndex(avatar.getX(), avatar.getY());
+            int[] index = plantController.worldCoordToIndex(avatar.getX(), avatar.getY());
             hazardController.extinguishFire(index[0], index[1]);
         }
         plantController.propagateDestruction();
