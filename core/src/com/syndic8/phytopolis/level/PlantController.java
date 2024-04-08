@@ -132,16 +132,16 @@ public class PlantController {
                            float y,
                            branchDirection direction,
                            Branch.branchType type) {
-        int xIndex = xCoordToIndex(x * worldToPixelConversionRatio);
-        int yIndex = yCoordToIndex(y * worldToPixelConversionRatio);
+        int xIndex = screenCoordToIndex(x * worldToPixelConversionRatio, y * worldToPixelConversionRatio)[0];
+        int yIndex = screenCoordToIndex(x * worldToPixelConversionRatio, y * worldToPixelConversionRatio)[1];
         plantGrid[xIndex][yIndex].makeBranch(direction, type, world);
     }
 
     public Leaf growLeaf(float x,
                          float y,
                          Leaf.leafType type) {
-        int xIndex = xCoordToIndex(x);
-        int yIndex = yCoordToIndex(y);
+        int xIndex = screenCoordToIndex(x, y)[0];
+        int yIndex = screenCoordToIndex(x, y)[1];
         boolean lowerNode = xIndex % 2 == 0;
         if(!plantGrid[xIndex][yIndex].hasLeaf() && (yIndex>0 || !lowerNode)) return plantGrid[xIndex][yIndex].makeLeaf(type, leafTexture);
         return null;
@@ -226,8 +226,8 @@ public class PlantController {
      * @return whether or not a node can be grown at
      */
     public boolean canGrowAt(float xArg, float yArg) {
-        int xIndex = xCoordToIndex(xArg * worldToPixelConversionRatio);
-        int yIndex = yCoordToIndex(yArg * worldToPixelConversionRatio);
+        int xIndex = worldCoordToIndex(xArg, yArg)[0];
+        int yIndex = worldCoordToIndex(xArg, yArg)[1];
         return canGrowAtIndex(xIndex, yIndex);
     }
 
@@ -268,8 +268,8 @@ public class PlantController {
     public boolean branchGrowableAt(float xArg,
                                     float yArg,
                                     branchDirection dir) {
-        int xIndex = xCoordToIndex(xArg * worldToPixelConversionRatio);
-        int yIndex = yCoordToIndex(yArg * worldToPixelConversionRatio);
+        int xIndex = worldCoordToIndex(xArg, yArg)[0];
+        int yIndex = worldCoordToIndex(xArg, yArg)[1];
         return growableAt(xArg, yArg) &&
                 !plantGrid[xIndex][yIndex].hasBranchInDirection(dir);
     }
@@ -367,43 +367,27 @@ public class PlantController {
     }
 
     /**
-     * Converts a screen x coordinate to the corresponding node index in the plant
+     * Converts a screen coordinate to the corresponding node index in the plant
      *
      * @param xArg x coordinate to be converted
-     * @return x index of the corresponding node
-     */
-    public int xCoordToIndex(float xArg) {
-        return Math.round((xArg - xOrigin) / xSpacing);
-    }
-
-    /**
-     * Converts a screen y coordinate to the corresponding node index in the plant
-     *
      * @param yArg y coordinate to be converted
-     * @return y index of the corresponding node
+     * @return (x, y) index of the corresponding node
      */
-    public int yCoordToIndex(float yArg) {
-        return (int) ((yArg - yOrigin) / gridSpacing);
+    public int[] screenCoordToIndex(float xArg, float yArg) {
+        int xIndex = Math.round((xArg - xOrigin) / xSpacing);
+        int yIndex =  (int) ((yArg - yOrigin - (gridSpacing * .5f * (xIndex % 2))) / gridSpacing);
+        return new int[] {xIndex, yIndex};
     }
 
     /**
-     * Convert x world coord to an index in PlantController
+     * Converts a world coordinate to the corresponding node index in the plant
      *
-     * @param xArg x world coordinate
-     * @return the corresponding index
+     * @param xArg x coordinate to be converted
+     * @param yArg y coordinate to be converted
+     * @return (x, y) index of the corresponding node
      */
-    public int xWorldCoordToIndex(float xArg) {
-        return xCoordToIndex(xArg * worldToPixelConversionRatio);
-    }
-
-    /**
-     * Convert y world coord to an index in PlantController
-     *
-     * @param yArg y world coordinate
-     * @return the corresponding index
-     */
-    public int yWorldCoordToIndex(float yArg) {
-        return yCoordToIndex(yArg * worldToPixelConversionRatio);
+    public int[] worldCoordToIndex(float xArg, float yArg) {
+        return screenCoordToIndex(xArg * worldToPixelConversionRatio, yArg * worldToPixelConversionRatio);
     }
 
     /**
@@ -429,6 +413,7 @@ public class PlantController {
     public Vector2 indexToScreenCoord(int xIndex, int yIndex) {
         float screenX = xOrigin + xIndex * xSpacing;
         float screenY = yOrigin + yIndex * gridSpacing;
+        screenY += gridSpacing * .5f * (xIndex % 2);
         return new Vector2(screenX, screenY);
     }
 
@@ -561,7 +546,7 @@ public class PlantController {
          */
         public Leaf makeLeaf(Leaf.leafType type,
                              Texture texture) {
-            if (yCoordToIndex(y / worldToPixelConversionRatio) > 0 &&
+            if (screenCoordToIndex(x / worldToPixelConversionRatio, y / worldToPixelConversionRatio)[1] > 0 &&
                     !leafExists && hasBranch() ||
                     growableAt(x / worldToPixelConversionRatio,
                                y / worldToPixelConversionRatio)) {

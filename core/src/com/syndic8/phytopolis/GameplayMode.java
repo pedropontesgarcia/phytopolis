@@ -395,8 +395,8 @@ public class GameplayMode extends WorldController implements ContactListener {
         resourceController.update(avatar);
         hazardController.updateHazards(this);
         if (InputController.getInstance().didExtinguish()) {
-            hazardController.extinguishFire(plantController.xCoordToIndex(avatar.getX()),
-                                            plantController.yCoordToIndex(avatar.getY()));
+            int[] index = plantController.screenCoordToIndex(avatar.getX(), avatar.getY());
+            hazardController.extinguishFire(index[0], index[1]);
         }
         plantController.propagateDestruction();
     }
