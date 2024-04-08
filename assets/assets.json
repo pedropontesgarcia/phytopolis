@@ -11,7 +11,8 @@
     "gameplay:sun_filmstrip": "gameplay/sun-ui.png",
     "fire": "hazards/fire.png",
     "drone": "hazards/drone.png",
-    "gameplay:background": "gameplay/back.jpg"
+    "gameplay:background": "gameplay/back.jpg",
+    "jump": "gameplay/jump-filmstrip.png"
   },
   "jsons": {
     "gameplay:constants": "gameplay/constants.json"

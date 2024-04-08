@@ -2,6 +2,7 @@ package com.syndic8.phytopolis.level.models;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.Fixture;
 import com.badlogic.gdx.physics.box2d.FixtureDef;
@@ -9,8 +10,14 @@ import com.badlogic.gdx.physics.box2d.PolygonShape;
 import com.badlogic.gdx.physics.box2d.World;
 import com.badlogic.gdx.utils.JsonValue;
 import com.syndic8.phytopolis.GameCanvas;
+import com.syndic8.phytopolis.util.FilmStrip;
 
 public class Player extends CapsuleObject {
+    private float animFrame;
+
+    private FilmStrip jumpAnimator;
+    private static final int NUM_JUMP_FRAMES = 12 ;
+    private static final float ANIMATION_SPEED = 0.4f;
     /** The initializing data (to avoid magic numbers) */
     private final JsonValue data;
 
@@ -220,7 +227,8 @@ public class Player extends CapsuleObject {
      * @param width		The object width in physics units
      * @param height	The object width in physics units
      */
-    public Player(JsonValue data, float width, float height) {
+    public Player(JsonValue data, float width,
+                  float height, FilmStrip jump) {
         // The shrink factors fit the image to a tigher hitbox
         super(	data.get("pos").getFloat(0),
                 data.get("pos").getFloat(1),
@@ -245,6 +253,8 @@ public class Player extends CapsuleObject {
         isJumping = false;
         faceRight = true;
 
+        animFrame = 0.0f;
+        jumpAnimator = jump;
         shootCooldown = 0;
         jumpCooldown = 0;
         setName("dude");
@@ -331,9 +341,19 @@ public class Player extends CapsuleObject {
      * @param dt	Number of seconds since last animation frame
      */
     public void update(float dt) {
+
+        if(Math.abs(body.getLinearVelocity().y) >= 0.3){
+            animFrame += ANIMATION_SPEED;
+            if (animFrame >= NUM_JUMP_FRAMES) {
+                animFrame -= NUM_JUMP_FRAMES;
+            }
+        }
         // Apply cooldowns
         if (isJumping()) {
             jumpCooldown = jumpLimit;
+
+
+
         } else {
             jumpCooldown = Math.max(0, jumpCooldown - 1);
         }
@@ -354,17 +374,37 @@ public class Player extends CapsuleObject {
      */
     public void draw(GameCanvas canvas) {
         float effect = faceRight ? 1.0f : -1.0f;
-        canvas.draw(
-                texture,
-                Color.WHITE,
-                origin.x,
-                origin.y,
-                getX()*drawScale.x,
-                getY()*drawScale.y,
-                getAngle(),
-                1f * effect,
-                1f
-        );
+
+        if (Math.abs(body.getLinearVelocity().y) >= 0.3){
+            jumpAnimator.setFrame((int)animFrame);
+            float x = jumpAnimator.getRegionWidth()/2.0f;
+            float y = jumpAnimator.getRegionHeight()/2.0f;
+            canvas.draw(
+                    jumpAnimator,
+                    Color.WHITE,
+                    x,
+                    y,
+                    getX()*drawScale.x,
+                    getY()*drawScale.y,
+                    getAngle(),
+                    0.8f * effect,
+                    0.8f
+            );
+        }else{
+            canvas.draw(
+                    texture,
+                    Color.WHITE,
+                    origin.x,
+                    origin.y,
+                    getX()*drawScale.x,
+                    getY()*drawScale.y,
+                    getAngle(),
+                    1f * effect,
+                    1f
+            );
+        }
+
+
     }
 
     @Override

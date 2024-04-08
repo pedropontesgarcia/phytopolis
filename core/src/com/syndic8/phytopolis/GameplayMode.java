@@ -26,6 +26,7 @@ import com.syndic8.phytopolis.level.HazardController;
 import com.syndic8.phytopolis.level.PlantController;
 import com.syndic8.phytopolis.level.ResourceController;
 import com.syndic8.phytopolis.level.models.*;
+import com.syndic8.phytopolis.util.FilmStrip;
 
 import java.util.HashMap;
 
@@ -39,6 +40,8 @@ import java.util.HashMap;
  * place nicely with the static assets.
  */
 public class GameplayMode extends WorldController implements ContactListener {
+    private FilmStrip jumpAnimator;
+
 
     // Define collision categories (bits)
     final short CATEGORY_PLAYER = 0x0001;
@@ -67,6 +70,8 @@ public class GameplayMode extends WorldController implements ContactListener {
     protected TextureRegion branchTexture;
     private int sunCollected;
     private int waterCollected;
+
+    protected Texture jumpTexture;
     private Player player;
     /**
      * The font for giving messages to the player
@@ -188,6 +193,11 @@ public class GameplayMode extends WorldController implements ContactListener {
         hazardController.gatherAssets(directory);
         resourceController.gatherAssets(directory);
 
+        jumpTexture = directory.getEntry("jump",
+                Texture.class);
+        jumpAnimator = new FilmStrip(jumpTexture, 1, 12,
+                12);
+
         //jumpSound = directory.getEntry("platform:jump", Sound.class);
         //fireSound = directory.getEntry("platform:pew", Sound.class);
         //plopSound = directory.getEntry("platform:plop", Sound.class);
@@ -279,7 +289,8 @@ public class GameplayMode extends WorldController implements ContactListener {
         // Create dude
         dwidth = avatarTexture.getRegionWidth() / scale.x;
         dheight = avatarTexture.getRegionHeight() / scale.y;
-        avatar = new Player(constants.get("dude"), dwidth, dheight);
+        avatar = new Player(constants.get("dude"), dwidth
+                , dheight, jumpAnimator);
         avatar.setDrawScale(scale);
         avatar.setTexture(avatarTexture);
         avatar.setName("dude");
@@ -589,7 +600,7 @@ public class GameplayMode extends WorldController implements ContactListener {
                                 ((Model) fix1.getBody()
                                         .getUserData()).getType() ==
                                         Model.ModelType.SUN);
-        if (isCollisionBetweenPlayerAndSun) {
+        if (isCollisionBetweenPlayerAndSun){
             resourceController.setCurrSun(1);
         }
         if (isCollisionBetweenPlayerAndWater) {
