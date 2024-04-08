@@ -62,11 +62,16 @@ public class ResourceController {
     }
 
     public void setCurrSun(int sun) {
-        currSun += sun;
+        if (!fullSun())
+        {currSun += sun;}
     }
 
     public boolean fullWater() {
         return currWater == MAX_WATER;
+    }
+
+    public boolean fullSun(){
+        return currSun == MAX_SUN;
     }
 
     public boolean canGrow() {
