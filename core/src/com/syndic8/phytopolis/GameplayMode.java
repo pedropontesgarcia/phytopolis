@@ -153,7 +153,7 @@ public class GameplayMode extends WorldController implements ContactListener {
                                               40,
                                               1.4f,
                                               1,
-                                              1,
+                                              0,
                                               world,
                                               scale,
                                               resourceController);
@@ -205,6 +205,7 @@ public class GameplayMode extends WorldController implements ContactListener {
                               DEFAULT_HEIGHT,
                               directory.getEntry("gameplay:tilemap",
                                                  JsonValue.class));
+        tilemap.gatherAssets(directory);
 
         this.branchTexture = new TextureRegion(directory.getEntry(
                 "gameplay:branch",
@@ -395,7 +396,8 @@ public class GameplayMode extends WorldController implements ContactListener {
         float avatarX = avatar.getX();
         float avatarY = avatar.getY();
         Branch.branchType bt = Branch.branchType.NORMAL;
-        if(InputController.getInstance().didSpecial()) bt = Branch.branchType.REINFORCED;
+        if (InputController.getInstance().didSpecial())
+            bt = Branch.branchType.REINFORCED;
         if (InputController.getInstance().didGrowUp() &&
                 (plantController.branchGrowableAt(avatarX,
                                                   avatarY,
@@ -717,6 +719,7 @@ public class GameplayMode extends WorldController implements ContactListener {
         canvas.cameraUpdate(cameraVector);
         super.draw(dt);
         canvas.begin();
+        tilemap.draw(canvas);
         resourceController.draw(canvas);
         plantController.draw(canvas);
         hazardController.draw(canvas);

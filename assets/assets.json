@@ -11,14 +11,19 @@
     "water_nooutline": "gameplay/water_nooutline.png",
     "gameplay:water_filmstrip": "gameplay/water-ui.png",
     "gameplay:sun_filmstrip": "gameplay/sun-ui.png",
+    "gameplay:background": "gameplay/back2.png",
+    "gameplay:block1": "gameplay/budblock1.png",
+    "gameplay:block2": "gameplay/budblock2.png",
+    "gameplay:block3": "gameplay/budblock3.png",
+    "gameplay:balcony": "gameplay/shortbalcony1.png",
     "fire": "hazards/fire.png",
     "drone": "hazards/drone.png",
-    "gameplay:background": "gameplay/back2.png",
     "jump": "gameplay/jump-filmstrip.png"
   },
   "jsons": {
     "gameplay:tilemap": "gameplay/lvl1.json",
-    "gameplay:constants": "gameplay/constants.json"
+    "gameplay:constants": "gameplay/constants.json",
+    "gameplay:tileset": "gameplay/default.json"
   },
   "music": {
     "viridian": "gameplay/ViridianEXP1_16bit.wav"
