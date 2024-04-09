@@ -27,6 +27,7 @@ import com.syndic8.phytopolis.level.PlantController;
 import com.syndic8.phytopolis.level.ResourceController;
 import com.syndic8.phytopolis.level.models.*;
 import com.syndic8.phytopolis.util.FilmStrip;
+import com.syndic8.phytopolis.util.Tilemap;
 
 import java.util.HashMap;
 
@@ -82,6 +83,7 @@ public class GameplayMode extends WorldController implements ContactListener {
      * Texture asset for character avatar
      */
     private TextureRegion avatarTexture;
+    private Tilemap tilemap;
     /**
      * Texture asset for water symbol
      */
@@ -203,6 +205,10 @@ public class GameplayMode extends WorldController implements ContactListener {
         //plopSound = directory.getEntry("platform:plop", Sound.class);
 
         constants = directory.getEntry("gameplay:constants", JsonValue.class);
+        tilemap = new Tilemap(DEFAULT_WIDTH,
+                              DEFAULT_HEIGHT,
+                              directory.getEntry("gameplay:tilemap",
+                                                 JsonValue.class));
 
         this.branchTexture = new TextureRegion(directory.getEntry(
                 "gameplay:branch",
@@ -251,37 +257,87 @@ public class GameplayMode extends WorldController implements ContactListener {
         // Add level goal
         float dwidth;
         float dheight;
-
-        String wname = "wall";
-        JsonValue walljv = constants.get("walls");
+        tilemap.populateLevel(this);
         JsonValue defaults = constants.get("defaults");
-        for (int ii = 0; ii < walljv.size; ii++) {
-            PolygonObject obj;
-            obj = new PolygonObject(walljv.get(ii).asFloatArray(), 0, 0);
-            obj.setBodyType(BodyDef.BodyType.StaticBody);
-            obj.setDensity(defaults.getFloat("density", 0.0f));
-            obj.setFriction(defaults.getFloat("friction", 0.0f));
-            obj.setRestitution(defaults.getFloat("restitution", 0.0f));
-            obj.setDrawScale(scale);
-            obj.setTexture(barrierTexture);
-            obj.setName(wname + ii);
-            addObject(obj);
-        }
 
-        String pname = "platform";
-        JsonValue platjv = constants.get("platforms");
-        for (int ii = 0; ii < platjv.size; ii++) {
-            PolygonObject obj;
-            obj = new PolygonObject(platjv.get(ii).asFloatArray(), 0, 0);
-            obj.setBodyType(BodyDef.BodyType.StaticBody);
-            obj.setDensity(defaults.getFloat("density", 0.0f));
-            obj.setFriction(defaults.getFloat("friction", 0.0f));
-            obj.setRestitution(defaults.getFloat("restitution", 0.0f));
-            obj.setDrawScale(scale);
-            obj.setTexture(barrierTexture);
-            obj.setName(pname + ii);
-            addObject(obj);
-        }
+        // Add floor
+        PolygonObject obj;
+        obj = new PolygonObject(new float[]{0,
+                0,
+                DEFAULT_WIDTH,
+                0,
+                DEFAULT_WIDTH,
+                -1,
+                0,
+                -1}, 0, 0);
+        obj.setBodyType(BodyDef.BodyType.StaticBody);
+        obj.setDensity(0);
+        obj.setFriction(0);
+        obj.setRestitution(0);
+        obj.setName("floor");
+        addObject(obj);
+
+        // Add left wall
+        obj = new PolygonObject(new float[]{-1,
+                DEFAULT_HEIGHT,
+                0,
+                DEFAULT_HEIGHT,
+                0,
+                0,
+                -1,
+                0}, 0, 0);
+        obj.setBodyType(BodyDef.BodyType.StaticBody);
+        obj.setDensity(0);
+        obj.setFriction(0);
+        obj.setRestitution(0);
+        obj.setName("leftwall");
+        addObject(obj);
+
+        // Add right wall
+        obj = new PolygonObject(new float[]{DEFAULT_WIDTH,
+                DEFAULT_HEIGHT,
+                DEFAULT_WIDTH + 1,
+                DEFAULT_HEIGHT,
+                DEFAULT_WIDTH + 1,
+                0,
+                DEFAULT_WIDTH,
+                0}, 0, 0);
+        obj.setBodyType(BodyDef.BodyType.StaticBody);
+        obj.setDensity(0);
+        obj.setFriction(0);
+        obj.setRestitution(0);
+        obj.setName("rightwall");
+        addObject(obj);
+
+        //        String wname = "wall";
+        //        JsonValue walljv = constants.get("walls");
+        //        for (int ii = 0; ii < walljv.size; ii++) {
+        //            PolygonObject obj;
+        //            obj = new PolygonObject(walljv.get(ii).asFloatArray(), 0, 0);
+        //            obj.setBodyType(BodyDef.BodyType.StaticBody);
+        //            obj.setDensity(defaults.getFloat("density", 0.0f));
+        //            obj.setFriction(defaults.getFloat("friction", 0.0f));
+        //            obj.setRestitution(defaults.getFloat("restitution", 0.0f));
+        //            obj.setDrawScale(scale);
+        //            obj.setTexture(barrierTexture);
+        //            obj.setName(wname + ii);
+        //            addObject(obj);
+        //        }
+        //
+        //        String pname = "platform";
+        //        JsonValue platjv = constants.get("platforms");
+        //        for (int ii = 0; ii < platjv.size; ii++) {
+        //            PolygonObject obj;
+        //            obj = new PolygonObject(platjv.get(ii).asFloatArray(), 0, 0);
+        //            obj.setBodyType(BodyDef.BodyType.StaticBody);
+        //            obj.setDensity(defaults.getFloat("density", 0.0f));
+        //            obj.setFriction(defaults.getFloat("friction", 0.0f));
+        //            obj.setRestitution(defaults.getFloat("restitution", 0.0f));
+        //            obj.setDrawScale(scale);
+        //            obj.setTexture(barrierTexture);
+        //            obj.setName(pname + ii);
+        //            addObject(obj);
+        //        }
 
         // This world is heavier
         world.setGravity(new Vector2(0, defaults.getFloat("gravity", 0)));
@@ -289,8 +345,10 @@ public class GameplayMode extends WorldController implements ContactListener {
         // Create dude
         dwidth = avatarTexture.getRegionWidth() / scale.x;
         dheight = avatarTexture.getRegionHeight() / scale.y;
-        avatar = new Player(constants.get("dude"), dwidth
-                , dheight, jumpAnimator);
+        avatar = new Player(constants.get("dude"),
+                            dwidth,
+                            dheight,
+                            jumpAnimator);
         avatar.setDrawScale(scale);
         avatar.setTexture(avatarTexture);
         avatar.setName("dude");
@@ -416,7 +474,8 @@ public class GameplayMode extends WorldController implements ContactListener {
         resourceController.update(avatar);
         hazardController.updateHazards(this);
         if (InputController.getInstance().didExtinguish()) {
-            int[] index = plantController.worldCoordToIndex(avatar.getX(), avatar.getY());
+            int[] index = plantController.worldCoordToIndex(avatar.getX(),
+                                                            avatar.getY());
             hazardController.extinguishFire(index[0], index[1]);
         }
         plantController.propagateDestruction();
@@ -603,7 +662,7 @@ public class GameplayMode extends WorldController implements ContactListener {
                                 ((Model) fix1.getBody()
                                         .getUserData()).getType() ==
                                         Model.ModelType.SUN);
-        if (isCollisionBetweenPlayerAndSun){
+        if (isCollisionBetweenPlayerAndSun) {
             resourceController.setCurrSun(1);
         }
         if (isCollisionBetweenPlayerAndWater) {
@@ -623,11 +682,14 @@ public class GameplayMode extends WorldController implements ContactListener {
                         InputController.getInstance().didDrop())) {
             contact.setEnabled(false);
         }
-        if(isCollisionBetweenPlayerAndLeaf){
+        if (isCollisionBetweenPlayerAndLeaf) {
             Leaf l;
             if(fix1.getBody() == avatar.getBody()) l = (Leaf) fix2.getBody().getUserData();
+            if (fix1.getBody() == avatar.getBody())
+                l = (Leaf) fix2.getBody().getUserData();
             else l = (Leaf) fix1.getBody().getUserData();
-            if(l.getLeafType() == Leaf.leafType.BOUNCY && avatar.getY() > l.getY() + 0.9f) avatar.setBouncy(true);
+            if (l.getLeafType() == Leaf.leafType.BOUNCY &&
+                    avatar.getY() > l.getY() + 0.9f) avatar.setBouncy(true);
         }
     }
 
