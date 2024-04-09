@@ -1,6 +1,6 @@
 {
   "textures": {
-    "background": "mainmenu/back.png",
+    "background": "mainmenu/menuart.png",
     "play": "mainmenu/play.png",
     "logo": "mainmenu/logo.png"
   }
