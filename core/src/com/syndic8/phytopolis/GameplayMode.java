@@ -671,10 +671,24 @@ public class GameplayMode extends WorldController implements ContactListener {
                                         .getUserData()).getType() ==
                                         Model.ModelType.SUN);
         if (isCollisionBetweenPlayerAndSun) {
-            resourceController.setCurrSun(1);
+            Sun s;
+            if (((Model) fix1.getBody().getUserData()).getType() == Model.ModelType.SUN) {
+                s = (Sun) fix1.getUserData();
+            } else {
+                s = (Sun) fix2.getUserData();
+            }
+            s.clear();
+            resourceController.pickupSun(s.getRegenRatio());
         }
         if (isCollisionBetweenPlayerAndWater) {
-            resourceController.setCurrWater(5);
+            Water w;
+            if (((Model) fix1.getBody().getUserData()).getType() == Model.ModelType.WATER) {
+                w = (Water) fix1.getUserData();
+            } else {
+                w = (Water) fix2.getUserData();
+            }
+            w.clear();
+            resourceController.pickupWater(w.getRegenRatio());
         }
 
         boolean isPlayerGoingUp = avatar.getVY() >= 0;

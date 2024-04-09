@@ -24,6 +24,11 @@ public abstract class Resource extends CircleObject {
         return (float) currRegen / MAX_REGEN;
     }
 
+    public void clear() {
+        currRegen = 0;
+        currDelay = 0;
+    }
+
     public void regenerate() {
         if (currRegen < MAX_REGEN) {
             currDelay++;

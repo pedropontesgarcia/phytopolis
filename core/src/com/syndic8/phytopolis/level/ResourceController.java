@@ -24,6 +24,9 @@ public class ResourceController {
      * Amount of water required to extinguish a fire
      */
     private final int FIRE_AMT = 20;
+    private final int SUN_ON_PICKUP = 1;
+    private final int WATER_ON_PICKUP = 10;
+
     /**
      * Controller for UI.
      */
@@ -58,19 +61,16 @@ public class ResourceController {
         return currWater;
     }
 
-    public void setCurrWater(int water) {
-        if (!fullWater()) {
-            currWater += water;
-        }
+    public void pickupWater(float ratio) {
+        currWater = Math.min(MAX_WATER, currWater + (int)(WATER_ON_PICKUP * ratio));
     }
 
     public int getCurrSun() {
         return currSun;
     }
 
-    public void setCurrSun(int sun) {
-        if (!fullSun())
-        {currSun += sun;}
+    public void pickupSun(float ratio) {
+        currSun = Math.min(MAX_SUN, currSun + (int)(SUN_ON_PICKUP * ratio));
     }
 
     public boolean fullWater() {
@@ -113,6 +113,10 @@ public class ResourceController {
     public void addSun(float x, float y) {
         Sun s = new Sun(x, y);
         resources.add(s);
+    }
+
+    public PooledList<Resource> getResources() {
+        return resources;
     }
 
     public void update(Player player) {
