@@ -1,6 +1,6 @@
 {
   "textures": {
-    "gameplay:player": "gameplay/charo2.png",
+    "gameplay:player": "gameplay/static.png",
     "gameplay:leaf": "gameplay/leaf.png",
     "gameplay:node": "gameplay/node.png",
     "gameplay:barrier": "gameplay/barrier.png",
@@ -9,9 +9,10 @@
     "water_nooutline": "gameplay/water_nooutline.png",
     "gameplay:water_filmstrip": "gameplay/water-ui.png",
     "gameplay:sun_filmstrip": "gameplay/sun-ui.png",
+    "gameplay:tilemap": "gameplay/lvl1.json",
     "fire": "hazards/fire.png",
     "drone": "hazards/drone.png",
-    "gameplay:background": "gameplay/back.jpg",
+    "gameplay:background": "gameplay/bg.png",
     "jump": "gameplay/jump-filmstrip.png"
   },
   "jsons": {

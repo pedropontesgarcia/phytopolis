@@ -1,0 +1,43 @@
+{
+  "columns": 0,
+  "grid": {
+    "height": 1,
+    "orientation": "orthogonal",
+    "width": 1
+  },
+  "margin": 0,
+  "name": "default",
+  "spacing": 0,
+  "tilecount": 4,
+  "tiledversion": "1.10.2",
+  "tileheight": 537,
+  "tiles": [
+    {
+      "id": 0,
+      "image": "budblock1.png",
+      "imageheight": 537,
+      "imagewidth": 867
+    },
+    {
+      "id": 1,
+      "image": "budblock2.png",
+      "imageheight": 537,
+      "imagewidth": 867
+    },
+    {
+      "id": 2,
+      "image": "budblock3.png",
+      "imageheight": 537,
+      "imagewidth": 902
+    },
+    {
+      "id": 3,
+      "image": "shortbalcony1.png",
+      "imageheight": 536,
+      "imagewidth": 847
+    }
+  ],
+  "tilewidth": 902,
+  "type": "tileset",
+  "version": "1.10"
+}
