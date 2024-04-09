@@ -2,6 +2,7 @@
   "textures": {
     "gameplay:player": "gameplay/charo2.png",
     "gameplay:leaf": "gameplay/leaf.png",
+    "gameplay:bouncy": "gameplay/bounce.png",
     "gameplay:node": "gameplay/node.png",
     "gameplay:barrier": "gameplay/barrier.png",
     "gameplay:branch": "gameplay/branch.png",

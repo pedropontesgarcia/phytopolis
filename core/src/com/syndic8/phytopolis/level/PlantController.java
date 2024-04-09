@@ -72,6 +72,10 @@ public class PlantController {
      */
     protected Texture leafTexture;
     /**
+     * bouncy leaf texture
+     */
+    protected Texture bouncyLeafTexture;
+    /**
      * how many more frames until the next propagation of destruction
      */
     private int plantCoyoteTimeRemaining = 0;
@@ -143,7 +147,7 @@ public class PlantController {
         int xIndex = screenCoordToIndex(x, y)[0];
         int yIndex = screenCoordToIndex(x, y)[1];
         boolean lowerNode = xIndex % 2 == 0;
-        if(!plantGrid[xIndex][yIndex].hasLeaf() && (yIndex>0 || !lowerNode)) return plantGrid[xIndex][yIndex].makeLeaf(type, leafTexture);
+        if(!plantGrid[xIndex][yIndex].hasLeaf() && (yIndex>0 || !lowerNode)) return plantGrid[xIndex][yIndex].makeLeaf(type);
         return null;
     }
 
@@ -337,6 +341,7 @@ public class PlantController {
         this.branchTexture = directory.getEntry("gameplay:branch",
                                                 Texture.class);
         this.leafTexture = directory.getEntry("gameplay:leaf", Texture.class);
+        this.bouncyLeafTexture = directory.getEntry("gameplay:bouncy", Texture.class);
     }
 
     /**
@@ -519,19 +524,29 @@ public class PlantController {
                                World world) {
             float pi = (float) Math.PI;
             if (branchTexture != null) {
+                Branch newBranch = null;
                 switch (direction) {
                     case LEFT:
                         left = new Branch(x, y, pi / 3, type);
-                        left.setTexture(branchTexture);
+                        newBranch = left;
                         break;
                     case MIDDLE:
                         middle = new Branch(x, y, 0, type);
-                        middle.setTexture(branchTexture);
+                        newBranch = middle;
                         break;
                     case RIGHT:
                         right = new Branch(x, y, -pi / 3, type);
-                        right.setTexture(branchTexture);
+                        newBranch = right;
                         break;
+                }
+                if (newBranch != null) {
+                    switch (type){
+                        case NORMAL:
+                            newBranch.setTexture(branchTexture);
+                            break;
+                        case REINFORCED:
+                            break;
+                    }
                 }
             }
             resourceController.decrementGrow();
@@ -542,10 +557,8 @@ public class PlantController {
          * make a leaf of the desired type
          *
          * @param type    type of leaf to create
-         * @param texture texture of the leaf
          */
-        public Leaf makeLeaf(Leaf.leafType type,
-                             Texture texture) {
+        public Leaf makeLeaf(Leaf.leafType type) {
             if (screenCoordToIndex(x / worldToPixelConversionRatio, y / worldToPixelConversionRatio)[1] > 0 &&
                     !leafExists && hasBranch() ||
                     growableAt(x / worldToPixelConversionRatio,
@@ -554,7 +567,14 @@ public class PlantController {
                                 y / worldToPixelConversionRatio, //- 0.5f,
                                 leafWidth,
                                 leafHeight, type);
-                leaf.setTexture(texture);
+                switch (type){
+                    case NORMAL:
+                        leaf.setTexture(leafTexture);
+                        break;
+                    case BOUNCY:
+                        leaf.setTexture(bouncyLeafTexture);
+                        break;
+                }
                 leaf.setDrawScale(scale.x, scale.y);
                 leafExists = true;
                 //worldcontroller.addObject(leaf);

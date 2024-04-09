@@ -1,6 +1,8 @@
 package com.syndic8.phytopolis.level.models;
 
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.physics.box2d.BodyDef;
+import com.syndic8.phytopolis.GameCanvas;
 
 public class Leaf extends BoxObject {
     /**
@@ -44,4 +46,31 @@ public class Leaf extends BoxObject {
         return ModelType.LEAF;
     }
 
+    @Override
+    public void draw(GameCanvas canvas) {
+        if (texture != null) {
+            switch (type){
+                case NORMAL:
+                    canvas.draw(texture,
+                            Color.WHITE,
+                            origin.x,
+                            origin.y,
+                            getX() * drawScale.x,
+                            getY() * drawScale.x,
+                            getAngle(),
+                            1,
+                            1);
+                case BOUNCY:
+                    canvas.draw(texture,
+                            Color.WHITE,
+                            origin.x,
+                            origin.y,
+                            getX() * drawScale.x,
+                            getY() * drawScale.x,
+                            getAngle(),
+                            0.21f,
+                            0.21f);
+            }
+        }
+    }
 }
