@@ -145,15 +145,15 @@ public class Branch extends Model {
      * @param canvas The drawing context
      */
     public void draw(GameCanvas canvas) {
-        canvas.draw(texture,
-                Color.WHITE,
-                texture.getRegionWidth() / 2.0f,
-                0,
-                position.x,
-                position.y,
-                angle,
-                scale.x/90f,
-                scale.x/90f);
+//        canvas.draw(texture,
+//                Color.WHITE,
+//                texture.getRegionWidth() / 2.0f,
+//                0,
+//                position.x,
+//                position.y,
+//                angle,
+//                scale.x/90f,
+//                scale.x/90f);
         switch (type){
             case NORMAL:
                 canvas.draw(texture,
@@ -168,14 +168,14 @@ public class Branch extends Model {
                 break;
             case REINFORCED:
                 canvas.draw(texture,
-                        Color.GRAY,
-                        texture.getRegionWidth() / 2.0f,
-                        0,
+                        Color.WHITE,
+                        texture.getRegionWidth() / 1.87f,
+                        texture.getRegionHeight()/4f,
                         position.x,
                         position.y,
                         angle,
-                        scale.x/90f,
-                        scale.x/90f);
+                        (scale.x * 0.24f)/90f,
+                        (scale.x * 0.24f)/90f);
                 break;
         }
     }

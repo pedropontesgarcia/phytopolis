@@ -72,6 +72,10 @@ public class PlantController {
      */
     protected Texture leafTexture;
     /**
+     * reinforced upwards branch texture
+     */
+    protected Texture enBranchTextureUp;
+    /**
      * bouncy leaf texture
      */
     protected Texture bouncyLeafTexture;
@@ -342,6 +346,7 @@ public class PlantController {
                                                 Texture.class);
         this.leafTexture = directory.getEntry("gameplay:leaf", Texture.class);
         this.bouncyLeafTexture = directory.getEntry("gameplay:bouncy", Texture.class);
+        this.enBranchTextureUp = directory.getEntry("gameplay:enbranch", Texture.class);
     }
 
     /**
@@ -545,7 +550,7 @@ public class PlantController {
                             newBranch.setTexture(branchTexture);
                             break;
                         case REINFORCED:
-                            newBranch.setTexture(branchTexture);
+                            newBranch.setTexture(enBranchTextureUp);
                             break;
                     }
                 }
