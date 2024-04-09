@@ -10,13 +10,13 @@
     "water_nooutline": "gameplay/water_nooutline.png",
     "gameplay:water_filmstrip": "gameplay/water-ui.png",
     "gameplay:sun_filmstrip": "gameplay/sun-ui.png",
-    "gameplay:tilemap": "gameplay/lvl1.json",
     "fire": "hazards/fire.png",
     "drone": "hazards/drone.png",
     "gameplay:background": "gameplay/back2.png",
     "jump": "gameplay/jump-filmstrip.png"
   },
   "jsons": {
+    "gameplay:tilemap": "gameplay/lvl1.json",
     "gameplay:constants": "gameplay/constants.json"
   },
   "music": {
