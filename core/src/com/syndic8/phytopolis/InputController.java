@@ -91,6 +91,7 @@ public class InputController {
     private boolean dropPrevious;
     private boolean extinguishFirePressed;
     private boolean extinguishFirePrevious;
+    private boolean specialToggled;
     private float growX;
     private float growY;
     /**
@@ -289,6 +290,14 @@ public class InputController {
     }
 
     /**
+     * Returns true if the special growth key was held
+     * @return whether or not the special key was held
+     */
+    public boolean didSpecial(){
+        return specialToggled;
+    }
+
+    /**
      * Reads the input for the player and converts the result into game logic.
      * <p>
      * The method provides both the input bounds and the drawing scale.  It needs
@@ -390,6 +399,8 @@ public class InputController {
                 (Gdx.input.isKeyPressed(Input.Keys.N));
         exitPressed = (secondary && exitPressed) ||
                 (Gdx.input.isKeyPressed(Input.Keys.ESCAPE));
+        specialToggled = (secondary && specialToggled) ||
+                Gdx.input.isKeyPressed(Input.Keys.SHIFT_LEFT);
 
         // Directional controls
         horizontal = (secondary ? horizontal : 0.0f);

@@ -366,13 +366,15 @@ public class GameplayMode extends WorldController implements ContactListener {
                                        Branch.branchType.NORMAL);
 
         } else if (InputController.getInstance().didMousePress()) {
+            Leaf.leafType lt = Leaf.leafType.NORMAL;
+            if(InputController.getInstance().didSpecial()) lt = Leaf.leafType.BOUNCY;
             Model newLeaf = plantController.growLeaf(InputController.getInstance()
                                                              .getGrowX(),
                                                      InputController.getInstance()
                                                              .getGrowY() +
                                                              cameraVector.y -
                                                              500,
-                                                     Leaf.leafType.BOUNCY);
+                                                     lt);
             if (newLeaf != null) addObject(newLeaf);
         }
         return false;
