@@ -153,7 +153,7 @@ public class GameplayMode extends WorldController implements ContactListener {
                                               40,
                                               1.4f,
                                               1,
-                                              1,
+                                              0,
                                               world,
                                               scale,
                                               resourceController);
