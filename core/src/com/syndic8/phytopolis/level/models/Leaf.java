@@ -60,6 +60,7 @@ public class Leaf extends BoxObject {
                             getAngle(),
                             1,
                             1);
+                    break;
                 case BOUNCY:
                     canvas.draw(texture,
                             Color.WHITE,
@@ -70,6 +71,7 @@ public class Leaf extends BoxObject {
                             getAngle(),
                             0.21f,
                             0.21f);
+                    break;
             }
         }
     }
