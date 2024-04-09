@@ -99,7 +99,6 @@ public class ResourceController {
     }
 
     public void update(Player player) {
-        ui.update((float) currWater / MAX_WATER, (float) currSun / MAX_SUN);
         if (player.atBottom()) {
             //System.out.println("AT BOTTOM");
             framesOnGround++;
@@ -114,6 +113,7 @@ public class ResourceController {
                 currWater++;
             }
         }
+        ui.update((float) currWater / MAX_WATER, (float) currSun / MAX_SUN);
     }
 
     public void draw(GameCanvas c) {
