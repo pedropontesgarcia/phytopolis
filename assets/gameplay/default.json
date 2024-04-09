@@ -14,25 +14,25 @@
   "tiles": [
     {
       "id": 0,
-      "image": "budblock1.png",
+      "image": "gameplay:block1",
       "imageheight": 537,
       "imagewidth": 867
     },
     {
       "id": 1,
-      "image": "budblock2.png",
+      "image": "gameplay:block2",
       "imageheight": 537,
       "imagewidth": 867
     },
     {
       "id": 2,
-      "image": "budblock3.png",
+      "image": "gameplay:block3",
       "imageheight": 537,
       "imagewidth": 902
     },
     {
       "id": 3,
-      "image": "shortbalcony1.png",
+      "image": "gameplay:balcony",
       "imageheight": 536,
       "imagewidth": 847
     }

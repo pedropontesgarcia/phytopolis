@@ -207,7 +207,7 @@
   "tilesets": [
     {
       "firstgid": 1,
-      "source": "default"
+      "source": "gameplay:tileset"
     }
   ],
   "tilewidth": 867,
