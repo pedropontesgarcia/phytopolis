@@ -69,6 +69,9 @@ public class GameplayMode extends WorldController implements ContactListener {
     protected TextureRegion branchTexture;
     protected Texture jumpTexture;
     private FilmStrip jumpAnimator;
+
+    private Texture jogTexture;
+    private FilmStrip jogAnimator;
     private int sunCollected;
     private int waterCollected;
     private Player player;
@@ -195,6 +198,10 @@ public class GameplayMode extends WorldController implements ContactListener {
 
         jumpTexture = directory.getEntry("jump", Texture.class);
         jumpAnimator = new FilmStrip(jumpTexture, 1, 12, 12);
+
+        jogTexture = directory.getEntry("jog",
+                Texture.class);
+        jogAnimator = new FilmStrip(jogTexture, 1, 8, 8);
 
         //jumpSound = directory.getEntry("platform:jump", Sound.class);
         //fireSound = directory.getEntry("platform:pew", Sound.class);
@@ -345,7 +352,7 @@ public class GameplayMode extends WorldController implements ContactListener {
         avatar = new Player(constants.get("dude"),
                             dwidth,
                             dheight,
-                            jumpAnimator);
+                            jumpAnimator, jogAnimator);
         avatar.setDrawScale(scale);
         avatar.setTexture(avatarTexture);
         avatar.setName("dude");

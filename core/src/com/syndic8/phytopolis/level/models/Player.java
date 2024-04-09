@@ -16,8 +16,15 @@ public class Player extends CapsuleObject {
     private float animFrame;
 
     private FilmStrip jumpAnimator;
+
+    private float animFrame2;
+
+    private FilmStrip jogAnimator;
+    private static final int NUM_JOG_FRAMES = 8;
     private static final int NUM_JUMP_FRAMES = 12 ;
     private static final float ANIMATION_SPEED = 0.15f;
+
+    private static final float ANIMATION_SPEED2 = 0.16f;
     /** The initializing data (to avoid magic numbers) */
     private final JsonValue data;
 
@@ -228,7 +235,8 @@ public class Player extends CapsuleObject {
      * @param height	The object width in physics units
      */
     public Player(JsonValue data, float width,
-                  float height, FilmStrip jump) {
+                  float height, FilmStrip jump,
+                  FilmStrip jog) {
         // The shrink factors fit the image to a tigher hitbox
         super(	data.get("pos").getFloat(0),
                 data.get("pos").getFloat(1),
@@ -255,6 +263,7 @@ public class Player extends CapsuleObject {
 
         animFrame = 0.0f;
         jumpAnimator = jump;
+        jogAnimator = jog;
         shootCooldown = 0;
         jumpCooldown = 0;
         setName("dude");
@@ -348,6 +357,14 @@ public class Player extends CapsuleObject {
                 animFrame -= NUM_JUMP_FRAMES;
             }
         }
+        if (!(Math.abs(body.getLinearVelocity().y) >= 0.15) &&
+                (Math.abs(body.getLinearVelocity().x) >= 0.1)){
+            animFrame2 += ANIMATION_SPEED2;
+            if (animFrame2 >= NUM_JOG_FRAMES){
+                animFrame2-= NUM_JOG_FRAMES;
+            }
+
+        }
         // Apply cooldowns
         if (isJumping()) {
             jumpCooldown = jumpLimit;
@@ -392,7 +409,25 @@ public class Player extends CapsuleObject {
                     0.8f * effect,
                     0.8f
             );
-        }else{
+
+        }else if (!(Math.abs(body.getLinearVelocity().y) >= 0.15) &&
+                (Math.abs(body.getLinearVelocity().x) >= 0.1)){
+            jogAnimator.setFrame((int)animFrame2);
+            float x = jogAnimator.getRegionWidth()/2.0f;
+            float y = jogAnimator.getRegionHeight()/2.0f;
+            canvas.draw(
+                    jogAnimator,
+                    Color.WHITE,
+                    x,
+                    y,
+                    getX()*drawScale.x,
+                    getY()*drawScale.y,
+                    getAngle(),
+                    0.8f * effect,
+                    0.8f
+            );
+        }
+        else{
             canvas.draw(
                     texture,
                     Color.WHITE,
