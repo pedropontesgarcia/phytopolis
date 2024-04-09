@@ -7,9 +7,7 @@ import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.*;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
-import com.badlogic.gdx.math.Affine2;
-import com.badlogic.gdx.math.Matrix4;
-import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.math.*;
 import com.badlogic.gdx.physics.box2d.CircleShape;
 import com.badlogic.gdx.physics.box2d.PolygonShape;
 
@@ -57,7 +55,6 @@ public class GameCanvas {
      * Affine cache for all sprites this drawing pass
      */
     private Matrix4 global;
-
     // CACHE OBJECTS
     private Vector2 vertex;
     /**
@@ -86,9 +83,13 @@ public class GameCanvas {
 
         // Set the projection matrix (for proper scaling)
         camera = new OrthographicCamera(getWidth(), getHeight());
+        //viewport = new ScalingViewport(Scaling.fit, 16, 9, camera);
+
         camera.position.set(camera.viewportWidth / 2f,
                             camera.viewportHeight / 2f,
                             0);
+        //viewport.apply();
+
         camera.update();
         spriteBatch.setProjectionMatrix(camera.combined);
         debugRender.setProjectionMatrix(camera.combined);
@@ -101,7 +102,10 @@ public class GameCanvas {
     }
 
     public void cameraUpdate(Vector2 pos) {
-        camera.position.set(pos, 0);
+        //camera.position.set(pos, 0);
+        camera.position.interpolate(new Vector3(pos.x, pos.y, 0),
+                                    0.3f,
+                                    Interpolation.fade);
         spriteBatch.setProjectionMatrix(camera.combined);
         camera.update();
 
