@@ -1,7 +1,8 @@
 {
   "textures": {
-    "gameplay:player": "gameplay/static.png",
+    "gameplay:player": "gameplay/charo2.png",
     "gameplay:leaf": "gameplay/leaf.png",
+    "gameplay:bouncy": "gameplay/bounce.png",
     "gameplay:node": "gameplay/node.png",
     "gameplay:barrier": "gameplay/barrier.png",
     "gameplay:branch": "gameplay/branch.png",
@@ -12,7 +13,7 @@
     "gameplay:tilemap": "gameplay/lvl1.json",
     "fire": "hazards/fire.png",
     "drone": "hazards/drone.png",
-    "gameplay:background": "gameplay/bg.png",
+    "gameplay:background": "gameplay/back2.png",
     "jump": "gameplay/jump-filmstrip.png"
   },
   "jsons": {

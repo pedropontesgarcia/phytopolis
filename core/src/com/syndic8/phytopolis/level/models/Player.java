@@ -17,7 +17,7 @@ public class Player extends CapsuleObject {
 
     private FilmStrip jumpAnimator;
     private static final int NUM_JUMP_FRAMES = 12 ;
-    private static final float ANIMATION_SPEED = 0.4f;
+    private static final float ANIMATION_SPEED = 0.15f;
     /** The initializing data (to avoid magic numbers) */
     private final JsonValue data;
 
@@ -342,7 +342,7 @@ public class Player extends CapsuleObject {
      */
     public void update(float dt) {
 
-        if(Math.abs(body.getLinearVelocity().y) >= 0.2){
+        if(Math.abs(body.getLinearVelocity().y) >= 0.15){
             animFrame += ANIMATION_SPEED;
             if (animFrame >= NUM_JUMP_FRAMES) {
                 animFrame -= NUM_JUMP_FRAMES;
@@ -375,7 +375,7 @@ public class Player extends CapsuleObject {
     public void draw(GameCanvas canvas) {
         float effect = faceRight ? 1.0f : -1.0f;
 
-        if (Math.abs(body.getLinearVelocity().y) >= 0.2){
+        if (Math.abs(body.getLinearVelocity().y) >= 0.15){
             jumpAnimator.setFrame((int)animFrame);
             float x = jumpAnimator.getRegionWidth()/2.0f;
             float y = jumpAnimator.getRegionHeight()/2.0f;
