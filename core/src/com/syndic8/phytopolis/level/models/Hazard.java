@@ -4,9 +4,10 @@ import com.badlogic.gdx.graphics.Color;
 import com.syndic8.phytopolis.GameCanvas;
 
 public abstract class Hazard extends CircleObject {
+    /** Radius for hazard collisions */
     private static final int HAZARD_RADIUS = 30;
     /**
-     * Creates an object with the desired hazard radius.
+     * Creates a hazard object.
      */
     public Hazard() {
         super(HAZARD_RADIUS);

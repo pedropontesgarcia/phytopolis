@@ -3,6 +3,10 @@ package com.syndic8.phytopolis.level;
 import com.syndic8.phytopolis.GameCanvas;
 import com.syndic8.phytopolis.assets.AssetDirectory;
 import com.syndic8.phytopolis.level.models.Player;
+import com.syndic8.phytopolis.level.models.Resource;
+import com.syndic8.phytopolis.level.models.Sun;
+import com.syndic8.phytopolis.level.models.Water;
+import com.syndic8.phytopolis.util.PooledList;
 
 public class ResourceController {
 
@@ -12,8 +16,6 @@ public class ResourceController {
     private final int MAX_WATER = 100;
 
     private final int MAX_SUN = 8;
-    //    /** Amount of water required to grow a branch */
-    //    private final int BRANCH_AMT = 5;
     /**
      * Amount of water required to grow a branch/leaf
      */
@@ -35,6 +37,11 @@ public class ResourceController {
      * Frames on ground (for getting water)
      */
     private int framesOnGround;
+
+    /**
+     * All pickup resources in world
+     */
+    protected PooledList<Resource> resources = new PooledList<Resource>();
 
     public ResourceController() {
         currWater = MAX_WATER;
@@ -98,7 +105,20 @@ public class ResourceController {
         }
     }
 
+    public void addWater(float x, float y) {
+        Water w = new Water(x, y);
+        resources.add(w);
+    }
+
+    public void addSun(float x, float y) {
+        Sun s = new Sun(x, y);
+        resources.add(s);
+    }
+
     public void update(Player player) {
+        for (Resource r : resources) {
+            r.regenerate();
+        }
         if (player.atBottom()) {
             //System.out.println("AT BOTTOM");
             framesOnGround++;
