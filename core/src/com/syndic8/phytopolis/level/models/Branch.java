@@ -146,14 +146,38 @@ public class Branch extends Model {
      */
     public void draw(GameCanvas canvas) {
         canvas.draw(texture,
-                    Color.WHITE,
-                    texture.getRegionWidth() / 2.0f,
-                    0,
-                    position.x,
-                    position.y,
-                    angle,
-                    scale.x/90f,
-                    scale.x/90f);
+                Color.WHITE,
+                texture.getRegionWidth() / 2.0f,
+                0,
+                position.x,
+                position.y,
+                angle,
+                scale.x/90f,
+                scale.x/90f);
+        switch (type){
+            case NORMAL:
+                canvas.draw(texture,
+                        Color.WHITE,
+                        texture.getRegionWidth() / 2.0f,
+                        0,
+                        position.x,
+                        position.y,
+                        angle,
+                        scale.x/90f,
+                        scale.x/90f);
+                break;
+            case REINFORCED:
+                canvas.draw(texture,
+                        Color.GRAY,
+                        texture.getRegionWidth() / 2.0f,
+                        0,
+                        position.x,
+                        position.y,
+                        angle,
+                        scale.x/90f,
+                        scale.x/90f);
+                break;
+        }
     }
 
     /**

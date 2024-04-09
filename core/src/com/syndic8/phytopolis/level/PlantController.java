@@ -545,6 +545,7 @@ public class PlantController {
                             newBranch.setTexture(branchTexture);
                             break;
                         case REINFORCED:
+                            newBranch.setTexture(branchTexture);
                             break;
                     }
                 }

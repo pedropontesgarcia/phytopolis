@@ -340,6 +340,8 @@ public class GameplayMode extends WorldController implements ContactListener {
         // TODO: position branch correctly
         float avatarX = avatar.getX();
         float avatarY = avatar.getY();
+        Branch.branchType bt = Branch.branchType.NORMAL;
+        if(InputController.getInstance().didSpecial()) bt = Branch.branchType.REINFORCED;
         if (InputController.getInstance().didGrowUp() &&
                 (plantController.branchGrowableAt(avatarX,
                                                   avatarY,
@@ -347,7 +349,7 @@ public class GameplayMode extends WorldController implements ContactListener {
             plantController.growBranch(avatarX,
                                        avatarY,
                                        PlantController.branchDirection.MIDDLE,
-                                       Branch.branchType.NORMAL);
+                                       bt);
         } else if (InputController.getInstance().didGrowRight() &&
                 (plantController.branchGrowableAt(avatarX,
                                                   avatarY,
@@ -355,7 +357,7 @@ public class GameplayMode extends WorldController implements ContactListener {
             plantController.growBranch(avatarX,
                                        avatarY,
                                        PlantController.branchDirection.RIGHT,
-                                       Branch.branchType.NORMAL);
+                                       bt);
         } else if (InputController.getInstance().didGrowLeft() &&
                 (plantController.branchGrowableAt(avatarX,
                                                   avatarY,
@@ -363,7 +365,7 @@ public class GameplayMode extends WorldController implements ContactListener {
             plantController.growBranch(avatarX,
                                        avatarY,
                                        PlantController.branchDirection.LEFT,
-                                       Branch.branchType.NORMAL);
+                                       bt);
 
         } else if (InputController.getInstance().didMousePress()) {
             Leaf.leafType lt = Leaf.leafType.NORMAL;
