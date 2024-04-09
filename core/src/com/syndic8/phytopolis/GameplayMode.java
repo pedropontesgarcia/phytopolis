@@ -41,8 +41,6 @@ import java.util.HashMap;
  * place nicely with the static assets.
  */
 public class GameplayMode extends WorldController implements ContactListener {
-    private FilmStrip jumpAnimator;
-
 
     // Define collision categories (bits)
     final short CATEGORY_PLAYER = 0x0001;
@@ -69,10 +67,10 @@ public class GameplayMode extends WorldController implements ContactListener {
      * branch texture
      */
     protected TextureRegion branchTexture;
+    protected Texture jumpTexture;
+    private FilmStrip jumpAnimator;
     private int sunCollected;
     private int waterCollected;
-
-    protected Texture jumpTexture;
     private Player player;
     /**
      * The font for giving messages to the player
@@ -195,10 +193,8 @@ public class GameplayMode extends WorldController implements ContactListener {
         hazardController.gatherAssets(directory);
         resourceController.gatherAssets(directory);
 
-        jumpTexture = directory.getEntry("jump",
-                Texture.class);
-        jumpAnimator = new FilmStrip(jumpTexture, 1, 12,
-                12);
+        jumpTexture = directory.getEntry("jump", Texture.class);
+        jumpAnimator = new FilmStrip(jumpTexture, 1, 12, 12);
 
         //jumpSound = directory.getEntry("platform:jump", Sound.class);
         //fireSound = directory.getEntry("platform:pew", Sound.class);
@@ -425,7 +421,8 @@ public class GameplayMode extends WorldController implements ContactListener {
 
         } else if (InputController.getInstance().didMousePress()) {
             Leaf.leafType lt = Leaf.leafType.NORMAL;
-            if(InputController.getInstance().didSpecial()) lt = Leaf.leafType.BOUNCY;
+            if (InputController.getInstance().didSpecial())
+                lt = Leaf.leafType.BOUNCY;
             Model newLeaf = plantController.growLeaf(InputController.getInstance()
                                                              .getGrowX(),
                                                      InputController.getInstance()
@@ -578,12 +575,12 @@ public class GameplayMode extends WorldController implements ContactListener {
             if ((bd1 == avatar && bd1.getY() > 34)) {
                 setComplete(true);
             }
-//            //Check for bouncyness
-//            if (bd1 == avatar && bd2 instanceof Leaf) {
-//                Leaf l1 = (Leaf) bd2;
-//                if(l1.getLeafType() == Leaf.leafType.BOUNCY &&
-//                        bd1.getY() > bd2.getY() + 0.9f) avatar.setBouncy(true);
-//            }
+            //            //Check for bouncyness
+            //            if (bd1 == avatar && bd2 instanceof Leaf) {
+            //                Leaf l1 = (Leaf) bd2;
+            //                if(l1.getLeafType() == Leaf.leafType.BOUNCY &&
+            //                        bd1.getY() > bd2.getY() + 0.9f) avatar.setBouncy(true);
+            //            }
 
         } catch (Exception e) {
             e.printStackTrace();
@@ -619,9 +616,9 @@ public class GameplayMode extends WorldController implements ContactListener {
                 avatar.setGrounded(false);
             }
         }
-//        if (bd1 == avatar && bd2 instanceof Leaf) {
-//            avatar.setBouncy(false);
-//        }
+        //        if (bd1 == avatar && bd2 instanceof Leaf) {
+        //            avatar.setBouncy(false);
+        //        }
     }
 
     /**
@@ -684,7 +681,6 @@ public class GameplayMode extends WorldController implements ContactListener {
         }
         if (isCollisionBetweenPlayerAndLeaf) {
             Leaf l;
-            if(fix1.getBody() == avatar.getBody()) l = (Leaf) fix2.getBody().getUserData();
             if (fix1.getBody() == avatar.getBody())
                 l = (Leaf) fix2.getBody().getUserData();
             else l = (Leaf) fix1.getBody().getUserData();
