@@ -400,6 +400,7 @@ public class GameplayMode extends WorldController implements ContactListener {
         processPlantGrowth();
 
         avatar.applyForce();
+        avatar.setBouncy(false);
         //System.out.println(avatar.getY());
         //System.out.println(avatar.atBottom());
         //        if (avatar.isJumping()) {
@@ -516,12 +517,12 @@ public class GameplayMode extends WorldController implements ContactListener {
             if ((bd1 == avatar && bd1.getY() > 34)) {
                 setComplete(true);
             }
-            //Check for bouncyness
-            if (bd1 == avatar && bd2 instanceof Leaf) {
-                Leaf l1 = (Leaf) bd2;
-                if(l1.getLeafType() == Leaf.leafType.BOUNCY &&
-                        bd1.getY() > bd2.getY() + 0.9f) avatar.setBouncy(true);
-            }
+//            //Check for bouncyness
+//            if (bd1 == avatar && bd2 instanceof Leaf) {
+//                Leaf l1 = (Leaf) bd2;
+//                if(l1.getLeafType() == Leaf.leafType.BOUNCY &&
+//                        bd1.getY() > bd2.getY() + 0.9f) avatar.setBouncy(true);
+//            }
 
         } catch (Exception e) {
             e.printStackTrace();
@@ -557,9 +558,9 @@ public class GameplayMode extends WorldController implements ContactListener {
                 avatar.setGrounded(false);
             }
         }
-        if (bd1 == avatar && bd2 instanceof Leaf) {
-            avatar.setBouncy(false);
-        }
+//        if (bd1 == avatar && bd2 instanceof Leaf) {
+//            avatar.setBouncy(false);
+//        }
     }
 
     /**
@@ -619,6 +620,12 @@ public class GameplayMode extends WorldController implements ContactListener {
                 (isPlayerGoingUp || isPlayerBelow ||
                         InputController.getInstance().didDrop())) {
             contact.setEnabled(false);
+        }
+        if(isCollisionBetweenPlayerAndLeaf){
+            Leaf l;
+            if(fix1.getBody() == avatar.getBody()) l = (Leaf) fix2.getBody().getUserData();
+            else l = (Leaf) fix1.getBody().getUserData();
+            if(l.getLeafType() == Leaf.leafType.BOUNCY && avatar.getY() > l.getY() + 0.9f) avatar.setBouncy(true);
         }
     }
 
