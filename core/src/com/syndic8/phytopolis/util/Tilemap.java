@@ -19,12 +19,25 @@ public class Tilemap {
     JsonValue tilemap;
     Texture[] textures;
 
+    /**
+     * Constructs a tilemap from the world dimensions and a JSON file from
+     * Tiled.
+     *
+     * @param w  The world width, in world units.
+     * @param h  The world height, in world units.
+     * @param tm The JSON tilemap file from Tiled.
+     */
     public Tilemap(float w, float h, JsonValue tm) {
         worldWidth = w;
         worldHeight = h;
         tilemap = tm;
     }
 
+    /**
+     * Gathers the assets from the tileset.
+     *
+     * @param directory The main assets directory.
+     */
     public void gatherAssets(AssetDirectory directory) {
         List<Texture> textureList = new ArrayList<>();
         String tilesetName = tilemap.get("tilesets").get(0).getString("source");
@@ -39,6 +52,12 @@ public class Tilemap {
         textures = textureList.toArray(new Texture[0]);
     }
 
+    /**
+     * Populates the given WorldController with the tiles on the physics
+     * layer of the tilemap.
+     *
+     * @param ctrl The WorldController to populate.
+     */
     public void populateLevel(WorldController ctrl) {
         JsonValue physicsLayer = tilemap.get("layers").get(0);
         int tilemapHeight = physicsLayer.getInt("height");
@@ -74,6 +93,11 @@ public class Tilemap {
         }
     }
 
+    /**
+     * Draws the visual layer of the tilemap to the canvas.
+     *
+     * @param c The game canvas.
+     */
     public void draw(GameCanvas c) {
         JsonValue visualLayer = tilemap.get("layers").get(1);
         int tilemapHeight = visualLayer.getInt("height");
