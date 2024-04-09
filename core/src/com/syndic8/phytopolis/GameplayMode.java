@@ -476,6 +476,11 @@ public class GameplayMode extends WorldController implements ContactListener {
                          Math.max((avatar.getY() - 2) * scale.y, 600));
         // generate hazards please
         resourceController.update(avatar);
+        for (Model m : objects) {
+            if (m instanceof Resource) {
+                ((Resource) m).regenerate();
+            }
+        }
         hazardController.updateHazards(this);
         if (InputController.getInstance().didExtinguish()) {
             int[] index = plantController.worldCoordToIndex(avatar.getX(),

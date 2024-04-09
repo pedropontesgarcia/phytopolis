@@ -417,8 +417,8 @@ public class Player extends CapsuleObject {
      * @param canvas Drawing context
      */
     public void draw(GameCanvas canvas) {
-        System.out.println(getY());
-        System.out.println(getHeight());
+//        System.out.println(getY());
+//        System.out.println(getHeight());
         float effect = faceRight ? 1.0f : -1.0f;
 
         if (Math.abs(body.getLinearVelocity().y) >= 0.15) {

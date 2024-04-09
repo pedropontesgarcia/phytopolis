@@ -16,6 +16,8 @@ public abstract class Resource extends CircleObject {
      */
     public Resource(float x, float y) {
         super(x, y, RESOURCE_RADIUS);
+        currRegen = MAX_REGEN;
+        currDelay = 0;
     }
 
     public boolean isFull() {
@@ -27,6 +29,7 @@ public abstract class Resource extends CircleObject {
     }
 
     public void clear() {
+        System.out.println("clear");
         currRegen = 0;
         currDelay = 0;
         body = null;
@@ -34,6 +37,7 @@ public abstract class Resource extends CircleObject {
 
     public void regenerate() {
         if (currRegen < MAX_REGEN) {
+            System.out.println(currRegen);
             currDelay++;
             //System.out.println(framesOnGround);
             //System.out.println(currWater);

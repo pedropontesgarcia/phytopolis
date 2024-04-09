@@ -24,9 +24,9 @@ public class Water extends Resource {
 
     public void draw(GameCanvas canvas) {
         waterFilmstrip.setFrame(Math.round(
-                (waterFilmstrip.getSize() - 1) * (1 - getRegenRatio())));
+                (waterFilmstrip.getSize() - 1) * (getRegenRatio())));
 
-        canvas.draw(texture,
+        canvas.draw(waterFilmstrip,
                     Color.WHITE,
                     origin.x,
                     origin.y,
