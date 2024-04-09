@@ -53,7 +53,7 @@ public class PlantController {
     /**
      * how many frames between propagations of destruction
      */
-    private final int plantCoyoteTime = 30;
+    private final int plantCoyoteTime = 15;
     private final Queue<int[]> destructionQueue = new Queue<>();
     /**
      * Reference to the ResourceController
@@ -179,11 +179,11 @@ public class PlantController {
     public void destroyAll(int xArg, int yArg) {
         PlantNode nodeToDestroy = plantGrid[xArg][yArg];
         nodeToDestroy.unmakeLeaf();
-        if(!canGrowAt(xArg, yArg) || nodeToDestroy.getBranchType(branchDirection.LEFT) == Branch.branchType.NORMAL) nodeToDestroy.unmakeBranch(branchDirection.LEFT);
+        if(!canGrowAtIndex(xArg, yArg) || nodeToDestroy.getBranchType(branchDirection.LEFT) == Branch.branchType.NORMAL) nodeToDestroy.unmakeBranch(branchDirection.LEFT);
         else nodeToDestroy.setBranchType(branchDirection.LEFT, Branch.branchType.NORMAL);
-        if(!canGrowAt(xArg, yArg) || nodeToDestroy.getBranchType(branchDirection.MIDDLE) == Branch.branchType.NORMAL) nodeToDestroy.unmakeBranch(branchDirection.MIDDLE);
+        if(!canGrowAtIndex(xArg, yArg) || nodeToDestroy.getBranchType(branchDirection.MIDDLE) == Branch.branchType.NORMAL) nodeToDestroy.unmakeBranch(branchDirection.MIDDLE);
         else nodeToDestroy.setBranchType(branchDirection.MIDDLE, Branch.branchType.NORMAL);
-        if(!canGrowAt(xArg, yArg) || nodeToDestroy.getBranchType(branchDirection.RIGHT) == Branch.branchType.NORMAL) nodeToDestroy.unmakeBranch(branchDirection.RIGHT);
+        if(!canGrowAtIndex(xArg, yArg) || nodeToDestroy.getBranchType(branchDirection.RIGHT) == Branch.branchType.NORMAL) nodeToDestroy.unmakeBranch(branchDirection.RIGHT);
         else nodeToDestroy.setBranchType(branchDirection.RIGHT, Branch.branchType.NORMAL);
         plantCoyoteTimeRemaining = plantCoyoteTime;
         destructionQueue.addLast(new int[]{xArg, yArg});
@@ -598,12 +598,15 @@ public class PlantController {
                 case MIDDLE:
                     //middle.setDestroyed(true);
                     middle = null;
+                    break;
                 case RIGHT:
                     //right.setDestroyed(true);
                     right = null;
+                    break;
                 case LEFT:
                     //left.setDestroyed(true);
                     left = null;
+                    break;
             }
         }
 
@@ -730,20 +733,29 @@ public class PlantController {
         }
 
         /**
-         * sets the type of the branch in the given direction
+         * sets the type of the branch in the given direction and resets its texture
          * @param direction the slot to set
          * @param btype the branch type to set the given slot to
          */
         public void setBranchType(branchDirection direction, Branch.branchType btype){
             switch (direction){
                 case LEFT:
-                    if (hasBranchInDirection(branchDirection.LEFT)) left.setBranchType(btype);
+                    if (hasBranchInDirection(branchDirection.LEFT)){
+                        left.setBranchType(btype);
+                        left.setTexture(branchTexture);
+                    }
                     break;
                 case RIGHT:
-                    if (hasBranchInDirection(branchDirection.RIGHT)) right.setBranchType(btype);
+                    if (hasBranchInDirection(branchDirection.RIGHT)){
+                        right.setBranchType(btype);
+                        right.setTexture(branchTexture);
+                    }
                     break;
                 case MIDDLE:
-                    if (hasBranchInDirection(branchDirection.MIDDLE)) middle.setBranchType(btype);
+                    if (hasBranchInDirection(branchDirection.MIDDLE)){
+                        middle.setBranchType(btype);
+                        middle.setTexture(branchTexture);
+                    }
                     break;
             }
         }
