@@ -1,8 +1,6 @@
 package com.syndic8.phytopolis.level.models;
 
-import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.Fixture;
 import com.badlogic.gdx.physics.box2d.FixtureDef;
@@ -13,69 +11,145 @@ import com.syndic8.phytopolis.GameCanvas;
 import com.syndic8.phytopolis.util.FilmStrip;
 
 public class Player extends CapsuleObject {
-    private float animFrame;
 
-    private FilmStrip jumpAnimator;
-
-    private float animFrame2;
-
-    private FilmStrip jogAnimator;
     private static final int NUM_JOG_FRAMES = 8;
-    private static final int NUM_JUMP_FRAMES = 12 ;
+    private static final int NUM_JUMP_FRAMES = 12;
     private static final float ANIMATION_SPEED = 0.15f;
-
     private static final float ANIMATION_SPEED2 = 0.16f;
-    /** The initializing data (to avoid magic numbers) */
+    /**
+     * The initializing data (to avoid magic numbers)
+     */
     private final JsonValue data;
-
-    /** The factor to multiply by the input */
+    /**
+     * The factor to multiply by the input
+     */
     private final float force;
-    /** The amount to slow the character down */
+    /**
+     * The amount to slow the character down
+     */
     private final float damping;
-    /** The maximum character speed */
+    /**
+     * The maximum character speed
+     */
     private final float maxspeed;
-    /** Identifier to allow us to track the sensor in ContactListener */
+    /**
+     * Identifier to allow us to track the sensor in ContactListener
+     */
     private final String sensorName;
-    /** The impulse for the character jump */
+    /**
+     * The impulse for the character jump
+     */
     private final float jump_force;
-    /** Cooldown (in animation frames) for jumping */
+    /**
+     * Cooldown (in animation frames) for jumping
+     */
     private final int jumpLimit;
-    /** Cooldown (in animation frames) for shooting */
+    /**
+     * Cooldown (in animation frames) for shooting
+     */
     private final int shotLimit;
-
-    /** The current horizontal movement of the character */
-    private float   movement;
-    /** Which direction is the character facing */
-    private boolean faceRight;
-    /** How long until we can jump again */
-    private int jumpCooldown;
-    /** Whether we are actively jumping */
-    private boolean isJumping;
-    /** How long until we can shoot again */
-    private int shootCooldown;
-    /** Whether our feet are on the ground */
-    private boolean isGrounded;
-    /** Whether we are actively shooting */
-    private boolean isShooting;
-    /** The physics shape of this object */
-    private PolygonShape sensorShape;
-
-    /** Cache for internal force calculations */
+    /**
+     * Cache for internal force calculations
+     */
     private final Vector2 forceCache = new Vector2();
+    private float animFrame;
+    private final FilmStrip jumpAnimator;
+    private float animFrame2;
+    private final FilmStrip jogAnimator;
+    /**
+     * The current horizontal movement of the character
+     */
+    private float movement;
+    /**
+     * Which direction is the character facing
+     */
+    private boolean faceRight;
+    /**
+     * How long until we can jump again
+     */
+    private int jumpCooldown;
+    /**
+     * Whether we are actively jumping
+     */
+    private boolean isJumping;
+    /**
+     * How long until we can shoot again
+     */
+    private int shootCooldown;
+    /**
+     * Whether our feet are on the ground
+     */
+    private boolean isGrounded;
+    /**
+     * Whether we are actively shooting
+     */
+    private boolean isShooting;
+    /**
+     * The physics shape of this object
+     */
+    private PolygonShape sensorShape;
     /**
      * Multiplier for when standing on bouncy leaf
      */
-    private float bouncyMultiplier = 2f;
+    private final float bouncyMultiplier = 2f;
 
     /**
      * whether the dude can jump extra high
      */
     private boolean bouncy = false;
 
+    /**
+     * Creates a new dude avatar with the given physics data
+     * <p>
+     * The size is expressed in physics units NOT pixels.  In order for
+     * drawing to work properly, you MUST set the drawScale. The drawScale
+     * converts the physics units to pixels.
+     *
+     * @param data   The physics constants for this dude
+     * @param width  The object width in physics units
+     * @param height The object width in physics units
+     */
+    public Player(JsonValue data,
+                  float width,
+                  float height,
+                  FilmStrip jump,
+                  FilmStrip jog) {
+        // The shrink factors fit the image to a tigher hitbox
+        super(data.get("pos").getFloat(0),
+              data.get("pos").getFloat(1),
+              width * data.get("shrink").getFloat(0),
+              height * data.get("shrink").getFloat(1));
+        setDensity(data.getFloat("density", 0));
+        setFriction(data.getFloat("friction",
+                                  0));  /// HE WILL STICK TO WALLS IF YOU FORGET
+        setFixedRotation(true);
+
+        maxspeed = data.getFloat("maxspeed", 0);
+        damping = data.getFloat("damping", 0);
+        force = data.getFloat("force", 0);
+        jump_force = data.getFloat("jump_force", 0);
+        jumpLimit = data.getInt("jump_cool", 0);
+        shotLimit = data.getInt("shot_cool", 0);
+        sensorName = "DudeGroundSensor";
+        this.data = data;
+
+        // Gameplay attributes
+        isGrounded = false;
+        isShooting = false;
+        isJumping = false;
+        faceRight = true;
+
+        animFrame = 0.0f;
+        jumpAnimator = jump;
+        jogAnimator = jog;
+        shootCooldown = 0;
+        jumpCooldown = 0;
+        setName("dude");
+    }
 
     /**
      * Returns left/right movement of this character.
-     *
+     * <p>
      * This is the result of input times dude force.
      *
      * @return left/right movement of this character.
@@ -86,7 +160,7 @@ public class Player extends CapsuleObject {
 
     /**
      * Sets left/right movement of this character.
-     *
+     * <p>
      * This is the result of input times dude force.
      *
      * @param value left/right movement of this character.
@@ -139,9 +213,10 @@ public class Player extends CapsuleObject {
 
     /**
      * sets whether the dude can jump extra high, for example, if the dude is standing on a bouncy leaf
+     *
      * @param value whether the dude can jump extra high
      */
-    public void setBouncy(boolean value){
+    public void setBouncy(boolean value) {
         bouncy = value;
     }
 
@@ -151,7 +226,7 @@ public class Player extends CapsuleObject {
      * @return whether or not the player is at the bottom of the game
      */
     public boolean atBottom() {
-        return Math.abs(getY()) < 2.5;
+        return Math.abs(getY()) < 2;
     }
 
     /**
@@ -174,7 +249,7 @@ public class Player extends CapsuleObject {
 
     /**
      * Returns how much force to apply to get the dude moving
-     *
+     * <p>
      * Multiply this by the input to get the movement value.
      *
      * @return how much force to apply to get the dude moving
@@ -194,7 +269,7 @@ public class Player extends CapsuleObject {
 
     /**
      * Returns the upper limit on dude left-right movement.
-     *
+     * <p>
      * This does NOT apply to vertical movement.
      *
      * @return the upper limit on dude left-right movement.
@@ -205,7 +280,7 @@ public class Player extends CapsuleObject {
 
     /**
      * Returns the name of the ground sensor
-     *
+     * <p>
      * This is used by ContactListener
      *
      * @return the name of the ground sensor
@@ -224,58 +299,11 @@ public class Player extends CapsuleObject {
     }
 
     /**
-     * Creates a new dude avatar with the given physics data
-     *
-     * The size is expressed in physics units NOT pixels.  In order for
-     * drawing to work properly, you MUST set the drawScale. The drawScale
-     * converts the physics units to pixels.
-     *
-     * @param data  	The physics constants for this dude
-     * @param width		The object width in physics units
-     * @param height	The object width in physics units
-     */
-    public Player(JsonValue data, float width,
-                  float height, FilmStrip jump,
-                  FilmStrip jog) {
-        // The shrink factors fit the image to a tigher hitbox
-        super(	data.get("pos").getFloat(0),
-                data.get("pos").getFloat(1),
-                width*data.get("shrink").getFloat( 0 ),
-                height*data.get("shrink").getFloat( 1 ));
-        setDensity(data.getFloat("density", 0));
-        setFriction(data.getFloat("friction", 0));  /// HE WILL STICK TO WALLS IF YOU FORGET
-        setFixedRotation(true);
-
-        maxspeed = data.getFloat("maxspeed", 0);
-        damping = data.getFloat("damping", 0);
-        force = data.getFloat("force", 0);
-        jump_force = data.getFloat( "jump_force", 0);
-        jumpLimit = data.getInt( "jump_cool", 0);
-        shotLimit = data.getInt( "shot_cool", 0);
-        sensorName = "DudeGroundSensor";
-        this.data = data;
-
-        // Gameplay attributes
-        isGrounded = false;
-        isShooting = false;
-        isJumping = false;
-        faceRight = true;
-
-        animFrame = 0.0f;
-        jumpAnimator = jump;
-        jogAnimator = jog;
-        shootCooldown = 0;
-        jumpCooldown = 0;
-        setName("dude");
-    }
-
-    /**
      * Creates the physics Body(s) for this object, adding them to the world.
-     *
+     * <p>
      * This method overrides the base method to keep your ship from spinning.
      *
      * @param world Box2D world to store body
-     *
      * @return true if object allocation succeeded
      */
     public boolean activatePhysics(World world) {
@@ -294,25 +322,26 @@ public class Player extends CapsuleObject {
         // collisions with the world but has no collision response.
         Vector2 sensorCenter = new Vector2(0, -getHeight() / 2);
         FixtureDef sensorDef = new FixtureDef();
-        sensorDef.density = data.getFloat("density",0);
+        sensorDef.density = data.getFloat("density", 0);
         sensorDef.isSensor = true;
         sensorShape = new PolygonShape();
         JsonValue sensorjv = data.get("sensor");
-        sensorShape.setAsBox(sensorjv.getFloat("shrink",0)*getWidth()/2.0f,
-                sensorjv.getFloat("height",0), sensorCenter, 0.0f);
+        sensorShape.setAsBox(sensorjv.getFloat("shrink", 0) * getWidth() / 2.0f,
+                             sensorjv.getFloat("height", 0),
+                             sensorCenter,
+                             0.0f);
         sensorDef.shape = sensorShape;
 
         // Ground sensor to represent our feet
-        Fixture sensorFixture = body.createFixture( sensorDef );
+        Fixture sensorFixture = body.createFixture(sensorDef);
         sensorFixture.setUserData(getSensorName());
 
         return true;
     }
 
-
     /**
      * Applies the force to the body of this dude
-     *
+     * <p>
      * This method should be called after the force attribute is set.
      */
     public void applyForce() {
@@ -322,54 +351,52 @@ public class Player extends CapsuleObject {
 
         // Don't want to be moving. Damp out player motion
         if (getMovement() == 0f) {
-            forceCache.set(-getDamping()*getVX(),0);
-            body.applyForce(forceCache,getPosition(),true);
+            forceCache.set(-getDamping() * getVX(), 0);
+            body.applyForce(forceCache, getPosition(), true);
         }
 
         // Velocity too high, clamp it
         if (Math.abs(getVX()) >= getMaxSpeed()) {
-            setVX(Math.signum(getVX())*getMaxSpeed());
+            setVX(Math.signum(getVX()) * getMaxSpeed());
         } else {
-            forceCache.set(getMovement(),0);
-            body.applyForce(forceCache,getPosition(),true);
+            forceCache.set(getMovement(), 0);
+            body.applyForce(forceCache, getPosition(), true);
         }
 
         // Jump!
         if (isJumping()) {
-            if(bouncy) forceCache.set(0, jump_force * bouncyMultiplier);
+            if (bouncy) forceCache.set(0, jump_force * bouncyMultiplier);
             else forceCache.set(0, jump_force);
-            body.applyLinearImpulse(forceCache,getPosition(),true);
+            body.applyLinearImpulse(forceCache, getPosition(), true);
         }
     }
 
     /**
      * Updates the object's physics state (NOT GAME LOGIC).
-     *
+     * <p>
      * We use this method to reset cooldowns.
      *
-     * @param dt	Number of seconds since last animation frame
+     * @param dt Number of seconds since last animation frame
      */
     public void update(float dt) {
 
-        if(Math.abs(body.getLinearVelocity().y) >= 0.15){
+        if (Math.abs(body.getLinearVelocity().y) >= 0.15) {
             animFrame += ANIMATION_SPEED;
             if (animFrame >= NUM_JUMP_FRAMES) {
                 animFrame -= NUM_JUMP_FRAMES;
             }
         }
         if (!(Math.abs(body.getLinearVelocity().y) >= 0.15) &&
-                (Math.abs(body.getLinearVelocity().x) >= 0.1)){
+                (Math.abs(body.getLinearVelocity().x) >= 0.1)) {
             animFrame2 += ANIMATION_SPEED2;
-            if (animFrame2 >= NUM_JOG_FRAMES){
-                animFrame2-= NUM_JOG_FRAMES;
+            if (animFrame2 >= NUM_JOG_FRAMES) {
+                animFrame2 -= NUM_JOG_FRAMES;
             }
 
         }
         // Apply cooldowns
         if (isJumping()) {
             jumpCooldown = jumpLimit;
-
-
 
         } else {
             jumpCooldown = Math.max(0, jumpCooldown - 1);
@@ -394,53 +421,44 @@ public class Player extends CapsuleObject {
         System.out.println(getHeight());
         float effect = faceRight ? 1.0f : -1.0f;
 
-        if (Math.abs(body.getLinearVelocity().y) >= 0.15){
-            jumpAnimator.setFrame((int)animFrame);
-            float x = jumpAnimator.getRegionWidth()/2.0f;
-            float y = jumpAnimator.getRegionHeight()/2.0f;
-            canvas.draw(
-                    jumpAnimator,
-                    Color.WHITE,
-                    x,
-                    y,
-                    getX()*drawScale.x,
-                    getY()*drawScale.y,
-                    getAngle(),
-                    0.8f * effect,
-                    0.8f
-            );
+        if (Math.abs(body.getLinearVelocity().y) >= 0.15) {
+            jumpAnimator.setFrame((int) animFrame);
+            float x = jumpAnimator.getRegionWidth() / 2.0f;
+            float y = jumpAnimator.getRegionHeight() / 2.0f;
+            canvas.draw(jumpAnimator,
+                        Color.WHITE,
+                        x,
+                        y,
+                        getX() * drawScale.x,
+                        getY() * drawScale.y,
+                        getAngle(),
+                        0.8f * effect,
+                        0.8f);
 
-        }else if (!(Math.abs(body.getLinearVelocity().y) >= 0.15) &&
-                (Math.abs(body.getLinearVelocity().x) >= 0.1)){
-            jogAnimator.setFrame((int)animFrame2);
-            float x = jogAnimator.getRegionWidth()/2.0f;
-            float y = jogAnimator.getRegionHeight()/2.0f;
-            canvas.draw(
-                    jogAnimator,
-                    Color.WHITE,
-                    x,
-                    y,
-                    getX()*drawScale.x,
-                    getY()*drawScale.y,
-                    getAngle(),
-                    0.8f * effect,
-                    0.8f
-            );
+        } else if (!(Math.abs(body.getLinearVelocity().y) >= 0.15) &&
+                (Math.abs(body.getLinearVelocity().x) >= 0.1)) {
+            jogAnimator.setFrame((int) animFrame2);
+            float x = jogAnimator.getRegionWidth() / 2.0f;
+            float y = jogAnimator.getRegionHeight() / 2.0f;
+            canvas.draw(jogAnimator,
+                        Color.WHITE,
+                        x,
+                        y,
+                        getX() * drawScale.x,
+                        getY() * drawScale.y,
+                        getAngle(),
+                        0.8f * effect,
+                        0.8f);
+        } else {
+            canvas.draw(texture,
+                        Color.WHITE,
+                        origin.x,
+                        origin.y,
+                        getX() * drawScale.x,
+                        getY() * drawScale.y,
+                        getAngle(), effect,
+                        1f);
         }
-        else{
-            canvas.draw(
-                    texture,
-                    Color.WHITE,
-                    origin.x,
-                    origin.y,
-                    getX()*drawScale.x,
-                    getY()*drawScale.y,
-                    getAngle(),
-                    1f * effect,
-                    1f
-            );
-        }
-
 
     }
 
@@ -450,14 +468,14 @@ public class Player extends CapsuleObject {
     }
 
     //    /**
-//     * Draws the outline of the physics body.
-//     *
-//     * This method can be helpful for understanding issues with collisions.
-//     *
-//     * @param canvas Drawing context
-//     */
-//    public void drawDebug(GameCanvas canvas) {
-//        super.drawDebug(canvas);
-//        canvas.drawPhysics(sensorShape,Color.RED,getX(),getY(),getAngle(),drawScale.x,drawScale.y);
-//    }
+    //     * Draws the outline of the physics body.
+    //     *
+    //     * This method can be helpful for understanding issues with collisions.
+    //     *
+    //     * @param canvas Drawing context
+    //     */
+    //    public void drawDebug(GameCanvas canvas) {
+    //        super.drawDebug(canvas);
+    //        canvas.drawPhysics(sensorShape,Color.RED,getX(),getY(),getAngle(),drawScale.x,drawScale.y);
+    //    }
 }

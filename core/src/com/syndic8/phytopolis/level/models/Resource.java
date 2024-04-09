@@ -1,17 +1,19 @@
 package com.syndic8.phytopolis.level.models;
 
-import com.badlogic.gdx.graphics.Color;
-import com.syndic8.phytopolis.GameCanvas;
-
 public abstract class Resource extends CircleObject {
-    /** Radius for resource collisions */
-    private static final int RESOURCE_RADIUS = 15;
+
+    /**
+     * Radius for resource collisions
+     */
+    private static final int RESOURCE_RADIUS = 1;
     private static final int REGEN_DELAY = 15;
     private static final int MAX_REGEN = 100;
     private int currRegen;
     private int currDelay;
 
-    /** Creates a resource object. */
+    /**
+     * Creates a resource object.
+     */
     public Resource(float x, float y) {
         super(x, y, RESOURCE_RADIUS);
     }
@@ -27,6 +29,7 @@ public abstract class Resource extends CircleObject {
     public void clear() {
         currRegen = 0;
         currDelay = 0;
+        body = null;
     }
 
     public void regenerate() {
@@ -43,4 +46,5 @@ public abstract class Resource extends CircleObject {
             }
         }
     }
+
 }

@@ -8,6 +8,8 @@ import com.syndic8.phytopolis.GameCanvas;
 import com.syndic8.phytopolis.WorldController;
 import com.syndic8.phytopolis.assets.AssetDirectory;
 import com.syndic8.phytopolis.level.models.PolygonObject;
+import com.syndic8.phytopolis.level.models.Resource;
+import com.syndic8.phytopolis.level.models.Water;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -17,7 +19,9 @@ public class Tilemap {
     float worldWidth;
     float worldHeight;
     JsonValue tilemap;
-    Texture[] textures;
+    Texture[] tileTextures;
+    Texture[] resourceTextures;
+    Resource[] resources;
 
     /**
      * Constructs a tilemap from the world dimensions and a JSON file from
@@ -49,16 +53,27 @@ public class Tilemap {
                                             Texture.class);
             textureList.add(tx);
         }
-        textures = textureList.toArray(new Texture[0]);
+        tileTextures = textureList.toArray(new Texture[0]);
+
+        List<Texture> resourceTextureList = new ArrayList<>();
+        Texture tx = directory.getEntry("gameplay:water_filmstrip",
+                                        Texture.class);
+        resourceTextureList.add(tx);
+        resourceTextures = resourceTextureList.toArray(new Texture[0]);
     }
 
     /**
      * Populates the given WorldController with the tiles on the physics
-     * layer of the tilemap.
+     * layer and the resources on the resource layer of the tilemap.
      *
      * @param ctrl The WorldController to populate.
      */
     public void populateLevel(WorldController ctrl) {
+        populateGeometry(ctrl);
+        populateResources(ctrl);
+    }
+
+    public void populateGeometry(WorldController ctrl) {
         JsonValue physicsLayer = tilemap.get("layers").get(0);
         int tilemapHeight = physicsLayer.getInt("height");
         int tilemapWidth = physicsLayer.getInt("width");
@@ -68,7 +83,7 @@ public class Tilemap {
         for (int row = 0; row < tilemapHeight; row++) {
             for (int col = 0; col < tilemapWidth; col++) {
                 if (physicsLayer.get("data").asIntArray()[row * tilemapWidth +
-                        col] == 1) {
+                        col] != 0) {
                     PolygonObject obj;
                     float x0 = col * tileWidth;
                     float x1 = (col + 1) * tileWidth;
@@ -88,6 +103,29 @@ public class Tilemap {
                     obj.setRestitution(0);
                     obj.setName(wname + row + col);
                     ctrl.addObject(obj);
+                }
+            }
+        }
+    }
+
+    private void populateResources(WorldController ctrl) {
+        JsonValue resourceLayer = tilemap.get("layers").get(2);
+        int tilemapHeight = resourceLayer.getInt("height");
+        int tilemapWidth = resourceLayer.getInt("width");
+        float tileHeight = worldHeight / tilemapHeight;
+        float tileWidth = worldWidth / tilemapWidth;
+        for (int row = 0; row < tilemapHeight; row++) {
+            for (int col = 0; col < tilemapWidth; col++) {
+                if (resourceLayer.get("data").asIntArray()[row * tilemapWidth +
+                        col] != 0) {
+                    float xMid = (col + 0.5f) * tileWidth;
+                    float yMid = worldHeight - (row + 0.5f) * tileHeight;
+                    FilmStrip waterFilmstrip = new FilmStrip(resourceTextures[0],
+                                                             1,
+                                                             13);
+                    Water w = new Water(xMid, yMid, waterFilmstrip);
+                    w.setDrawScale(120, 120);
+                    ctrl.addObject(w);
                 }
             }
         }
@@ -114,7 +152,7 @@ public class Tilemap {
                     float y0 = worldHeight - (row + 1) * tileHeight;
                     float y1 = worldHeight - row * tileHeight;
                     float scale = 120;
-                    c.draw(textures[tileValue - 1],
+                    c.draw(tileTextures[tileValue - 1],
                            Color.WHITE,
                            x0 * scale,
                            y0 * scale,

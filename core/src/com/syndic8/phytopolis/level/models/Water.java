@@ -1,12 +1,20 @@
 package com.syndic8.phytopolis.level.models;
 
 import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.physics.box2d.BodyDef;
 import com.syndic8.phytopolis.GameCanvas;
 import com.syndic8.phytopolis.util.FilmStrip;
 
 public class Water extends Resource {
-    public Water(float x, float y) {
+
+    private final FilmStrip waterFilmstrip;
+
+    public Water(float x, float y, FilmStrip wf) {
         super(x, y);
+
+        bodyinfo.type = BodyDef.BodyType.StaticBody;
+        waterFilmstrip = wf;
+        setTexture(wf);
     }
 
     @Override
@@ -15,19 +23,19 @@ public class Water extends Resource {
     }
 
     public void draw(GameCanvas canvas) {
-        FilmStrip f = (FilmStrip) texture;
-        f.setFrame(Math.round((f.getSize() - 1) * getRegenRatio()));
-        float x = texture.getRegionWidth()/2.0f;
-        float y = texture.getRegionHeight()/2.0f;
-        canvas.draw(
-                texture,
-                Color.WHITE,
-                x,
-                y,
-                getX()*drawScale.x,
-                getY()*drawScale.y,
-                getAngle(),
-                1, 1
-        );
+        waterFilmstrip.setFrame(Math.round(
+                (waterFilmstrip.getSize() - 1) * (1 - getRegenRatio())));
+
+        canvas.draw(texture,
+                    Color.WHITE,
+                    origin.x,
+                    origin.y,
+                    getX() * drawScale.x,
+                    getY() * drawScale.x,
+                    getAngle(),
+                    0.25f,
+                    0.25f);
     }
+
 }
+

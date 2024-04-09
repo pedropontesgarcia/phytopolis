@@ -361,7 +361,6 @@ public class GameCanvas {
 
         setBlendState(BlendState.NO_PREMULT);
         spriteBatch.begin();
-        hudBatch.begin();
         active = DrawPass.STANDARD;
     }
 
@@ -380,8 +379,11 @@ public class GameCanvas {
         spriteBatch.setProjectionMatrix(global);
 
         spriteBatch.begin();
-        hudBatch.begin();
         active = DrawPass.STANDARD;
+    }
+
+    public void beginHud() {
+        hudBatch.begin();
     }
 
     /**
@@ -392,7 +394,6 @@ public class GameCanvas {
     public void begin() {
         spriteBatch.setProjectionMatrix(camera.combined);
         spriteBatch.begin();
-        hudBatch.begin();
         active = DrawPass.STANDARD;
     }
 
@@ -401,8 +402,11 @@ public class GameCanvas {
      */
     public void end() {
         spriteBatch.end();
-        hudBatch.end();
         active = DrawPass.INACTIVE;
+    }
+
+    public void endHud() {
+        hudBatch.end();
     }
 
     /**

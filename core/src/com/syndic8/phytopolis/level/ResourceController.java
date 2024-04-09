@@ -5,7 +5,6 @@ import com.syndic8.phytopolis.assets.AssetDirectory;
 import com.syndic8.phytopolis.level.models.Player;
 import com.syndic8.phytopolis.level.models.Resource;
 import com.syndic8.phytopolis.level.models.Sun;
-import com.syndic8.phytopolis.level.models.Water;
 import com.syndic8.phytopolis.util.PooledList;
 
 public class ResourceController {
@@ -31,6 +30,10 @@ public class ResourceController {
      * Controller for UI.
      */
     private final UIController ui;
+    /**
+     * All pickup resources in world
+     */
+    protected PooledList<Resource> resources = new PooledList<Resource>();
     private int currSun;
     /**
      * Current amount of water stored
@@ -40,11 +43,6 @@ public class ResourceController {
      * Frames on ground (for getting water)
      */
     private int framesOnGround;
-
-    /**
-     * All pickup resources in world
-     */
-    protected PooledList<Resource> resources = new PooledList<Resource>();
 
     public ResourceController() {
         currWater = MAX_WATER;
@@ -62,7 +60,8 @@ public class ResourceController {
     }
 
     public void pickupWater(float ratio) {
-        currWater = Math.min(MAX_WATER, currWater + (int)(WATER_ON_PICKUP * ratio));
+        currWater = Math.min(MAX_WATER,
+                             currWater + (int) (WATER_ON_PICKUP * ratio));
     }
 
     public int getCurrSun() {
@@ -70,14 +69,14 @@ public class ResourceController {
     }
 
     public void pickupSun(float ratio) {
-        currSun = Math.min(MAX_SUN, currSun + (int)(SUN_ON_PICKUP * ratio));
+        currSun = Math.min(MAX_SUN, currSun + (int) (SUN_ON_PICKUP * ratio));
     }
 
     public boolean fullWater() {
         return currWater == MAX_WATER;
     }
 
-    public boolean fullSun(){
+    public boolean fullSun() {
         return currSun == MAX_SUN;
     }
 
@@ -105,10 +104,10 @@ public class ResourceController {
         }
     }
 
-    public void addWater(float x, float y) {
-        Water w = new Water(x, y);
-        resources.add(w);
-    }
+    //    public void addWater(float x, float y) {
+    //        Water w = new Water(x, y);
+    //        resources.add(w);
+    //    }
 
     public void addSun(float x, float y) {
         Sun s = new Sun(x, y);

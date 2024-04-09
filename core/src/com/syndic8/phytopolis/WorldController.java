@@ -69,9 +69,7 @@ public abstract class WorldController implements Screen {
     /**
      * The amount of time for a physics engine step.
      */
-    public static final float WORLD_STEP = 1/60f;
-
-    private float accumulator = 0.0f;
+    public static final float WORLD_STEP = 1 / 60f;
     /**
      * Number of velocity iterations for the constrain solvers
      */
@@ -128,6 +126,7 @@ public abstract class WorldController implements Screen {
      * The world scale
      */
     protected Vector2 scale;
+    private float accumulator = 0.0f;
     private Texture background;
     /**
      * Listener that will update the player mode when we are done
@@ -178,7 +177,8 @@ public abstract class WorldController implements Screen {
      * @param gravity The downward gravity
      */
     protected WorldController(float width, float height, float gravity) {
-        this(new Rectangle(0, 0, width, height), new Vector2(0, DEFAULT_GRAVITY));
+        this(new Rectangle(0, 0, width, height),
+             new Vector2(0, DEFAULT_GRAVITY));
     }
 
     /**
@@ -199,7 +199,8 @@ public abstract class WorldController implements Screen {
         float referenceAspectRatio = 16f / 9f;
 
         // Actual aspect ratio of the canvas
-        float actualAspectRatio = (float) Gdx.graphics.getWidth() / Gdx.graphics.getHeight();
+        float actualAspectRatio =
+                (float) Gdx.graphics.getWidth() / Gdx.graphics.getHeight();
 
         // Calculate scale factors
         float scaleX = Gdx.graphics.getWidth() / 16f;
@@ -325,7 +326,8 @@ public abstract class WorldController implements Screen {
         float referenceAspectRatio = 16f / 9f;
 
         // Actual aspect ratio of the canvas
-        float actualAspectRatio = (float) canvas.getWidth() / canvas.getHeight();
+        float actualAspectRatio =
+                (float) canvas.getWidth() / canvas.getHeight();
 
         // Calculate scale factors
         float scaleX = canvas.getWidth() / 16f;
@@ -506,13 +508,11 @@ public abstract class WorldController implements Screen {
         // Accumulate time
         accumulator += dt;
 
-
         // Process fixed time steps
         while (accumulator >= WORLD_STEP) {
-            world.step(1/35f, WORLD_VELOC, WORLD_POSIT);
+            world.step(1 / 35f, WORLD_VELOC, WORLD_POSIT);
             accumulator -= WORLD_STEP;
         }
-
 
         // Garbage collect the deleted objects.
         // Note how we use the linked list nodes to delete O(1) in place.
@@ -544,8 +544,6 @@ public abstract class WorldController implements Screen {
      * @param dt Number of seconds since last animation frame
      */
     public void draw(float dt) {
-        canvas.clear();
-
         canvas.begin();
         if (background != null) {
             canvas.draw(background, Color.WHITE, 0, 0, canvas.getWidth(), 4320);

@@ -10,7 +10,6 @@
  */
 package com.syndic8.phytopolis;
 
-import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.Texture;
@@ -187,10 +186,7 @@ public class GameplayMode extends WorldController implements ContactListener {
         background = new TextureRegion(directory.getEntry("gameplay:background",
                                                           Texture.class));
 
-        background.setRegion(0,
-                             0,
-                             Gdx.graphics.getWidth(),
-                             Gdx.graphics.getHeight());
+        background.setRegion(0, 0, 1920, 1080);
         super.setBackground(background.getTexture());
         plantController.gatherAssets(directory);
         hazardController.gatherAssets(directory);
@@ -199,8 +195,7 @@ public class GameplayMode extends WorldController implements ContactListener {
         jumpTexture = directory.getEntry("jump", Texture.class);
         jumpAnimator = new FilmStrip(jumpTexture, 1, 12, 12);
 
-        jogTexture = directory.getEntry("jog",
-                Texture.class);
+        jogTexture = directory.getEntry("jog", Texture.class);
         jogAnimator = new FilmStrip(jogTexture, 1, 8, 8);
 
         //jumpSound = directory.getEntry("platform:jump", Sound.class);
@@ -352,8 +347,9 @@ public class GameplayMode extends WorldController implements ContactListener {
         avatar = new Player(constants.get("dude"),
                             dwidth,
                             dheight,
-                            jumpAnimator, jogAnimator);
-        avatar.setDrawScale(scale);
+                            jumpAnimator,
+                            jogAnimator);
+        avatar.setDrawScale(new Vector2(120, 120));
         avatar.setTexture(avatarTexture);
         avatar.setName("dude");
         addObject(avatar);
@@ -672,23 +668,26 @@ public class GameplayMode extends WorldController implements ContactListener {
                                         Model.ModelType.SUN);
         if (isCollisionBetweenPlayerAndSun) {
             Sun s;
-            if (((Model) fix1.getBody().getUserData()).getType() == Model.ModelType.SUN) {
-                s = (Sun) fix1.getUserData();
+            if (((Model) fix1.getBody().getUserData()).getType() ==
+                    Model.ModelType.SUN) {
+                s = (Sun) fix1.getBody().getUserData();
             } else {
-                s = (Sun) fix2.getUserData();
+                s = (Sun) fix2.getBody().getUserData();
             }
             s.clear();
             resourceController.pickupSun(s.getRegenRatio());
         }
         if (isCollisionBetweenPlayerAndWater) {
             Water w;
-            if (((Model) fix1.getBody().getUserData()).getType() == Model.ModelType.WATER) {
-                w = (Water) fix1.getUserData();
+            if (((Model) fix1.getBody().getUserData()).getType() ==
+                    Model.ModelType.WATER) {
+                w = (Water) fix1.getBody().getUserData();
             } else {
-                w = (Water) fix2.getUserData();
+                w = (Water) fix2.getBody().getUserData();
             }
             w.clear();
-            resourceController.pickupWater(w.getRegenRatio());
+            contact.setEnabled(false);
+            resourceController.pickupWater(0.1f);
         }
 
         boolean isPlayerGoingUp = avatar.getVY() >= 0;
@@ -737,15 +736,21 @@ public class GameplayMode extends WorldController implements ContactListener {
      * @param dt Number of seconds since last animation frame
      */
     public void draw(float dt) {
+        canvas.clear();
         canvas.cameraUpdate(cameraVector);
         super.draw(dt);
         canvas.begin();
         tilemap.draw(canvas);
-        resourceController.draw(canvas);
+        for (Model obj : objects) {
+            obj.draw(canvas);
+        }
         plantController.draw(canvas);
         hazardController.draw(canvas);
         player.draw(canvas);
         canvas.end();
+        canvas.beginHud();
+        resourceController.draw(canvas);
+        canvas.endHud();
     }
 
 }
