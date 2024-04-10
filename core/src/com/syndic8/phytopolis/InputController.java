@@ -81,6 +81,8 @@ public class InputController {
     private boolean exitPrevious;
     private boolean mousePressed;
     private boolean mousePressedPrevious;
+    private boolean mouseRightPressed;
+    private boolean mouseRightPressedPrevious;
     private boolean growRightPressed;
     private boolean growLeftPressed;
     private boolean growUpPressed;
@@ -224,6 +226,10 @@ public class InputController {
         return mousePressed && !mousePressedPrevious;
     }
 
+    public boolean didMouseRightPress() {
+        return mouseRightPressed && !mouseRightPressedPrevious;
+    }
+
     public boolean didDrop() {
         return dropPressed /*& !dropPrevious*/;
     }
@@ -291,9 +297,10 @@ public class InputController {
 
     /**
      * Returns true if the special growth key was held
+     *
      * @return whether or not the special key was held
      */
-    public boolean didSpecial(){
+    public boolean didSpecial() {
         return specialToggled;
     }
 
@@ -321,6 +328,7 @@ public class InputController {
         growLeftPrevious = growLeftPressed;
         growUpPrevious = growUpPressed;
         mousePressedPrevious = mousePressed;
+        mouseRightPressedPrevious = mouseRightPressed;
         dropPrevious = dropPressed;
         extinguishFirePrevious = extinguishFirePressed;
 
@@ -412,8 +420,7 @@ public class InputController {
         }
 
         vertical = (secondary ? vertical : 0.0f);
-        if (Gdx.input.isKeyPressed(Input.Keys.W) ||
-                Gdx.input.isKeyPressed(Input.Keys.SPACE)) {
+        if (Gdx.input.isKeyPressed(Input.Keys.SPACE)) {
             vertical += 1.0f;
         }
 
@@ -426,6 +433,13 @@ public class InputController {
         if (Gdx.input.isButtonPressed(Input.Buttons.LEFT) ||
                 Gdx.input.isKeyPressed(Input.Keys.DOWN)) {
             mousePressed = true;
+            growX = Gdx.input.getX();
+            growY = Gdx.input.getY();
+        }
+
+        mouseRightPressed = (secondary && mouseRightPressed);
+        if (Gdx.input.isButtonPressed(Input.Buttons.RIGHT)) {
+            mouseRightPressed = true;
             growX = Gdx.input.getX();
             growY = Gdx.graphics.getHeight() - Gdx.input.getY();
         }

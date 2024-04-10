@@ -4,7 +4,6 @@ import com.syndic8.phytopolis.GameCanvas;
 import com.syndic8.phytopolis.assets.AssetDirectory;
 import com.syndic8.phytopolis.level.models.Player;
 import com.syndic8.phytopolis.level.models.Resource;
-import com.syndic8.phytopolis.level.models.Sun;
 import com.syndic8.phytopolis.util.PooledList;
 
 public class ResourceController {
@@ -109,10 +108,10 @@ public class ResourceController {
     //        resources.add(w);
     //    }
 
-    public void addSun(float x, float y) {
-        Sun s = new Sun(x, y);
-        resources.add(s);
-    }
+    //    public void addSun(float x, float y) {
+    //        Sun s = new Sun(x, y);
+    //        resources.add(s);
+    //    }
 
     public PooledList<Resource> getResources() {
         return resources;

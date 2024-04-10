@@ -12,6 +12,7 @@ package com.syndic8.phytopolis;
 
 import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.audio.Sound;
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
@@ -44,19 +45,6 @@ public class GameplayMode extends WorldController implements ContactListener {
     // Define collision categories (bits)
     final short CATEGORY_PLAYER = 0x0001;
     final short CATEGORY_PLATFORM = 0x0002;
-    final short CATEGORY_PLAYER_FALL_THROUGH = 0x0004;
-    // Define collision masks
-    final short MASK_PLAYER = CATEGORY_PLATFORM;
-    final short MASK_PLATFORM = CATEGORY_PLAYER;
-    final short MASK_PLAYER_FALL_THROUGH = CATEGORY_PLATFORM;
-    private final float distance = 120f;
-    private final PlantController plantController;
-    private final HazardController hazardController;
-    private final ResourceController resourceController;
-    private final long fireId = -1;
-    private final long plopId = -1;
-    private final long jumpId = -1;
-    // Physics objects for the game
     private final Vector2 cameraVector;
     /**
      * Mark set to handle more sophisticated collision callbacks
@@ -67,6 +55,9 @@ public class GameplayMode extends WorldController implements ContactListener {
      */
     protected TextureRegion branchTexture;
     protected Texture jumpTexture;
+    private PlantController plantController;
+    private HazardController hazardController;
+    private ResourceController resourceController;
     private FilmStrip jumpAnimator;
 
     private Texture jogTexture;
@@ -143,29 +134,10 @@ public class GameplayMode extends WorldController implements ContactListener {
      * The game has default gravity and other settings
      */
     public GameplayMode() {
-        super(DEFAULT_WIDTH, DEFAULT_HEIGHT, DEFAULT_GRAVITY);
-        setDebug(false);
-        setComplete(false);
-        setFailure(false);
+        super();
         world.setContactListener(this);
         cameraVector = new Vector2();
         sensorFixtures = new ObjectSet<Fixture>();
-        resourceController = new ResourceController();
-        plantController = new PlantController(13,
-                                              40,
-                                              1.4f,
-                                              1,
-                                              0,
-                                              world,
-                                              scale,
-                                              resourceController);
-        hazardController = new HazardController(plantController,
-                                                3000,
-                                                3000,
-                                                2000,
-                                                200);
-
-        background = null;
     }
 
     /**
@@ -187,10 +159,6 @@ public class GameplayMode extends WorldController implements ContactListener {
                                                           Texture.class));
 
         background.setRegion(0, 0, 1920, 1080);
-        super.setBackground(background.getTexture());
-        plantController.gatherAssets(directory);
-        hazardController.gatherAssets(directory);
-        resourceController.gatherAssets(directory);
 
         jumpTexture = directory.getEntry("jump", Texture.class);
         jumpAnimator = new FilmStrip(jumpTexture, 1, 12, 12);
@@ -212,6 +180,26 @@ public class GameplayMode extends WorldController implements ContactListener {
         this.branchTexture = new TextureRegion(directory.getEntry(
                 "gameplay:branch",
                 Texture.class));
+
+        resourceController = new ResourceController();
+        plantController = new PlantController(8,
+                                              40,
+                                              tilemap.getTileHeight(),
+                                              tilemap.getTileWidth(),
+                                              0,
+                                              world,
+                                              scale,
+                                              resourceController,
+                                              tilemap);
+        hazardController = new HazardController(plantController,
+                                                3000,
+                                                3000,
+                                                2000,
+                                                200,
+                                                tilemap);
+        plantController.gatherAssets(directory);
+        hazardController.gatherAssets(directory);
+        resourceController.gatherAssets(directory);
         super.gatherAssets(directory);
         backgroundMusic = directory.getEntry("viridian", Music.class);
         backgroundMusic.setLooping(true);
@@ -268,7 +256,7 @@ public class GameplayMode extends WorldController implements ContactListener {
                 DEFAULT_WIDTH,
                 -1,
                 0,
-                -1}, 0, 0);
+                -1}, 0, 0, tilemap, 1);
         obj.setBodyType(BodyDef.BodyType.StaticBody);
         obj.setDensity(0);
         obj.setFriction(0);
@@ -284,7 +272,7 @@ public class GameplayMode extends WorldController implements ContactListener {
                 0,
                 0,
                 -1,
-                0}, 0, 0);
+                0}, 0, 0, tilemap, 1);
         obj.setBodyType(BodyDef.BodyType.StaticBody);
         obj.setDensity(0);
         obj.setFriction(0);
@@ -300,7 +288,7 @@ public class GameplayMode extends WorldController implements ContactListener {
                 DEFAULT_WIDTH + 1,
                 0,
                 DEFAULT_WIDTH,
-                0}, 0, 0);
+                0}, 0, 0, tilemap, 1);
         obj.setBodyType(BodyDef.BodyType.StaticBody);
         obj.setDensity(0);
         obj.setFriction(0);
@@ -342,14 +330,15 @@ public class GameplayMode extends WorldController implements ContactListener {
         world.setGravity(new Vector2(0, defaults.getFloat("gravity", 0)));
 
         // Create dude
-        dwidth = avatarTexture.getRegionWidth() / scale.x;
-        dheight = avatarTexture.getRegionHeight() / scale.y;
+        //        dwidth = avatarTexture.getRegionWidth() / scale.x;
+        //        dheight = avatarTexture.getRegionHeight() / scale.y;
         avatar = new Player(constants.get("dude"),
-                            dwidth,
-                            dheight,
+                            0.5f,
+                            tilemap.getTileHeight() * 0.9f,
                             jumpAnimator,
-                            jogAnimator);
-        avatar.setDrawScale(new Vector2(120, 120));
+                            jogAnimator,
+                            tilemap,
+                            0.9f);
         avatar.setTexture(avatarTexture);
         avatar.setName("dude");
         addObject(avatar);
@@ -409,6 +398,7 @@ public class GameplayMode extends WorldController implements ContactListener {
                                        avatarY,
                                        PlantController.branchDirection.MIDDLE,
                                        bt);
+            System.out.println("BRANCH");
         } else if (InputController.getInstance().didGrowRight() &&
                 (plantController.branchGrowableAt(avatarX,
                                                   avatarY,
@@ -430,12 +420,13 @@ public class GameplayMode extends WorldController implements ContactListener {
             Leaf.leafType lt = Leaf.leafType.NORMAL;
             if (InputController.getInstance().didSpecial())
                 lt = Leaf.leafType.BOUNCY;
-            Model newLeaf = plantController.growLeaf(InputController.getInstance()
-                                                             .getGrowX(),
-                                                     InputController.getInstance()
-                                                             .getGrowY() +
-                                                             cameraVector.y -
-                                                             500,
+            Vector2 projMousePos = new Vector2(InputController.getInstance()
+                                                       .getGrowX(),
+                                               InputController.getInstance()
+                                                       .getGrowY());
+            Vector2 unprojMousePos = canvas.unproject(projMousePos);
+            Model newLeaf = plantController.growLeaf(unprojMousePos.x,
+                                                     unprojMousePos.y,
                                                      lt);
             if (newLeaf != null) addObject(newLeaf);
         }
@@ -472,8 +463,9 @@ public class GameplayMode extends WorldController implements ContactListener {
         //        }
 
         //handleDrop();
-        cameraVector.set(8 * scale.x,
-                         Math.max((avatar.getY() - 2) * scale.y, 600));
+        cameraVector.set(8,
+                         Math.max(avatar.getY() - canvas.getHeight() / 6f,
+                                  canvas.getHeight() / 2f));
         // generate hazards please
         resourceController.update(avatar);
         for (Model m : objects) {
@@ -730,6 +722,17 @@ public class GameplayMode extends WorldController implements ContactListener {
         //fireSound.stop(fireId);
     }
 
+    private void drawBackground() {
+        if (background != null) {
+            canvas.draw(background.getTexture(),
+                        Color.WHITE,
+                        0,
+                        0,
+                        canvas.getWidth(),
+                        canvas.getHeight() * 4);
+        }
+    }
+
     /**
      * Draw the physics objects to the canvas
      * <p>
@@ -741,18 +744,17 @@ public class GameplayMode extends WorldController implements ContactListener {
      * @param dt Number of seconds since last animation frame
      */
     public void draw(float dt) {
-        canvas.clear();
         canvas.cameraUpdate(cameraVector);
-        super.draw(dt);
+        canvas.clear();
         canvas.begin();
+        drawBackground();
         tilemap.draw(canvas);
-        for (Model obj : objects) {
-            obj.draw(canvas);
-        }
+        super.draw(dt);
         plantController.draw(canvas);
         hazardController.draw(canvas);
-        player.draw(canvas);
+        //player.draw(canvas);
         canvas.end();
+
         canvas.beginHud();
         resourceController.draw(canvas);
         canvas.endHud();

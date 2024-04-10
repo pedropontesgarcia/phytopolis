@@ -16,9 +16,13 @@ import java.util.List;
 
 public class Tilemap {
 
+    JsonValue tilemap;
     float worldWidth;
     float worldHeight;
-    JsonValue tilemap;
+    int tilemapHeight;
+    int tilemapWidth;
+    float tileHeight;
+    float tileWidth;
     Texture[] tileTextures;
     Texture[] resourceTextures;
     Resource[] resources;
@@ -35,6 +39,30 @@ public class Tilemap {
         worldWidth = w;
         worldHeight = h;
         tilemap = tm;
+    }
+
+    public float getWorldWidth() {
+        return worldWidth;
+    }
+
+    public float getWorldHeight() {
+        return worldHeight;
+    }
+
+    public int getTilemapHeight() {
+        return tilemapHeight;
+    }
+
+    public int getTilemapWidth() {
+        return tilemapWidth;
+    }
+
+    public float getTileHeight() {
+        return tileHeight;
+    }
+
+    public float getTileWidth() {
+        return tileWidth;
     }
 
     /**
@@ -60,6 +88,12 @@ public class Tilemap {
                                         Texture.class);
         resourceTextureList.add(tx);
         resourceTextures = resourceTextureList.toArray(new Texture[0]);
+
+        JsonValue physicsLayer = tilemap.get("layers").get(0);
+        tilemapHeight = physicsLayer.getInt("height");
+        tilemapWidth = physicsLayer.getInt("width");
+        tileHeight = worldHeight / tilemapHeight;
+        tileWidth = worldWidth / tilemapWidth;
     }
 
     /**
@@ -75,10 +109,6 @@ public class Tilemap {
 
     public void populateGeometry(WorldController ctrl) {
         JsonValue physicsLayer = tilemap.get("layers").get(0);
-        int tilemapHeight = physicsLayer.getInt("height");
-        int tilemapWidth = physicsLayer.getInt("width");
-        float tileHeight = worldHeight / tilemapHeight;
-        float tileWidth = worldWidth / tilemapWidth;
         String wname = "wall";
         for (int row = 0; row < tilemapHeight; row++) {
             for (int col = 0; col < tilemapWidth; col++) {
@@ -96,7 +126,7 @@ public class Tilemap {
                             x1,
                             y0,
                             x0,
-                            y0}, 0, 0);
+                            y0}, 0, 0, this, 1);
                     obj.setBodyType(BodyDef.BodyType.StaticBody);
                     obj.setDensity(0);
                     obj.setFriction(0);
@@ -110,10 +140,6 @@ public class Tilemap {
 
     private void populateResources(WorldController ctrl) {
         JsonValue resourceLayer = tilemap.get("layers").get(2);
-        int tilemapHeight = resourceLayer.getInt("height");
-        int tilemapWidth = resourceLayer.getInt("width");
-        float tileHeight = worldHeight / tilemapHeight;
-        float tileWidth = worldWidth / tilemapWidth;
         for (int row = 0; row < tilemapHeight; row++) {
             for (int col = 0; col < tilemapWidth; col++) {
                 if (resourceLayer.get("data").asIntArray()[row * tilemapWidth +
@@ -123,8 +149,13 @@ public class Tilemap {
                     FilmStrip waterFilmstrip = new FilmStrip(resourceTextures[0],
                                                              1,
                                                              13);
-                    Water w = new Water(xMid, yMid, waterFilmstrip);
-                    w.setDrawScale(120, 120);
+                    Water w = new Water(xMid,
+                                        yMid,
+                                        tileWidth,
+                                        tileHeight,
+                                        waterFilmstrip,
+                                        this,
+                                        1);
                     ctrl.addObject(w);
                 }
             }
@@ -138,10 +169,6 @@ public class Tilemap {
      */
     public void draw(GameCanvas c) {
         JsonValue visualLayer = tilemap.get("layers").get(1);
-        int tilemapHeight = visualLayer.getInt("height");
-        int tilemapWidth = visualLayer.getInt("width");
-        float tileHeight = worldHeight / tilemapHeight;
-        float tileWidth = worldWidth / tilemapWidth;
         for (int row = 0; row < tilemapHeight; row++) {
             for (int col = 0; col < tilemapWidth; col++) {
                 int tileValue = visualLayer.get("data").asIntArray()[
@@ -151,13 +178,12 @@ public class Tilemap {
                     float x1 = (col + 1) * tileWidth;
                     float y0 = worldHeight - (row + 1) * tileHeight;
                     float y1 = worldHeight - row * tileHeight;
-                    float scale = 120;
                     c.draw(tileTextures[tileValue - 1],
                            Color.WHITE,
-                           x0 * scale,
-                           y0 * scale,
-                           tileWidth * scale,
-                           tileHeight * scale);
+                           x0,
+                           y0,
+                           tileWidth,
+                           tileHeight);
                 }
             }
         }

@@ -23,6 +23,7 @@ import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.*;
 import com.badlogic.gdx.physics.box2d.BodyDef.BodyType;
 import com.syndic8.phytopolis.GameCanvas;
+import com.syndic8.phytopolis.util.Tilemap;
 
 /**
  * Base model class to support collisions.
@@ -38,7 +39,9 @@ import com.syndic8.phytopolis.GameCanvas;
  * and fixture information into a single interface.
  */
 public abstract class GameObject extends Model {
+
     /// Initialization structures to store body information
+    /// Caching objects
     /**
      * Stores the body information for this shape
      */
@@ -73,8 +76,6 @@ public abstract class GameObject extends Model {
      * A cache value for when the user wants to access the linear velocity
      */
     protected Vector2 velocityCache = new Vector2();
-
-    /// Caching objects
     /**
      * A cache value for when the user wants to access the center of mass
      */
@@ -93,19 +94,13 @@ public abstract class GameObject extends Model {
     private boolean isDirty;
 
     /**
-     * Create a new physics object at the origin.
-     */
-    protected GameObject() {
-        this(0, 0);
-    }
-
-    /**
      * Create a new physics object
      *
      * @param x Initial x position in world coordinates
      * @param y Initial y position in world coordinates
      */
-    protected GameObject(float x, float y) {
+    protected GameObject(float x, float y, Tilemap tm, float texScl) {
+        super(tm, texScl);
         // Object has yet to be deactivated
         toRemove = false;
 
@@ -1044,7 +1039,6 @@ public abstract class GameObject extends Model {
      * @param value the drawing scale for this physics object
      */
     public void setDrawScale(Vector2 value) {
-        System.out.println(value.x + " " + value.y);
         setDrawScale(value.x, value.y);
     }
 
@@ -1182,16 +1176,20 @@ public abstract class GameObject extends Model {
      * @param canvas Drawing context
      */
     public void draw(GameCanvas canvas) {
+        float width = tilemap.getTileWidth() * textureSclInTiles;
+        float height = tilemap.getTileHeight() * textureSclInTiles;
+        float sclX = width / texture.getRegionWidth();
+        float sclY = height / texture.getRegionHeight();
         if (texture != null) {
             canvas.draw(texture,
                         Color.WHITE,
                         origin.x,
                         origin.y,
-                        getX() * drawScale.x,
-                        getY() * drawScale.x,
+                        getX(),
+                        getY(),
                         getAngle(),
-                        1,
-                        1);
+                        sclX,
+                        sclY);
         }
     }
 

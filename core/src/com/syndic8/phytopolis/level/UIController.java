@@ -57,16 +57,18 @@ public class UIController {
     public void draw(GameCanvas c) {
         int w = c.getWidth();
         int h = c.getHeight();
+        float widthRatio = (float) waterdropStrip.getRegionHeight() /
+                waterdropStrip.getRegionWidth();
         c.drawHud(waterdropStrip,
-                  (int) (w * 0.05),
-                  (int) (h * 0.8),
-                  (int) (w * 0.1),
-                  (int) (w * 0.1));
+                  w * (-0.025f),
+                  h * 0.75f,
+                  w * 0.125f / widthRatio,
+                  w * 0.125f);
         c.drawHud(sunStrip,
-                  (int) (w * 0.15),
-                  (int) (h * 0.8),
-                  (int) (w * 0.1),
-                  (int) (w * 0.1));
+                  w * 0.075f,
+                  h * 0.75f,
+                  w * 0.125f / widthRatio,
+                  w * 0.125f);
     }
 
 }

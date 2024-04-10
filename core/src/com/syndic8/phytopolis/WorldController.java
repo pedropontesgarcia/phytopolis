@@ -16,13 +16,9 @@
  */
 package com.syndic8.phytopolis;
 
-import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.audio.Sound;
-import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
-import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.World;
@@ -85,19 +81,11 @@ public abstract class WorldController implements Screen {
     /**
      * Height of the game world in Box2d units
      */
-    protected static final float DEFAULT_HEIGHT = 36;
+    protected static final float DEFAULT_HEIGHT = 320f / 9f;
     /**
      * The default value of gravity (going down)
      */
     protected static final float DEFAULT_GRAVITY = -4.9f;
-    /**
-     * The texture for walls and platforms
-     */
-    protected TextureRegion earthTile;
-    /**
-     * The texture for the exit condition
-     */
-    protected TextureRegion goalTile;
     /**
      * The font for giving messages to the player
      */
@@ -127,7 +115,6 @@ public abstract class WorldController implements Screen {
      */
     protected Vector2 scale;
     private float accumulator = 0.0f;
-    private Texture background;
     /**
      * Listener that will update the player mode when we are done
      */
@@ -195,16 +182,9 @@ public abstract class WorldController implements Screen {
         world = new World(gravity, false);
         this.bounds = new Rectangle(bounds);
 
-        // Reference aspect ratio (16:9)
-        float referenceAspectRatio = 16f / 9f;
-
-        // Actual aspect ratio of the canvas
-        float actualAspectRatio =
-                (float) Gdx.graphics.getWidth() / Gdx.graphics.getHeight();
-
         // Calculate scale factors
-        float scaleX = Gdx.graphics.getWidth() / 16f;
-        float scaleY = scaleX * (referenceAspectRatio / actualAspectRatio);
+        float scaleX = 1;
+        float scaleY = 1;
 
         this.scale = new Vector2(scaleX, scaleY);
 
@@ -213,7 +193,6 @@ public abstract class WorldController implements Screen {
         debug = false;
         active = false;
         countdown = -1;
-        background = null;
     }
 
     /**
@@ -236,10 +215,6 @@ public abstract class WorldController implements Screen {
      */
     public void setDebug(boolean value) {
         debug = value;
-    }
-
-    public void setBackground(Texture bg) {
-        background = bg;
     }
 
     /**
@@ -322,18 +297,6 @@ public abstract class WorldController implements Screen {
      */
     public void setCanvas(GameCanvas canvas) {
         this.canvas = canvas;
-        // Reference aspect ratio (16:9)
-        float referenceAspectRatio = 16f / 9f;
-
-        // Actual aspect ratio of the canvas
-        float actualAspectRatio =
-                (float) canvas.getWidth() / canvas.getHeight();
-
-        // Calculate scale factors
-        float scaleX = canvas.getWidth() / 16f;
-        float scaleY = scaleX * (referenceAspectRatio / actualAspectRatio);
-
-        this.scale = new Vector2(scaleX, scaleY);
     }
 
     /**
@@ -365,11 +328,6 @@ public abstract class WorldController implements Screen {
      * @param directory Reference to global asset manager.
      */
     public void gatherAssets(AssetDirectory directory) {
-        // Allocate the tiles
-        //earthTile = new TextureRegion(directory.getEntry("shared:earth",
-        //                                                 Texture.class));
-        //goalTile = new TextureRegion(directory.getEntry("shared:goal",
-        //                                                Texture.class));
         displayFont = directory.getEntry("shared:retro", BitmapFont.class);
     }
 
@@ -544,22 +502,17 @@ public abstract class WorldController implements Screen {
      * @param dt Number of seconds since last animation frame
      */
     public void draw(float dt) {
-        canvas.begin();
-        if (background != null) {
-            canvas.draw(background, Color.WHITE, 0, 0, canvas.getWidth(), 4320);
-        }
         for (Model obj : objects) {
             obj.draw(canvas);
         }
-        canvas.end();
-
-        if (debug) {
-            canvas.beginDebug();
-            for (Model obj : objects) {
-                obj.drawDebug(canvas);
-            }
-            canvas.endDebug();
-        }
+        //
+        //        if (debug) {
+        //            canvas.beginDebug();
+        //            for (Model obj : objects) {
+        //                obj.drawDebug(canvas);
+        //            }
+        //            canvas.endDebug();
+        //        }
 
         // Final message
         //        if (complete && !failed) {

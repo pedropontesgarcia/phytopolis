@@ -3,13 +3,11 @@ package com.syndic8.phytopolis.level.models;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.physics.box2d.BodyDef;
 import com.syndic8.phytopolis.GameCanvas;
+import com.syndic8.phytopolis.util.Tilemap;
 
 public class Leaf extends BoxObject {
-    /**
-     * enum containing possible leaf types
-     */
-    public enum leafType {NORMAL, BOUNCY}
-    private leafType type;
+
+    private final leafType type;
 
     /**
      * Creates a new Leaf object with the specified position and dimensions
@@ -20,18 +18,30 @@ public class Leaf extends BoxObject {
      * @param height height of the leaf
      * @param type
      */
-    public Leaf(float x, float y, float width, float height, leafType type) {
-        super(x, y, width, height);
+    public Leaf(float x,
+                float y,
+                float width,
+                float height,
+                leafType type,
+                Tilemap tm,
+                float texScl) {
+        super(x, y, width, height, tm, texScl);
         bodyinfo.type = BodyDef.BodyType.StaticBody;
         this.type = type;
     }
 
     /**
      * returns the type of this leaf
+     *
      * @return the type of this leaf
      */
-    public leafType getLeafType(){
+    public leafType getLeafType() {
         return type;
+    }
+
+    @Override
+    public ModelType getType() {
+        return ModelType.LEAF;
     }
 
     //    @Override
@@ -42,37 +52,27 @@ public class Leaf extends BoxObject {
     //    }
 
     @Override
-    public ModelType getType() {
-        return ModelType.LEAF;
-    }
-
-    @Override
     public void draw(GameCanvas canvas) {
         if (texture != null) {
-            switch (type){
-                case NORMAL:
-                    canvas.draw(texture,
-                            Color.WHITE,
-                            origin.x,
-                            origin.y,
-                            getX() * drawScale.x,
-                            getY() * drawScale.x,
-                            getAngle(),
-                            1,
-                            1);
-                    break;
-                case BOUNCY:
-                    canvas.draw(texture,
-                            Color.WHITE,
-                            origin.x,
-                            origin.y,
-                            getX() * drawScale.x,
-                            getY() * drawScale.x,
-                            getAngle(),
-                            0.21f,
-                            0.21f);
-                    break;
-            }
+            float width = tilemap.getTileWidth() * textureSclInTiles;
+            float height = tilemap.getTileHeight() * textureSclInTiles;
+            float sclX = width / texture.getRegionWidth();
+            float sclY = height / texture.getRegionHeight();
+            canvas.draw(texture,
+                        Color.WHITE,
+                        origin.x,
+                        origin.y,
+                        getX(),
+                        getY(),
+                        getAngle(),
+                        sclX,
+                        sclY);
         }
     }
+
+    /**
+     * enum containing possible leaf types
+     */
+    public enum leafType {NORMAL, BOUNCY}
+
 }

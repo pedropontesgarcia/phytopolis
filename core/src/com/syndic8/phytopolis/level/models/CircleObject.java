@@ -1,15 +1,55 @@
 package com.syndic8.phytopolis.level.models;
 
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.physics.box2d.CircleShape;
 import com.badlogic.gdx.physics.box2d.Fixture;
 import com.syndic8.phytopolis.GameCanvas;
-import com.badlogic.gdx.graphics.Color;
+import com.syndic8.phytopolis.util.Tilemap;
 
 public abstract class CircleObject extends GameObject {
-    /** Shape information for this circle */
+
+    /**
+     * Shape information for this circle
+     */
     protected CircleShape shape;
-    /** A cache value for the fixture (for resizing) */
+    /**
+     * A cache value for the fixture (for resizing)
+     */
     private Fixture geometry;
+
+    /**
+     * Creates a new circle at the origin.
+     * <p>
+     * The size is expressed in physics units NOT pixels.  In order for
+     * drawing to work properly, you MUST set the drawScale. The drawScale
+     * converts the physics units to pixels.
+     *
+     * @param radius The wheel radius
+     */
+    public CircleObject(float radius, Tilemap tm, float texScl) {
+        this(0, 0, radius, tm, texScl);
+    }
+
+    /**
+     * Creates a new circle object.
+     * <p>
+     * The size is expressed in physics units NOT pixels.  In order for
+     * drawing to work properly, you MUST set the drawScale. The drawScale
+     * converts the physics units to pixels.
+     *
+     * @param x      Initial x position of the circle center
+     * @param y      Initial y position of the circle center
+     * @param radius The wheel radius
+     */
+    public CircleObject(float x,
+                        float y,
+                        float radius,
+                        Tilemap tm,
+                        float texScl) {
+        super(x, y, tm, texScl);
+        shape = new CircleShape();
+        shape.setRadius(radius);
+    }
 
     /**
      * Returns the radius of this circle
@@ -23,7 +63,7 @@ public abstract class CircleObject extends GameObject {
     /**
      * Sets the radius of this circle
      *
-     * @param value  the radius of this circle
+     * @param value the radius of this circle
      */
     public void setRadius(float value) {
         shape.setRadius(value);
@@ -31,38 +71,8 @@ public abstract class CircleObject extends GameObject {
     }
 
     /**
-     * Creates a new circle at the origin.
-     *
-     * The size is expressed in physics units NOT pixels.  In order for
-     * drawing to work properly, you MUST set the drawScale. The drawScale
-     * converts the physics units to pixels.
-     *
-     * @param radius	The wheel radius
-     */
-    public CircleObject(float radius) {
-        this(0, 0, radius);
-    }
-
-    /**
-     * Creates a new circle object.
-     *
-     * The size is expressed in physics units NOT pixels.  In order for
-     * drawing to work properly, you MUST set the drawScale. The drawScale
-     * converts the physics units to pixels.
-     *
-     * @param x 		Initial x position of the circle center
-     * @param y  		Initial y position of the circle center
-     * @param radius	The wheel radius
-     */
-    public CircleObject(float x, float y, float radius) {
-        super(x,y);
-        shape = new CircleShape();
-        shape.setRadius(radius);
-    }
-
-    /**
      * Create new fixtures for this body, defining the shape
-     *
+     * <p>
      * This is the primary method to override for custom physics objects
      */
     protected void createFixtures() {
@@ -80,7 +90,7 @@ public abstract class CircleObject extends GameObject {
 
     /**
      * Release the fixtures for this body, reseting the shape
-     *
+     * <p>
      * This is the primary method to override for custom physics objects
      */
     protected void releaseFixtures() {
@@ -92,12 +102,18 @@ public abstract class CircleObject extends GameObject {
 
     /**
      * Draws the outline of the physics body.
-     *
+     * <p>
      * This method can be helpful for understanding issues with collisions.
      *
      * @param canvas Drawing context
      */
     public void drawDebug(GameCanvas canvas) {
-        canvas.drawPhysics(shape, Color.YELLOW,getX(),getY(),drawScale.x,drawScale.y);
+        canvas.drawPhysics(shape,
+                           Color.YELLOW,
+                           getX(),
+                           getY(),
+                           drawScale.x,
+                           drawScale.y);
     }
+
 }

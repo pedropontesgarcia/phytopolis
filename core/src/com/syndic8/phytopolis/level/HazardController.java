@@ -9,9 +9,10 @@ import com.syndic8.phytopolis.level.models.Drone;
 import com.syndic8.phytopolis.level.models.Fire;
 import com.syndic8.phytopolis.level.models.Hazard;
 import com.syndic8.phytopolis.level.models.Model;
+import com.syndic8.phytopolis.util.Tilemap;
 
-import java.util.*;
-
+import java.util.ArrayList;
+import java.util.Random;
 
 public class HazardController {
 
@@ -51,6 +52,7 @@ public class HazardController {
      * The time until drone explodes after it spawns.
      */
     private final int explodeTime;
+    private final Tilemap tilemap;
     /**
      * Texture for fire hazard.
      */
@@ -69,8 +71,8 @@ public class HazardController {
      *
      * @param plantController The PlantController instance associated with this HazardController.
      */
-    public HazardController(PlantController plantController) {
-        this(plantController, 300, 300, 100, 100);
+    public HazardController(PlantController plantController, Tilemap tm) {
+        this(plantController, 300, 300, 100, 100, tm);
     }
 
     /**
@@ -85,7 +87,8 @@ public class HazardController {
                             int fireFrequency,
                             int droneFrequency,
                             int burnTime,
-                            int explodeTime) {
+                            int explodeTime,
+                            Tilemap tm) {
         this.fireFrequency = fireFrequency;
         this.droneFrequency = droneFrequency;
         this.plantController = plantController;
@@ -95,6 +98,7 @@ public class HazardController {
         hazards = new ArrayList<>();
         height = plantController.getHeight();
         width = plantController.getWidth();
+        tilemap = tm;
     }
 
     /**
@@ -109,41 +113,53 @@ public class HazardController {
         if (hazardWidth == -1) return;
         switch (type) {
             case FIRE:
-                Fire f = new Fire(new Vector2(hazardWidth, hazardHeight), burnTime);
+                Fire f = new Fire(new Vector2(hazardWidth, hazardHeight),
+                                  burnTime,
+                                  tilemap,
+                                  0.5f);
                 f.setTexture(fireTexture);
                 hazards.add(f);
                 break;
             case DRONE:
-                Drone d = new Drone(new Vector2(hazardWidth, hazardHeight), explodeTime);
+                Drone d = new Drone(new Vector2(hazardWidth, hazardHeight),
+                                    explodeTime,
+                                    tilemap,
+                                    0.5f);
                 d.setTexture(droneTexture);
                 hazards.add(d);
                 break;
             default:
-                return;
         }
     }
 
     /**
      * Generates a hazard at random node at a given x and y.
      *
-     * @param type The type of hazard.
-     * @param hazardWidth x coordinate
+     * @param type         The type of hazard.
+     * @param hazardWidth  x coordinate
      * @param hazardHeight y coordinate
      */
-    public void generateHazard(Model.ModelType type, int hazardWidth, int hazardHeight) {
+    public void generateHazard(Model.ModelType type,
+                               int hazardWidth,
+                               int hazardHeight) {
         switch (type) {
             case FIRE:
-                Fire f = new Fire(new Vector2(hazardWidth, hazardHeight), burnTime);
+                Fire f = new Fire(new Vector2(hazardWidth, hazardHeight),
+                                  burnTime,
+                                  tilemap,
+                                  0.5f);
                 f.setTexture(fireTexture);
                 hazards.add(f);
                 break;
             case DRONE:
-                Drone d = new Drone(new Vector2(hazardWidth, hazardHeight), explodeTime);
+                Drone d = new Drone(new Vector2(hazardWidth, hazardHeight),
+                                    explodeTime,
+                                    tilemap,
+                                    0.5f);
                 d.setTexture(droneTexture);
                 hazards.add(d);
                 break;
             default:
-                return;
         }
     }
 
@@ -210,7 +226,8 @@ public class HazardController {
                         i--;
                         hazards.remove(f);
                         f.markRemoved(true);
-                        plantController.destroyAll((int) f.getLocation().x, (int) f.getLocation().y);
+                        plantController.destroyAll((int) f.getLocation().x,
+                                                   (int) f.getLocation().y);
                         spreadFire(f.getLocation());
                     }
                     f.setDuration(time - 1);
@@ -223,7 +240,8 @@ public class HazardController {
                         i--;
                         hazards.remove(d);
                         d.markRemoved(true);
-                        plantController.destroyAll((int) d.getLocation().x, (int) d.getLocation().y);
+                        plantController.destroyAll((int) d.getLocation().x,
+                                                   (int) d.getLocation().y);
                     }
                     d.setTimer(time2 - 1);
                 default:
@@ -240,44 +258,50 @@ public class HazardController {
     private void spreadFire(Vector2 node) {
         int x = (int) node.x;
         int y = (int) node.y;
-        if (y+1 <= height) {
+        if (y + 1 <= height) {
             // check top left
-            if (plantController.inBounds(x-1, y+1)) {
-                if (!plantController.nodeIsEmpty(x-1, y+1)) {
-                    generateHazard(Model.ModelType.FIRE, x-1, y+1);
+            if (plantController.inBounds(x - 1, y + 1)) {
+                if (!plantController.nodeIsEmpty(x - 1, y + 1)) {
+                    generateHazard(Model.ModelType.FIRE, x - 1, y + 1);
                 }
             }
             // check top right
-            if (plantController.inBounds(x+1, y+1)) {
-                if (!plantController.nodeIsEmpty(x+1, y+1)) {
-                    generateHazard(Model.ModelType.FIRE, x+1, y+1);
+            if (plantController.inBounds(x + 1, y + 1)) {
+                if (!plantController.nodeIsEmpty(x + 1, y + 1)) {
+                    generateHazard(Model.ModelType.FIRE, x + 1, y + 1);
                 }
             }
             // check top middle
-            if (plantController.inBounds(x, y+1)) {
-                if (!plantController.nodeIsEmpty(x, y+1)) {
-                    generateHazard(Model.ModelType.FIRE, x, y+1);
+            if (plantController.inBounds(x, y + 1)) {
+                if (!plantController.nodeIsEmpty(x, y + 1)) {
+                    generateHazard(Model.ModelType.FIRE, x, y + 1);
                 }
             }
         }
 
-        if (y-1 >= 0) {
+        if (y - 1 >= 0) {
             // check bottom left
-            if (plantController.inBounds(x-1, y-1)) {
-                if (plantController.branchExists(x-1, y-1, PlantController.branchDirection.RIGHT)) {
-                    generateHazard(Model.ModelType.FIRE, x-1, y-1);
+            if (plantController.inBounds(x - 1, y - 1)) {
+                if (plantController.branchExists(x - 1,
+                                                 y - 1,
+                                                 PlantController.branchDirection.RIGHT)) {
+                    generateHazard(Model.ModelType.FIRE, x - 1, y - 1);
                 }
             }
             // check bottom right
-            if (plantController.inBounds(x+1, y-1)) {
-                if (plantController.branchExists(x+1, y-1, PlantController.branchDirection.LEFT)) {
-                    generateHazard(Model.ModelType.FIRE, x+1, y-1);
+            if (plantController.inBounds(x + 1, y - 1)) {
+                if (plantController.branchExists(x + 1,
+                                                 y - 1,
+                                                 PlantController.branchDirection.LEFT)) {
+                    generateHazard(Model.ModelType.FIRE, x + 1, y - 1);
                 }
             }
             // check bottom middle
-            if (plantController.inBounds(x, y-1)) {
-                if (plantController.branchExists(x, y-1, PlantController.branchDirection.MIDDLE)) {
-                    generateHazard(Model.ModelType.FIRE, x, y-1);
+            if (plantController.inBounds(x, y - 1)) {
+                if (plantController.branchExists(x,
+                                                 y - 1,
+                                                 PlantController.branchDirection.MIDDLE)) {
+                    generateHazard(Model.ModelType.FIRE, x, y - 1);
                 }
             }
         }
@@ -296,7 +320,8 @@ public class HazardController {
         for (Hazard h : hazards) {
             if (h.getType().equals(Model.ModelType.FIRE)) {
                 f = (Fire) h;
-                if ((int) f.getLocation().x == x && (int) f.getLocation().y == y) break;
+                if ((int) f.getLocation().x == x &&
+                        (int) f.getLocation().y == y) break;
                 //System.out.println("-" + f.getLocation().x + " " + f.getLocation().y);
             }
         }
@@ -306,7 +331,6 @@ public class HazardController {
             f.markRemoved(true);
             resourceController.decrementExtinguish();
         }
-
 
     }
 
@@ -321,17 +345,19 @@ public class HazardController {
     /**
      * Draw each hazard.
      */
-    public void draw (GameCanvas canvas) {
+    public void draw(GameCanvas canvas) {
         for (Hazard h : hazards) {
             switch (h.getType()) {
                 case FIRE:
                     Fire f = (Fire) h;
-                    Vector2 worldCoords = plantController.indexToScreenCoord((int) f.getLocation().x, (int) f.getLocation().y);
+                    Vector2 worldCoords = plantController.indexToScreenCoord((int) f.getLocation().x,
+                                                                             (int) f.getLocation().y);
                     f.draw(canvas, worldCoords.x, worldCoords.y);
                     break;
                 case DRONE:
                     Drone d = (Drone) h;
-                    Vector2 worldCoords2 = plantController.indexToScreenCoord((int) d.getLocation().x, (int) d.getLocation().y);
+                    Vector2 worldCoords2 = plantController.indexToScreenCoord((int) d.getLocation().x,
+                                                                              (int) d.getLocation().y);
                     d.draw(canvas, worldCoords2.x, worldCoords2.y);
                     break;
                 default:

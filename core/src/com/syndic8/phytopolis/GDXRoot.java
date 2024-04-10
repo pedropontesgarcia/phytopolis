@@ -42,7 +42,7 @@ public class GDXRoot extends Game implements ScreenListener {
 
     public void create() {
         canvas = new GameCanvas();
-        canvas.setSize(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
+        canvas.setSize(16, 9);
         menu = new MainMenuMode("assets.json", canvas, 1);
         controller = new GameplayMode();
         menu.setScreenListener(this);
@@ -67,6 +67,7 @@ public class GDXRoot extends Game implements ScreenListener {
     }
 
     public void resize(int width, int height) {
+        canvas.resizeScreen(width, height);
     }
 
     public void exitScreen(Screen screen, int exitCode) {

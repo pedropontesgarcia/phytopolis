@@ -1,9 +1,7 @@
 package com.syndic8.phytopolis.level.models;
 
-import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.math.Vector2;
-import com.syndic8.phytopolis.GameCanvas;
+import com.syndic8.phytopolis.util.Tilemap;
 
 /**
  * Represents a fire with a specific location, duration, and burning state.
@@ -14,7 +12,7 @@ public class Fire extends Hazard {
      * Indicates whether the fire is still burning.
      * It is true if the fire hasn't finished burning yet, otherwise false.
      */
-    private boolean isBurning;
+    private final boolean isBurning;
 
     /**
      * The fire's remaining burn duration.
@@ -27,6 +25,19 @@ public class Fire extends Hazard {
     private Vector2 location;
 
     /**
+     * Constructs a Fire object with a specified location and duration.
+     *
+     * @param location The initial location of the fire.
+     * @param duration The initial burn duration of the fire.
+     */
+    public Fire(Vector2 location, int duration, Tilemap tm, float texScl) {
+        super(tm, texScl);
+        this.duration = duration;
+        this.location = location;
+        isBurning = true;
+    }
+
+    /**
      * Returns the type of the model.
      *
      * @return ModelType.FIRE, representing the type of this object.
@@ -34,18 +45,6 @@ public class Fire extends Hazard {
     @Override
     public ModelType getType() {
         return ModelType.FIRE;
-    }
-
-    /**
-     * Constructs a Fire object with a specified location and duration.
-     *
-     * @param location The initial location of the fire.
-     * @param duration The initial burn duration of the fire.
-     */
-    public Fire(Vector2 location, int duration) {
-        this.duration = duration;
-        this.location = location;
-        isBurning = true;
     }
 
     /**

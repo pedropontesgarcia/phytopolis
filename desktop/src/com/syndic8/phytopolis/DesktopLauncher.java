@@ -29,14 +29,15 @@ public class DesktopLauncher {
         List<Graphics.DisplayMode> goodDisplayModes = new ArrayList<Graphics.DisplayMode>();
         for (Graphics.DisplayMode displayMode : displayModes) {
             if (Math.abs(displayMode.width / displayMode.height - 16 / 9) <
-                    0.01 && displayMode.width <= 1920) {
+                    0.01) {
                 goodDisplayModes.add(displayMode);
             }
         }
         goodDisplayModes.sort((Graphics.DisplayMode dm1, Graphics.DisplayMode dm2) ->
                                       dm1.width - dm2.width);
-        config.setFullscreenMode(goodDisplayModes.get(
-                goodDisplayModes.size() - 1));
+        //        config.setFullscreenMode(goodDisplayModes.get(
+        //                goodDisplayModes.size() - 1));
+        config.setWindowedMode(1280, 720);
         new Lwjgl3Application(new GDXRoot(), config);
     }
 

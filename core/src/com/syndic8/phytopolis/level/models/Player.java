@@ -9,6 +9,7 @@ import com.badlogic.gdx.physics.box2d.World;
 import com.badlogic.gdx.utils.JsonValue;
 import com.syndic8.phytopolis.GameCanvas;
 import com.syndic8.phytopolis.util.FilmStrip;
+import com.syndic8.phytopolis.util.Tilemap;
 
 public class Player extends CapsuleObject {
 
@@ -52,10 +53,14 @@ public class Player extends CapsuleObject {
      * Cache for internal force calculations
      */
     private final Vector2 forceCache = new Vector2();
-    private float animFrame;
     private final FilmStrip jumpAnimator;
-    private float animFrame2;
     private final FilmStrip jogAnimator;
+    /**
+     * Multiplier for when standing on bouncy leaf
+     */
+    private final float bouncyMultiplier = 2f;
+    private float animFrame;
+    private float animFrame2;
     /**
      * The current horizontal movement of the character
      */
@@ -89,11 +94,6 @@ public class Player extends CapsuleObject {
      */
     private PolygonShape sensorShape;
     /**
-     * Multiplier for when standing on bouncy leaf
-     */
-    private final float bouncyMultiplier = 2f;
-
-    /**
      * whether the dude can jump extra high
      */
     private boolean bouncy = false;
@@ -113,12 +113,16 @@ public class Player extends CapsuleObject {
                   float width,
                   float height,
                   FilmStrip jump,
-                  FilmStrip jog) {
+                  FilmStrip jog,
+                  Tilemap tm,
+                  float texScl) {
         // The shrink factors fit the image to a tigher hitbox
         super(data.get("pos").getFloat(0),
               data.get("pos").getFloat(1),
               width * data.get("shrink").getFloat(0),
-              height * data.get("shrink").getFloat(1));
+              height * data.get("shrink").getFloat(1),
+              tm,
+              texScl);
         setDensity(data.getFloat("density", 0));
         setFriction(data.getFloat("friction",
                                   0));  /// HE WILL STICK TO WALLS IF YOU FORGET
@@ -417,47 +421,76 @@ public class Player extends CapsuleObject {
      * @param canvas Drawing context
      */
     public void draw(GameCanvas canvas) {
-//        System.out.println(getY());
-//        System.out.println(getHeight());
+        //        System.out.println(getY());
+        //        System.out.println(getHeight());
         float effect = faceRight ? 1.0f : -1.0f;
 
-        if (Math.abs(body.getLinearVelocity().y) >= 0.15) {
-            jumpAnimator.setFrame((int) animFrame);
-            float x = jumpAnimator.getRegionWidth() / 2.0f;
-            float y = jumpAnimator.getRegionHeight() / 2.0f;
-            canvas.draw(jumpAnimator,
-                        Color.WHITE,
-                        x,
-                        y,
-                        getX() * drawScale.x,
-                        getY() * drawScale.y,
-                        getAngle(),
-                        0.8f * effect,
-                        0.8f);
+        //        if (Math.abs(body.getLinearVelocity().y) >= 0.15) {
+        //            jumpAnimator.setFrame((int) animFrame);
+        //            float x = jumpAnimator.getRegionWidth() / 2.0f;
+        //            float y = jumpAnimator.getRegionHeight() / 2.0f;
+        //            canvas.draw(jumpAnimator,
+        //                        Color.WHITE,
+        //                        x,
+        //                        y,
+        //                        getX() * drawScale.x,
+        //                        getY() * drawScale.y,
+        //                        getAngle(),
+        //                        0.8f * effect,
+        //                        0.8f);
 
-        } else if (!(Math.abs(body.getLinearVelocity().y) >= 0.15) &&
-                (Math.abs(body.getLinearVelocity().x) >= 0.1)) {
-            jogAnimator.setFrame((int) animFrame2);
-            float x = jogAnimator.getRegionWidth() / 2.0f;
-            float y = jogAnimator.getRegionHeight() / 2.0f;
-            canvas.draw(jogAnimator,
-                        Color.WHITE,
-                        x,
-                        y,
-                        getX() * drawScale.x,
-                        getY() * drawScale.y,
-                        getAngle(),
-                        0.8f * effect,
-                        0.8f);
-        } else {
+        //        } else if (!(Math.abs(body.getLinearVelocity().y) >= 0.15) &&
+        //                (Math.abs(body.getLinearVelocity().x) >= 0.1)) {
+        //            jogAnimator.setFrame((int) animFrame2);
+        //            float x = jogAnimator.getRegionWidth() / 2.0f;
+        //            float y = jogAnimator.getRegionHeight() / 2.0f;
+        //            canvas.draw(jogAnimator,
+        //                        Color.WHITE,
+        //                        x,
+        //                        y,
+        //                        getX() * drawScale.x,
+        //                        getY() * drawScale.y,
+        //                        getAngle(),
+        //                        0.8f * effect,
+        //                        0.8f);
+        //        } else {
+        //            canvas.draw(texture,
+        //                        Color.WHITE,
+        //                        origin.x,
+        //                        origin.y,
+        //                        getX() * drawScale.x,
+        //                        getY() * drawScale.y,
+        //                        getAngle(), effect,
+        //                        1f);
+        //        }
+        //        float width = 16f / 6f;
+        //        float height = (320f / 9f) / 20f;
+        //        float sclX = width / 600f;
+        //        float sclY = height / 400f;
+        //        canvas.draw(texture,
+        //                    Color.WHITE,
+        //                    origin.x,
+        //                    origin.y,
+        //                    getX(),
+        //                    getY(),
+        //                    getAngle(),
+        //                    sclX * effect,
+        //                    sclY);
+
+        float width = tilemap.getTileWidth() * textureSclInTiles;
+        float height = tilemap.getTileHeight() * textureSclInTiles;
+        float sclX = width / texture.getRegionWidth();
+        float sclY = height / texture.getRegionHeight();
+        if (texture != null) {
             canvas.draw(texture,
                         Color.WHITE,
                         origin.x,
                         origin.y,
-                        getX() * drawScale.x,
-                        getY() * drawScale.y,
-                        getAngle(), effect,
-                        1f);
+                        getX(),
+                        getY(),
+                        getAngle(),
+                        sclX * effect,
+                        sclY);
         }
 
     }

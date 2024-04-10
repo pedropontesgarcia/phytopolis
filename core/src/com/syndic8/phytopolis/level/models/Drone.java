@@ -1,9 +1,7 @@
 package com.syndic8.phytopolis.level.models;
 
-import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.math.Vector2;
-import com.syndic8.phytopolis.GameCanvas;
+import com.syndic8.phytopolis.util.Tilemap;
 
 /**
  * Represents a drone in the game, which is a type of hazard.
@@ -15,7 +13,7 @@ public class Drone extends Hazard {
      * Indicates whether the drone is still alive (has not collided with the plant).
      * It is true if the drone hasn't collided with the plant yet, otherwise false.
      */
-    private boolean isAlive;
+    private final boolean isAlive;
 
     /**
      * The current location of the drone.
@@ -28,6 +26,22 @@ public class Drone extends Hazard {
     private int timer;
 
     /**
+     * Constructs a Drone object with a specified location.
+     * The drone is initially alive upon creation.
+     *
+     * @param location The initial location of the drone.
+     */
+    public Drone(Vector2 location,
+                 int timeTilExplosion,
+                 Tilemap tm,
+                 float texScl) {
+        super(tm, texScl);
+        this.timer = timeTilExplosion;
+        this.location = location;
+        isAlive = true;
+    }
+
+    /**
      * Returns the type of the model.
      *
      * @return ModelType.DRONE, representing the type of this object.
@@ -35,18 +49,6 @@ public class Drone extends Hazard {
     @Override
     public ModelType getType() {
         return ModelType.DRONE;
-    }
-
-    /**
-     * Constructs a Drone object with a specified location.
-     * The drone is initially alive upon creation.
-     *
-     * @param location The initial location of the drone.
-     */
-    public Drone(Vector2 location, int timeTilExplosion) {
-        this.timer = timeTilExplosion;
-        this.location = location;
-        isAlive = true;
     }
 
     /**
@@ -91,4 +93,5 @@ public class Drone extends Hazard {
     public void setTimer(int time) {
         timer = time;
     }
+
 }

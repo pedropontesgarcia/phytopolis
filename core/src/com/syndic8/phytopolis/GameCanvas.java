@@ -10,11 +10,12 @@ import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.*;
 import com.badlogic.gdx.physics.box2d.CircleShape;
 import com.badlogic.gdx.physics.box2d.PolygonShape;
+import com.badlogic.gdx.utils.ScreenUtils;
+import com.badlogic.gdx.utils.viewport.FitViewport;
+import com.badlogic.gdx.utils.viewport.Viewport;
 
 public class GameCanvas {
 
-    static final int WORLD_WIDTH = 16;
-    static final int WORLD_HEIGHT = 36;
     /**
      * Rendering context for the debug outlines
      */
@@ -23,6 +24,12 @@ public class GameCanvas {
      * Camera for the underlying SpriteBatch
      */
     private final OrthographicCamera camera;
+    /**
+     * Camera for the underlying SpriteBatch
+     */
+    private final OrthographicCamera hudCamera;
+    private final Viewport viewport;
+    private final Viewport hudViewport;
     /**
      * Value to cache window width (if we are currently full screen)
      */
@@ -76,22 +83,30 @@ public class GameCanvas {
      * of the necessary graphics objects.
      */
     public GameCanvas() {
+        width = 16;
+        height = 9;
         active = DrawPass.INACTIVE;
         spriteBatch = new PolygonSpriteBatch();
         hudBatch = new SpriteBatch();
         debugRender = new ShapeRenderer();
 
         // Set the projection matrix (for proper scaling)
-        camera = new OrthographicCamera(getWidth(), getHeight());
-        //viewport = new ScalingViewport(Scaling.fit, 16, 9, camera);
+        camera = new OrthographicCamera(width, height);
+        hudCamera = new OrthographicCamera(width, height);
 
-        camera.position.set(camera.viewportWidth / 2f,
-                            camera.viewportHeight / 2f,
-                            0);
-        //viewport.apply();
+        viewport = new FitViewport(width, height, camera);
+        hudViewport = new FitViewport(width, height, hudCamera);
+        int screenWidth = Gdx.graphics.getDisplayMode().width;
+        int screenHeight = Gdx.graphics.getDisplayMode().height;
+        viewport.setScreenSize(screenWidth, screenHeight);
+        hudViewport.setScreenSize(screenWidth, screenHeight);
+        camera.position.set(width / 2f, height / 2f, 0);
+        hudCamera.position.set(width / 2f, height / 2f, 0);
 
         camera.update();
+        hudCamera.update();
         spriteBatch.setProjectionMatrix(camera.combined);
+        hudBatch.setProjectionMatrix(hudCamera.combined);
         debugRender.setProjectionMatrix(camera.combined);
 
         // Initialize the cache objects
@@ -99,6 +114,10 @@ public class GameCanvas {
         local = new Affine2();
         global = new Matrix4();
         vertex = new Vector2();
+    }
+
+    public Vector2 unproject(Vector2 proj) {
+        return viewport.unproject(proj);
     }
 
     public void cameraUpdate(Vector2 pos) {
@@ -139,7 +158,7 @@ public class GameCanvas {
      * @return the width of this canvas
      */
     public int getWidth() {
-        return Gdx.graphics.getWidth();
+        return width;
     }
 
     /**
@@ -158,10 +177,10 @@ public class GameCanvas {
             return;
         }
         this.width = width;
-        if (!isFullscreen()) {
-            Gdx.graphics.setWindowedMode(width, getHeight());
-        }
-        resize();
+        //        if (!isFullscreen()) {
+        //            Gdx.graphics.setWindowedMode(width, height);
+        //        }
+        resizeCanvas();
     }
 
     /**
@@ -172,7 +191,7 @@ public class GameCanvas {
      * @return the height of this canvas
      */
     public int getHeight() {
-        return Gdx.graphics.getHeight();
+        return height;
     }
 
     /**
@@ -191,10 +210,10 @@ public class GameCanvas {
             return;
         }
         this.height = height;
-        if (!isFullscreen()) {
-            Gdx.graphics.setWindowedMode(getWidth(), height);
-        }
-        resize();
+        //        if (!isFullscreen()) {
+        //            Gdx.graphics.setWindowedMode(width, height);
+        //        }
+        resizeCanvas();
     }
 
     /**
@@ -203,7 +222,7 @@ public class GameCanvas {
      * @return the dimensions of this canvas
      */
     public Vector2 getSize() {
-        return new Vector2(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
+        return new Vector2(width, height);
     }
 
     /**
@@ -224,10 +243,10 @@ public class GameCanvas {
         }
         this.width = width;
         this.height = height;
-        if (!isFullscreen()) {
-            Gdx.graphics.setWindowedMode(width, height);
-        }
-        resize();
+        //        if (!isFullscreen()) {
+        //            Gdx.graphics.setWindowedMode(width, height);
+        //        }
+        resizeCanvas();
 
     }
 
@@ -275,10 +294,15 @@ public class GameCanvas {
      * If you do not call this when the window is resized, you will get
      * weird scaling issues.
      */
-    public void resize() {
+    public void resizeCanvas() {
         // Resizing screws up the spriteBatch projection matrix
         spriteBatch.getProjectionMatrix()
                 .setToOrtho2D(0, 0, getWidth(), getHeight());
+    }
+
+    public void resizeScreen(int width, int height) {
+        viewport.update(width, height);
+        hudViewport.update(width, height);
     }
 
     public void drawBackground(Texture image, float x, float y) {
@@ -344,11 +368,8 @@ public class GameCanvas {
      */
     public void clear() {
         // Clear the screen
-        Gdx.gl.glClearColor(0.39f,
-                            0.58f,
-                            0.93f,
-                            1.0f);  // Homage to the XNA years
-        Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
+        //Gdx.gl.glClearColor(0, 0, 0, 0);  // Black
+        ScreenUtils.clear(Color.BLACK);
     }
 
     /**
@@ -377,6 +398,8 @@ public class GameCanvas {
      * @param sy the amount to scale the y-axis
      */
     public void begin(float sx, float sy) {
+        viewport.apply();
+        hudViewport.apply();
         global.idt();
         global.scl(sx, sy, 1.0f);
         global.mulLeft(camera.combined);
@@ -387,6 +410,7 @@ public class GameCanvas {
     }
 
     public void beginHud() {
+        hudBatch.setProjectionMatrix(hudCamera.combined);
         hudBatch.begin();
     }
 
@@ -396,6 +420,7 @@ public class GameCanvas {
      * Nothing is flushed to the graphics card until the method end() is called.
      */
     public void begin() {
+        viewport.apply();
         spriteBatch.setProjectionMatrix(camera.combined);
         spriteBatch.begin();
         active = DrawPass.STANDARD;
@@ -447,7 +472,7 @@ public class GameCanvas {
      * @param x
      * @param y
      */
-    public void drawHud(TextureRegion t, int x, int y, int w, int h) {
+    public void drawHud(TextureRegion t, float x, float y, float w, float h) {
         hudBatch.draw(t, x, y, w, h);
     }
 

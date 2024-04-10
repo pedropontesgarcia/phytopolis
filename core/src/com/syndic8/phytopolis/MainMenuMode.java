@@ -37,14 +37,6 @@ public class MainMenuMode implements Screen {
      */
     private static final int DEFAULT_BUDGET = 15;
     /**
-     * Standard window size (for scaling)
-     */
-    private static final int STANDARD_WIDTH = 1600;
-    /**
-     * Standard window height (for scaling)
-     */
-    private static final int STANDARD_HEIGHT = 1400;
-    /**
      * Internal assets for this loading screen
      */
     private final AssetDirectory internal;
@@ -78,10 +70,6 @@ public class MainMenuMode implements Screen {
      * Listener that will update the player mode when we are done
      */
     private ScreenListener listener;
-    /**
-     * The height of the canvas window (necessary since sprite origin != screen origin)
-     */
-    private int heightY;
     /**
      * Scaling factor for when the student changes the resolution.
      */
@@ -259,8 +247,8 @@ public class MainMenuMode implements Screen {
                     canvas.getWidth() / 2.0f,
                     canvas.getHeight() * 2.0f / 3.0f,
                     0,
-                    0.0008f * scale,
-                    0.0008f * scale);
+                    (float) canvas.getWidth() / logo.getWidth(),
+                    (float) canvas.getHeight() / logo.getHeight());
         Color tint = (pressState == 1 ?
                 Color.GRAY :
                 new Color(1f, 1f, 1f, (float) Math.pow(Math.sin(tmr), 2)));
@@ -272,8 +260,8 @@ public class MainMenuMode implements Screen {
                         canvas.getWidth() / 2.0f,
                         canvas.getHeight() / 4.0f,
                         0,
-                        0.0001f * scale,
-                        0.0001f * scale);
+                        0.001f,
+                        0.001f);
         }
         canvas.end();
     }
@@ -310,7 +298,9 @@ public class MainMenuMode implements Screen {
         float sx = ((float) width);
         float sy = ((float) height);
         scale = (Math.min(sx, sy));
-        heightY = height;
+        /**
+         * The height of the canvas window (necessary since sprite origin != screen origin)
+         */
     }
 
     /**

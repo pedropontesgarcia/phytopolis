@@ -1,15 +1,14 @@
 package com.syndic8.phytopolis.level;
 
-import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.World;
 import com.badlogic.gdx.utils.Queue;
 import com.syndic8.phytopolis.GameCanvas;
-import com.syndic8.phytopolis.WorldController;
 import com.syndic8.phytopolis.assets.AssetDirectory;
 import com.syndic8.phytopolis.level.models.Branch;
 import com.syndic8.phytopolis.level.models.Leaf;
+import com.syndic8.phytopolis.util.Tilemap;
 
 public class PlantController {
 
@@ -59,6 +58,7 @@ public class PlantController {
      * Reference to the ResourceController
      */
     private final ResourceController resourceController;
+    private final Tilemap tilemap;
     /**
      * node texture
      */
@@ -101,10 +101,11 @@ public class PlantController {
                            float yOrigin,
                            World world,
                            Vector2 scale,
-                           ResourceController rc) {
+                           ResourceController rc,
+                           Tilemap tm) {
         plantGrid = new PlantNode[width][height];
         this.world = world;
-        worldToPixelConversionRatio = scale.x;
+        worldToPixelConversionRatio = 1;
         this.scale = scale;
         this.xOrigin = xOrigin * worldToPixelConversionRatio;
         this.yOrigin = yOrigin * worldToPixelConversionRatio;
@@ -115,6 +116,7 @@ public class PlantController {
                 (this.gridSpacing * this.gridSpacing) -
                         ((this.gridSpacing / 2f) * (this.gridSpacing / 2f))));
         this.resourceController = rc;
+        tilemap = tm;
         for (int x = 0; x < width; x++) {
             for (int y = 0; y < height; y++) {
                 float yOffset = 0;
@@ -123,7 +125,8 @@ public class PlantController {
                 plantGrid[x][y] = new PlantNode(
                         (x * this.xSpacing) + this.xOrigin,
                         this.yOrigin + yOffset + (y * this.gridSpacing),
-                        this.worldToPixelConversionRatio);
+                        this.worldToPixelConversionRatio,
+                        tilemap);
             }
         }
     }
@@ -140,18 +143,19 @@ public class PlantController {
                            float y,
                            branchDirection direction,
                            Branch.branchType type) {
-        int xIndex = screenCoordToIndex(x * worldToPixelConversionRatio, y * worldToPixelConversionRatio)[0];
-        int yIndex = screenCoordToIndex(x * worldToPixelConversionRatio, y * worldToPixelConversionRatio)[1];
+        int xIndex = screenCoordToIndex(x * worldToPixelConversionRatio,
+                                        y * worldToPixelConversionRatio)[0];
+        int yIndex = screenCoordToIndex(x * worldToPixelConversionRatio,
+                                        y * worldToPixelConversionRatio)[1];
         plantGrid[xIndex][yIndex].makeBranch(direction, type, world);
     }
 
-    public Leaf growLeaf(float x,
-                         float y,
-                         Leaf.leafType type) {
+    public Leaf growLeaf(float x, float y, Leaf.leafType type) {
         int xIndex = screenCoordToIndex(x, y)[0];
         int yIndex = screenCoordToIndex(x, y)[1];
         boolean lowerNode = xIndex % 2 == 0;
-        if(!plantGrid[xIndex][yIndex].hasLeaf() && (yIndex>0 || !lowerNode)) return plantGrid[xIndex][yIndex].makeLeaf(type);
+        if (!plantGrid[xIndex][yIndex].hasLeaf() && (yIndex > 0 || !lowerNode))
+            return plantGrid[xIndex][yIndex].makeLeaf(type);
         return null;
     }
 
@@ -179,12 +183,24 @@ public class PlantController {
     public void destroyAll(int xArg, int yArg) {
         PlantNode nodeToDestroy = plantGrid[xArg][yArg];
         nodeToDestroy.unmakeLeaf();
-        if(!canGrowAtIndex(xArg, yArg) || nodeToDestroy.getBranchType(branchDirection.LEFT) == Branch.branchType.NORMAL) nodeToDestroy.unmakeBranch(branchDirection.LEFT);
-        else nodeToDestroy.setBranchType(branchDirection.LEFT, Branch.branchType.NORMAL);
-        if(!canGrowAtIndex(xArg, yArg) || nodeToDestroy.getBranchType(branchDirection.MIDDLE) == Branch.branchType.NORMAL) nodeToDestroy.unmakeBranch(branchDirection.MIDDLE);
-        else nodeToDestroy.setBranchType(branchDirection.MIDDLE, Branch.branchType.NORMAL);
-        if(!canGrowAtIndex(xArg, yArg) || nodeToDestroy.getBranchType(branchDirection.RIGHT) == Branch.branchType.NORMAL) nodeToDestroy.unmakeBranch(branchDirection.RIGHT);
-        else nodeToDestroy.setBranchType(branchDirection.RIGHT, Branch.branchType.NORMAL);
+        if (!canGrowAtIndex(xArg, yArg) ||
+                nodeToDestroy.getBranchType(branchDirection.LEFT) ==
+                        Branch.branchType.NORMAL)
+            nodeToDestroy.unmakeBranch(branchDirection.LEFT);
+        else nodeToDestroy.setBranchType(branchDirection.LEFT,
+                                         Branch.branchType.NORMAL);
+        if (!canGrowAtIndex(xArg, yArg) ||
+                nodeToDestroy.getBranchType(branchDirection.MIDDLE) ==
+                        Branch.branchType.NORMAL)
+            nodeToDestroy.unmakeBranch(branchDirection.MIDDLE);
+        else nodeToDestroy.setBranchType(branchDirection.MIDDLE,
+                                         Branch.branchType.NORMAL);
+        if (!canGrowAtIndex(xArg, yArg) ||
+                nodeToDestroy.getBranchType(branchDirection.RIGHT) ==
+                        Branch.branchType.NORMAL)
+            nodeToDestroy.unmakeBranch(branchDirection.RIGHT);
+        else nodeToDestroy.setBranchType(branchDirection.RIGHT,
+                                         Branch.branchType.NORMAL);
         plantCoyoteTimeRemaining = plantCoyoteTime;
         destructionQueue.addLast(new int[]{xArg, yArg});
     }
@@ -204,7 +220,7 @@ public class PlantController {
             boolean lowerNode = xIndex % 2 == 0;
             for (int i = -1; i < 2; i++) {
                 int yOff = 0;
-                if(!lowerNode || i==0) yOff = 1;
+                if (!lowerNode || i == 0) yOff = 1;
                 //System.out.println("Checking node x: " + (xIndex + i) + " y: " + (yIndex + yOff));
                 //System.out.println("i = " + i);
                 //System.out.println("yIndex < height: " + (yIndex+ yOff < height));
@@ -212,11 +228,14 @@ public class PlantController {
                 //System.out.println("xIndex + i < width: " + (xIndex + i < width));
                 //System.out.println("Can't grow at node: " + (!canGrowAtIndex(xIndex + i, yIndex+ yOff)));
                 //System.out.println("Target node not empty: " + (plantGrid[xIndex + i][yIndex+ yOff].hasBranch() || plantGrid[xIndex + i][yIndex+ yOff].hasLeaf()));
-                if (yIndex + yOff < height && xIndex + i >= 0 && xIndex + i < width &&
+                if (yIndex + yOff < height && xIndex + i >= 0 &&
+                        xIndex + i < width &&
                         !canGrowAtIndex(xIndex + i, yIndex + yOff) &&
-                        (plantGrid[xIndex + i][yIndex+ yOff].hasBranch() || plantGrid[xIndex + i][yIndex+ yOff].hasLeaf())) {
+                        (plantGrid[xIndex + i][yIndex + yOff].hasBranch() ||
+                                plantGrid[xIndex + i][yIndex +
+                                        yOff].hasLeaf())) {
                     //System.out.println("Floating branch found, i = " + i);
-                    destroyAll(xIndex + i, yIndex+ yOff);
+                    destroyAll(xIndex + i, yIndex + yOff);
                     //destructionQueue.addLast(new int[]{xIndex + i, yIndex});
                 }
             }
@@ -241,11 +260,12 @@ public class PlantController {
 
     /**
      * Returns whether or not a node can be grown at the given index
+     *
      * @param xIndex x Index of the checked node
      * @param yIndex y Index of the checked node
      * @return if the checked node can be grown at
      */
-    public boolean canGrowAtIndex(int xIndex, int yIndex){
+    public boolean canGrowAtIndex(int xIndex, int yIndex) {
 
         boolean lowerNode = xIndex % 2 == 0;
         //If this is a node at the base of the plant, return true
@@ -278,6 +298,7 @@ public class PlantController {
                                     branchDirection dir) {
         int xIndex = worldCoordToIndex(xArg, yArg)[0];
         int yIndex = worldCoordToIndex(xArg, yArg)[1];
+        if (!inBounds(xIndex, yIndex)) return false;
         return growableAt(xArg, yArg) &&
                 !plantGrid[xIndex][yIndex].hasBranchInDirection(dir);
     }
@@ -298,12 +319,13 @@ public class PlantController {
                     //                                node.getX(),
                     //                                node.getY(),
                     //                                0.0f,
-                    //                                1.0f,
-                    //                                1.0f);
+                    //                                0.005f,
+                    //                                0.006f);
                     try {
                         node.drawBranches(canvas);
                         node.drawLeaf(canvas);
                     } catch (Exception ignore) {
+                        System.out.println("could not draw " + ignore);
                     }
                 }
             }
@@ -345,8 +367,10 @@ public class PlantController {
         this.branchTexture = directory.getEntry("gameplay:branch",
                                                 Texture.class);
         this.leafTexture = directory.getEntry("gameplay:leaf", Texture.class);
-        this.bouncyLeafTexture = directory.getEntry("gameplay:bouncy", Texture.class);
-        this.enBranchTextureUp = directory.getEntry("gameplay:enbranch", Texture.class);
+        this.bouncyLeafTexture = directory.getEntry("gameplay:bouncy",
+                                                    Texture.class);
+        this.enBranchTextureUp = directory.getEntry("gameplay:enbranch",
+                                                    Texture.class);
     }
 
     /**
@@ -385,8 +409,10 @@ public class PlantController {
      */
     public int[] screenCoordToIndex(float xArg, float yArg) {
         int xIndex = Math.round((xArg - xOrigin) / xSpacing);
-        int yIndex =  (int) ((yArg - yOrigin - (gridSpacing * .5f * (xIndex % 2))) / gridSpacing);
-        return new int[] {xIndex, yIndex};
+        int yIndex = (int) (
+                (yArg - yOrigin - (gridSpacing * .5f * (xIndex % 2))) /
+                        gridSpacing);
+        return new int[]{xIndex, yIndex};
     }
 
     /**
@@ -397,7 +423,8 @@ public class PlantController {
      * @return (x, y) index of the corresponding node
      */
     public int[] worldCoordToIndex(float xArg, float yArg) {
-        return screenCoordToIndex(xArg * worldToPixelConversionRatio, yArg * worldToPixelConversionRatio);
+        return screenCoordToIndex(xArg * worldToPixelConversionRatio,
+                                  yArg * worldToPixelConversionRatio);
     }
 
     /**
@@ -429,21 +456,25 @@ public class PlantController {
 
     /**
      * returns type of branch at given indicies and direction
+     *
      * @param xArg x index of the branch to check
      * @param yArg y index of the branch to check
      * @return the type of the checked branch
      */
-    public Branch.branchType getBranchType(int xArg, int yArg, branchDirection direction){
+    public Branch.branchType getBranchType(int xArg,
+                                           int yArg,
+                                           branchDirection direction) {
         return plantGrid[xArg][yArg].getBranchType(direction);
     }
 
     /**
      * returns type of leaf at given indicies
+     *
      * @param xArg x index of the branch to check
      * @param yArg y index of the branch to check
      * @return the type of the checked branch
      */
-    public Leaf.leafType getLeafType(int xArg, int yArg){
+    public Leaf.leafType getLeafType(int xArg, int yArg) {
         return plantGrid[xArg][yArg].getLeafType();
     }
 
@@ -452,14 +483,11 @@ public class PlantController {
      */
     public enum branchDirection {LEFT, MIDDLE, RIGHT}
 
-
-
-
-
     /**
      * representation of a node in the plantGrid
      */
     public class PlantNode {
+
         /**
          * x coordinate of this node
          */
@@ -480,6 +508,7 @@ public class PlantController {
          * conversion ration for converting between world coords and pixels
          */
         private final float worldToPixelConversionRatio;
+        private final Tilemap tilemap;
         /**
          * whether there is a branch in the leftmost slot of this node
          */
@@ -507,13 +536,17 @@ public class PlantController {
          * @param x x coordinate of the node
          * @param y y coordinate of the node
          */
-        public PlantNode(float x, float y, float worldToPixelConversionRatio) {
+        public PlantNode(float x,
+                         float y,
+                         float worldToPixelConversionRatio,
+                         Tilemap tm) {
             //            this.left = false;
             //            this.middle = false;
             //            this.right = false;
             this.x = x;
             this.y = y;
             this.worldToPixelConversionRatio = worldToPixelConversionRatio;
+            tilemap = tm;
         }
 
         /**
@@ -532,20 +565,20 @@ public class PlantController {
                 Branch newBranch = null;
                 switch (direction) {
                     case LEFT:
-                        left = new Branch(x, y, pi / 3, type);
+                        left = new Branch(x, y, pi / 3, type, tilemap, 1);
                         newBranch = left;
                         break;
                     case MIDDLE:
-                        middle = new Branch(x, y, 0, type);
+                        middle = new Branch(x, y, 0, type, tilemap, 1);
                         newBranch = middle;
                         break;
                     case RIGHT:
-                        right = new Branch(x, y, -pi / 3, type);
+                        right = new Branch(x, y, -pi / 3, type, tilemap, 1);
                         newBranch = right;
                         break;
                 }
                 if (newBranch != null) {
-                    switch (type){
+                    switch (type) {
                         case NORMAL:
                             newBranch.setTexture(branchTexture);
                             break;
@@ -562,18 +595,23 @@ public class PlantController {
         /**
          * make a leaf of the desired type
          *
-         * @param type    type of leaf to create
+         * @param type type of leaf to create
          */
         public Leaf makeLeaf(Leaf.leafType type) {
-            if (screenCoordToIndex(x / worldToPixelConversionRatio, y / worldToPixelConversionRatio)[1] > 0 &&
+            if (screenCoordToIndex(x / worldToPixelConversionRatio,
+                                   y / worldToPixelConversionRatio)[1] > 0 &&
                     !leafExists && hasBranch() ||
                     growableAt(x / worldToPixelConversionRatio,
                                y / worldToPixelConversionRatio)) {
                 leaf = new Leaf(x / worldToPixelConversionRatio,
-                                y / worldToPixelConversionRatio, //- 0.5f,
+                                y / worldToPixelConversionRatio,
+                                //- 0.5f,
                                 leafWidth,
-                                leafHeight, type);
-                switch (type){
+                                leafHeight,
+                                type,
+                                tilemap,
+                                0.75f);
+                switch (type) {
                     case NORMAL:
                         leaf.setTexture(leafTexture);
                         break;
@@ -713,19 +751,23 @@ public class PlantController {
 
         /**
          * returns the type of branch in the given direction
+         *
          * @param direction the slot to check
          * @return the type of branch in the given slot
          */
-        public Branch.branchType getBranchType(branchDirection direction){
-            switch (direction){
+        public Branch.branchType getBranchType(branchDirection direction) {
+            switch (direction) {
                 case LEFT:
-                    if (hasBranchInDirection(branchDirection.LEFT)) return left.getBranchType();
+                    if (hasBranchInDirection(branchDirection.LEFT))
+                        return left.getBranchType();
                     else return null;
                 case RIGHT:
-                    if (hasBranchInDirection(branchDirection.RIGHT)) return right.getBranchType();
+                    if (hasBranchInDirection(branchDirection.RIGHT))
+                        return right.getBranchType();
                     else return null;
                 case MIDDLE:
-                    if (hasBranchInDirection(branchDirection.MIDDLE)) return middle.getBranchType();
+                    if (hasBranchInDirection(branchDirection.MIDDLE))
+                        return middle.getBranchType();
                     else return null;
             }
             //There is no branch at this node
@@ -734,25 +776,27 @@ public class PlantController {
 
         /**
          * sets the type of the branch in the given direction and resets its texture
+         *
          * @param direction the slot to set
-         * @param btype the branch type to set the given slot to
+         * @param btype     the branch type to set the given slot to
          */
-        public void setBranchType(branchDirection direction, Branch.branchType btype){
-            switch (direction){
+        public void setBranchType(branchDirection direction,
+                                  Branch.branchType btype) {
+            switch (direction) {
                 case LEFT:
-                    if (hasBranchInDirection(branchDirection.LEFT)){
+                    if (hasBranchInDirection(branchDirection.LEFT)) {
                         left.setBranchType(btype);
                         left.setTexture(branchTexture);
                     }
                     break;
                 case RIGHT:
-                    if (hasBranchInDirection(branchDirection.RIGHT)){
+                    if (hasBranchInDirection(branchDirection.RIGHT)) {
                         right.setBranchType(btype);
                         right.setTexture(branchTexture);
                     }
                     break;
                 case MIDDLE:
-                    if (hasBranchInDirection(branchDirection.MIDDLE)){
+                    if (hasBranchInDirection(branchDirection.MIDDLE)) {
                         middle.setBranchType(btype);
                         middle.setTexture(branchTexture);
                     }
@@ -762,10 +806,11 @@ public class PlantController {
 
         /**
          * returns the type of leaf at this node, null if no leaf
+         *
          * @return
          */
-        public Leaf.leafType getLeafType(){
-            if(hasLeaf()) return leaf.getLeafType();
+        public Leaf.leafType getLeafType() {
+            if (hasLeaf()) return leaf.getLeafType();
             else return null;
         }
 

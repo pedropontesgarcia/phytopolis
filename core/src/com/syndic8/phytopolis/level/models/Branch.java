@@ -3,6 +3,7 @@ package com.syndic8.phytopolis.level.models;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.math.Vector2;
 import com.syndic8.phytopolis.GameCanvas;
+import com.syndic8.phytopolis.util.Tilemap;
 
 public class Branch extends Model {
 
@@ -15,13 +16,15 @@ public class Branch extends Model {
      * Whether or not the object should be removed at next timestep.
      */
     protected boolean destroyed;
-    /**
-     * enum containing possible branch types
-     */
-    public enum branchType {NORMAL, REINFORCED}
     private branchType type;
 
-    public Branch(float x, float y, float angle, branchType type) {
+    public Branch(float x,
+                  float y,
+                  float angle,
+                  branchType type,
+                  Tilemap tm,
+                  float texScl) {
+        super(tm, texScl);
         position = new Vector2(x, y);
         this.angle = angle;
         this.type = type;
@@ -103,7 +106,7 @@ public class Branch extends Model {
 
     /**
      * Returns the type of this object.
-     *
+     * <p>
      * We use this instead of runtime-typing for performance reasons.
      *
      * @return the type of this object.
@@ -115,15 +118,21 @@ public class Branch extends Model {
 
     /**
      * returns the branch type of this branch
+     *
      * @return the type of branch
      */
-    public branchType getBranchType(){ return type;}
+    public branchType getBranchType() {
+        return type;
+    }
 
     /**
      * changes the branch type to the given value
+     *
      * @param t the new branch type to be assigned to this branch
      */
-    public void setBranchType(branchType t){type = t;}
+    public void setBranchType(branchType t) {
+        type = t;
+    }
 
     /**
      * Updates the state of this object.
@@ -145,44 +154,24 @@ public class Branch extends Model {
      * @param canvas The drawing context
      */
     public void draw(GameCanvas canvas) {
-//        canvas.draw(texture,
-//                Color.WHITE,
-//                texture.getRegionWidth() / 2.0f,
-//                0,
-//                position.x,
-//                position.y,
-//                angle,
-//                scale.x/90f,
-//                scale.x/90f);
-        switch (type){
-            case NORMAL:
-                canvas.draw(texture,
-                        Color.WHITE,
-                        texture.getRegionWidth() / 2.0f,
-                        0,
-                        position.x,
-                        position.y,
-                        angle,
-                        scale.x/90f,
-                        scale.x/90f);
-                break;
-            case REINFORCED:
-                canvas.draw(texture,
-                        Color.WHITE,
-                        texture.getRegionWidth() / 1.87f,
-                        texture.getRegionHeight()/4f,
-                        position.x,
-                        position.y,
-                        angle,
-                        (scale.x * 0.24f)/90f,
-                        (scale.x * 0.24f)/90f);
-                break;
-        }
+        float width = tilemap.getTileWidth() * textureSclInTiles;
+        float height = tilemap.getTileHeight() * textureSclInTiles;
+        float sclX = width / texture.getRegionWidth();
+        float sclY = height / texture.getRegionHeight();
+        canvas.draw(texture,
+                    Color.WHITE,
+                    texture.getRegionWidth() / 2f,
+                    0,
+                    position.x,
+                    position.y,
+                    angle,
+                    sclX,
+                    sclY);
     }
 
     /**
      * Draws the outline of the physics body.
-     *
+     * <p>
      * This method can be helpful for understanding issues with collisions.
      *
      * @param canvas Drawing context
@@ -190,5 +179,10 @@ public class Branch extends Model {
     public void drawDebug(GameCanvas canvas) {
         draw(canvas);
     }
+
+    /**
+     * enum containing possible branch types
+     */
+    public enum branchType {NORMAL, REINFORCED}
 
 }
