@@ -154,6 +154,7 @@ public class PlantController {
         int xIndex = screenCoordToIndex(x, y)[0];
         int yIndex = screenCoordToIndex(x, y)[1];
         boolean lowerNode = xIndex % 2 == 0;
+        if (!inBounds(xIndex, yIndex)) return null;
         if (!plantGrid[xIndex][yIndex].hasLeaf() && (yIndex > 0 || !lowerNode))
             return plantGrid[xIndex][yIndex].makeLeaf(type);
         return null;
@@ -299,6 +300,9 @@ public class PlantController {
         int xIndex = worldCoordToIndex(xArg, yArg)[0];
         int yIndex = worldCoordToIndex(xArg, yArg)[1];
         if (!inBounds(xIndex, yIndex)) return false;
+        if (xIndex == 0 && dir != branchDirection.RIGHT) return false;
+        if (xIndex == plantGrid.length - 1 && dir != branchDirection.LEFT)
+            return false;
         return growableAt(xArg, yArg) &&
                 !plantGrid[xIndex][yIndex].hasBranchInDirection(dir);
     }

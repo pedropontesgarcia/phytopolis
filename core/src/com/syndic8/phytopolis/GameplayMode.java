@@ -241,9 +241,6 @@ public class GameplayMode extends WorldController implements ContactListener {
      * Lays out the game geography.
      */
     private void populateLevel() {
-        // Add level goal
-        float dwidth;
-        float dheight;
         tilemap.populateLevel(this);
         JsonValue defaults = constants.get("defaults");
 
@@ -296,42 +293,7 @@ public class GameplayMode extends WorldController implements ContactListener {
         obj.setName("rightwall");
         addObject(obj);
 
-        //        String wname = "wall";
-        //        JsonValue walljv = constants.get("walls");
-        //        for (int ii = 0; ii < walljv.size; ii++) {
-        //            PolygonObject obj;
-        //            obj = new PolygonObject(walljv.get(ii).asFloatArray(), 0, 0);
-        //            obj.setBodyType(BodyDef.BodyType.StaticBody);
-        //            obj.setDensity(defaults.getFloat("density", 0.0f));
-        //            obj.setFriction(defaults.getFloat("friction", 0.0f));
-        //            obj.setRestitution(defaults.getFloat("restitution", 0.0f));
-        //            obj.setDrawScale(scale);
-        //            obj.setTexture(barrierTexture);
-        //            obj.setName(wname + ii);
-        //            addObject(obj);
-        //        }
-        //
-        //        String pname = "platform";
-        //        JsonValue platjv = constants.get("platforms");
-        //        for (int ii = 0; ii < platjv.size; ii++) {
-        //            PolygonObject obj;
-        //            obj = new PolygonObject(platjv.get(ii).asFloatArray(), 0, 0);
-        //            obj.setBodyType(BodyDef.BodyType.StaticBody);
-        //            obj.setDensity(defaults.getFloat("density", 0.0f));
-        //            obj.setFriction(defaults.getFloat("friction", 0.0f));
-        //            obj.setRestitution(defaults.getFloat("restitution", 0.0f));
-        //            obj.setDrawScale(scale);
-        //            obj.setTexture(barrierTexture);
-        //            obj.setName(pname + ii);
-        //            addObject(obj);
-        //        }
-
-        // This world is heavier
         world.setGravity(new Vector2(0, defaults.getFloat("gravity", 0)));
-
-        // Create dude
-        //        dwidth = avatarTexture.getRegionWidth() / scale.x;
-        //        dheight = avatarTexture.getRegionHeight() / scale.y;
         avatar = new Player(constants.get("dude"),
                             0.5f,
                             tilemap.getTileHeight() * 0.9f,
@@ -380,11 +342,8 @@ public class GameplayMode extends WorldController implements ContactListener {
     /**
      * Processes plant growth using player input. Grows a branch in the
      * corresponding direction at the node closest to the player's position.
-     *
-     * @return whether the plant grew.
      */
-    public boolean processPlantGrowth() {
-        // TODO: position branch correctly
+    public void processPlantGrowth() {
         float avatarX = avatar.getX();
         float avatarY = avatar.getY();
         Branch.branchType bt = Branch.branchType.NORMAL;
@@ -426,11 +385,11 @@ public class GameplayMode extends WorldController implements ContactListener {
                                                        .getGrowY());
             Vector2 unprojMousePos = canvas.unproject(projMousePos);
             Model newLeaf = plantController.growLeaf(unprojMousePos.x,
-                                                     unprojMousePos.y,
+                                                     unprojMousePos.y + 0.5f *
+                                                             tilemap.getTileHeight(),
                                                      lt);
             if (newLeaf != null) addObject(newLeaf);
         }
-        return false;
     }
 
     /**
