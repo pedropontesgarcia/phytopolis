@@ -6,24 +6,17 @@ import com.badlogic.gdx.backends.lwjgl3.Lwjgl3ApplicationConfiguration;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Logger;
 
 // Please note that on macOS your application needs to be started with the -XstartOnFirstThread JVM argument
 public class DesktopLauncher {
 
-    public static void main(String[] arg) {
-        //		Lwjgl3ApplicationConfiguration config = new Lwjgl3ApplicationConfiguration();
-        //		config.setForegroundFPS(60);
-        //		config.setTitle("Phytopolis");
-        //		new Lwjgl3Application(new GDXRoot(), config);
+    private static final Logger LOGGER = Logger.getLogger(DesktopLauncher.class.getName());
 
+    public static void main(String[] arg) {
         Lwjgl3ApplicationConfiguration config = new Lwjgl3ApplicationConfiguration();
-        // windowed fullscreen
-        config.setWindowedMode( // windowed fullscreen
-                                Lwjgl3ApplicationConfiguration.getDisplayMode().width,
-                                Lwjgl3ApplicationConfiguration.getDisplayMode().height);
-        // config.setWindowedMode(1920, 1080); // 1080p
-        // config.setWindowedMode(1280, 720); // 720p
-        // config.setWindowedMode(1920, 1200); // Mac 16:10
+        config.setWindowedMode(Lwjgl3ApplicationConfiguration.getDisplayMode().width,
+                               Lwjgl3ApplicationConfiguration.getDisplayMode().height);
         config.setTitle("Phytopolis");
         Graphics.DisplayMode[] displayModes = Lwjgl3ApplicationConfiguration.getDisplayModes();
         List<Graphics.DisplayMode> goodDisplayModes = new ArrayList<Graphics.DisplayMode>();
@@ -35,9 +28,13 @@ public class DesktopLauncher {
         }
         goodDisplayModes.sort((Graphics.DisplayMode dm1, Graphics.DisplayMode dm2) ->
                                       dm1.width - dm2.width);
-        //        config.setFullscreenMode(goodDisplayModes.get(
-        //                goodDisplayModes.size() - 1));
-        config.setWindowedMode(1280, 720);
+        if (goodDisplayModes.isEmpty()) {
+            LOGGER.warning("No valid fullscreen resolutions were detected, " +
+                                   "switching to compatibility (windowed) " +
+                                   "mode.");
+            config.setWindowedMode(1280, 720);
+        } else config.setFullscreenMode(goodDisplayModes.get(
+                goodDisplayModes.size() - 1));
         new Lwjgl3Application(new GDXRoot(), config);
     }
 
