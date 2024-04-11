@@ -665,7 +665,7 @@ public class GameplayMode extends WorldController implements ContactListener {
                 l = (Leaf) fix2.getBody().getUserData();
             else l = (Leaf) fix1.getBody().getUserData();
             if (l.getLeafType() == Leaf.leafType.BOUNCY &&
-                    avatar.getY() > l.getY() + 0.9f) avatar.setBouncy(true);
+                    avatar.getY() > l.getY() + 0.5f) avatar.setBouncy(true);
         }
     }
 
