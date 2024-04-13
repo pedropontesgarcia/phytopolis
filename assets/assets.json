@@ -16,13 +16,17 @@
     "gameplay:block2": "gameplay/budblock2.png",
     "gameplay:block3": "gameplay/budblock3.png",
     "gameplay:balcony": "gameplay/shortbalcony1.png",
+    "gameplay:clothes1a": "gameplay/clothes1a.png",
+    "gameplay:clothes1b": "gameplay/clothes1b.png",
+    "gameplay:clothes1c": "gameplay/clothes1c.png",
+    "gameplay:clothes1d": "gameplay/clothes1d.png",
     "fire": "hazards/fire.png",
     "drone": "hazards/drone.png",
     "jump": "gameplay/jump-filmstrip.png",
     "jog": "gameplay/jog-filmstrip.png"
   },
   "jsons": {
-    "gameplay:tilemap": "gameplay/lvl2.json",
+    "gameplay:tilemap": "gameplay/lvl1.json",
     "gameplay:constants": "gameplay/constants.json",
     "gameplay:tileset": "gameplay/default.json"
   },
