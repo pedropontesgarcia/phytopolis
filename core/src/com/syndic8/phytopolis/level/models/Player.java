@@ -14,7 +14,8 @@ import com.syndic8.phytopolis.util.Tilemap;
 public class Player extends CapsuleObject {
 
     private static final int NUM_JOG_FRAMES = 8;
-    private static final int NUM_JUMP_FRAMES = 12;
+    private static final int NUM_JUMP_UP_FRAMES = 6;
+    private static final int NUM_JUMP_DOWN_FRAMES = 6;
     private static final float ANIMATION_SPEED = 0.15f;
     private static final float ANIMATION_SPEED2 = 0.16f;
     /**
@@ -384,20 +385,35 @@ public class Player extends CapsuleObject {
      */
     public void update(float dt) {
 
-        if (Math.abs(body.getLinearVelocity().y) >= 0.15) {
+        if (getVY() > 0.1) {
             animFrame += ANIMATION_SPEED;
-            if (animFrame >= NUM_JUMP_FRAMES) {
-                animFrame -= NUM_JUMP_FRAMES;
+            animFrame %= NUM_JUMP_UP_FRAMES;
+//            if (animFrame >= NUM_JUMP_FRAMES) {
+//                animFrame -= NUM_JUMP_FRAMES;
+//            }
+        } else if (getVY() < -0.1) {
+            if (animFrame < NUM_JUMP_UP_FRAMES) {
+                animFrame = NUM_JUMP_UP_FRAMES;
+            } else {
+                animFrame += ANIMATION_SPEED;
+                animFrame = ((animFrame - NUM_JUMP_UP_FRAMES) % NUM_JUMP_DOWN_FRAMES) + NUM_JUMP_UP_FRAMES;
             }
+        } else {
+            animFrame = 0;
         }
+
         if (!(Math.abs(body.getLinearVelocity().y) >= 0.15) &&
                 (Math.abs(body.getLinearVelocity().x) >= 0.1)) {
             animFrame2 += ANIMATION_SPEED2;
-            if (animFrame2 >= NUM_JOG_FRAMES) {
-                animFrame2 -= NUM_JOG_FRAMES;
-            }
+            animFrame2 %= NUM_JOG_FRAMES;
+//            if (animFrame2 >= NUM_JOG_FRAMES) {
+//                animFrame2 -= NUM_JOG_FRAMES;
+//            }
 
+        } else {
+            animFrame2 = 0;
         }
+
         // Apply cooldowns
         if (isJumping()) {
             jumpCooldown = jumpLimit;
@@ -425,44 +441,49 @@ public class Player extends CapsuleObject {
         //        System.out.println(getHeight());
         float effect = faceRight ? 1.0f : -1.0f;
 
-        //        if (Math.abs(body.getLinearVelocity().y) >= 0.15) {
-        //            jumpAnimator.setFrame((int) animFrame);
-        //            float x = jumpAnimator.getRegionWidth() / 2.0f;
-        //            float y = jumpAnimator.getRegionHeight() / 2.0f;
-        //            canvas.draw(jumpAnimator,
-        //                        Color.WHITE,
-        //                        x,
-        //                        y,
-        //                        getX() * drawScale.x,
-        //                        getY() * drawScale.y,
-        //                        getAngle(),
-        //                        0.8f * effect,
-        //                        0.8f);
+        float width = tilemap.getTileWidth() * textureSclInTiles;
+        float height = tilemap.getTileHeight() * textureSclInTiles;
+        float sclX = width / texture.getRegionWidth();
+        float sclY = height / texture.getRegionHeight();
 
-        //        } else if (!(Math.abs(body.getLinearVelocity().y) >= 0.15) &&
-        //                (Math.abs(body.getLinearVelocity().x) >= 0.1)) {
-        //            jogAnimator.setFrame((int) animFrame2);
-        //            float x = jogAnimator.getRegionWidth() / 2.0f;
-        //            float y = jogAnimator.getRegionHeight() / 2.0f;
-        //            canvas.draw(jogAnimator,
-        //                        Color.WHITE,
-        //                        x,
-        //                        y,
-        //                        getX() * drawScale.x,
-        //                        getY() * drawScale.y,
-        //                        getAngle(),
-        //                        0.8f * effect,
-        //                        0.8f);
-        //        } else {
-        //            canvas.draw(texture,
-        //                        Color.WHITE,
-        //                        origin.x,
-        //                        origin.y,
-        //                        getX() * drawScale.x,
-        //                        getY() * drawScale.y,
-        //                        getAngle(), effect,
-        //                        1f);
-        //        }
+                if (Math.abs(getVY()) >= 0.15) {
+                    jumpAnimator.setFrame((int) animFrame);
+                    float x = jumpAnimator.getRegionWidth() / 2.0f;
+                    float y = jumpAnimator.getRegionHeight() / 2.0f;
+                    canvas.draw(jumpAnimator,
+                                Color.WHITE,
+                                x,
+                                y,
+                                getX(),
+                                getY(),
+                                getAngle(),
+                                sclX * effect,
+                                sclY);
+
+                } else if
+                        (Math.abs(getVX()) >= 0.1) {
+                    jogAnimator.setFrame((int) animFrame2);
+                    float x = jogAnimator.getRegionWidth() / 2.0f;
+                    float y = jogAnimator.getRegionHeight() / 2.0f;
+                    canvas.draw(jogAnimator,
+                                Color.WHITE,
+                                x,
+                                y,
+                                getX(),
+                                getY(),
+                                getAngle(),
+                                sclX * effect,
+                                sclY);
+                } else {
+                    canvas.draw(texture,
+                                Color.WHITE,
+                                origin.x,
+                                origin.y,
+                                getX() * drawScale.x,
+                                getY() * drawScale.y,
+                                getAngle(), sclX * effect,
+                                sclY);
+                }
         //        float width = 16f / 6f;
         //        float height = (320f / 9f) / 20f;
         //        float sclX = width / 600f;
@@ -477,21 +498,21 @@ public class Player extends CapsuleObject {
         //                    sclX * effect,
         //                    sclY);
 
-        float width = tilemap.getTileWidth() * textureSclInTiles;
-        float height = tilemap.getTileHeight() * textureSclInTiles;
-        float sclX = width / texture.getRegionWidth();
-        float sclY = height / texture.getRegionHeight();
-        if (texture != null) {
-            canvas.draw(texture,
-                        Color.WHITE,
-                        origin.x,
-                        origin.y,
-                        getX(),
-                        getY(),
-                        getAngle(),
-                        sclX * effect,
-                        sclY);
-        }
+//        float width = tilemap.getTileWidth() * textureSclInTiles;
+//        float height = tilemap.getTileHeight() * textureSclInTiles;
+//        float sclX = width / texture.getRegionWidth();
+//        float sclY = height / texture.getRegionHeight();
+//        if (texture != null) {
+//            canvas.draw(texture,
+//                        Color.WHITE,
+//                        origin.x,
+//                        origin.y,
+//                        getX(),
+//                        getY(),
+//                        getAngle(),
+//                        sclX * effect,
+//                        sclY);
+//        }
 
     }
 
