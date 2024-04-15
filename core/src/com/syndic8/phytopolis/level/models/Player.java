@@ -384,26 +384,35 @@ public class Player extends CapsuleObject {
      * @param dt Number of seconds since last animation frame
      */
     public void update(float dt) {
-
-        if (getVY() > 0.1) {
-            animFrame += ANIMATION_SPEED;
-            animFrame %= NUM_JUMP_UP_FRAMES;
+        if (!isGrounded()) {
+            if (getVY() > 0.1) {
+                if (animFrame < NUM_JUMP_UP_FRAMES) {
+                    animFrame += ANIMATION_SPEED;
+                }
+                if (animFrame >= NUM_JUMP_UP_FRAMES) {
+                    animFrame = NUM_JUMP_UP_FRAMES - 1;
+                }
+//                animFrame %= NUM_JUMP_UP_FRAMES;
 //            if (animFrame >= NUM_JUMP_FRAMES) {
 //                animFrame -= NUM_JUMP_FRAMES;
 //            }
-        } else if (getVY() < -0.1) {
-            if (animFrame < NUM_JUMP_UP_FRAMES) {
-                animFrame = NUM_JUMP_UP_FRAMES;
-            } else {
-                animFrame += ANIMATION_SPEED;
-                animFrame = ((animFrame - NUM_JUMP_UP_FRAMES) % NUM_JUMP_DOWN_FRAMES) + NUM_JUMP_UP_FRAMES;
+            } else if (getVY() < -0.1) {
+//                if (animFrame < NUM_JUMP_UP_FRAMES) {
+//                    animFrame = NUM_JUMP_UP_FRAMES;
+//                } else
+                if (animFrame < NUM_JUMP_UP_FRAMES + NUM_JUMP_DOWN_FRAMES) {
+                    animFrame += ANIMATION_SPEED;
+//                    animFrame = ((animFrame - NUM_JUMP_UP_FRAMES) % NUM_JUMP_DOWN_FRAMES) + NUM_JUMP_UP_FRAMES;
+                }
+                if (animFrame >= NUM_JUMP_UP_FRAMES + NUM_JUMP_DOWN_FRAMES) {
+                    animFrame = NUM_JUMP_UP_FRAMES + NUM_JUMP_DOWN_FRAMES - 1;
+                }
             }
         } else {
             animFrame = 0;
         }
 
-        if (!(Math.abs(body.getLinearVelocity().y) >= 0.15) &&
-                (Math.abs(body.getLinearVelocity().x) >= 0.1)) {
+        if (isGrounded() && Math.abs(getVX()) >= 0.1) {
             animFrame2 += ANIMATION_SPEED2;
             animFrame2 %= NUM_JOG_FRAMES;
 //            if (animFrame2 >= NUM_JOG_FRAMES) {
@@ -446,7 +455,7 @@ public class Player extends CapsuleObject {
         float sclX = width / texture.getRegionWidth();
         float sclY = height / texture.getRegionHeight();
 
-                if (Math.abs(getVY()) >= 0.15) {
+                if (!isGrounded()) {
                     jumpAnimator.setFrame((int) animFrame);
                     float x = jumpAnimator.getRegionWidth() / 2.0f;
                     float y = jumpAnimator.getRegionHeight() / 2.0f;
