@@ -28,6 +28,7 @@ import com.syndic8.phytopolis.level.models.Model;
 import com.syndic8.phytopolis.util.PooledList;
 import com.syndic8.phytopolis.util.ScreenListener;
 
+import java.util.Comparator;
 import java.util.Iterator;
 
 /**
@@ -355,6 +356,7 @@ public abstract class WorldController implements Screen {
         if (obj instanceof GameObject) {
             ((GameObject) obj).activatePhysics(world);
         }
+        objects.sort(Comparator.comparingInt(Model::getZIndex));
     }
 
     /**

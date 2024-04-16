@@ -29,6 +29,7 @@ public abstract class Model {
      * The texture for the shape.
      */
     protected TextureRegion texture;
+    protected int zIndex;
 
     public Model(Tilemap tilemap, float textureSclInTiles) {
         this.tilemap = tilemap;
@@ -108,6 +109,10 @@ public abstract class Model {
      */
     public void markRemoved(boolean value) {
         toRemove = value;
+    }
+
+    public int getZIndex() {
+        return zIndex;
     }
 
     /**
