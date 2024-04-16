@@ -20,20 +20,14 @@ public class Fire extends Hazard {
     private int duration;
 
     /**
-     * The fire's location represented as a 2D vector.
-     */
-    private Vector2 location;
-
-    /**
      * Constructs a Fire object with a specified location and duration.
      *
      * @param location The initial location of the fire.
      * @param duration The initial burn duration of the fire.
      */
     public Fire(Vector2 location, int duration, Tilemap tm, float texScl) {
-        super(tm, texScl);
+        super(tm, texScl, location);
         this.duration = duration;
-        this.location = location;
         isBurning = true;
     }
 
@@ -54,24 +48,6 @@ public class Fire extends Hazard {
      */
     public boolean isBurning() {
         return isBurning;
-    }
-
-    /**
-     * Gets the current location of the fire.
-     *
-     * @return The current location of the fire.
-     */
-    public Vector2 getLocation() {
-        return location;
-    }
-
-    /**
-     * Sets a new location for the fire.
-     *
-     * @param location The new location of the fire.
-     */
-    public void setLocation(Vector2 location) {
-        this.location = location;
     }
 
     /**

@@ -16,11 +16,6 @@ public class Drone extends Hazard {
     private final boolean isAlive;
 
     /**
-     * The current location of the drone.
-     */
-    private Vector2 location;
-
-    /**
      * Time til explosion.
      */
     private int timer;
@@ -35,9 +30,8 @@ public class Drone extends Hazard {
                  int timeTilExplosion,
                  Tilemap tm,
                  float texScl) {
-        super(tm, texScl);
+        super(tm, texScl, location);
         this.timer = timeTilExplosion;
-        this.location = location;
         isAlive = true;
     }
 
@@ -58,24 +52,6 @@ public class Drone extends Hazard {
      */
     public boolean isAlive() {
         return isAlive;
-    }
-
-    /**
-     * Gets the current location of the drone.
-     *
-     * @return The current location of the drone.
-     */
-    public Vector2 getLocation() {
-        return location;
-    }
-
-    /**
-     * Sets a new location for the drone.
-     *
-     * @param location The new location of the drone.
-     */
-    public void setLocation(Vector2 location) {
-        this.location = location;
     }
 
     /**
