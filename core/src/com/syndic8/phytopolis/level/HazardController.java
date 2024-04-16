@@ -211,7 +211,7 @@ public class HazardController {
      * for generating and managing both fire and drone hazards, including their effects
      * on plant nodes.
      */
-    public void updateHazards(WorldController wldc) {
+    public void updateHazards() {
         generateHazard(Model.ModelType.FIRE);
         generateHazard(Model.ModelType.DRONE);
         int i = 0;

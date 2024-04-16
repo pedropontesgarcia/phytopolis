@@ -357,7 +357,7 @@ public class GameplayMode extends WorldController implements ContactListener {
                                        avatarY,
                                        PlantController.branchDirection.MIDDLE,
                                        bt));
-            System.out.println("BRANCH");
+//            System.out.println("BRANCH");
         } else if (InputController.getInstance().didGrowRight() &&
                 (plantController.branchGrowableAt(avatarX,
                                                   avatarY,
@@ -432,14 +432,14 @@ public class GameplayMode extends WorldController implements ContactListener {
                 ((Resource) m).regenerate();
             }
         }
-        hazardController.updateHazards(this);
+        hazardController.updateHazards();
         if (InputController.getInstance().didExtinguish()) {
             int[] index = plantController.worldCoordToIndex(avatar.getX(),
                                                             avatar.getY());
             hazardController.extinguishFire(index[0], index[1]);
         }
         plantController.propagateDestruction();
-        System.out.println(objects.size());
+//        System.out.println(objects.size());
     }
 
     //    /**
