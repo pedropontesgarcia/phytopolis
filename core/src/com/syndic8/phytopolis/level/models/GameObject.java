@@ -101,8 +101,6 @@ public abstract class GameObject extends Model {
      */
     protected GameObject(float x, float y, Tilemap tm, float texScl) {
         super(tm, texScl);
-        // Object has yet to be deactivated
-        toRemove = false;
 
         // Allocate the body information
         bodyinfo = new BodyDef();

@@ -150,6 +150,8 @@ public class Player extends CapsuleObject {
         shootCooldown = 0;
         jumpCooldown = 0;
         setName("dude");
+
+        zIndex = 5;
     }
 
     /**

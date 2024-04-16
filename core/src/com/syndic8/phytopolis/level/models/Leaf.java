@@ -28,6 +28,7 @@ public class Leaf extends BoxObject {
         super(x, y, width, height, tm, texScl);
         bodyinfo.type = BodyDef.BodyType.StaticBody;
         this.type = type;
+        zIndex = 2;
     }
 
     /**

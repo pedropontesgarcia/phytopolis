@@ -29,6 +29,7 @@ public abstract class Resource extends CircleObject {
         currDelay = 0;
         width = w;
         height = h;
+        zIndex = 3;
     }
 
     public boolean isFull() {

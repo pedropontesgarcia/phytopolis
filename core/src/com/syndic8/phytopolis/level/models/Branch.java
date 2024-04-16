@@ -31,6 +31,7 @@ public class Branch extends Model {
         this.angle = angle;
         this.type = type;
         this.animFrame = 0;
+        zIndex = 1;
     }
 
     public void setFilmStrip(FilmStrip f) {

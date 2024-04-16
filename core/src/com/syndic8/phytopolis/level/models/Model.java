@@ -20,11 +20,11 @@ public abstract class Model {
      * Whether the object should be removed from the world on next pass
      */
     protected boolean toRemove;
-    /**
-     * Scale of the game objects
-     */
-    protected Vector2 scale = new Vector2(Gdx.graphics.getWidth() / 16f,
-                                          Gdx.graphics.getHeight() / 9f);
+//    /**
+//     * Scale of the game objects
+//     */
+//    protected Vector2 scale = new Vector2(Gdx.graphics.getWidth() / 16f,
+//                                          Gdx.graphics.getHeight() / 9f);
     /**
      * The texture for the shape.
      */
@@ -34,6 +34,8 @@ public abstract class Model {
     public Model(Tilemap tilemap, float textureSclInTiles) {
         this.tilemap = tilemap;
         this.textureSclInTiles = textureSclInTiles;
+        // Object has yet to be deactivated
+        toRemove = false;
     }
 
     public Texture getTexture() {
@@ -45,6 +47,7 @@ public abstract class Model {
         //        radius = animator.getRegionHeight() / 2.0f;
         origin = new Vector2(texture.getWidth() / 2.0f,
                              texture.getHeight() / 2.0f);
+        zIndex = 0;
     }
 
     /**
