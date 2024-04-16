@@ -16,6 +16,7 @@ public abstract class Hazard extends CircleObject {
      */
     public Hazard(Tilemap tm, float texScl) {
         super(HAZARD_RADIUS, tm, texScl);
+        zIndex = 4;
     }
 
     /**
