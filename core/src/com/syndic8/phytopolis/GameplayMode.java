@@ -50,10 +50,10 @@ public class GameplayMode extends WorldController implements ContactListener {
      * Mark set to handle more sophisticated collision callbacks
      */
     protected ObjectSet<Fixture> sensorFixtures;
-    /**
-     * branch texture
-     */
-    protected TextureRegion branchTexture;
+//    /**
+//     * branch texture
+//     */
+//    protected TextureRegion branchTexture;
     protected Texture jumpTexture;
     private PlantController plantController;
     private HazardController hazardController;
@@ -161,7 +161,7 @@ public class GameplayMode extends WorldController implements ContactListener {
         background.setRegion(0, 0, 1920, 1080);
 
         jumpTexture = directory.getEntry("jump", Texture.class);
-        jumpAnimator = new FilmStrip(jumpTexture, 1, 12, 12);
+        jumpAnimator = new FilmStrip(jumpTexture, 1, 13, 13);
 
         jogTexture = directory.getEntry("jog", Texture.class);
         jogAnimator = new FilmStrip(jogTexture, 1, 8, 8);
@@ -177,9 +177,9 @@ public class GameplayMode extends WorldController implements ContactListener {
                                                  JsonValue.class));
         tilemap.gatherAssets(directory);
 
-        this.branchTexture = new TextureRegion(directory.getEntry(
-                "gameplay:branch",
-                Texture.class));
+//        this.branchTexture = new FilmStrip(directory.getEntry(
+//                "gameplay:branch",
+//                Texture.class), 1, 5, 5);
 
         resourceController = new ResourceController();
         plantController = new PlantController(8,
@@ -353,27 +353,27 @@ public class GameplayMode extends WorldController implements ContactListener {
                 (plantController.branchGrowableAt(avatarX,
                                                   avatarY,
                                                   PlantController.branchDirection.MIDDLE))) {
-            plantController.growBranch(avatarX,
+            addObject(plantController.growBranch(avatarX,
                                        avatarY,
                                        PlantController.branchDirection.MIDDLE,
-                                       bt);
+                                       bt));
             System.out.println("BRANCH");
         } else if (InputController.getInstance().didGrowRight() &&
                 (plantController.branchGrowableAt(avatarX,
                                                   avatarY,
                                                   PlantController.branchDirection.RIGHT))) {
-            plantController.growBranch(avatarX,
+            addObject(plantController.growBranch(avatarX,
                                        avatarY,
                                        PlantController.branchDirection.RIGHT,
-                                       bt);
+                                       bt));
         } else if (InputController.getInstance().didGrowLeft() &&
                 (plantController.branchGrowableAt(avatarX,
                                                   avatarY,
                                                   PlantController.branchDirection.LEFT))) {
-            plantController.growBranch(avatarX,
+            addObject(plantController.growBranch(avatarX,
                                        avatarY,
                                        PlantController.branchDirection.LEFT,
-                                       bt);
+                                       bt));
 
         } else if (InputController.getInstance().didMousePress()) {
             Leaf.leafType lt = Leaf.leafType.NORMAL;
@@ -439,6 +439,7 @@ public class GameplayMode extends WorldController implements ContactListener {
             hazardController.extinguishFire(index[0], index[1]);
         }
         plantController.propagateDestruction();
+        System.out.println(objects.size());
     }
 
     //    /**

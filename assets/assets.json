@@ -5,7 +5,7 @@
     "gameplay:bouncy": "gameplay/bounce.png",
     "gameplay:node": "gameplay/node.png",
     "gameplay:barrier": "gameplay/barrier.png",
-    "gameplay:branch": "gameplay/branch.png",
+    "gameplay:branch": "gameplay/branch-filmstrip.png",
     "gameplay:enbranch": "gameplay/enbranchup.png",
     "water_outline": "gameplay/water_woutline.png",
     "water_nooutline": "gameplay/water_nooutline.png",

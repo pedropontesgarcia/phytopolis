@@ -3,10 +3,11 @@ package com.syndic8.phytopolis.level.models;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.math.Vector2;
 import com.syndic8.phytopolis.GameCanvas;
+import com.syndic8.phytopolis.util.FilmStrip;
 import com.syndic8.phytopolis.util.Tilemap;
 
 public class Branch extends Model {
-
+    private static final float ANIMATION_SPEED = 1/6.0f;
     private final float angle;
     /**
      * Object position (centered on the texture middle)
@@ -17,6 +18,7 @@ public class Branch extends Model {
      */
     protected boolean destroyed;
     private branchType type;
+    private float animFrame;
 
     public Branch(float x,
                   float y,
@@ -28,6 +30,15 @@ public class Branch extends Model {
         position = new Vector2(x, y);
         this.angle = angle;
         this.type = type;
+        this.animFrame = 0;
+    }
+
+    public void setFilmStrip(FilmStrip f) {
+        this.texture = f;
+    }
+
+    public FilmStrip getFilmStrip() {
+        return (FilmStrip) this.texture;
     }
 
     /**
@@ -145,7 +156,11 @@ public class Branch extends Model {
      * @param delta Number of seconds since last animation frame
      */
     public void update(float delta) {
-
+        if (animFrame < getFilmStrip().getSize() - 1) {
+            animFrame += ANIMATION_SPEED;
+        } else if (animFrame >= getFilmStrip().getSize()) {
+            animFrame = getFilmStrip().getSize() - 1;
+        }
     }
 
     /**
@@ -158,12 +173,15 @@ public class Branch extends Model {
         float height = tilemap.getTileHeight() * textureSclInTiles;
         float sclX = width / texture.getRegionWidth();
         float sclY = height / texture.getRegionHeight();
+        float x = texture.getRegionWidth() / 2.0f;
+        float y = texture.getRegionHeight() / 2.0f;
+        getFilmStrip().setFrame((int)animFrame);
         canvas.draw(texture,
                     Color.WHITE,
-                    texture.getRegionWidth() / 2f,
+                    x,
                     0,
-                    position.x,
-                    position.y,
+                    getX(),
+                    getY(),
                     angle,
                     sclX,
                     sclY);

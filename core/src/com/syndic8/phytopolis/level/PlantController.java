@@ -8,6 +8,7 @@ import com.syndic8.phytopolis.GameCanvas;
 import com.syndic8.phytopolis.assets.AssetDirectory;
 import com.syndic8.phytopolis.level.models.Branch;
 import com.syndic8.phytopolis.level.models.Leaf;
+import com.syndic8.phytopolis.util.FilmStrip;
 import com.syndic8.phytopolis.util.Tilemap;
 
 public class PlantController {
@@ -66,7 +67,7 @@ public class PlantController {
     /**
      * branch texture
      */
-    protected Texture branchTexture;
+    protected FilmStrip branchTexture;
     /**
      * leaf texture
      */
@@ -139,7 +140,7 @@ public class PlantController {
      * @param direction the direction in which to grow the branch
      * @param type      the type of branch to grow
      */
-    public void growBranch(float x,
+    public Branch growBranch(float x,
                            float y,
                            branchDirection direction,
                            Branch.branchType type) {
@@ -147,7 +148,7 @@ public class PlantController {
                                         y * worldToPixelConversionRatio)[0];
         int yIndex = screenCoordToIndex(x * worldToPixelConversionRatio,
                                         y * worldToPixelConversionRatio)[1];
-        plantGrid[xIndex][yIndex].makeBranch(direction, type, world);
+        return plantGrid[xIndex][yIndex].makeBranch(direction, type, world);
     }
 
     public Leaf growLeaf(float x, float y, Leaf.leafType type) {
@@ -368,8 +369,8 @@ public class PlantController {
     public void gatherAssets(AssetDirectory directory) {
 
         this.nodeTexture = directory.getEntry("gameplay:node", Texture.class);
-        this.branchTexture = directory.getEntry("gameplay:branch",
-                                                Texture.class);
+        this.branchTexture = new FilmStrip(directory.getEntry("gameplay:branch", Texture.class),
+                1, 5, 5);
         this.leafTexture = directory.getEntry("gameplay:leaf", Texture.class);
         this.bouncyLeafTexture = directory.getEntry("gameplay:bouncy",
                                                     Texture.class);
@@ -561,38 +562,39 @@ public class PlantController {
          *                  //         * @param texture   texture the branch should use
          * @param world     world to assign the branch to
          */
-        public void makeBranch(branchDirection direction,
+        public Branch makeBranch(branchDirection direction,
                                Branch.branchType type,
                                World world) {
             float pi = (float) Math.PI;
-            if (branchTexture != null) {
-                Branch newBranch = null;
-                switch (direction) {
-                    case LEFT:
-                        left = new Branch(x, y, pi / 3, type, tilemap, 1);
-                        newBranch = left;
+            Branch newBranch = null;
+            switch (direction) {
+                case LEFT:
+                    left = new Branch(x, y, pi / 3, type, tilemap, 1);
+                    newBranch = left;
+                    break;
+                case MIDDLE:
+                    middle = new Branch(x, y, 0, type, tilemap, 1);
+                    newBranch = middle;
+                    break;
+                case RIGHT:
+                    right = new Branch(x, y, -pi / 3, type, tilemap, 1);
+                    newBranch = right;
+                    break;
+            }
+            if (newBranch != null) {
+                switch (type) {
+                    case NORMAL:
+                        newBranch.setFilmStrip(branchTexture);
                         break;
-                    case MIDDLE:
-                        middle = new Branch(x, y, 0, type, tilemap, 1);
-                        newBranch = middle;
+                    case REINFORCED:
+                        newBranch.setTexture(enBranchTextureUp);
                         break;
-                    case RIGHT:
-                        right = new Branch(x, y, -pi / 3, type, tilemap, 1);
-                        newBranch = right;
-                        break;
-                }
-                if (newBranch != null) {
-                    switch (type) {
-                        case NORMAL:
-                            newBranch.setTexture(branchTexture);
-                            break;
-                        case REINFORCED:
-                            newBranch.setTexture(enBranchTextureUp);
-                            break;
-                    }
                 }
             }
+
             resourceController.decrementGrow();
+            return newBranch;
+
 
         }
 
@@ -638,15 +640,15 @@ public class PlantController {
         public void unmakeBranch(branchDirection direction) {
             switch (direction) {
                 case MIDDLE:
-                    //middle.setDestroyed(true);
+                    middle.markRemoved(true);
                     middle = null;
                     break;
                 case RIGHT:
-                    //right.setDestroyed(true);
+                    right.markRemoved(true);
                     right = null;
                     break;
                 case LEFT:
-                    //left.setDestroyed(true);
+                    left.markRemoved(true);
                     left = null;
                     break;
             }
@@ -790,19 +792,19 @@ public class PlantController {
                 case LEFT:
                     if (hasBranchInDirection(branchDirection.LEFT)) {
                         left.setBranchType(btype);
-                        left.setTexture(branchTexture);
+                        left.setFilmStrip(branchTexture);
                     }
                     break;
                 case RIGHT:
                     if (hasBranchInDirection(branchDirection.RIGHT)) {
                         right.setBranchType(btype);
-                        right.setTexture(branchTexture);
+                        right.setFilmStrip(branchTexture);
                     }
                     break;
                 case MIDDLE:
                     if (hasBranchInDirection(branchDirection.MIDDLE)) {
                         middle.setBranchType(btype);
-                        middle.setTexture(branchTexture);
+                        middle.setFilmStrip(branchTexture);
                     }
                     break;
             }

@@ -397,10 +397,9 @@ public class Player extends CapsuleObject {
 //                animFrame -= NUM_JUMP_FRAMES;
 //            }
             } else if (getVY() < -0.1) {
-//                if (animFrame < NUM_JUMP_UP_FRAMES) {
-//                    animFrame = NUM_JUMP_UP_FRAMES;
-//                } else
-                if (animFrame < NUM_JUMP_UP_FRAMES + NUM_JUMP_DOWN_FRAMES) {
+                if (animFrame < NUM_JUMP_UP_FRAMES) {
+                    animFrame = NUM_JUMP_UP_FRAMES;
+                } else if (animFrame < NUM_JUMP_UP_FRAMES + NUM_JUMP_DOWN_FRAMES) {
                     animFrame += ANIMATION_SPEED;
 //                    animFrame = ((animFrame - NUM_JUMP_UP_FRAMES) % NUM_JUMP_DOWN_FRAMES) + NUM_JUMP_UP_FRAMES;
                 }
@@ -408,11 +407,18 @@ public class Player extends CapsuleObject {
                     animFrame = NUM_JUMP_UP_FRAMES + NUM_JUMP_DOWN_FRAMES - 1;
                 }
             }
-        } else {
-            animFrame = 0;
+        } else if (animFrame != 0) {
+            if (animFrame < 11) {
+                animFrame = 11;
+            } else {
+                animFrame += ANIMATION_SPEED;
+            }
+            if (animFrame >= jumpAnimator.getSize()) {
+                animFrame = 0;
+            }
         }
 
-        if (isGrounded() && Math.abs(getVX()) >= 0.1) {
+        if (Math.abs(getVX()) >= 0.1) {
             animFrame2 += ANIMATION_SPEED2;
             animFrame2 %= NUM_JOG_FRAMES;
 //            if (animFrame2 >= NUM_JOG_FRAMES) {
@@ -455,7 +461,7 @@ public class Player extends CapsuleObject {
         float sclX = width / texture.getRegionWidth();
         float sclY = height / texture.getRegionHeight();
 
-                if (!isGrounded()) {
+                if (!isGrounded() || animFrame != 0) {
                     jumpAnimator.setFrame((int) animFrame);
                     float x = jumpAnimator.getRegionWidth() / 2.0f;
                     float y = jumpAnimator.getRegionHeight() / 2.0f;
@@ -469,8 +475,8 @@ public class Player extends CapsuleObject {
                                 sclX * effect,
                                 sclY);
 
-                } else if
-                        (Math.abs(getVX()) >= 0.1) {
+                } else if (Math.abs(getVX()) >= 0.1) {
+//                    System.out.println("--------------------");
                     jogAnimator.setFrame((int) animFrame2);
                     float x = jogAnimator.getRegionWidth() / 2.0f;
                     float y = jogAnimator.getRegionHeight() / 2.0f;
@@ -493,6 +499,7 @@ public class Player extends CapsuleObject {
                                 getAngle(), sclX * effect,
                                 sclY);
                 }
+//                System.out.println("A");
         //        float width = 16f / 6f;
         //        float height = (320f / 9f) / 20f;
         //        float sclX = width / 600f;
