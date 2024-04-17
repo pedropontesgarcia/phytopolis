@@ -445,19 +445,19 @@ public class PlantController {
                            n.y / worldToPixelConversionRatio);
     }
 
-    /**
-     * Converts grid indices to screen coordinates.
-     *
-     * @param xIndex The x index in the grid.
-     * @param yIndex The y index in the grid.
-     * @return A Vector2 object representing the screen coordinates.
-     */
-    public Vector2 indexToScreenCoord(int xIndex, int yIndex) {
-        float screenX = xOrigin + xIndex * xSpacing;
-        float screenY = yOrigin + yIndex * gridSpacing;
-        screenY += gridSpacing * .5f * (xIndex % 2);
-        return new Vector2(screenX, screenY);
-    }
+//    /**
+//     * Converts grid indices to screen coordinates.
+//     *
+//     * @param xIndex The x index in the grid.
+//     * @param yIndex The y index in the grid.
+//     * @return A Vector2 object representing the screen coordinates.
+//     */
+//    public Vector2 indexToScreenCoord(int xIndex, int yIndex) {
+//        float screenX = xOrigin + xIndex * xSpacing;
+//        float screenY = yOrigin + yIndex * gridSpacing;
+//        screenY += gridSpacing * .5f * (xIndex % 2);
+//        return new Vector2(screenX, screenY);
+//    }
 
     /**
      * returns type of branch at given indicies and direction
@@ -625,7 +625,7 @@ public class PlantController {
                         leaf.setTexture(bouncyLeafTexture);
                         break;
                 }
-                leaf.setDrawScale(scale.x, scale.y);
+//                leaf.setDrawScale(scale.x, scale.y);
                 leafExists = true;
                 //worldcontroller.addObject(leaf);
                 resourceController.decrementGrow();
@@ -640,16 +640,22 @@ public class PlantController {
         public void unmakeBranch(branchDirection direction) {
             switch (direction) {
                 case MIDDLE:
-                    middle.markRemoved(true);
-                    middle = null;
+                    if (middle != null) {
+                        middle.markRemoved(true);
+                        middle = null;
+                    }
                     break;
                 case RIGHT:
-                    right.markRemoved(true);
-                    right = null;
+                    if (right != null) {
+                        right.markRemoved(true);
+                        right = null;
+                    }
                     break;
                 case LEFT:
-                    left.markRemoved(true);
-                    left = null;
+                    if (left != null) {
+                        left.markRemoved(true);
+                        left = null;
+                    }
                     break;
             }
         }
@@ -658,7 +664,7 @@ public class PlantController {
             leafExists = false;
             if (leaf != null) {
                 leaf.markRemoved(true);
-                //leaf = null;
+                leaf = null;
             }
         }
 
