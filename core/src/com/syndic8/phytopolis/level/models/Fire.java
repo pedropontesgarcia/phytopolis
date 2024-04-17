@@ -25,8 +25,8 @@ public class Fire extends Hazard {
      * @param location The initial location of the fire.
      * @param duration The initial burn duration of the fire.
      */
-    public Fire(Vector2 location, int duration, Tilemap tm, float texScl) {
-        super(tm, texScl, location);
+    public Fire(Vector2 pos, Vector2 location, int duration, Tilemap tm, float texScl) {
+        super(tm, texScl, pos, location);
         this.duration = duration;
         isBurning = true;
     }

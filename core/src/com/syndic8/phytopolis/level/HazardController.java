@@ -111,25 +111,28 @@ public class HazardController {
         if (hazardHeight == -1) return;
         int hazardWidth = generateHazardWidth(hazardHeight);
         if (hazardWidth == -1) return;
-        switch (type) {
-            case FIRE:
-                Fire f = new Fire(new Vector2(hazardWidth, hazardHeight),
-                                  burnTime,
-                                  tilemap,
-                                  0.5f);
-                f.setTexture(fireTexture);
-                hazards.add(f);
-                break;
-            case DRONE:
-                Drone d = new Drone(new Vector2(hazardWidth, hazardHeight),
-                                    explodeTime,
-                                    tilemap,
-                                    0.5f);
-                d.setTexture(droneTexture);
-                hazards.add(d);
-                break;
-            default:
-        }
+        generateHazard(type, hazardWidth, hazardHeight);
+//        switch (type) {
+//            case FIRE:
+//                Fire f = new Fire(plantController.indexToWorldCoord(hazardWidth, hazardHeight),
+//                                  new Vector2(hazardWidth, hazardHeight),
+//                                  burnTime,
+//                                  tilemap,
+//                                  0.5f);
+//                f.setTexture(fireTexture);
+//                hazards.add(f);
+//                break;
+//            case DRONE:
+//                Drone d = new Drone(plantController.indexToWorldCoord(hazardWidth, hazardHeight),
+//                                    new Vector2(hazardWidth, hazardHeight),
+//                                    explodeTime,
+//                                    tilemap,
+//                                    0.5f);
+//                d.setTexture(droneTexture);
+//                hazards.add(d);
+//                break;
+//            default:
+//        }
     }
 
     /**
@@ -144,7 +147,8 @@ public class HazardController {
                                int hazardHeight) {
         switch (type) {
             case FIRE:
-                Fire f = new Fire(new Vector2(hazardWidth, hazardHeight),
+                Fire f = new Fire(plantController.indexToWorldCoord(hazardWidth, hazardHeight),
+                        new Vector2(hazardWidth, hazardHeight),
                                   burnTime,
                                   tilemap,
                                   0.5f);
@@ -152,7 +156,8 @@ public class HazardController {
                 hazards.add(f);
                 break;
             case DRONE:
-                Drone d = new Drone(new Vector2(hazardWidth, hazardHeight),
+                Drone d = new Drone(plantController.indexToWorldCoord(hazardWidth, hazardHeight),
+                        new Vector2(hazardWidth, hazardHeight),
                                     explodeTime,
                                     tilemap,
                                     0.5f);
@@ -347,22 +352,19 @@ public class HazardController {
      */
     public void draw(GameCanvas canvas) {
         for (Hazard h : hazards) {
-            switch (h.getType()) {
-                case FIRE:
-                    Fire f = (Fire) h;
-                    Vector2 worldCoords = plantController.indexToScreenCoord((int) f.getLocation().x,
-                                                                             (int) f.getLocation().y);
-                    f.draw(canvas, worldCoords.x, worldCoords.y);
-                    break;
-                case DRONE:
-                    Drone d = (Drone) h;
-                    Vector2 worldCoords2 = plantController.indexToScreenCoord((int) d.getLocation().x,
-                                                                              (int) d.getLocation().y);
-                    d.draw(canvas, worldCoords2.x, worldCoords2.y);
-                    break;
-                default:
-                    return;
-            }
+            h.draw(canvas);
+//            switch (h.getType()) {
+//                case FIRE:
+//                    Fire f = (Fire) h;
+//                    f.draw(canvas);
+//                    break;
+//                case DRONE:
+//                    Drone d = (Drone) h;
+//                    d.draw(canvas);
+//                    break;
+//                default:
+//                    return;
+//            }
 
         }
     }

@@ -13,15 +13,15 @@ public abstract class Hazard extends CircleObject {
     private static final int HAZARD_RADIUS = 30;
 
     /**
-     * The current location of the hazard.
+     * The current location (index-wise) of the hazard.
      */
     protected Vector2 location;
 
     /**
      * Creates a hazard object.
      */
-    public Hazard(Tilemap tm, float texScl, Vector2 location) {
-        super(HAZARD_RADIUS, tm, texScl);
+    public Hazard(Tilemap tm, float texScl, Vector2 pos, Vector2 location) {
+        super(pos.x, pos.y, HAZARD_RADIUS, tm, texScl);
         this.location = location;
         zIndex = 4;
     }
@@ -58,23 +58,26 @@ public abstract class Hazard extends CircleObject {
      * Draws the hazard on the provided GameCanvas.
      *
      * @param canvas The GameCanvas on which to draw.
-     * @param x      The x position at which to draw.
-     * @param y      The y position at which to draw.
+//     * @param x      The x position at which to draw.
+//     * @param y      The y position at which to draw.
      */
-    public void draw(GameCanvas canvas, float x, float y) {
+    public void draw(GameCanvas canvas) {
         float width = tilemap.getTileWidth() * textureSclInTiles;
         float height = tilemap.getTileHeight() * textureSclInTiles;
         float sclX = width / texture.getRegionWidth();
         float sclY = height / texture.getRegionHeight();
-        canvas.draw(texture,
-                    Color.WHITE,
+
+        if (texture != null) {
+            canvas.draw(texture,
+                    Color.RED,
                     origin.x,
                     origin.y,
-                    x,
-                    y,
+                    getX(),
+                    getY(),
                     0,
                     sclX,
                     sclY);
+        }
     }
 
 }

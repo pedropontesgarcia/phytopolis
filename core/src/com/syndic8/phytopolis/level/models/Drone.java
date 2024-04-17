@@ -26,11 +26,11 @@ public class Drone extends Hazard {
      *
      * @param location The initial location of the drone.
      */
-    public Drone(Vector2 location,
+    public Drone(Vector2 pos, Vector2 location,
                  int timeTilExplosion,
                  Tilemap tm,
                  float texScl) {
-        super(tm, texScl, location);
+        super(tm, texScl, pos, location);
         this.timer = timeTilExplosion;
         isAlive = true;
     }
