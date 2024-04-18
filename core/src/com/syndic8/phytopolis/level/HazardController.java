@@ -225,14 +225,20 @@ public class HazardController {
             switch (h.getType()) {
                 case FIRE:
                     Fire f = (Fire) h;
-                    int time = f.getDuration();
+                    // check if branch is still there (floating fire bug)
+                    int fx = (int) f.getLocation().x;
+                    int fy = (int) f.getLocation().y;
+                    if (plantController.nodeIsEmpty(fx, fy)) {
+                        hazards.remove(f);
+                        break;
+                    }
                     // spread fire if the time is right, otherwise decrement timer
+                    int time = f.getDuration();
                     if (time == 1) {
                         i--;
                         hazards.remove(f);
                         f.markRemoved(true);
-                        plantController.destroyAll((int) f.getLocation().x,
-                                                   (int) f.getLocation().y);
+                        plantController.destroyAll(fx, fy);
                         spreadFire(f.getLocation());
                     }
                     f.setDuration(time - 1);

@@ -69,7 +69,7 @@ public abstract class Hazard extends CircleObject {
 
         if (texture != null) {
             canvas.draw(texture,
-                    Color.RED,
+                    Color.WHITE,
                     origin.x,
                     origin.y,
                     getX(),
