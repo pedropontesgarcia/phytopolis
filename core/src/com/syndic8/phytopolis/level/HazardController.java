@@ -346,6 +346,22 @@ public class HazardController {
     }
 
     /**
+     * Returns true if there is a fire at the mouse location.
+     *
+     * @param x x coord of fire node.
+     * @param y y coord of fire node.
+     */
+    public boolean hasFire(int x, int y) {
+        for (Hazard h : hazards) {
+            if (h.getType().equals(Model.ModelType.FIRE)) {
+                Fire f = (Fire) h;
+                if ((int) f.getLocation().x == x && (int) f.getLocation().y == y) return true;
+            }
+        }
+        return false;
+    }
+
+    /**
      * Sets the texture of hazards.
      */
     public void gatherAssets(AssetDirectory directory) {

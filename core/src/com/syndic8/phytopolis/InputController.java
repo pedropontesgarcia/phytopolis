@@ -91,8 +91,6 @@ public class InputController {
     private boolean growUpPrevious;
     private boolean dropPressed;
     private boolean dropPrevious;
-    private boolean extinguishFirePressed;
-    private boolean extinguishFirePrevious;
     private boolean specialToggled;
     private float growX;
     private float growY;
@@ -234,10 +232,6 @@ public class InputController {
         return dropPressed /*& !dropPrevious*/;
     }
 
-    public boolean didExtinguish() {
-        return extinguishFirePressed & !extinguishFirePrevious;
-    }
-
     public boolean didGrowRight() {
         return growRightPressed && !growRightPrevious;
     }
@@ -330,7 +324,6 @@ public class InputController {
         mousePressedPrevious = mousePressed;
         mouseRightPressedPrevious = mouseRightPressed;
         dropPrevious = dropPressed;
-        extinguishFirePrevious = extinguishFirePressed;
 
         // Check to see if a GamePad is connected
         if (xbox != null && xbox.isConnected()) {
@@ -442,10 +435,6 @@ public class InputController {
             mouseRightPressed = true;
             growX = Gdx.input.getX();
             growY = Gdx.graphics.getHeight() - Gdx.input.getY();
-        }
-        extinguishFirePressed = (secondary && extinguishFirePressed);
-        if (Gdx.input.isKeyPressed(Input.Keys.E)) {
-            extinguishFirePressed = true;
         }
         growRightPressed = (secondary && growRightPressed);
         if (Gdx.input.isKeyPressed(Input.Keys.RIGHT)) {

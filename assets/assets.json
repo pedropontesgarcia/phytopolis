@@ -2,7 +2,6 @@
   "textures": {
     "gameplay:player": "gameplay/static.png",
     "gameplay:leaf": "gameplay/leaf-filmstrip.png",
-    "gameplay:leafcursor": "gameplay/leaf.png",
     "gameplay:bouncy": "gameplay/bounce.png",
     "gameplay:node": "gameplay/node.png",
     "gameplay:barrier": "gameplay/barrier.png",
@@ -24,7 +23,10 @@
     "fire": "hazards/fire.png",
     "drone": "hazards/drone.png",
     "jump": "gameplay/jump-filmstrip.png",
-    "jog": "gameplay/jog-filmstrip.png"
+    "jog": "gameplay/jog-filmstrip.png",
+    "ui:branch-cursor": "ui/branch-cursor.png",
+    "ui:leaf-cursor": "ui/leaf-cursor.png",
+    "ui:water-cursor": "ui/water-cursor.png"
   },
   "jsons": {
     "gameplay:tilemap": "gameplay/lvl1.json",

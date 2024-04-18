@@ -11,6 +11,7 @@
 package com.syndic8.phytopolis;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Input;
 import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.files.FileHandle;
@@ -54,10 +55,12 @@ public class GameplayMode extends WorldController implements ContactListener {
      * Mark set to handle more sophisticated collision callbacks
      */
     protected ObjectSet<Fixture> sensorFixtures;
+    private TextureRegion branchCursorTexture;
 
-    private TextureRegion plantCursorTexture;
+    private TextureRegion leafCursorTexture;
     private TextureRegion waterCursorTexture;
-    private Cursor plantCursor;
+    private Cursor branchCursor;
+    private Cursor leafCursor;
     private Cursor waterCursor;
     protected Texture jumpTexture;
     private PlantController plantController;
@@ -154,10 +157,21 @@ public class GameplayMode extends WorldController implements ContactListener {
      * @param directory Reference to global asset manager.
      */
     public void gatherAssets(AssetDirectory directory) {
-        plantCursorTexture = new TextureRegion(directory.getEntry("gameplay:leafcursor",
+        branchCursorTexture = new TextureRegion(directory.getEntry("ui:branch-cursor",
                 Texture.class));
-        waterCursorTexture = new TextureRegion(directory.getEntry("water_nooutline",
+        leafCursorTexture = new TextureRegion(directory.getEntry("ui:leaf-cursor",
                 Texture.class));
+        waterCursorTexture = new TextureRegion(directory.getEntry("ui:water-cursor",
+                Texture.class));
+        Pixmap pixmap = getPixmapFromRegion(branchCursorTexture);
+        branchCursor = Gdx.graphics.newCursor(pixmap, 128 / 2, 128 / 2);
+        pixmap = getPixmapFromRegion(leafCursorTexture);
+        leafCursor = Gdx.graphics.newCursor(pixmap, 128 / 2, 128 / 2);
+        pixmap = getPixmapFromRegion(waterCursorTexture);
+        waterCursor = Gdx.graphics.newCursor(pixmap, 128 / 2, 128 / 2);
+        pixmap.dispose();
+
+
         avatarTexture = new TextureRegion(directory.getEntry("gameplay:player",
                                                              Texture.class));
         barrierTexture = new TextureRegion(directory.getEntry("gameplay:barrier",
@@ -369,12 +383,17 @@ public class GameplayMode extends WorldController implements ContactListener {
      * Updates the custom cursor
      */
     public void updateCursor() {
-        if (plantCursor == null) {
-            Pixmap pixmap = getPixmapFromRegion(plantCursorTexture);
-            plantCursor = Gdx.graphics.newCursor(pixmap, 128 / 2, 128 / 2);
-            pixmap.dispose();
+        Gdx.graphics.setCursor(branchCursor);
+        if (InputController.getInstance().didSpecial()) {
+            Gdx.graphics.setCursor(leafCursor); //
         }
-        Gdx.graphics.setCursor(plantCursor);
+        Vector2 projMousePos = new Vector2(InputController.getInstance().getGrowX(),
+                InputController.getInstance().getGrowY());
+        Vector2 unprojMousePos = canvas.unproject(projMousePos);
+        int[] index = plantController.worldCoordToIndex(unprojMousePos.x, unprojMousePos.y);
+        if (hazardController.hasFire(index[0], index[1])) {
+            Gdx.graphics.setCursor(waterCursor);
+        }
     }
 
     /**
@@ -413,20 +432,22 @@ public class GameplayMode extends WorldController implements ContactListener {
                                        PlantController.branchDirection.LEFT,
                                        bt));
 
-        } else if (InputController.getInstance().didMousePress()) {
-            Leaf.leafType lt = Leaf.leafType.NORMAL;
-            if (InputController.getInstance().didSpecial())
-                lt = Leaf.leafType.BOUNCY;
-            Vector2 projMousePos = new Vector2(InputController.getInstance()
-                                                       .getGrowX(),
-                                               InputController.getInstance()
-                                                       .getGrowY());
+        } else if (InputController.getInstance().didMousePress() && InputController.getInstance().didSpecial()) {
+            // don't grow if there's a fire there (prioritize fire)
+            Vector2 projMousePos = new Vector2(InputController.getInstance().getGrowX(),
+                    InputController.getInstance().getGrowY());
             Vector2 unprojMousePos = canvas.unproject(projMousePos);
-            Model newLeaf = plantController.growLeaf(unprojMousePos.x,
-                                                     unprojMousePos.y + 0.5f *
-                                                             tilemap.getTileHeight(),
-                                                     lt);
-            if (newLeaf != null) addObject(newLeaf);
+            int[] index = plantController.worldCoordToIndex(unprojMousePos.x, unprojMousePos.y);
+            if (!hazardController.hasFire(index[0], index[1])) {
+                Leaf.leafType lt = Leaf.leafType.NORMAL;
+//            if (InputController.getInstance().didSpecial())
+//                lt = Leaf.leafType.BOUNCY;
+                Model newLeaf = plantController.growLeaf(unprojMousePos.x,
+                        unprojMousePos.y + 0.5f * tilemap.getTileHeight(), lt);
+                if (newLeaf != null) addObject(newLeaf);
+            }
+
+
         }
     }
 
@@ -471,9 +492,11 @@ public class GameplayMode extends WorldController implements ContactListener {
             }
         }
         hazardController.updateHazards();
-        if (InputController.getInstance().didExtinguish()) {
-            int[] index = plantController.worldCoordToIndex(avatar.getX(),
-                                                            avatar.getY());
+        if (InputController.getInstance().didMousePress()) {
+            Vector2 projMousePos = new Vector2(InputController.getInstance().getGrowX(),
+                    InputController.getInstance().getGrowY());
+            Vector2 unprojMousePos = canvas.unproject(projMousePos);
+            int[] index = plantController.worldCoordToIndex(unprojMousePos.x, unprojMousePos.y);
             hazardController.extinguishFire(index[0], index[1]);
         }
         plantController.propagateDestruction();
