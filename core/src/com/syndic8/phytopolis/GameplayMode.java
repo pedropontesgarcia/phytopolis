@@ -10,9 +10,13 @@
  */
 package com.syndic8.phytopolis;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.audio.Sound;
+import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.Cursor;
+import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
@@ -50,10 +54,11 @@ public class GameplayMode extends WorldController implements ContactListener {
      * Mark set to handle more sophisticated collision callbacks
      */
     protected ObjectSet<Fixture> sensorFixtures;
-//    /**
-//     * branch texture
-//     */
-//    protected TextureRegion branchTexture;
+
+    private TextureRegion plantCursorTexture;
+    private TextureRegion waterCursorTexture;
+    private Cursor plantCursor;
+    private Cursor waterCursor;
     protected Texture jumpTexture;
     private PlantController plantController;
     private HazardController hazardController;
@@ -149,6 +154,10 @@ public class GameplayMode extends WorldController implements ContactListener {
      * @param directory Reference to global asset manager.
      */
     public void gatherAssets(AssetDirectory directory) {
+        plantCursorTexture = new TextureRegion(directory.getEntry("gameplay:leaf",
+                Texture.class));
+        waterCursorTexture = new TextureRegion(directory.getEntry("water_nooutline",
+                Texture.class));
         avatarTexture = new TextureRegion(directory.getEntry("gameplay:player",
                                                              Texture.class));
         barrierTexture = new TextureRegion(directory.getEntry("gameplay:barrier",
@@ -337,6 +346,35 @@ public class GameplayMode extends WorldController implements ContactListener {
         }
 
         return true;
+    }
+
+    private Pixmap getPixmapFromRegion(TextureRegion region) {
+        if (!region.getTexture().getTextureData().isPrepared()) {
+            region.getTexture().getTextureData().prepare();
+        }
+        Pixmap originalPixmap = region.getTexture().getTextureData().consumePixmap();
+        Pixmap cursorPixmap = new Pixmap(128, 128, originalPixmap.getFormat());
+        cursorPixmap.drawPixmap(
+                originalPixmap,
+                0, 0,
+                originalPixmap.getWidth(), originalPixmap.getHeight(),
+                0, 0,
+                cursorPixmap.getWidth(), cursorPixmap.getHeight()
+        );
+        originalPixmap.dispose(); // Avoid memory leaks
+        return cursorPixmap;
+    }
+
+    /**
+     * Updates the custom cursor
+     */
+    public void updateCursor() {
+        if (plantCursor == null) {
+            Pixmap pixmap = getPixmapFromRegion(plantCursorTexture);
+            plantCursor = Gdx.graphics.newCursor(pixmap, 128 / 2, 128 / 2);
+            pixmap.dispose();
+        }
+        Gdx.graphics.setCursor(plantCursor);
     }
 
     /**
@@ -716,6 +754,7 @@ public class GameplayMode extends WorldController implements ContactListener {
         canvas.end();
 
         canvas.beginHud();
+        updateCursor();
         resourceController.draw(canvas);
         canvas.endHud();
     }
