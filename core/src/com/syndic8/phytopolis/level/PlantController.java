@@ -71,7 +71,7 @@ public class PlantController {
     /**
      * leaf texture
      */
-    protected Texture leafTexture;
+    protected FilmStrip leafTexture;
     /**
      * reinforced upwards branch texture
      */
@@ -371,7 +371,8 @@ public class PlantController {
         this.nodeTexture = directory.getEntry("gameplay:node", Texture.class);
         this.branchTexture = new FilmStrip(directory.getEntry("gameplay:branch", Texture.class),
                 1, 5, 5);
-        this.leafTexture = directory.getEntry("gameplay:leaf", Texture.class);
+        this.leafTexture = new FilmStrip(directory.getEntry("gameplay:leaf", Texture.class),
+                1, 5, 5);
         this.bouncyLeafTexture = directory.getEntry("gameplay:bouncy",
                                                     Texture.class);
         this.enBranchTextureUp = directory.getEntry("gameplay:enbranch",
@@ -619,7 +620,7 @@ public class PlantController {
                                 0.75f);
                 switch (type) {
                     case NORMAL:
-                        leaf.setTexture(leafTexture);
+                        leaf.setFilmStrip(leafTexture);
                         break;
                     case BOUNCY:
                         leaf.setTexture(bouncyLeafTexture);

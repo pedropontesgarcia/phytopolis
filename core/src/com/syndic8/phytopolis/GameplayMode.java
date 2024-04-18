@@ -154,7 +154,7 @@ public class GameplayMode extends WorldController implements ContactListener {
      * @param directory Reference to global asset manager.
      */
     public void gatherAssets(AssetDirectory directory) {
-        plantCursorTexture = new TextureRegion(directory.getEntry("gameplay:leaf",
+        plantCursorTexture = new TextureRegion(directory.getEntry("gameplay:leafcursor",
                 Texture.class));
         waterCursorTexture = new TextureRegion(directory.getEntry("water_nooutline",
                 Texture.class));
