@@ -413,7 +413,7 @@ public class InputController {
         exitPressed = (secondary && exitPressed) ||
                 (Gdx.input.isKeyPressed(Input.Keys.ESCAPE));
         specialToggled = (secondary && specialToggled) ||
-                Gdx.input.isKeyPressed(Input.Keys.SHIFT_LEFT);
+                Gdx.input.isKeyPressed(Input.Keys.SHIFT_LEFT) || Gdx.input.isKeyPressed(Input.Keys.SHIFT_RIGHT);
 
         // Directional controls
         horizontal = (secondary ? horizontal : 0.0f);
