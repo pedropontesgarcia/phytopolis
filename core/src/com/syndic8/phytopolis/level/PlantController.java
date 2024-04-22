@@ -151,6 +151,14 @@ public class PlantController {
         return plantGrid[xIndex][yIndex].makeBranch(direction, type, world);
     }
 
+    /**
+     * grow a leaf at the specified node
+     * @param x screen x coord of the target node
+     * @param y screen y coord of the target node
+     * @param type type of leaf to grow
+     * @return the grown leaf object
+     */
+
     public Leaf growLeaf(float x, float y, Leaf.leafType type) {
         int xIndex = screenCoordToIndex(x, y)[0];
         int yIndex = screenCoordToIndex(x, y)[1];
@@ -158,6 +166,46 @@ public class PlantController {
         if (!inBounds(xIndex, yIndex)) return null;
         if (!plantGrid[xIndex][yIndex].hasLeaf() && (yIndex > 0 || !lowerNode))
             return plantGrid[xIndex][yIndex].makeLeaf(type);
+        return null;
+    }
+
+    /**
+     * upgrades the leaf at the target node
+     * @param x screen x coord of the target node
+     * @param y screem y coord of the target node
+     * @param direction direction of the target branch to upgrade
+     * @param type type of branch to upgrade to
+     * @return the new branch
+     */
+
+    public Branch upgradeBranch(float x,
+                                float y,
+                                branchDirection direction,
+                                Branch.branchType type){
+        int xIndex = screenCoordToIndex(x * worldToPixelConversionRatio,
+                y * worldToPixelConversionRatio)[0];
+        int yIndex = screenCoordToIndex(x * worldToPixelConversionRatio,
+                y * worldToPixelConversionRatio)[1];
+        plantGrid[xIndex][yIndex].unmakeBranch(direction);
+        return plantGrid[xIndex][yIndex].makeBranch(direction, type, world);
+    }
+
+    /**
+     * upgrades the leaf at the target node
+     * @param x screen x coord of the target node
+     * @param y screen y coord of the target node
+     * @param type type of branch to upgrade to
+     * @return the new Leaf object
+     */
+    public Leaf upgradeLeaf(float x, float y, Leaf.leafType type){
+        int xIndex = screenCoordToIndex(x, y)[0];
+        int yIndex = screenCoordToIndex(x, y)[1];
+        boolean lowerNode = xIndex % 2 == 0;
+        if (!inBounds(xIndex, yIndex)) return null;
+        if (plantGrid[xIndex][yIndex].hasLeaf()){
+            plantGrid[xIndex][yIndex].unmakeLeaf();
+            return plantGrid[xIndex][yIndex].makeLeaf(type);
+        }
         return null;
     }
 
