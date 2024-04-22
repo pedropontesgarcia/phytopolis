@@ -137,18 +137,64 @@ public class PlantController {
      *
      * @param x         the x coordinate of the node to grow the branch at
      * @param y         the y coordinate of the node to grow the branch at
-     * @param direction the direction in which to grow the branch
-     * @param type      the type of branch to grow
      */
-    public Branch growBranch(float x,
-                           float y,
-                           branchDirection direction,
-                           Branch.branchType type) {
-        int xIndex = screenCoordToIndex(x * worldToPixelConversionRatio,
-                                        y * worldToPixelConversionRatio)[0];
-        int yIndex = screenCoordToIndex(x * worldToPixelConversionRatio,
-                                        y * worldToPixelConversionRatio)[1];
-        return plantGrid[xIndex][yIndex].makeBranch(direction, type, world);
+    public Branch growBranch(float x, float y) {
+        Branch branch = screenToBranch(x, y);
+        if (branch == null) return null;
+        branch.setBranchType(Branch.branchType.NORMAL);
+        return branch;
+    }
+
+    /**
+     * returns a branch at the given screen coords
+     *
+     * @param x         the x coordinate of the node to grow the branch at
+     * @param y         the y coordinate of the node to grow the branch at
+     */
+    public Branch screenToBranch(float x, float y) {
+        // Convert screen coordinates to grid indices
+        int xIndex = worldCoordToIndex(x, y)[0];
+        int yIndex = worldCoordToIndex(x, y)[1];
+        if (!inBounds(xIndex, yIndex)) return null;
+
+        // Convert indices back to world coordinates to find the center of the cell
+        Vector2 cellCenter = indexToWorldCoord(xIndex, yIndex);
+
+        // Calculate angle from the center of the node to the click position
+        float angle = (float)Math.atan2(y - cellCenter.y, x - cellCenter.x);
+
+        // Normalize angle into a range from 0 to 2*PI
+        angle = (angle + (float)(2 * Math.PI)) % (float)(2 * Math.PI);
+        if (angle >= Math.PI) return null;
+
+        // Divide the space around the node into six segments (each segment is 60 degrees)
+        branchDirection direction = getBranchDirection(angle);
+
+        // Grow branch
+        if (!branchExists(xIndex, yIndex, direction) && canGrowAtIndex(xIndex, yIndex))
+            return plantGrid[xIndex][yIndex].makeBranch(direction, Branch.branchType.NORMAL, world);
+        return null;
+    }
+
+    private branchDirection getBranchDirection(float angle) {
+        branchDirection direction;
+        if (angle < Math.PI / 3) {
+            direction = branchDirection.RIGHT;
+        } else if (angle < 2 * Math.PI / 3) {
+            direction = branchDirection.MIDDLE;
+        } else if (angle < Math.PI) {
+            direction = branchDirection.LEFT;
+        }
+        // For branches under the node
+        else if (angle < 4 * Math.PI / 3) {
+            direction = branchDirection.RIGHT;
+        } else if (angle < 5 * Math.PI / 3) {
+            System.out.println("rawr");
+            direction = branchDirection.MIDDLE;
+        } else {
+            direction = branchDirection.LEFT;
+        }
+        return direction;
     }
 
     /**
