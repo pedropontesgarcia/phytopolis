@@ -66,7 +66,10 @@ public class Timer {
      * @param starTime Max time passed to get the max number of points
      */
     public Timer(int second, int stars, int starTime){
-        new Timer(second);
+        startSeconds = second % 60;
+        startMinutes = second / 60;
+        seconds = startSeconds;
+        minutes = startMinutes;
         numStars = stars;
         this.starTime = starTime;
 
@@ -134,7 +137,8 @@ public class Timer {
     public void displayTime(GameCanvas canvas,
                             BitmapFont font, Color color,
                             float x, float y){
-        String timeDisplay = String.format("%02d:%02d", minutes, seconds);
+        //String timeDisplay = String.format("%02d:%02d", minutes, seconds);
+        String timeDisplay = "" + minutes + " : " + seconds;
         font.setColor(color);
         canvas.drawText(timeDisplay, font, x, y);
     }
@@ -155,5 +159,14 @@ public class Timer {
         font.getData().setScale(scale.x, scale.y);
         displayTime(canvas, font, color, x, y);
     }
+    public int getMinutes(){
+        return minutes;
+    }
+    public int getSeconds(){
+        return seconds;
+    }
 
+    public boolean isRunning() {
+        return running;
+    }
 }

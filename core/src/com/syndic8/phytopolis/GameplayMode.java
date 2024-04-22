@@ -34,6 +34,7 @@ import com.syndic8.phytopolis.level.models.*;
 import com.syndic8.phytopolis.util.FilmStrip;
 import com.syndic8.phytopolis.util.Tilemap;
 
+import com.syndic8.phytopolis.util.Timer;
 import java.util.HashMap;
 
 /**
@@ -56,6 +57,8 @@ public class GameplayMode extends WorldController implements ContactListener {
      */
     protected ObjectSet<Fixture> sensorFixtures;
     private TextureRegion branchCursorTexture;
+    private Timer timer;
+    private int starPoints;
 
     private TextureRegion leafCursorTexture;
     private TextureRegion waterCursorTexture;
@@ -337,6 +340,8 @@ public class GameplayMode extends WorldController implements ContactListener {
         }
 
         volume = constants.getFloat("volume", 1.0f);
+        timer = new Timer(60, 3, 20);
+        timer.startTimer();
     }
 
     /**
@@ -499,6 +504,7 @@ public class GameplayMode extends WorldController implements ContactListener {
         }
         plantController.propagateDestruction();
 //        System.out.println(objects.size());
+        timer.updateTime();
     }
 
     //    /**
@@ -595,8 +601,12 @@ public class GameplayMode extends WorldController implements ContactListener {
             }
 
             // Check for win condition
-            if ((bd1 == avatar && bd1.getY() > 34)) {
+            if ((bd1 == avatar && bd1.getY() > 34) && timer.isRunning()) {
+                starPoints = timer.getAcquiredStars();
                 setComplete(true);
+
+
+
             }
             //            //Check for bouncyness
             //            if (bd1 == avatar && bd2 instanceof Leaf) {
@@ -767,11 +777,15 @@ public class GameplayMode extends WorldController implements ContactListener {
         canvas.clear();
         canvas.begin();
         drawBackground();
+        //timer.displayTime(canvas,timesFont, Color.BLACK, canvas.getWidth()/2, canvas.getHeight()/2, new Vector2(0.036f, 0.036f));
+        //System.out.println(timer.getMinutes());
+        System.out.println(timer.getSeconds());
+
         tilemap.draw(canvas);
         super.draw(dt);
+
         plantController.draw(canvas);
         hazardController.draw(canvas);
-
         //player.draw(canvas);
         canvas.end();
 
