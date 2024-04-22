@@ -196,7 +196,8 @@ public class HazardController {
             default:
                 break;
         }
-        return Math.min(hazardHeight+2, height-1);
+        hazardHeight = hazardHeight == -1 ? -1 : hazardHeight + 1;
+        return Math.min(hazardHeight, height-1);
     }
 
     /**
