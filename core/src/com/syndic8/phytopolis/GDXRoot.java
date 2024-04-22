@@ -28,6 +28,7 @@ public class GDXRoot extends Game implements ScreenListener {
      * Player mode for the asset loading screen (CONTROLLER CLASS)
      */
     private MainMenuMode menu;
+    private LevelSelectMode levelSelect;
     /**
      * Player mode for the the game proper (CONTROLLER CLASS)
      */
@@ -45,6 +46,7 @@ public class GDXRoot extends Game implements ScreenListener {
         canvas.setSize(16, 9);
         menu = new MainMenuMode("assets.json", canvas, 1);
         controller = new GameplayMode();
+        levelSelect = new LevelSelectMode();
         menu.setScreenListener(this);
         setScreen(menu);
     }
