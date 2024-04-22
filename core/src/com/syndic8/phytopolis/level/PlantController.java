@@ -139,10 +139,11 @@ public class PlantController {
      * @param y         the y coordinate of the node to grow the branch at
      */
     public Branch growBranch(float x, float y) {
-        Branch branch = screenToBranch(x, y);
-        if (branch == null) return null;
-        branch.setBranchType(Branch.branchType.NORMAL);
-        return branch;
+        int xIndex = worldCoordToIndex(x, y)[0];
+        int yIndex = worldCoordToIndex(x, y)[1];
+        branchDirection direction = worldToBranch(x, y);
+        if (direction == null) return null;
+        return plantGrid[xIndex][yIndex].makeBranch(direction, Branch.branchType.NORMAL, world);
     }
 
     /**
@@ -151,7 +152,7 @@ public class PlantController {
      * @param x         the x coordinate of the node to grow the branch at
      * @param y         the y coordinate of the node to grow the branch at
      */
-    public Branch screenToBranch(float x, float y) {
+    public branchDirection worldToBranch(float x, float y) {
         // Convert screen coordinates to grid indices
         int xIndex = worldCoordToIndex(x, y)[0];
         int yIndex = worldCoordToIndex(x, y)[1];
@@ -172,7 +173,7 @@ public class PlantController {
 
         // Grow branch
         if (!branchExists(xIndex, yIndex, direction) && canGrowAtIndex(xIndex, yIndex))
-            return plantGrid[xIndex][yIndex].makeBranch(direction, Branch.branchType.NORMAL, world);
+            return direction;
         return null;
     }
 

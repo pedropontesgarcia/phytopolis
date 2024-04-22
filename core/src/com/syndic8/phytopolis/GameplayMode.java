@@ -390,7 +390,7 @@ public class GameplayMode extends WorldController implements ContactListener {
     public void updateCursor() {
         Gdx.graphics.setCursor(branchCursor);
         if (InputController.getInstance().didSpecial()) {
-            Gdx.graphics.setCursor(leafCursor); //
+            Gdx.graphics.setCursor(leafCursor);
         }
         InputController ic = InputController.getInstance();
         Vector2 projMousePos = new Vector2(ic.getMouseX(), ic.getMouseY());
