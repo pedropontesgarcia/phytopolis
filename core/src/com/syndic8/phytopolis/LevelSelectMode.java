@@ -4,6 +4,8 @@ import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import com.badlogic.gdx.math.Rectangle;
+import com.badlogic.gdx.math.Vector2;
 import com.syndic8.phytopolis.assets.AssetDirectory;
 import com.syndic8.phytopolis.util.ScreenListener;
 
@@ -21,13 +23,17 @@ public class LevelSelectMode implements Screen {
      */
     private ScreenListener listener;
     private TextureRegion background;
+    private boolean ready;
+    private final Rectangle bounds;
 
 
     public LevelSelectMode(){
+        ready = false;
+        bounds = new Rectangle(0, 0, 16, 9);
     }
 
     public void gatherAssets(AssetDirectory directory){
-        background = new TextureRegion(directory.getEntry("gameplay:background",
+        background = new TextureRegion(directory.getEntry("lvlsel:background",
                 Texture.class));
     }
 
@@ -45,9 +51,7 @@ public class LevelSelectMode implements Screen {
             update(delta);
             draw();
 
-            if (listener != null
-            //&& isReady()
-                ) {
+            if (listener != null && ready) {
                 listener.exitScreen(this, 0);
             }
         }
@@ -56,6 +60,9 @@ public class LevelSelectMode implements Screen {
     public void update(float delta){
         float mouseX = InputController.getInstance().getMouseX();
         float mouseY = InputController.getInstance().getMouseY();
+        InputController.getInstance().readInput(bounds, Vector2.Zero.add(1, 1));
+        //TODO remove this
+        if(InputController.getInstance().didSecondary()) ready = true;
         //TODO Check if player clicked on a pot, listener.exitScreen if did
     }
 
