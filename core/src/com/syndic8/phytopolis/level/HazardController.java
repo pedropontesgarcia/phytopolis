@@ -187,16 +187,17 @@ public class HazardController {
         switch (type) {
             case FIRE:
                 if (random.nextDouble() < 1.0 / fireFrequency)
-                    hazardHeight = random.nextInt(height-2);
+                    hazardHeight = random.nextInt(height);
                 break;
             case DRONE:
                 if (random.nextDouble() < 1.0 / droneFrequency)
-                    hazardHeight = random.nextInt(height-2);
+                    hazardHeight = random.nextInt(height);
                 break;
             default:
                 break;
         }
-        return hazardHeight+2;
+        hazardHeight = hazardHeight == -1 ? -1 : hazardHeight + 1;
+        return Math.min(hazardHeight, height-1);
     }
 
     /**

@@ -396,7 +396,6 @@ public class GameplayMode extends WorldController implements ContactListener {
         Vector2 projMousePos = new Vector2(ic.getMouseX(), ic.getMouseY());
         Vector2 unprojMousePos = canvas.unproject(projMousePos);
         if (hazardController.hasFire(unprojMousePos)) {
-            System.out.println(unprojMousePos);
             Gdx.graphics.setCursor(waterCursor);
         }
     }
@@ -779,7 +778,7 @@ public class GameplayMode extends WorldController implements ContactListener {
         drawBackground();
         //timer.displayTime(canvas,timesFont, Color.BLACK, canvas.getWidth()/2, canvas.getHeight()/2, new Vector2(0.036f, 0.036f));
         //System.out.println(timer.getMinutes());
-        System.out.println(timer.getSeconds());
+        //System.out.println(timer.getSeconds());
 
         tilemap.draw(canvas);
         super.draw(dt);
