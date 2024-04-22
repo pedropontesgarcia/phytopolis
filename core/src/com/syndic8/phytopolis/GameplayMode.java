@@ -215,10 +215,10 @@ public class GameplayMode extends WorldController implements ContactListener {
                                               resourceController,
                                               tilemap);
         hazardController = new HazardController(plantController,
-                                                3000,
-                                                3000,
-                                                2000,
-                                                200,
+                                                8,
+                                                1000000000,
+                                                8,
+                                                6,
                                                 tilemap);
         plantController.gatherAssets(directory);
         hazardController.gatherAssets(directory);
@@ -387,11 +387,11 @@ public class GameplayMode extends WorldController implements ContactListener {
         if (InputController.getInstance().didSpecial()) {
             Gdx.graphics.setCursor(leafCursor); //
         }
-        Vector2 projMousePos = new Vector2(InputController.getInstance().getGrowX(),
-                InputController.getInstance().getGrowY());
+        InputController ic = InputController.getInstance();
+        Vector2 projMousePos = new Vector2(ic.getMouseX(), ic.getMouseY());
         Vector2 unprojMousePos = canvas.unproject(projMousePos);
-        int[] index = plantController.worldCoordToIndex(unprojMousePos.x, unprojMousePos.y);
-        if (hazardController.hasFire(index[0], index[1])) {
+        if (hazardController.hasFire(unprojMousePos)) {
+            System.out.println(unprojMousePos);
             Gdx.graphics.setCursor(waterCursor);
         }
     }
@@ -434,11 +434,10 @@ public class GameplayMode extends WorldController implements ContactListener {
 
         } else if (InputController.getInstance().didMousePress() && InputController.getInstance().didSpecial()) {
             // don't grow if there's a fire there (prioritize fire)
-            Vector2 projMousePos = new Vector2(InputController.getInstance().getGrowX(),
-                    InputController.getInstance().getGrowY());
+            InputController ic = InputController.getInstance();
+            Vector2 projMousePos = new Vector2(ic.getGrowX(), ic.getGrowY());
             Vector2 unprojMousePos = canvas.unproject(projMousePos);
-            int[] index = plantController.worldCoordToIndex(unprojMousePos.x, unprojMousePos.y);
-            if (!hazardController.hasFire(index[0], index[1])) {
+            if (!hazardController.hasFire(unprojMousePos)) {
                 Leaf.leafType lt = Leaf.leafType.NORMAL;
 //            if (InputController.getInstance().didSpecial())
 //                lt = Leaf.leafType.BOUNCY;
@@ -492,12 +491,11 @@ public class GameplayMode extends WorldController implements ContactListener {
             }
         }
         hazardController.updateHazards();
-        if (InputController.getInstance().didMousePress()) {
-            Vector2 projMousePos = new Vector2(InputController.getInstance().getGrowX(),
-                    InputController.getInstance().getGrowY());
+        InputController ic = InputController.getInstance();
+        if (ic.didMousePress()) {
+            Vector2 projMousePos = new Vector2(ic.getGrowX(), ic.getGrowY());
             Vector2 unprojMousePos = canvas.unproject(projMousePos);
-            int[] index = plantController.worldCoordToIndex(unprojMousePos.x, unprojMousePos.y);
-            hazardController.extinguishFire(index[0], index[1]);
+            hazardController.extinguishFire(unprojMousePos);
         }
         plantController.propagateDestruction();
 //        System.out.println(objects.size());
@@ -773,11 +771,14 @@ public class GameplayMode extends WorldController implements ContactListener {
         super.draw(dt);
         plantController.draw(canvas);
         hazardController.draw(canvas);
+
         //player.draw(canvas);
         canvas.end();
 
-        canvas.beginHud();
         updateCursor();
+
+        canvas.beginHud();
+        hazardController.drawWarning(canvas, cameraVector);
         resourceController.draw(canvas);
         canvas.endHud();
     }

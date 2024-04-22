@@ -94,6 +94,8 @@ public class InputController {
     private boolean specialToggled;
     private float growX;
     private float growY;
+    private float mouseX;
+    private float mouseY;
     /**
      * How much did we move horizontally?
      */
@@ -167,6 +169,14 @@ public class InputController {
 
     public float getGrowY() {
         return growY;
+    }
+
+    public float getMouseX() {
+        return mouseX;
+    }
+
+    public float getMouseY() {
+        return mouseY;
     }
 
     /**
@@ -385,6 +395,8 @@ public class InputController {
                               Vector2 scale,
                               boolean secondary) {
         // Give priority to gamepad results
+        mouseX = Gdx.input.getX();
+        mouseY = Gdx.input.getY();
         resetPressed = (secondary && resetPressed) ||
                 (Gdx.input.isKeyPressed(Input.Keys.R));
         debugPressed = (secondary && debugPressed) ||

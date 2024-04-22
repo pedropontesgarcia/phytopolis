@@ -1,6 +1,9 @@
 package com.syndic8.phytopolis.level;
 
+import com.badlogic.gdx.graphics.Camera;
+import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Vector2;
 import com.syndic8.phytopolis.GameCanvas;
 import com.syndic8.phytopolis.WorldController;
@@ -17,11 +20,11 @@ import java.util.Random;
 public class HazardController {
 
     /**
-     * The frequency at which fires are generated (probability = 1 / fireFrequency).
+     * The frequency at which fires are generated (probability = 1 / fireFrequency) every second.
      */
     private final int fireFrequency;
     /**
-     * The frequency at which drones are generated (probability = 1 / droneFrequency).
+     * The frequency at which drones are generated (probability = 1 / droneFrequency) every second.
      */
     private final int droneFrequency;
     /**
@@ -45,13 +48,20 @@ public class HazardController {
      */
     private final int width;
     /**
-     * The duration that a fire continues to burn.
+     * The duration that a fire continues to burn in seconds.
      */
     private final int burnTime;
     /**
-     * The time until drone explodes after it spawns.
+     * The time until drone explodes after it spawns in seconds.
      */
     private final int explodeTime;
+    /**
+     * Update timer for hazards
+     */
+    private long lastUpdateTime;
+    /**
+     * Tilemap
+     */
     private final Tilemap tilemap;
     /**
      * Texture for fire hazard.
@@ -61,6 +71,26 @@ public class HazardController {
      * Texture for drone hazard.
      */
     protected Texture droneTexture;
+    /**
+     * Texture for yellow warning indicator.
+     */
+    protected TextureRegion redWarningTexture;
+    /**
+     * Texture for red warning indicator.
+     */
+    protected TextureRegion yellowWarningTexture;
+    /**
+     * Frame counter to switch from yellow and red warning.
+     */
+    private int frameCounter = 0;
+    /**
+     * Texture for warning indicator arrow.
+     */
+    protected TextureRegion arrowDownTexture;
+    /**
+     * Texture for warning indicator arrow.
+     */
+    protected TextureRegion arrowUpTexture;
     /**
      * List to track active hazards and their remaining time.
      */
@@ -112,27 +142,6 @@ public class HazardController {
         int hazardWidth = generateHazardWidth(hazardHeight);
         if (hazardWidth == -1) return;
         generateHazard(type, hazardWidth, hazardHeight);
-//        switch (type) {
-//            case FIRE:
-//                Fire f = new Fire(plantController.indexToWorldCoord(hazardWidth, hazardHeight),
-//                                  new Vector2(hazardWidth, hazardHeight),
-//                                  burnTime,
-//                                  tilemap,
-//                                  0.5f);
-//                f.setTexture(fireTexture);
-//                hazards.add(f);
-//                break;
-//            case DRONE:
-//                Drone d = new Drone(plantController.indexToWorldCoord(hazardWidth, hazardHeight),
-//                                    new Vector2(hazardWidth, hazardHeight),
-//                                    explodeTime,
-//                                    tilemap,
-//                                    0.5f);
-//                d.setTexture(droneTexture);
-//                hazards.add(d);
-//                break;
-//            default:
-//        }
     }
 
     /**
@@ -217,50 +226,53 @@ public class HazardController {
      * on plant nodes.
      */
     public void updateHazards() {
-        generateHazard(Model.ModelType.FIRE);
-        generateHazard(Model.ModelType.DRONE);
-        int i = 0;
-        while (i < hazards.size()) {
-            Hazard h = hazards.get(i);
-            switch (h.getType()) {
-                case FIRE:
-                    Fire f = (Fire) h;
-                    // check if branch is still there (floating fire bug)
-                    int fx = (int) f.getLocation().x;
-                    int fy = (int) f.getLocation().y;
-                    if (plantController.nodeIsEmpty(fx, fy)) {
-                        hazards.remove(f);
+        long currentTime = System.currentTimeMillis();
+        if (currentTime - lastUpdateTime >= 1000) { // Check if one second has passed
+            lastUpdateTime = currentTime; // Reset the last update time
+            generateHazard(Model.ModelType.FIRE);
+            generateHazard(Model.ModelType.DRONE);
+            int i = 0;
+            while (i < hazards.size()) {
+                Hazard h = hazards.get(i);
+                switch (h.getType()) {
+                    case FIRE:
+                        Fire f = (Fire) h;
+                        // check if branch is still there (floating fire bug)
+                        int fx = (int) f.getLocation().x;
+                        int fy = (int) f.getLocation().y;
+                        if (plantController.nodeIsEmpty(fx, fy)) {
+                            hazards.remove(f);
+                            continue; // Continue to next hazard after removing
+                        }
+                        // spread fire if the time is right, otherwise decrement timer
+                        int time = f.getDuration();
+                        if (time == 1) {
+                            hazards.remove(f);
+                            f.markRemoved(true);
+                            plantController.destroyAll(fx, fy);
+                            spreadFire(f.getLocation());
+                        } else {
+                            f.setDuration(time - 1);
+                        }
                         break;
-                    }
-                    // spread fire if the time is right, otherwise decrement timer
-                    int time = f.getDuration();
-                    if (time == 1) {
-                        i--;
-                        hazards.remove(f);
-                        f.markRemoved(true);
-                        plantController.destroyAll(fx, fy);
-                        spreadFire(f.getLocation());
-                    }
-                    f.setDuration(time - 1);
-                    break;
-                case DRONE:
-                    // destroy plant at location
-                    Drone d = (Drone) h;
-                    int time2 = d.getTimer();
-                    if (time2 == 1) {
-                        i--;
-                        hazards.remove(d);
-                        d.markRemoved(true);
-                        plantController.destroyAll((int) d.getLocation().x,
-                                                   (int) d.getLocation().y);
-                    }
-                    d.setTimer(time2 - 1);
-                default:
-                    return;
+                    case DRONE:
+                        Drone d = (Drone) h;
+                        int time2 = d.getTimer();
+                        if (time2 == 1) {
+                            hazards.remove(d);
+                            d.markRemoved(true);
+                            plantController.destroyAll((int) d.getLocation().x,
+                                    (int) d.getLocation().y);
+                        } else {
+                            d.setTimer(time2 - 1);
+                        }
+                        break;
+                    default:
+                        return; // Shouldn't reach here, but just in case
+                }
+                i++;
             }
-            i++;
         }
-
     }
 
     /**
@@ -320,42 +332,35 @@ public class HazardController {
     }
 
     /**
-     * Extinguish fire.
+     * Extinguish fire at the given mouse position.
      *
-     * @param x x coord of fire node.
-     * @param y y coord of fire node.
+     * @param mousePos mouse position
      */
-    public void extinguishFire(int x, int y) {
+    public void extinguishFire(Vector2 mousePos) {
         if (!resourceController.canExtinguish()) return;
-        Fire f = null;
         for (Hazard h : hazards) {
             if (h.getType().equals(Model.ModelType.FIRE)) {
-                f = (Fire) h;
-                if ((int) f.getLocation().x == x &&
-                        (int) f.getLocation().y == y) break;
-                //System.out.println("-" + f.getLocation().x + " " + f.getLocation().y);
+                Vector2 hazPos = plantController.indexToWorldCoord((int) h.getLocation().x, (int) h.getLocation().y);
+                if (Math.abs(mousePos.x - hazPos.x) < .5 && Math.abs(mousePos.y - hazPos.y) < .5) {
+                    hazards.remove(h);
+                    h.markRemoved(true);
+                    resourceController.decrementExtinguish();
+                    break;
+                }
             }
         }
-        if (f == null) return;
-        if ((int) f.getLocation().x == x && (int) f.getLocation().y == y) {
-            hazards.remove(f);
-            f.markRemoved(true);
-            resourceController.decrementExtinguish();
-        }
-
     }
 
     /**
      * Returns true if there is a fire at the mouse location.
      *
-     * @param x x coord of fire node.
-     * @param y y coord of fire node.
+     * @param mousePos mouse position in world coordinates.
      */
-    public boolean hasFire(int x, int y) {
+    public boolean hasFire(Vector2 mousePos) {
         for (Hazard h : hazards) {
             if (h.getType().equals(Model.ModelType.FIRE)) {
-                Fire f = (Fire) h;
-                if ((int) f.getLocation().x == x && (int) f.getLocation().y == y) return true;
+                Vector2 hazPos = plantController.indexToWorldCoord((int) h.getLocation().x, (int) h.getLocation().y);
+                if (Math.abs(mousePos.x - hazPos.x) < .5 && Math.abs(mousePos.y - hazPos.y) < .5) return true;
             }
         }
         return false;
@@ -365,8 +370,45 @@ public class HazardController {
      * Sets the texture of hazards.
      */
     public void gatherAssets(AssetDirectory directory) {
-        this.fireTexture = directory.getEntry("fire", Texture.class);
-        this.droneTexture = directory.getEntry("drone", Texture.class);
+        this.fireTexture = directory.getEntry("hazards:fire", Texture.class);
+        this.droneTexture = directory.getEntry("hazards:drone", Texture.class);
+        this.redWarningTexture = new TextureRegion(directory.getEntry("hazards:red-warning", Texture.class));
+        this.yellowWarningTexture = new TextureRegion(directory.getEntry("hazards:yellow-warning", Texture.class));
+        this.arrowDownTexture = new TextureRegion(directory.getEntry("hazards:arrow-down", Texture.class));
+        this.arrowUpTexture = new TextureRegion(directory.getEntry("hazards:arrow-up", Texture.class));
+    }
+
+    /**
+     * Draws a warning symbol if hazards are out of camera view.
+     *
+     * @param canvas game canvas
+     * @param cameraVector camera position
+     */
+    public void drawWarning(GameCanvas canvas, Vector2 cameraVector) {
+        int w = canvas.getWidth();
+        int hi = canvas.getHeight();
+
+        for (Hazard h : hazards) {
+            Vector2 hazardLoc = plantController.indexToWorldCoord((int) h.getLocation().x, (int) h.getLocation().y);
+            if (Math.abs(hazardLoc.y - cameraVector.y) > 4.5) {
+                float warningY = hazardLoc.y < cameraVector.y ? 0.05f : 0.86f;
+                float arrowY = hazardLoc.y < cameraVector.y ? 0.02f : 0.95f;
+                TextureRegion arrowTex = hazardLoc.y < cameraVector.y ? arrowDownTexture : arrowUpTexture;
+
+                // Choose texture based on current time
+                long currentTime = System.currentTimeMillis();
+                long interval = 500; // switch between red and yellow every .5 second
+                TextureRegion warningTex = (currentTime / interval) % 2 == 0 ? redWarningTexture : yellowWarningTexture;
+
+                float warningScale = 0.05f;
+                float arrowScale = 0.02f;
+                float warningX = hazardLoc.x - .4f;
+                float arrowX = hazardLoc.x - .15f;
+
+                canvas.drawHud(warningTex, warningX, hi * warningY, w * warningScale, w * warningScale);
+                canvas.drawHud(arrowTex, arrowX, hi * arrowY, w * arrowScale, w * arrowScale);
+            }
+        }
     }
 
     /**
@@ -387,6 +429,7 @@ public class HazardController {
 //                default:
 //                    return;
 //            }
+            // draw warning indicator
 
         }
     }
