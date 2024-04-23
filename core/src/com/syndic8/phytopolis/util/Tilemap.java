@@ -27,6 +27,8 @@ public class Tilemap {
     float tileWidth;
     Texture[] resourceTextures;
     Resource[] resources;
+    float timer;
+    float fireRate;
 
     /**
      * Constructs a tilemap from the world dimensions and a JSON file from
@@ -66,18 +68,40 @@ public class Tilemap {
         return tileWidth;
     }
 
+    public float getTimer() {
+        return timer;
+    }
+
+    public float getFireRate() {
+        return fireRate;
+    }
+
     /**
      * Gathers the assets from the tileset.
      *
      * @param dir The main assets directory.
      */
     public void gatherAssets(AssetDirectory dir) {
-        JsonValue physicsLayer = tilemap.get("layers").get(0);
+        JsonValue layersJson = tilemap.get("layers");
+        JsonValue physicsLayer = null;
+        for (JsonValue layerJson : layersJson) {
+            if (layerJson.getString("name").equals("physics"))
+                physicsLayer = layerJson;
+        }
+        assert physicsLayer != null;
         tilemapHeight = physicsLayer.getInt("height");
         tilemapWidth = physicsLayer.getInt("width");
         tileHeight = worldHeight / tilemapHeight;
         tileWidth = worldWidth / tilemapWidth;
         directory = dir;
+
+        JsonValue propertiesJson = tilemap.get("properties");
+        for (JsonValue propertyJson : propertiesJson) {
+            if (propertyJson.getString("name").equals("firerate"))
+                fireRate = propertyJson.getFloat("value");
+            else if (propertyJson.getString("name").equals("timer"))
+                timer = propertyJson.getInt("value");
+        }
 
         List<Texture> resourceTextureList = new ArrayList<>();
         Texture tx = directory.getEntry("gameplay:water_filmstrip",
@@ -96,7 +120,13 @@ public class Tilemap {
      * @param ctrl The WorldController to populate.
      */
     public void populateLevel(WorldController ctrl) {
-        JsonValue physicsLayer = tilemap.get("layers").get(0);
+        JsonValue layersJson = tilemap.get("layers");
+        JsonValue physicsLayer = null;
+        for (JsonValue layerJson : layersJson) {
+            if (layerJson.getString("name").equals("physics"))
+                physicsLayer = layerJson;
+        }
+        assert physicsLayer != null;
         String tilesetName = tilemap.get("tilesets").get(0).getString("source");
         JsonValue tilesetJson = directory.getEntry(tilesetName,
                                                    JsonValue.class);
@@ -158,7 +188,13 @@ public class Tilemap {
     }
 
     private void populateResources(WorldController ctrl) {
-        JsonValue resourceLayer = tilemap.get("layers").get(1);
+        JsonValue layersJson = tilemap.get("layers");
+        JsonValue resourceLayer = null;
+        for (JsonValue layerJson : layersJson) {
+            if (layerJson.getString("name").equals("resources"))
+                resourceLayer = layerJson;
+        }
+        assert resourceLayer != null;
         for (int row = 0; row < tilemapHeight; row++) {
             for (int col = 0; col < tilemapWidth; col++) {
                 if (resourceLayer.get("data").asIntArray()[row * tilemapWidth +

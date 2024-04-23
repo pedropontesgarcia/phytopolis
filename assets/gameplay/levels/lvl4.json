@@ -27,17 +27,6 @@
          "id":2,
          "name":"physics",
          "opacity":1,
-         "properties":[
-                {
-                 "name":"firerate",
-                 "type":"float",
-                 "value":0
-                }, 
-                {
-                 "name":"timer",
-                 "type":"int",
-                 "value":0
-                }],
          "type":"tilelayer",
          "visible":true,
          "width":6,
@@ -80,8 +69,13 @@
  "orientation":"orthogonal",
  "properties":[
         {
-         "name":"sun_spawn_rate",
+         "name":"firerate",
          "type":"float",
+         "value":0
+        }, 
+        {
+         "name":"timer",
+         "type":"int",
          "value":0
         }],
  "renderorder":"right-down",
