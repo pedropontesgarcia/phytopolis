@@ -31,6 +31,7 @@ public class Tilemap {
     int star;
     int starTime;
     float fireRate;
+    float victoryHeight;
 
     /**
      * Constructs a tilemap from the world dimensions and a JSON file from
@@ -74,12 +75,20 @@ public class Tilemap {
         return time;
     }
 
-    public int getStar(){return star;}
+    public int getStar() {
+        return star;
+    }
 
-    public int getStarTime(){return starTime;}
+    public int getStarTime() {
+        return starTime;
+    }
 
     public float getFireRate() {
         return fireRate;
+    }
+
+    public float getVictoryHeight() {
+        return victoryHeight;
     }
 
     /**
@@ -105,13 +114,15 @@ public class Tilemap {
         for (JsonValue propertyJson : propertiesJson) {
             if (propertyJson.getString("name").equals("firerate"))
                 fireRate = propertyJson.getFloat("value");
-//            else if (propertyJson.getString("name").equals("timer"))
-//                timer = propertyJson.getInt("value");
+            else if (propertyJson.getString("name").equals("time"))
+                time = propertyJson.getInt("value");
+            else if (propertyJson.getString("name").equals("star"))
+                star = propertyJson.getInt("value");
+            else if (propertyJson.getString("name").equals("startime"))
+                starTime = propertyJson.getInt("value");
+            else if (propertyJson.getString("name").equals("victory"))
+                victoryHeight = propertyJson.getFloat("value");
         }
-        JsonValue timer = tilemap.get("timer");
-        time = timer.getInt("time");
-        star = timer.getInt("star");
-        starTime = timer.getInt("starTime");
 
         List<Texture> resourceTextureList = new ArrayList<>();
         Texture tx = directory.getEntry("gameplay:water_filmstrip",
@@ -144,8 +155,6 @@ public class Tilemap {
         float tilePixelHeight = tilesetJson.getFloat("tileheight");
         JsonValue tilesJson = tilesetJson.get("tiles");
         tiles = new PooledList<>();
-
-
 
         for (int row = 0; row < tilemapHeight; row++) {
             for (int col = 0; col < tilemapWidth; col++) {

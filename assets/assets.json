@@ -35,7 +35,7 @@
     "gameplay:lvl2": "gameplay/levels/lvl2.json",
     "gameplay:lvl3": "gameplay/levels/lvl3.json",
     "gameplay:constants": "gameplay/constants.json",
-    "gameplay:tileset": "gameplay/tileset.json"
+    "tileset.tsx": "gameplay/tileset.json"
   },
   "music": {
     "viridian": "gameplay/ViridianEXP1OGG.ogg",

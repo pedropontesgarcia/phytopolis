@@ -152,7 +152,7 @@ public class GameplayMode extends WorldController implements ContactListener {
         sensorFixtures = new ObjectSet<Fixture>();
     }
 
-    public void setLevel(String lvl){
+    public void setLevel(String lvl) {
         this.lvl = lvl;
     }
 
@@ -191,7 +191,7 @@ public class GameplayMode extends WorldController implements ContactListener {
         background = new TextureRegion(directory.getEntry("gameplay:background",
                                                           Texture.class));
         vignette = new TextureRegion(directory.getEntry("gameplay:vignette",
-                Texture.class));
+                                                        Texture.class));
 
         background.setRegion(0, 0, 1920, 1080);
         vignette.setRegion(0, 0, 1920, 1080);
@@ -209,8 +209,7 @@ public class GameplayMode extends WorldController implements ContactListener {
         constants = directory.getEntry("gameplay:constants", JsonValue.class);
         tilemap = new Tilemap(DEFAULT_WIDTH,
                               DEFAULT_HEIGHT,
-                              directory.getEntry(lvl,
-                                                 JsonValue.class));
+                              directory.getEntry(lvl, JsonValue.class));
         tilemap.gatherAssets(directory);
 
         //        this.branchTexture = new FilmStrip(directory.getEntry(
@@ -228,7 +227,7 @@ public class GameplayMode extends WorldController implements ContactListener {
                                               resourceController,
                                               tilemap);
         hazardController = new HazardController(plantController,
-                                                8,
+                                                (int) tilemap.getFireRate(),
                                                 1000000000,
                                                 8,
                                                 6,
@@ -350,9 +349,11 @@ public class GameplayMode extends WorldController implements ContactListener {
         }
 
         volume = constants.getFloat("volume", 1.0f);
-        timer = new Timer(tilemap.getTime(), tilemap.getStar(), tilemap.getStarTime());
-        scalex = Gdx.graphics.getWidth()/1129.412f;
-        scaley = Gdx.graphics.getHeight()/635.294f;
+        timer = new Timer(tilemap.getTime(),
+                          tilemap.getStar(),
+                          tilemap.getStarTime());
+        scalex = Gdx.graphics.getWidth() / 1129.412f;
+        scaley = Gdx.graphics.getHeight() / 635.294f;
         timer.startTimer();
     }
 
@@ -606,10 +607,15 @@ public class GameplayMode extends WorldController implements ContactListener {
                                             Model.ModelType.LEAF);
 
             // See if we have landed on the ground.
-            if ((avatar.getSensorName().equals(fd2) && avatar != bd1 && (bd1.getType() == Model.ModelType.LEAF ||
-                    bd1.getType() == Model.ModelType.PLATFORM || bd1.getType() == Model.ModelType.TILE_FULL)) ||
-                    (avatar.getSensorName().equals(fd1) && avatar != bd2) && (bd2.getType() == Model.ModelType.LEAF ||
-                            bd2.getType() == Model.ModelType.PLATFORM || bd2.getType() == Model.ModelType.TILE_FULL)) {
+            if ((avatar.getSensorName().equals(fd2) && avatar != bd1 &&
+                    (bd1.getType() == Model.ModelType.LEAF ||
+                            bd1.getType() == Model.ModelType.PLATFORM ||
+                            bd1.getType() == Model.ModelType.TILE_FULL)) ||
+                    (avatar.getSensorName().equals(fd1) && avatar != bd2) &&
+                            (bd2.getType() == Model.ModelType.LEAF ||
+                                    bd2.getType() == Model.ModelType.PLATFORM ||
+                                    bd2.getType() ==
+                                            Model.ModelType.TILE_FULL)) {
                 avatar.setGrounded(true);
                 sensorFixtures.add(avatar == bd1 ?
                                            fix2 :
@@ -617,7 +623,8 @@ public class GameplayMode extends WorldController implements ContactListener {
             }
 
             // Check for win condition
-            if ((bd1 == avatar && bd1.getY() > 34)) {
+            if ((bd1 == avatar && bd1.getY() >
+                    tilemap.getVictoryHeight() * tilemap.getTileHeight())) {
                 timer.setRunning(false);
                 starPoints = timer.getAcquiredStars();
                 setComplete(true);
@@ -730,10 +737,12 @@ public class GameplayMode extends WorldController implements ContactListener {
                         ((Model) fix2.getBody().getUserData()).getType() ==
                                 Model.ModelType.SUN) ||
                         (((Model) fix2.getBody().getUserData()).getType() ==
-                                Model.ModelType.PLATFORM && ((Model) fix1.getBody()
-                                .getUserData()).getType() ==
-                                Model.ModelType.SUN);
-        if (isCollisionBetweenPlayerAndSun || isCollisionBetweenPlatformAndSun) {
+                                Model.ModelType.PLATFORM &&
+                                ((Model) fix1.getBody()
+                                        .getUserData()).getType() ==
+                                        Model.ModelType.SUN);
+        if (isCollisionBetweenPlayerAndSun ||
+                isCollisionBetweenPlatformAndSun) {
             contact.setEnabled(false);
         }
         if (isCollisionBetweenLeafAndSun) {
@@ -746,9 +755,9 @@ public class GameplayMode extends WorldController implements ContactListener {
             }
             s.clear();
             contact.setEnabled(false);
-//            if (isCollisionBetweenPlayerAndSun) {
+            //            if (isCollisionBetweenPlayerAndSun) {
             resourceController.pickupSun();
-//            }
+            //            }
         }
         if (isCollisionBetweenPlayerAndWater) {
             Water w;
@@ -830,8 +839,8 @@ public class GameplayMode extends WorldController implements ContactListener {
         }
     }
 
-    private void drawVignette(){
-        float backgroundY = canvas.getCameraY()- canvas.getViewPortY() / 2;
+    private void drawVignette() {
+        float backgroundY = canvas.getCameraY() - canvas.getViewPortY() / 2;
         canvas.draw(vignette.getTexture(),
                 Color.WHITE,
                 0,
@@ -891,7 +900,7 @@ public class GameplayMode extends WorldController implements ContactListener {
                           Color.WHITE,
                           Gdx.graphics.getWidth() / 2.1f,
                           Gdx.graphics.getHeight() / 1.03f,
-                (new Vector2(scalex, scaley)));
+                          (new Vector2(scalex, scaley)));
         System.out.println(Gdx.graphics.getWidth());
         System.out.println(Gdx.graphics.getHeight());
         //canvas.drawTime(timesFont,"me", Color.WHITE, 800, 200);
