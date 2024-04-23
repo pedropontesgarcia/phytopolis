@@ -582,9 +582,20 @@ public class GameplayMode extends WorldController implements ContactListener {
             Model bd1 = (Model) body1.getUserData();
             Model bd2 = (Model) body2.getUserData();
 
+            boolean isCollisionBetweenPlayerAndLeaf =
+                    (fix1.getBody() == avatar.getBody() &&
+                            ((Model) fix2.getBody().getUserData()).getType() ==
+                                    Model.ModelType.LEAF) ||
+                            (fix2.getBody() == avatar.getBody() &&
+                                    ((Model) fix1.getBody()
+                                            .getUserData()).getType() ==
+                                            Model.ModelType.LEAF);
+
             // See if we have landed on the ground.
-            if ((avatar.getSensorName().equals(fd2) && avatar != bd1) ||
-                    (avatar.getSensorName().equals(fd1) && avatar != bd2)) {
+            if ((avatar.getSensorName().equals(fd2) && avatar != bd1 && (bd1.getType() == Model.ModelType.LEAF ||
+                    bd1.getType() == Model.ModelType.PLATFORM || bd1.getType() == Model.ModelType.TILE_FULL)) ||
+                    (avatar.getSensorName().equals(fd1) && avatar != bd2) && (bd2.getType() == Model.ModelType.LEAF ||
+                            bd2.getType() == Model.ModelType.PLATFORM || bd2.getType() == Model.ModelType.TILE_FULL)) {
                 avatar.setGrounded(true);
                 sensorFixtures.add(avatar == bd1 ?
                                            fix2 :

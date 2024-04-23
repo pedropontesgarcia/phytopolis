@@ -169,25 +169,45 @@ public abstract class Model {
 
     public enum ModelType {
         /**
-         *
+         * The player
          */
         PLAYER,
         /**
-         * A shell, which lives until it is destroyed by a star or bullet
+         * A leaf
          */
         LEAF,
         /**
-         * A ship, which lives until it is destroyed by a shell
+         * A branch
          */
         BRANCH,
         /**
-         * A bullet, which is fired from the ship
+         * A drone
          */
         DRONE,
         /**
-         * A star, which is created by a shell explosion
+         * A fire
          */
-        FIRE, WATER, SUN, PLATFORM, TILE_FULL, TILE_NOTOP
+        FIRE,
+        /**
+         * Water resource
+         */
+        WATER,
+        /**
+         * Sun resource
+         */
+        SUN,
+        /**
+         * Platform
+         */
+        PLATFORM,
+        /**
+         * Full tile
+         */
+        TILE_FULL,
+        /**
+         * Tile without a top
+         */
+        TILE_NOTOP
     }
 
 }
