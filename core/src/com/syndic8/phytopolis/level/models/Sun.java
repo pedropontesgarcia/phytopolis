@@ -1,19 +1,31 @@
 package com.syndic8.phytopolis.level.models;
 
 import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.physics.box2d.BodyDef;
 import com.syndic8.phytopolis.GameCanvas;
 import com.syndic8.phytopolis.util.FilmStrip;
 import com.syndic8.phytopolis.util.Tilemap;
 
 public class Sun extends Resource {
 
-    public Sun(float x, float y, float w, float h, Tilemap tm, float texScl) {
+    private final FilmStrip sunFilmstrip;
+
+    public Sun(float x,
+               float y,
+               float w,
+               float h,
+               FilmStrip sf,
+               Tilemap tm,
+               float texScl) {
         super(x, y, w, h, tm, texScl);
-        bodyinfo.gravityScale = 0.5f;
+        bodyinfo.gravityScale = 0.005f;
+        sunFilmstrip = sf;
+        setTexture(sf);
     }
 
     public void clear() {
         super.clear();
+        bodyinfo.type = BodyDef.BodyType.StaticBody;
         markRemoved(true);
     }
 
@@ -23,19 +35,19 @@ public class Sun extends Resource {
     }
 
     public void draw(GameCanvas canvas) {
-        FilmStrip f = (FilmStrip) texture;
-        f.setFrame(isFull() ? f.getSize() - 1 : 0);
-        float x = texture.getRegionWidth() / 2.0f;
-        float y = texture.getRegionHeight() / 2.0f;
-        canvas.draw(texture,
+        sunFilmstrip.setFrame(isFull() ? sunFilmstrip.getSize() - 1 : 0);
+        sunFilmstrip.setFrame(8);
+        float sclX = width / sunFilmstrip.getRegionWidth();
+        float sclY = height / sunFilmstrip.getRegionHeight();
+        canvas.draw(sunFilmstrip,
                     Color.WHITE,
-                    x,
-                    y,
-                    getX() * drawScale.x,
-                    getY() * drawScale.y,
+                    origin.x,
+                    origin.y,
+                    getX(),
+                    getY(),
                     getAngle(),
-                    1,
-                    1);
+                    sclX,
+                    sclY);
     }
 
 }
