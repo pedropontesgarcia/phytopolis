@@ -780,6 +780,7 @@ public class GameplayMode extends WorldController implements ContactListener {
         //System.out.println(timer.getSeconds());
 
         tilemap.draw(canvas);
+
         super.draw(dt);
 
         //plantController.draw(canvas);
@@ -799,6 +800,14 @@ public class GameplayMode extends WorldController implements ContactListener {
         hazardController.drawWarning(canvas, cameraVector);
         resourceController.draw(canvas);
         canvas.endHud();
+
+        canvas.beginText();
+        timer.displayTime(canvas, timesFont, Color.WHITE, Gdx.graphics.getWidth()/2.0f, Gdx.graphics.getHeight()/1.05f);
+        //canvas.drawTime(timesFont,"me", Color.WHITE, 800, 200);
+        canvas.endtext();
+
+
+
     }
 
 }
