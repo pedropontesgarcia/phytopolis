@@ -43,7 +43,6 @@ public abstract class Resource extends CircleObject {
     public void clear() {
         currRegen = 0;
         currDelay = 0;
-        body = null;
     }
 
     public void regenerate() {

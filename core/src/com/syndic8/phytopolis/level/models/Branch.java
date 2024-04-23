@@ -10,10 +10,6 @@ public class Branch extends Model {
     private static final float ANIMATION_SPEED = 1/6.0f;
     private final float angle;
     /**
-     * Object position (centered on the texture middle)
-     */
-    protected Vector2 position;
-    /**
      * Whether or not the object should be removed at next timestep.
      */
     protected boolean destroyed;
@@ -26,8 +22,7 @@ public class Branch extends Model {
                   branchType type,
                   Tilemap tm,
                   float texScl) {
-        super(tm, texScl);
-        position = new Vector2(x, y);
+        super(x, y, tm, texScl);
         this.angle = angle;
         this.type = type;
         this.animFrame = 0;
@@ -40,54 +35,6 @@ public class Branch extends Model {
 
     public FilmStrip getFilmStrip() {
         return (FilmStrip) this.texture;
-    }
-
-    /**
-     * Returns the position of this object (e.g. location of the center pixel)
-     * <p>
-     * The value returned is a reference to the position vector, which may be
-     * modified freely.
-     *
-     * @return the position of this object
-     */
-    public Vector2 getPosition() {
-        return position;
-    }
-
-    /**
-     * Returns the x-coordinate of the object position (center).
-     *
-     * @return the x-coordinate of the object position
-     */
-    public float getX() {
-        return position.x;
-    }
-
-    /**
-     * Sets the x-coordinate of the object position (center).
-     *
-     * @param value the x-coordinate of the object position
-     */
-    public void setX(float value) {
-        position.x = value;
-    }
-
-    /**
-     * Returns the y-coordinate of the object position (center).
-     *
-     * @return the y-coordinate of the object position
-     */
-    public float getY() {
-        return position.y;
-    }
-
-    /**
-     * Sets the y-coordinate of the object position (center).
-     *
-     * @param value the y-coordinate of the object position
-     */
-    public void setY(float value) {
-        position.y = value;
     }
 
     /**

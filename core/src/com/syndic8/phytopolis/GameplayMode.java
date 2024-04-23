@@ -78,6 +78,7 @@ public class GameplayMode extends WorldController implements ContactListener {
      */
     private BitmapFont timesFont;
     private TextureRegion background;
+    private TextureRegion vignette;
     /**
      * Texture asset for character avatar
      */
@@ -182,8 +183,11 @@ public class GameplayMode extends WorldController implements ContactListener {
         timesFont = directory.getEntry("times", BitmapFont.class);
         background = new TextureRegion(directory.getEntry("gameplay:background",
                                                           Texture.class));
+        vignette = new TextureRegion(directory.getEntry("gameplay:vignette",
+                Texture.class));
 
         background.setRegion(0, 0, 1920, 1080);
+        vignette.setRegion(0, 0, 1920, 1080);
 
         jumpTexture = directory.getEntry("jump", Texture.class);
         jumpAnimator = new FilmStrip(jumpTexture, 1, 13, 13);
@@ -696,7 +700,10 @@ public class GameplayMode extends WorldController implements ContactListener {
                                 Model.ModelType.LEAF && ((Model) fix1.getBody()
                                 .getUserData()).getType() ==
                                 Model.ModelType.SUN);
-        if (isCollisionBetweenPlayerAndSun || isCollisionBetweenLeafAndSun) {
+        if (isCollisionBetweenPlayerAndSun) {
+            contact.setEnabled(false);
+        }
+        if (isCollisionBetweenLeafAndSun) {
             Sun s;
             if (((Model) fix1.getBody().getUserData()).getType() ==
                     Model.ModelType.SUN) {
@@ -706,9 +713,9 @@ public class GameplayMode extends WorldController implements ContactListener {
             }
             s.clear();
             contact.setEnabled(false);
-            if (isCollisionBetweenPlayerAndSun) {
-                resourceController.pickupSun();
-            }
+//            if (isCollisionBetweenPlayerAndSun) {
+            resourceController.pickupSun();
+//            }
         }
         if (isCollisionBetweenPlayerAndWater) {
             Water w;
@@ -790,6 +797,17 @@ public class GameplayMode extends WorldController implements ContactListener {
         }
     }
 
+    private void drawVignette(){
+        float base = Math.max(avatar.getY() - canvas.getHeight() / 6f,
+                canvas.getHeight() / 2f);
+        canvas.draw(vignette.getTexture(),
+                Color.WHITE,
+                0,
+                base,
+                canvas.getWidth(),
+                canvas.getHeight());
+    }
+
     /**
      * Draw the physics objects to the canvas
      * <p>
@@ -805,6 +823,7 @@ public class GameplayMode extends WorldController implements ContactListener {
         canvas.clear();
         canvas.begin();
         drawBackground();
+        drawVignette();
         //timer.displayTime(canvas,timesFont, Color.BLACK, canvas.getWidth()/2, canvas.getHeight()/2, new Vector2(0.036f, 0.036f));
         //System.out.println(timer.getMinutes());
         //System.out.println(timer.getSeconds());

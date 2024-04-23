@@ -1,6 +1,7 @@
 {
   "textures": {
-    "lvlsel:background": "gameplay/level_select_proto.png",
+    "lvlsel:background": "gameplay/levelselect-123-filmstrip.png",
+    "lvlsel:lighting": "gameplay/levelselect-lighting.png",
     "gameplay:player": "gameplay/static.png",
     "gameplay:leaf": "gameplay/leaf-filmstrip.png",
     "gameplay:bouncy": "gameplay/bounce.png",
@@ -14,6 +15,7 @@
     "gameplay:water_ui": "gameplay/waterUI_filmstrip.png",
     "gameplay:sun_filmstrip": "gameplay/sun-ui-sheet.png",
     "gameplay:background": "gameplay/back2.png",
+    "gameplay:vignette": "gameplay/vignette.png",
     "gameplay:block1": "gameplay/budblock1.png",
     "gameplay:block2": "gameplay/budblock2.png",
     "gameplay:block3": "gameplay/budblock3.png",
