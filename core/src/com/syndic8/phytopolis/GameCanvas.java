@@ -347,6 +347,13 @@ public class GameCanvas {
         return blend;
     }
 
+    public float getCameraY(){
+        return camera.position.y;
+    }
+    public float getViewPortY(){
+        return camera.viewportHeight;
+    }
+
     /**
      * Sets the color blending state for this canvas.
      * <p>
