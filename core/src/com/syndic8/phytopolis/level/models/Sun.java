@@ -9,6 +9,12 @@ public class Sun extends Resource {
 
     public Sun(float x, float y, float w, float h, Tilemap tm, float texScl) {
         super(x, y, w, h, tm, texScl);
+        bodyinfo.gravityScale = 0.5f;
+    }
+
+    public void clear() {
+        super.clear();
+        markRemoved(true);
     }
 
     @Override

@@ -67,8 +67,8 @@ public class ResourceController {
         return currSun;
     }
 
-    public void pickupSun(float ratio) {
-        currSun = Math.min(MAX_SUN, currSun + (int) (SUN_ON_PICKUP * ratio));
+    public void pickupSun() {
+        currSun = Math.min(MAX_SUN, currSun + SUN_ON_PICKUP);
     }
 
     public boolean fullWater() {
