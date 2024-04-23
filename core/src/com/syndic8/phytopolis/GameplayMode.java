@@ -485,6 +485,11 @@ public class GameplayMode extends WorldController implements ContactListener {
             if (m instanceof Water) {
                 ((Water) m).regenerate();
             }
+            if (m instanceof Sun) {
+                if (((Sun) m).belowScreen()) {
+                    ((Sun) m).clear();
+                }
+            }
         }
         hazardController.updateHazards();
         InputController ic = InputController.getInstance();
@@ -710,7 +715,16 @@ public class GameplayMode extends WorldController implements ContactListener {
                                 Model.ModelType.LEAF && ((Model) fix1.getBody()
                                 .getUserData()).getType() ==
                                 Model.ModelType.SUN);
-        if (isCollisionBetweenPlayerAndSun) {
+        boolean isCollisionBetweenPlatformAndSun =
+                (((Model) fix1.getBody().getUserData()).getType() ==
+                        Model.ModelType.PLATFORM &&
+                        ((Model) fix2.getBody().getUserData()).getType() ==
+                                Model.ModelType.SUN) ||
+                        (((Model) fix2.getBody().getUserData()).getType() ==
+                                Model.ModelType.PLATFORM && ((Model) fix1.getBody()
+                                .getUserData()).getType() ==
+                                Model.ModelType.SUN);
+        if (isCollisionBetweenPlayerAndSun || isCollisionBetweenPlatformAndSun) {
             contact.setEnabled(false);
         }
         if (isCollisionBetweenLeafAndSun) {

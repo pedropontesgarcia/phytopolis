@@ -23,6 +23,10 @@ public class Sun extends Resource {
         setTexture(sf);
     }
 
+    public boolean belowScreen() {
+        return getY() + getRadius() < 0;
+    }
+
     public void clear() {
         bodyinfo.type = BodyDef.BodyType.StaticBody;
         markRemoved(true);
