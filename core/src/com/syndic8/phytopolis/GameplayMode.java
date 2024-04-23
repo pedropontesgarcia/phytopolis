@@ -487,9 +487,15 @@ public class GameplayMode extends WorldController implements ContactListener {
         //        }
 
         //handleDrop();
-        cameraVector.set(8,
-                         Math.max(avatar.getY(),
-                                  canvas.getHeight() / 2f));
+        InputController ic = InputController.getInstance();
+        if (ic.didScrollReset()) {
+            ic.resetScrolled();
+        }
+        InputController.setHeight(tilemap.getTilemapHeight() - canvas.getHeight());
+        cameraVector.set(canvas.getWidth() / 2f,
+                Math.max(canvas.getHeight() / 2f, Math.min(tilemap.getTilemapHeight() - canvas.getHeight() / 2f, avatar.getY()) + ic.getScrolled()));
+//                         Math.max(avatar.getY(),
+//                                  canvas.getHeight() / 2f));
         // generate hazards please
         for (Model m : objects) {
             if (m instanceof Water) {
@@ -504,8 +510,12 @@ public class GameplayMode extends WorldController implements ContactListener {
         for (Hazard h : hazardController.updateHazards()) {
             addObject(h);
         }
-        InputController ic = InputController.getInstance();
+
         if (ic.didMousePress()) {
+//            System.out.println(ic.getGrowX()/ tilemap.getTileWidth() + " " + ic.getGrowY()/ tilemap.getTileHeight());
+//            System.out.println(tilemap.getTilemapWidth() + " " + );
+            System.out.println(cameraVector.x + " " + cameraVector.y);
+            System.out.println(ic.getScrolled());
             Vector2 projMousePos = new Vector2(ic.getGrowX(), ic.getGrowY());
             Vector2 unprojMousePos = canvas.unproject(projMousePos);
             hazardController.extinguishFire(unprojMousePos);
@@ -604,15 +614,6 @@ public class GameplayMode extends WorldController implements ContactListener {
         try {
             Model bd1 = (Model) body1.getUserData();
             Model bd2 = (Model) body2.getUserData();
-
-            boolean isCollisionBetweenPlayerAndLeaf =
-                    (fix1.getBody() == avatar.getBody() &&
-                            ((Model) fix2.getBody().getUserData()).getType() ==
-                                    Model.ModelType.LEAF) ||
-                            (fix2.getBody() == avatar.getBody() &&
-                                    ((Model) fix1.getBody()
-                                            .getUserData()).getType() ==
-                                            Model.ModelType.LEAF);
 
             // See if we have landed on the ground.
             if ((avatar.getSensorName().equals(fd2) && avatar != bd1 &&
@@ -775,11 +776,9 @@ public class GameplayMode extends WorldController implements ContactListener {
             } else {
                 s = (Sun) fix2.getBody().getUserData();
             }
-            s.clear();
             contact.setEnabled(false);
-            //            if (isCollisionBetweenPlayerAndSun) {
+            s.clear();
             resourceController.pickupSun();
-            //            }
         }
         if (isCollisionBetweenPlayerAndWater) {
             Water w;
@@ -789,9 +788,11 @@ public class GameplayMode extends WorldController implements ContactListener {
             } else {
                 w = (Water) fix2.getBody().getUserData();
             }
-            w.clear();
             contact.setEnabled(false);
-            resourceController.pickupWater(0.1f);
+            if (w.isFull()) {
+                w.clear();
+                resourceController.pickupWater();
+            }
         }
 
         boolean isPlayerGoingUp = avatar.getVY() >= 0;

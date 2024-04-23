@@ -31,7 +31,7 @@ public class ResourceController {
      */
     private final int UPGRADE_AMT = 1;
     private final int SUN_ON_PICKUP = 1;
-    private final int WATER_ON_PICKUP = 10;
+    private final int WATER_ON_PICKUP = 50;
 
     /**
      * Controller for UI.
@@ -60,9 +60,8 @@ public class ResourceController {
         return currWater;
     }
 
-    public void pickupWater(float ratio) {
-        currWater = Math.min(MAX_WATER,
-                             currWater + (int) (WATER_ON_PICKUP * ratio));
+    public void pickupWater() {
+        currWater = Math.min(MAX_WATER, currWater + WATER_ON_PICKUP);
     }
 
     public int getCurrSun() {

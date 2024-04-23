@@ -2,6 +2,7 @@ package com.syndic8.phytopolis;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
+import com.badlogic.gdx.InputProcessor;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Array;
@@ -15,12 +16,14 @@ import com.syndic8.phytopolis.util.XBoxController;
  * a controller via the new XBox360Controller class.
  */
 
-public class InputController {
+public class InputController implements InputProcessor {
 
     // Sensitivity for moving crosshair with gameplay
     private static final float GP_ACCELERATE = 1.0f;
     private static final float GP_MAX_SPEED = 10.0f;
     private static final float GP_THRESHOLD = 0.01f;
+
+    private static int height;
 
     /**
      * The singleton instance of the input controller
@@ -96,6 +99,7 @@ public class InputController {
     private float growY;
     private float mouseX;
     private float mouseY;
+    private boolean scrollReset;
     /**
      * How much did we move horizontally?
      */
@@ -108,6 +112,10 @@ public class InputController {
      * For the gamepad crosshair control
      */
     private float momentum;
+    /**
+     * Amount scrolled
+     */
+    private float scrolled;
 
     /**
      * Creates a new input controller
@@ -137,8 +145,13 @@ public class InputController {
     public static InputController getInstance() {
         if (theController == null) {
             theController = new InputController();
+            Gdx.input.setInputProcessor(theController);
         }
         return theController;
+    }
+
+    public static void setHeight(int h) {
+        height = h;
     }
 
     /**
@@ -242,6 +255,10 @@ public class InputController {
         return dropPressed /*& !dropPrevious*/;
     }
 
+    public boolean didScrollReset() {
+        return scrollReset;
+    }
+
     public boolean didGrowRight() {
         return growRightPressed && !growRightPrevious;
     }
@@ -308,6 +325,14 @@ public class InputController {
         return specialToggled;
     }
 
+    public float getScrolled() {
+        return scrolled;
+    }
+
+    public void resetScrolled() {
+        scrolled = 0f;
+    }
+
     /**
      * Reads the input for the player and converts the result into game logic.
      * <p>
@@ -366,6 +391,7 @@ public class InputController {
         horizontal = xbox.getLeftX();
         vertical = xbox.getLeftY();
         secondPressed = xbox.getRightTrigger() > 0.6f;
+        scrollReset = xbox.getLeftTrigger() > 0.6f;
 
         // Move the crosshairs with the right stick.
         tertiaryPressed = xbox.getA();
@@ -434,6 +460,11 @@ public class InputController {
             dropPressed = true;
         }
 
+        scrollReset = (secondary && scrollReset);
+        if (Gdx.input.isKeyPressed(Input.Keys.X)) {
+            scrollReset = true;
+        }
+
         mousePressed = (secondary && mousePressed);
         if (Gdx.input.isButtonPressed(Input.Buttons.LEFT) ||
                 Gdx.input.isKeyPressed(Input.Keys.DOWN)) {
@@ -481,4 +512,50 @@ public class InputController {
                                Math.min(bounds.y + bounds.height, crosshair.y));
     }
 
+    @Override
+    public boolean keyDown(int i) {
+        return false;
+    }
+
+    @Override
+    public boolean keyUp(int i) {
+        return false;
+    }
+
+    @Override
+    public boolean keyTyped(char c) {
+        return false;
+    }
+
+    @Override
+    public boolean touchDown(int i, int i1, int i2, int i3) {
+        return false;
+    }
+
+    @Override
+    public boolean touchUp(int i, int i1, int i2, int i3) {
+        return false;
+    }
+
+    @Override
+    public boolean touchCancelled(int i, int i1, int i2, int i3) {
+        return false;
+    }
+
+    @Override
+    public boolean touchDragged(int i, int i1, int i2) {
+        return false;
+    }
+
+    @Override
+    public boolean mouseMoved(int i, int i1) {
+        return false;
+    }
+
+    @Override
+    public boolean scrolled(float v, float v1) {
+        scrolled -= v1;
+        scrolled = Math.max(0, Math.min(height, scrolled));
+        return false;
+    }
 }
