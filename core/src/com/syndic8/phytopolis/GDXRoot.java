@@ -84,6 +84,7 @@ public class GDXRoot extends Game implements ScreenListener {
         }
         else if(screen == levelSelect){
             //directory = menu.getAssets();
+            ((GameplayMode) controller).setLevel(levelSelect.getLevel());
             controller.gatherAssets(directory);
             controller.setScreenListener(this);
             controller.setCanvas(canvas);

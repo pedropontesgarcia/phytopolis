@@ -8,6 +8,7 @@ import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import com.syndic8.phytopolis.assets.AssetDirectory;
+import com.syndic8.phytopolis.levelselect.LevelBox;
 import com.syndic8.phytopolis.util.FilmStrip;
 import com.syndic8.phytopolis.util.ScreenListener;
 import edu.cornell.gdiac.audio.AudioEngine;
@@ -31,17 +32,24 @@ public class LevelSelectMode implements Screen {
     private final Rectangle bounds;
     private Music backgroundMusic;
     private AudioEngine audioEngine;
+    private LevelBox[] levelBoxes;
+    private Texture rs;
+    private final int numLevels = 6;
 
 
     public LevelSelectMode(){
         this.ready = false;
         this.bounds = new Rectangle(0, 0, 16, 9);
+
+        //Setup levelboxes
+        this.levelBoxes = new LevelBox[numLevels];
     }
 
     public void gatherAssets(AssetDirectory directory){
         background = new FilmStrip(directory.getEntry("lvlsel:background",
                 Texture.class), 1, 4);
         lighting = directory.getEntry("lvlsel:lighting", Texture.class);
+        rs = directory.getEntry("lvlsel:redsquare", Texture.class);
         backgroundMusic = directory.getEntry("newgrowth", Music.class);
         backgroundMusic.setLooping(true);
         backgroundMusic.play();
@@ -49,6 +57,18 @@ public class LevelSelectMode implements Screen {
 
     public void setCanvas(GameCanvas canvas) {
         this.canvas = canvas;
+        //Setup levelboxes
+        levelBoxes[0] = new LevelBox(canvas.getWidth()/5f, canvas.getHeight()/3.3f);
+        levelBoxes[1] = new LevelBox(canvas.getWidth()/2.3f, canvas.getHeight()/3.3f);
+        levelBoxes[2] = new LevelBox(canvas.getWidth()/1.47f, canvas.getHeight()/3.3f);
+        for(LevelBox lb : levelBoxes) if(lb != null) lb.setTexutre(rs);
+    }
+
+    public int getSelectedPot(){
+        for(int i = 0; i < numLevels; i++){
+            if(levelBoxes[i] != null && levelBoxes[i].getSelected()) return i;
+        }
+        return -1;
     }
     @Override
     public void show() {
@@ -69,18 +89,27 @@ public class LevelSelectMode implements Screen {
     }
 
     public void update(float delta){
-        float mouseX = InputController.getInstance().getMouseX();
-        float mouseY = InputController.getInstance().getMouseY();
+//        float mouseX = InputController.getInstance().getMouseX();
+//        float mouseY = InputController.getInstance().getMouseY();
+        InputController ic = InputController.getInstance();
+        Vector2 projMousePos = new Vector2(ic.getMouseX(), ic.getMouseY());
+        Vector2 unprojMousePos = canvas.unproject(projMousePos);
+        float mouseX = unprojMousePos.x;
+        float mouseY = unprojMousePos.y;
+        for(LevelBox lb : levelBoxes){
+            if(lb != null) lb.setSelected(lb.inBounds(mouseX, mouseY));
+        }
         InputController.getInstance().readInput(bounds, Vector2.Zero.add(1, 1));
-        //TODO remove this
-        if(InputController.getInstance().didSecondary()) ready = true;
-        //TODO Check if player clicked on a pot, listener.exitScreen if did
+        if(getSelectedPot() != -1 && InputController.getInstance().didMousePress()){
+            ready = true;
+        }
     }
 
     public void draw(){
         canvas.clear();
         canvas.begin();
         canvas.setBlendState(GameCanvas.BlendState.ADDITIVE);
+        background.setFrame(getSelectedPot() + 1);
         canvas.draw(background,
                 Color.WHITE,
                 0,
@@ -94,6 +123,7 @@ public class LevelSelectMode implements Screen {
                 canvas.getWidth(),
                 canvas.getHeight());
         canvas.setBlendState(GameCanvas.BlendState.NO_PREMULT);
+        for(LevelBox lb : levelBoxes) if(lb != null) lb.draw(canvas);
         canvas.end();
     }
 
@@ -125,5 +155,17 @@ public class LevelSelectMode implements Screen {
     @Override
     public void dispose() {
         backgroundMusic.dispose();
+    }
+
+    public String getLevel() {
+        switch(getSelectedPot()){
+            case 0:
+                return "gameplay:lvl1";
+            case 1:
+                return "gameplay:lvl2";
+            case 2:
+                return "gameplay:lvl3";
+        }
+        return "";
     }
 }

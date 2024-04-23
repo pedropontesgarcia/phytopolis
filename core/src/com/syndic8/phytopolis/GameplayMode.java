@@ -136,6 +136,7 @@ public class GameplayMode extends WorldController implements ContactListener {
     private float startHeight;
     private HashMap<Fixture, Filter> originalCollisionProperties;
     private Music backgroundMusic;
+    private String lvl;
 
     /**
      * Creates and initialize a new instance of the platformer game
@@ -147,6 +148,10 @@ public class GameplayMode extends WorldController implements ContactListener {
         world.setContactListener(this);
         cameraVector = new Vector2();
         sensorFixtures = new ObjectSet<Fixture>();
+    }
+
+    public void setLevel(String lvl){
+        this.lvl = lvl;
     }
 
     /**
@@ -202,7 +207,7 @@ public class GameplayMode extends WorldController implements ContactListener {
         constants = directory.getEntry("gameplay:constants", JsonValue.class);
         tilemap = new Tilemap(DEFAULT_WIDTH,
                               DEFAULT_HEIGHT,
-                              directory.getEntry("gameplay:tilemap",
+                              directory.getEntry(lvl,
                                                  JsonValue.class));
         tilemap.gatherAssets(directory);
 

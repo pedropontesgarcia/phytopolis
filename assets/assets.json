@@ -2,6 +2,7 @@
   "textures": {
     "lvlsel:background": "gameplay/levelselect-123-filmstrip.png",
     "lvlsel:lighting": "gameplay/levelselect-lighting.png",
+    "lvlsel:redsquare": "gameplay/redsquare.png",
     "gameplay:player": "gameplay/static.png",
     "gameplay:leaf": "gameplay/leaf-filmstrip.png",
     "gameplay:bouncy": "gameplay/bounce.png",
@@ -37,7 +38,9 @@
     "ui:water-cursor": "ui/water-cursor.png"
   },
   "jsons": {
-    "gameplay:tilemap": "gameplay/lvl3.json",
+    "gameplay:lvl1": "gameplay/lvl1.json",
+    "gameplay:lvl2": "gameplay/lvl2.json",
+    "gameplay:lvl3": "gameplay/lvl3.json",
     "gameplay:constants": "gameplay/constants.json",
     "gameplay:tileset": "gameplay/tileset.json"
   },
