@@ -50,9 +50,13 @@ public class LevelSelectMode implements Screen {
                 Texture.class), 1, 4);
         lighting = directory.getEntry("lvlsel:lighting", Texture.class);
         rs = directory.getEntry("lvlsel:redsquare", Texture.class);
-        backgroundMusic = directory.getEntry("newgrowth", Music.class);
-        backgroundMusic.setLooping(true);
-        backgroundMusic.play();
+//        backgroundMusic = directory.getEntry("newgrowth", Music.class);
+//        backgroundMusic.setLooping(true);
+//        backgroundMusic.play();
+    }
+
+    public void setBackgroundMusic(Music m){
+        backgroundMusic = m;
     }
 
     public void setCanvas(GameCanvas canvas) {

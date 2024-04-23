@@ -9,6 +9,7 @@ package com.syndic8.phytopolis;
  */
 
 import com.badlogic.gdx.Screen;
+import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.Texture.TextureFilter;
@@ -86,6 +87,8 @@ public class MainMenuMode implements Screen {
      * Whether or not this player mode is still active
      */
     private boolean active;
+
+    private Music backgroundMusic;
 
     /**
      * Creates a MainMenuMode with the default budget, size and position.
@@ -218,10 +221,19 @@ public class MainMenuMode implements Screen {
                 playButton = internal.getEntry("play", Texture.class);
                 playButton.setFilter(TextureFilter.Linear,
                                      TextureFilter.Linear);
+                if(backgroundMusic == null){
+                    backgroundMusic = assets.getEntry("newgrowth", Music.class);
+                    backgroundMusic.setLooping(true);
+                    backgroundMusic.play();
+                }
             }
         } else if (InputController.getInstance().didSecondary()) {
             pressState = 1;
         }
+    }
+
+    public Music getBackgroundMusic(){
+        return backgroundMusic;
     }
 
     /**
