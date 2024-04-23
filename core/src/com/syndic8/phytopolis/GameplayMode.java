@@ -857,7 +857,7 @@ public class GameplayMode extends WorldController implements ContactListener {
                           Color.WHITE,
                           Gdx.graphics.getWidth() / 2.1f,
                           Gdx.graphics.getHeight() / 1.03f,
-                          new Vector2(1.7f, 1.7f));
+                          new Vector2(Gdx.graphics.getWidth()/1129.412f, Gdx.graphics.getHeight()/635.294f));
         //canvas.drawTime(timesFont,"me", Color.WHITE, 800, 200);
         canvas.endtext();
 
