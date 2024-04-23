@@ -530,7 +530,7 @@
         }, 
         {
          "id":20,
-         "image":"standarized_balony1.png",
+         "image":"notop_balcony1.png",
          "imageheight":400,
          "imagewidth":600,
          "properties":[
@@ -542,7 +542,7 @@
         }, 
         {
          "id":21,
-         "image":"standarized_balony2.png",
+         "image":"notop_balcony2.png",
          "imageheight":400,
          "imagewidth":600,
          "properties":[
@@ -554,7 +554,7 @@
         }, 
         {
          "id":22,
-         "image":"standarized_balony3.png",
+         "image":"notop_balcony3.png",
          "imageheight":400,
          "imagewidth":600,
          "properties":[
@@ -566,7 +566,7 @@
         }, 
         {
          "id":23,
-         "image":"standarized_balony4.png",
+         "image":"notop_balcony1.png",
          "imageheight":400,
          "imagewidth":600,
          "properties":[
