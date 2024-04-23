@@ -24,6 +24,7 @@ import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.World;
 import com.syndic8.phytopolis.assets.AssetDirectory;
 import com.syndic8.phytopolis.level.models.GameObject;
+import com.syndic8.phytopolis.level.models.Leaf;
 import com.syndic8.phytopolis.level.models.Model;
 import com.syndic8.phytopolis.util.PooledList;
 import com.syndic8.phytopolis.util.ScreenListener;
@@ -511,9 +512,9 @@ public abstract class WorldController implements Screen {
         //        int x = 0;
         for (Model obj : objects) {
             obj.draw(canvas);
-            //            if (obj instanceof Sun) {
-            //                x++;
-            //            }
+//            if (obj instanceof Leaf && ((Leaf) obj).getLeafType() == Leaf.leafType.BOUNCY) {
+//                System.out.println(obj.getZIndex());
+//            }
         }
         //        System.out.println(x);
         //

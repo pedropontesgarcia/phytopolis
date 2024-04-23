@@ -35,6 +35,7 @@ public abstract class Model {
         this.textureSclInTiles = textureSclInTiles;
         // Object has yet to be deactivated
         toRemove = false;
+        zIndex = 0;
     }
 
     public Texture getTexture() {
@@ -46,7 +47,6 @@ public abstract class Model {
         //        radius = animator.getRegionHeight() / 2.0f;
         origin = new Vector2(texture.getWidth() / 2.0f,
                              texture.getHeight() / 2.0f);
-        zIndex = 0;
     }
 
     /**
