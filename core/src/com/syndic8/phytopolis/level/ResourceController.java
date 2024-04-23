@@ -15,9 +15,13 @@ public class ResourceController {
 
     private final int MAX_SUN = 8;
     /**
-     * Amount of water required to grow a branch/leaf
+     * Amount of water required to grow a leaf
      */
-    private final int GROW_AMT = 5;
+    private final int LEAF_GROW_AMT = 10;
+    /**
+     * Amount of water required to grow a branch
+     */
+    private final int BRANCH_GROW_AMT = 5;
     /**
      * Amount of water required to extinguish a fire
      */
@@ -79,19 +83,31 @@ public class ResourceController {
         return currSun == MAX_SUN;
     }
 
-    public boolean canGrow() {
-        return currWater >= GROW_AMT;
+    public boolean canGrowLeaf() {
+        return currWater >= LEAF_GROW_AMT;
+    }
+
+    public boolean canGrowBranch() {
+        return currWater >= BRANCH_GROW_AMT;
     }
 
     public boolean canExtinguish() {
         return currWater >= FIRE_AMT;
     }
 
-    public void decrementGrow() {
-        if (!canGrow()) {
+    public void decrementGrowLeaf() {
+        if (!canGrowLeaf()) {
             //System.out.println("NOT ENOUGH WATER!");
         } else {
-            currWater -= GROW_AMT;
+            currWater -= LEAF_GROW_AMT;
+        }
+    }
+
+    public void decrementGrowBranch() {
+        if (!canGrowBranch()) {
+            //System.out.println("NOT ENOUGH WATER!");
+        } else {
+            currWater -= BRANCH_GROW_AMT;
         }
     }
 
