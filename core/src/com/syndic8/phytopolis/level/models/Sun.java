@@ -23,6 +23,10 @@ public class Sun extends Resource {
         setTexture(sf);
     }
 
+    public boolean belowScreen() {
+        return getY() + getRadius() < 0;
+    }
+
     public void clear() {
         bodyinfo.type = BodyDef.BodyType.StaticBody;
         markRemoved(true);
@@ -34,8 +38,6 @@ public class Sun extends Resource {
     }
 
     public void draw(GameCanvas canvas) {
-//        sunFilmstrip.setFrame(isFull() ? sunFilmstrip.getSize() - 1 : 0);
-        sunFilmstrip.setFrame(8);
         float sclX = width / sunFilmstrip.getRegionWidth();
         float sclY = height / sunFilmstrip.getRegionHeight();
         canvas.draw(sunFilmstrip,

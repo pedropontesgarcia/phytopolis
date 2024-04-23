@@ -14,16 +14,9 @@
     "gameplay:water_filmstrip": "gameplay/water-ui-sheet.png",
     "gameplay:water_ui": "gameplay/waterUI_filmstrip.png",
     "gameplay:sun_filmstrip": "gameplay/sun-ui-sheet.png",
+    "gameplay:sun_resource": "gameplay/sun-resource.png",
     "gameplay:background": "gameplay/back2.png",
     "gameplay:vignette": "gameplay/vignette.png",
-    "gameplay:block1": "gameplay/budblock1.png",
-    "gameplay:block2": "gameplay/budblock2.png",
-    "gameplay:block3": "gameplay/budblock3.png",
-    "gameplay:balcony": "gameplay/shortbalcony1.png",
-    "gameplay:clothes1a": "gameplay/clothes1a.png",
-    "gameplay:clothes1b": "gameplay/clothes1b.png",
-    "gameplay:clothes1c": "gameplay/clothes1c.png",
-    "gameplay:clothes1d": "gameplay/clothes1d.png",
     "hazards:fire": "hazards/fire.png",
     "hazards:drone": "hazards/drone.png",
     "hazards:red-warning": "hazards/red_warning.png",
@@ -37,7 +30,7 @@
     "ui:water-cursor": "ui/water-cursor.png"
   },
   "jsons": {
-    "gameplay:tilemap": "gameplay/lvl3.json",
+    "gameplay:tilemap": "gameplay/levels/lvl4.json",
     "gameplay:constants": "gameplay/constants.json",
     "gameplay:tileset": "gameplay/tileset.json"
   },
