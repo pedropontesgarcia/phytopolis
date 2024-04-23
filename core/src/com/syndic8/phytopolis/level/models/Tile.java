@@ -31,6 +31,10 @@ public class Tile extends Model {
         collider.setRestitution(0);
     }
 
+    public void fixColliderUserData() {
+        collider.getBody().setUserData(this);
+    }
+
     @Override
     public ModelType getType() {
         return type;

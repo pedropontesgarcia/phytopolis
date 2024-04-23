@@ -486,10 +486,14 @@ public class GameplayMode extends WorldController implements ContactListener {
                          Math.max(avatar.getY() - canvas.getHeight() / 6f,
                                   canvas.getHeight() / 2f));
         // generate hazards please
-        resourceController.update(avatar);
         for (Model m : objects) {
-            if (m instanceof Resource) {
-                ((Resource) m).regenerate();
+            if (m instanceof Water) {
+                ((Water) m).regenerate();
+            }
+            if (m instanceof Sun) {
+                if (((Sun) m).belowScreen()) {
+                    ((Sun) m).clear();
+                }
             }
         }
         hazardController.updateHazards();
@@ -588,9 +592,20 @@ public class GameplayMode extends WorldController implements ContactListener {
             Model bd1 = (Model) body1.getUserData();
             Model bd2 = (Model) body2.getUserData();
 
+            boolean isCollisionBetweenPlayerAndLeaf =
+                    (fix1.getBody() == avatar.getBody() &&
+                            ((Model) fix2.getBody().getUserData()).getType() ==
+                                    Model.ModelType.LEAF) ||
+                            (fix2.getBody() == avatar.getBody() &&
+                                    ((Model) fix1.getBody()
+                                            .getUserData()).getType() ==
+                                            Model.ModelType.LEAF);
+
             // See if we have landed on the ground.
-            if ((avatar.getSensorName().equals(fd2) && avatar != bd1) ||
-                    (avatar.getSensorName().equals(fd1) && avatar != bd2)) {
+            if ((avatar.getSensorName().equals(fd2) && avatar != bd1 && (bd1.getType() == Model.ModelType.LEAF ||
+                    bd1.getType() == Model.ModelType.PLATFORM || bd1.getType() == Model.ModelType.TILE_FULL)) ||
+                    (avatar.getSensorName().equals(fd1) && avatar != bd2) && (bd2.getType() == Model.ModelType.LEAF ||
+                            bd2.getType() == Model.ModelType.PLATFORM || bd2.getType() == Model.ModelType.TILE_FULL)) {
                 avatar.setGrounded(true);
                 sensorFixtures.add(avatar == bd1 ?
                                            fix2 :
@@ -672,6 +687,14 @@ public class GameplayMode extends WorldController implements ContactListener {
                                 ((Model) fix1.getBody()
                                         .getUserData()).getType() ==
                                         Model.ModelType.LEAF);
+        boolean isCollisionBetweenPlayerAndNoTopTile =
+                (fix1.getBody() == avatar.getBody() &&
+                        ((Model) fix2.getBody().getUserData()).getType() ==
+                                Model.ModelType.TILE_NOTOP) ||
+                        (fix2.getBody() == avatar.getBody() &&
+                                ((Model) fix1.getBody()
+                                        .getUserData()).getType() ==
+                                        Model.ModelType.TILE_NOTOP);
         boolean isCollisionBetweenPlayerAndWater =
                 (fix1.getBody() == avatar.getBody() &&
                         ((Model) fix2.getBody().getUserData()).getType() ==
@@ -697,7 +720,19 @@ public class GameplayMode extends WorldController implements ContactListener {
                                 Model.ModelType.LEAF && ((Model) fix1.getBody()
                                 .getUserData()).getType() ==
                                 Model.ModelType.SUN);
-        if (isCollisionBetweenPlayerAndSun || isCollisionBetweenLeafAndSun) {
+        boolean isCollisionBetweenPlatformAndSun =
+                (((Model) fix1.getBody().getUserData()).getType() ==
+                        Model.ModelType.PLATFORM &&
+                        ((Model) fix2.getBody().getUserData()).getType() ==
+                                Model.ModelType.SUN) ||
+                        (((Model) fix2.getBody().getUserData()).getType() ==
+                                Model.ModelType.PLATFORM && ((Model) fix1.getBody()
+                                .getUserData()).getType() ==
+                                Model.ModelType.SUN);
+        if (isCollisionBetweenPlayerAndSun || isCollisionBetweenPlatformAndSun) {
+            contact.setEnabled(false);
+        }
+        if (isCollisionBetweenLeafAndSun) {
             Sun s;
             if (((Model) fix1.getBody().getUserData()).getType() ==
                     Model.ModelType.SUN) {
@@ -707,9 +742,9 @@ public class GameplayMode extends WorldController implements ContactListener {
             }
             s.clear();
             contact.setEnabled(false);
-            if (isCollisionBetweenPlayerAndSun) {
-                resourceController.pickupSun();
-            }
+//            if (isCollisionBetweenPlayerAndSun) {
+            resourceController.pickupSun();
+//            }
         }
         if (isCollisionBetweenPlayerAndWater) {
             Water w;
@@ -725,6 +760,7 @@ public class GameplayMode extends WorldController implements ContactListener {
         }
 
         boolean isPlayerGoingUp = avatar.getVY() >= 0;
+        boolean isPlayerGoingDown = avatar.getVY() <= 0;
         boolean isPlayerBelow = false;
         if (fix1.getBody() == avatar.getBody()) isPlayerBelow =
                 fix1.getBody().getPosition().y - avatar.getHeight() / 2f <
@@ -735,6 +771,9 @@ public class GameplayMode extends WorldController implements ContactListener {
         if (isCollisionBetweenPlayerAndLeaf &&
                 (isPlayerGoingUp || isPlayerBelow ||
                         InputController.getInstance().didDrop())) {
+            contact.setEnabled(false);
+        }
+        if (isCollisionBetweenPlayerAndNoTopTile && isPlayerGoingDown) {
             contact.setEnabled(false);
         }
         if (isCollisionBetweenPlayerAndLeaf) {
@@ -788,11 +827,14 @@ public class GameplayMode extends WorldController implements ContactListener {
     }
 
     private void drawVignette(){
+        float base = Math.max((avatar.getY() - canvas.getHeight() / 6f),
+                0);
+        float backgroundY = canvas.getCameraY()- canvas.getViewPortY() / 2;
         canvas.draw(vignette.getTexture(),
                 Color.WHITE,
                 0,
-                0,
-                canvas.getWidth(),
+                backgroundY,
+                getCanvas().getHeight(),
                 canvas.getHeight());
     }
 
@@ -846,7 +888,7 @@ public class GameplayMode extends WorldController implements ContactListener {
                           Color.WHITE,
                           Gdx.graphics.getWidth() / 2.1f,
                           Gdx.graphics.getHeight() / 1.03f,
-                          new Vector2(1.7f, 1.7f));
+                          new Vector2(Gdx.graphics.getWidth()/1129.412f, Gdx.graphics.getHeight()/635.294f));
         //canvas.drawTime(timesFont,"me", Color.WHITE, 800, 200);
         canvas.endtext();
 

@@ -25,6 +25,7 @@ import com.badlogic.gdx.physics.box2d.World;
 import com.syndic8.phytopolis.assets.AssetDirectory;
 import com.syndic8.phytopolis.level.models.GameObject;
 import com.syndic8.phytopolis.level.models.Model;
+import com.syndic8.phytopolis.level.models.Sun;
 import com.syndic8.phytopolis.util.PooledList;
 import com.syndic8.phytopolis.util.ScreenListener;
 
@@ -140,7 +141,6 @@ public abstract class WorldController implements Screen {
      * Countdown active for winning or losing
      */
     private int countdown;
-
     /**
      * Creates a new game world with the default values.
      * <p>
@@ -194,6 +194,10 @@ public abstract class WorldController implements Screen {
         debug = false;
         active = false;
         countdown = -1;
+    }
+
+    public World getWorld() {
+        return world;
     }
 
     /**
@@ -504,9 +508,14 @@ public abstract class WorldController implements Screen {
      * @param dt Number of seconds since last animation frame
      */
     public void draw(float dt) {
+//        int x = 0;
         for (Model obj : objects) {
             obj.draw(canvas);
+//            if (obj instanceof Sun) {
+//                x++;
+//            }
         }
+//        System.out.println(x);
         //
         //        if (debug) {
         //            canvas.beginDebug();

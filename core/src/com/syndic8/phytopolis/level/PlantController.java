@@ -1,6 +1,5 @@
 package com.syndic8.phytopolis.level;
 
-import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.World;
@@ -147,7 +146,7 @@ public class PlantController {
         int xIndex = worldCoordToIndex(x, y)[0];
         int yIndex = worldCoordToIndex(x, y)[1];
         branchDirection direction = worldToBranch(x, y);
-        if (direction == null) return null;
+        if (direction == null || !resourceController.canGrowBranch()) return null;
         return plantGrid[xIndex][yIndex].makeBranch(direction, Branch.branchType.NORMAL, world);
     }
 
@@ -216,7 +215,7 @@ public class PlantController {
         int yIndex = screenCoordToIndex(x, y)[1];
         boolean lowerNode = xIndex % 2 == 0;
         if (!inBounds(xIndex, yIndex)) return null;
-        if (!plantGrid[xIndex][yIndex].hasLeaf() && (yIndex > 0 || !lowerNode))
+        if (!plantGrid[xIndex][yIndex].hasLeaf() && (yIndex > 0 || !lowerNode) && resourceController.canGrowLeaf())
             return plantGrid[xIndex][yIndex].makeLeaf(type);
         return null;
     }
@@ -238,8 +237,12 @@ public class PlantController {
                 y * worldToPixelConversionRatio)[0];
         int yIndex = screenCoordToIndex(x * worldToPixelConversionRatio,
                 y * worldToPixelConversionRatio)[1];
-        plantGrid[xIndex][yIndex].unmakeBranch(direction);
-        return plantGrid[xIndex][yIndex].makeBranch(direction, type, world);
+        if (resourceController.canUpgrade()) {
+            resourceController.decrementUpgrade();
+            plantGrid[xIndex][yIndex].unmakeBranch(direction);
+            return plantGrid[xIndex][yIndex].makeBranch(direction, type, world);
+        }
+        return null;
     }
 
     /**
@@ -254,7 +257,8 @@ public class PlantController {
         int yIndex = screenCoordToIndex(x, y)[1];
         boolean lowerNode = xIndex % 2 == 0;
         if (!inBounds(xIndex, yIndex)) return null;
-        if (plantGrid[xIndex][yIndex].hasLeaf()){
+        if (plantGrid[xIndex][yIndex].hasLeaf() && resourceController.canUpgrade()){
+            resourceController.decrementUpgrade();
             plantGrid[xIndex][yIndex].unmakeLeaf();
             return plantGrid[xIndex][yIndex].makeLeaf(type);
         }
@@ -391,8 +395,12 @@ public class PlantController {
         return below || downLeft || downRight;
     }
 
-    public boolean growableAt(float xArg, float yArg) {
-        return canGrowAt(xArg, yArg) && resourceController.canGrow();
+    public boolean leafGrowableAt(float xArg, float yArg) {
+        return canGrowAt(xArg, yArg) && resourceController.canGrowLeaf();
+    }
+
+    public boolean branchGrowableAt(float xArg, float yArg) {
+        return canGrowAt(xArg, yArg) && resourceController.canGrowBranch();
     }
 
     public boolean branchGrowableAt(float xArg,
@@ -404,7 +412,7 @@ public class PlantController {
         if (xIndex == 0 && dir != branchDirection.RIGHT) return false;
         if (xIndex == plantGrid.length - 1 && dir != branchDirection.LEFT)
             return false;
-        return growableAt(xArg, yArg) &&
+        return branchGrowableAt(xArg, yArg) &&
                 !plantGrid[xIndex][yIndex].hasBranchInDirection(dir);
     }
 
@@ -721,7 +729,7 @@ public class PlantController {
                 }
             }
 
-            resourceController.decrementGrow();
+            resourceController.decrementGrowBranch();
             return newBranch;
 
 
@@ -736,7 +744,7 @@ public class PlantController {
             if (screenCoordToIndex(x / worldToPixelConversionRatio,
                                    y / worldToPixelConversionRatio)[1] > 0 &&
                     !leafExists && hasBranch() ||
-                    growableAt(x / worldToPixelConversionRatio,
+                    leafGrowableAt(x / worldToPixelConversionRatio,
                                y / worldToPixelConversionRatio)) {
                 leaf = new Leaf(x / worldToPixelConversionRatio,
                                 y / worldToPixelConversionRatio,
@@ -757,7 +765,7 @@ public class PlantController {
 //                leaf.setDrawScale(scale.x, scale.y);
                 leafExists = true;
                 //worldcontroller.addObject(leaf);
-                resourceController.decrementGrow();
+                resourceController.decrementGrowLeaf();
                 return leaf;
             }
             return null;

@@ -15,13 +15,21 @@ public class ResourceController {
 
     private final int MAX_SUN = 8;
     /**
-     * Amount of water required to grow a branch/leaf
+     * Amount of water required to grow a leaf
      */
-    private final int GROW_AMT = 5;
+    private final int LEAF_GROW_AMT = 10;
+    /**
+     * Amount of water required to grow a branch
+     */
+    private final int BRANCH_GROW_AMT = 5;
     /**
      * Amount of water required to extinguish a fire
      */
     private final int FIRE_AMT = 20;
+    /**
+     * Amount of sun required for an upgrade
+     */
+    private final int UPGRADE_AMT = 1;
     private final int SUN_ON_PICKUP = 1;
     private final int WATER_ON_PICKUP = 10;
 
@@ -30,22 +38,16 @@ public class ResourceController {
      */
     private final UIController ui;
     /**
-     * All pickup resources in world
+     * Current amount of sun stored
      */
-    protected PooledList<Resource> resources = new PooledList<Resource>();
     private int currSun;
     /**
      * Current amount of water stored
      */
     private int currWater;
-    /**
-     * Frames on ground (for getting water)
-     */
-    private int framesOnGround;
 
     public ResourceController() {
         currWater = MAX_WATER;
-        framesOnGround = 0;
         currSun = 0;
         ui = new UIController();
     }
@@ -79,66 +81,48 @@ public class ResourceController {
         return currSun == MAX_SUN;
     }
 
-    public boolean canGrow() {
-        return currWater >= GROW_AMT;
+    public boolean canGrowLeaf() {
+        return currWater >= LEAF_GROW_AMT;
+    }
+
+    public boolean canGrowBranch() {
+        return currWater >= BRANCH_GROW_AMT;
     }
 
     public boolean canExtinguish() {
         return currWater >= FIRE_AMT;
     }
 
-    public void decrementGrow() {
-        if (!canGrow()) {
-            //System.out.println("NOT ENOUGH WATER!");
-        } else {
-            currWater -= GROW_AMT;
+    public boolean canUpgrade() { return currSun >= UPGRADE_AMT; }
+
+    public void decrementGrowLeaf() {
+        if (canGrowLeaf()) {
+            currWater -= LEAF_GROW_AMT;
+        }
+    }
+
+    public void decrementGrowBranch() {
+        if (canGrowBranch()) {
+            currWater -= BRANCH_GROW_AMT;
         }
     }
 
     public void decrementExtinguish() {
-        if (!canExtinguish()) {
-            //System.out.println("NOT ENOUGH WATER!");
-        } else {
+        if (canExtinguish()) {
             currWater -= FIRE_AMT;
         }
     }
 
-    //    public void addWater(float x, float y) {
-    //        Water w = new Water(x, y);
-    //        resources.add(w);
-    //    }
+    public void decrementUpgrade() {
+        if (!canUpgrade()) {
 
-    //    public void addSun(float x, float y) {
-    //        Sun s = new Sun(x, y);
-    //        resources.add(s);
-    //    }
-
-    public PooledList<Resource> getResources() {
-        return resources;
-    }
-
-    public void update(Player player) {
-        for (Resource r : resources) {
-            r.regenerate();
+        } else {
+            currSun -= UPGRADE_AMT;
         }
-        if (player.atBottom()) {
-            //System.out.println("AT BOTTOM");
-            framesOnGround++;
-        }
-        //System.out.println(framesOnGround);
-        //System.out.println(currWater);
-        if (framesOnGround >= 4) {
-            //System.out.println("IN IF");
-            framesOnGround -= 4;
-            if (currWater < MAX_WATER) {
-                //System.out.println("NOT MAX");
-                currWater++;
-            }
-        }
-        ui.update((float) currWater / MAX_WATER, (float) currSun / MAX_SUN);
     }
 
     public void draw(GameCanvas c) {
+        ui.update((float) currWater / MAX_WATER, (float) currSun / MAX_SUN);
         ui.draw(c);
     }
 
