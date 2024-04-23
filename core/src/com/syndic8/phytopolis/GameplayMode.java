@@ -340,7 +340,7 @@ public class GameplayMode extends WorldController implements ContactListener {
         }
 
         volume = constants.getFloat("volume", 1.0f);
-        timer = new Timer(60, 3, 20);
+        timer = new Timer(300, 3, 100);
         timer.startTimer();
     }
 
@@ -582,7 +582,8 @@ public class GameplayMode extends WorldController implements ContactListener {
             }
 
             // Check for win condition
-            if ((bd1 == avatar && bd1.getY() > 34) && timer.isRunning()) {
+            if ((bd1 == avatar && bd1.getY() > 34)) {
+                timer.setRunning(false);
                 starPoints = timer.getAcquiredStars();
                 setComplete(true);
 
@@ -802,7 +803,7 @@ public class GameplayMode extends WorldController implements ContactListener {
         canvas.endHud();
 
         canvas.beginText();
-        timer.displayTime(canvas, timesFont, Color.WHITE, Gdx.graphics.getWidth()/2.0f, Gdx.graphics.getHeight()/1.05f);
+        timer.displayTime(canvas, timesFont, Color.WHITE, Gdx.graphics.getWidth()/2.1f, Gdx.graphics.getHeight()/1.03f, new Vector2(1.7f, 1.7f));
         //canvas.drawTime(timesFont,"me", Color.WHITE, 800, 200);
         canvas.endtext();
 
