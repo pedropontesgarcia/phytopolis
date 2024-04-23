@@ -242,7 +242,7 @@ public class Player extends CapsuleObject {
      * @return true if the dude is on the ground.
      */
     public boolean isGrounded() {
-        return isGrounded;
+        return isGrounded && Math.abs(getVY()) < 0.2;
     }
 
     /**
@@ -454,8 +454,7 @@ public class Player extends CapsuleObject {
      * @param canvas Drawing context
      */
     public void draw(GameCanvas canvas) {
-        //        System.out.println(getY());
-        //        System.out.println(getHeight());
+//        System.out.println(getVY());
         float effect = faceRight ? 1.0f : -1.0f;
 
         float width = tilemap.getTileWidth() * textureSclInTiles;

@@ -1,6 +1,5 @@
 package com.syndic8.phytopolis.level.models;
 
-import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Vector2;
@@ -13,6 +12,10 @@ public abstract class Model {
     protected final Tilemap tilemap;
     protected final float textureSclInTiles;
     /**
+     * Object position (centered on the texture middle)
+     */
+    protected Vector2 position;
+    /**
      * Reference to texture origin
      */
     protected Vector2 origin;
@@ -20,18 +23,14 @@ public abstract class Model {
      * Whether the object should be removed from the world on next pass
      */
     protected boolean toRemove;
-//    /**
-//     * Scale of the game objects
-//     */
-//    protected Vector2 scale = new Vector2(Gdx.graphics.getWidth() / 16f,
-//                                          Gdx.graphics.getHeight() / 9f);
     /**
      * The texture for the shape.
      */
     protected TextureRegion texture;
     protected int zIndex;
 
-    public Model(Tilemap tilemap, float textureSclInTiles) {
+    public Model(float x, float y, Tilemap tilemap, float textureSclInTiles) {
+        position = new Vector2(x, y);
         this.tilemap = tilemap;
         this.textureSclInTiles = textureSclInTiles;
         // Object has yet to be deactivated
@@ -58,35 +57,45 @@ public abstract class Model {
      *
      * @return the position of this object
      */
-    public abstract Vector2 getPosition();
+    public Vector2 getPosition() {
+        return position;
+    }
 
     /**
      * Returns the x-coordinate of the object position (center).
      *
      * @return the x-coordinate of the object position
      */
-    public abstract float getX();
+    public float getX() {
+        return position.x;
+    }
 
     /**
      * Sets the x-coordinate of the object position (center).
      *
      * @param value the x-coordinate of the object position
      */
-    public abstract void setX(float value);
+    public void setX(float value) {
+        position.x = value;
+    }
 
     /**
      * Returns the y-coordinate of the object position (center).
      *
      * @return the y-coordinate of the object position
      */
-    public abstract float getY();
+    public float getY() {
+        return position.y;
+    }
 
     /**
      * Sets the y-coordinate of the object position (center).
      *
      * @param value the y-coordinate of the object position
      */
-    public abstract void setY(float value);
+    public void setY(float value) {
+        position.y = value;
+    }
 
     /**
      * Returns true if our object has been flagged for garbage collection
@@ -178,7 +187,7 @@ public abstract class Model {
         /**
          * A star, which is created by a shell explosion
          */
-        FIRE, WATER, SUN, PLATFORM
+        FIRE, WATER, SUN, PLATFORM, TILE_FULL, TILE_NOTOP
     }
 
 }

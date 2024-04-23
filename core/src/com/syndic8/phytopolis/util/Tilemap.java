@@ -1,14 +1,14 @@
 package com.syndic8.phytopolis.util;
 
-import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.physics.box2d.BodyDef;
+import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.JsonValue;
 import com.syndic8.phytopolis.GameCanvas;
 import com.syndic8.phytopolis.WorldController;
 import com.syndic8.phytopolis.assets.AssetDirectory;
-import com.syndic8.phytopolis.level.models.PolygonObject;
 import com.syndic8.phytopolis.level.models.Resource;
+import com.syndic8.phytopolis.level.models.Sun;
+import com.syndic8.phytopolis.level.models.Tile;
 import com.syndic8.phytopolis.level.models.Water;
 
 import java.util.ArrayList;
@@ -16,6 +16,8 @@ import java.util.List;
 
 public class Tilemap {
 
+    PooledList<Tile> tiles;
+    AssetDirectory directory;
     JsonValue tilemap;
     float worldWidth;
     float worldHeight;
@@ -23,7 +25,6 @@ public class Tilemap {
     int tilemapWidth;
     float tileHeight;
     float tileWidth;
-    Texture[] tileTextures;
     Texture[] resourceTextures;
     Resource[] resources;
 
@@ -68,32 +69,24 @@ public class Tilemap {
     /**
      * Gathers the assets from the tileset.
      *
-     * @param directory The main assets directory.
+     * @param dir The main assets directory.
      */
-    public void gatherAssets(AssetDirectory directory) {
-        List<Texture> textureList = new ArrayList<>();
-        String tilesetName = tilemap.get("tilesets").get(0).getString("source");
-        JsonValue tileset = directory.getEntry(tilesetName, JsonValue.class);
-        JsonValue tiles = tileset.get("tiles");
-        for (int i = 0; i < tiles.size; i++) {
-            JsonValue tile = tiles.get(i);
-            Texture tx = directory.getEntry(tile.getString("image"),
-                                            Texture.class);
-            textureList.add(tx);
-        }
-        tileTextures = textureList.toArray(new Texture[0]);
-
-        List<Texture> resourceTextureList = new ArrayList<>();
-        Texture tx = directory.getEntry("gameplay:water_filmstrip",
-                                        Texture.class);
-        resourceTextureList.add(tx);
-        resourceTextures = resourceTextureList.toArray(new Texture[0]);
-
+    public void gatherAssets(AssetDirectory dir) {
         JsonValue physicsLayer = tilemap.get("layers").get(0);
         tilemapHeight = physicsLayer.getInt("height");
         tilemapWidth = physicsLayer.getInt("width");
         tileHeight = worldHeight / tilemapHeight;
         tileWidth = worldWidth / tilemapWidth;
+        directory = dir;
+
+        List<Texture> resourceTextureList = new ArrayList<>();
+        Texture tx = directory.getEntry("gameplay:water_filmstrip",
+                                        Texture.class);
+        Texture tx2 = directory.getEntry("gameplay:sun_filmstrip",
+                                         Texture.class);
+        resourceTextureList.add(tx);
+        resourceTextureList.add(tx2);
+        resourceTextures = resourceTextureList.toArray(new Texture[0]);
     }
 
     /**
@@ -103,43 +96,69 @@ public class Tilemap {
      * @param ctrl The WorldController to populate.
      */
     public void populateLevel(WorldController ctrl) {
-        populateGeometry(ctrl);
-        populateResources(ctrl);
-    }
-
-    public void populateGeometry(WorldController ctrl) {
         JsonValue physicsLayer = tilemap.get("layers").get(0);
-        String wname = "wall";
+        String tilesetName = tilemap.get("tilesets").get(0).getString("source");
+        JsonValue tilesetJson = directory.getEntry(tilesetName,
+                                                   JsonValue.class);
+        float tilePixelWidth = tilesetJson.getFloat("tilewidth");
+        float tilePixelHeight = tilesetJson.getFloat("tileheight");
+        JsonValue tilesJson = tilesetJson.get("tiles");
+        tiles = new PooledList<>();
+
         for (int row = 0; row < tilemapHeight; row++) {
             for (int col = 0; col < tilemapWidth; col++) {
-                if (physicsLayer.get("data").asIntArray()[row * tilemapWidth +
-                        col] != 0) {
-                    PolygonObject obj;
+                int tileValue = physicsLayer.get("data").asIntArray()[
+                        row * tilemapWidth + col];
+                if (tileValue != 0) {
                     float x0 = col * tileWidth;
                     float x1 = (col + 1) * tileWidth;
                     float y0 = worldHeight - (row + 1) * tileHeight;
                     float y1 = worldHeight - row * tileHeight;
-                    obj = new PolygonObject(new float[]{x0,
-                            y1,
-                            x1,
-                            y1,
-                            x1,
-                            y0,
-                            x0,
-                            y0}, 0, 0, this, 1);
-                    obj.setBodyType(BodyDef.BodyType.StaticBody);
-                    obj.setDensity(0);
-                    obj.setFriction(0);
-                    obj.setRestitution(0);
-                    obj.setName(wname + row + col);
-                    ctrl.addObject(obj);
+                    JsonValue tileJson = tilesJson.get(tileValue - 1);
+
+                    Texture tx = directory.getEntry(tileJson.getString("image"),
+                                                    Texture.class);
+                    boolean hasCollider = tileJson.has("objectgroup");
+                    boolean collideTop = tileJson.get("properties")
+                            .get(0)
+                            .getBoolean("value");
+                    Tile tile = new Tile(this,
+                                         new Vector2(x0, y0),
+                                         collideTop,
+                                         tx);
+                    if (hasCollider) {
+                        JsonValue colliderJson = tileJson.get("objectgroup")
+                                .get("objects")
+                                .get(0);
+                        float cx0 = x0 +
+                                colliderJson.getFloat("x") / tilePixelWidth *
+                                        tileWidth;
+                        float cy0 = y0 +
+                                colliderJson.getFloat("y") / tilePixelHeight *
+                                        tileHeight;
+                        float cx1 = cx0 + colliderJson.getFloat("width") /
+                                tilePixelWidth * tileWidth;
+                        float cy1 = cy0 + colliderJson.getFloat("height") /
+                                tilePixelHeight * tileHeight;
+                        tile.addCollider(new float[]{cx0,
+                                cy1,
+                                cx1,
+                                cy1,
+                                cx1,
+                                cy0,
+                                cx0,
+                                cy0});
+                        ctrl.addObject(tile.getCollider());
+                    }
+                    tiles.add(tile);
                 }
             }
         }
+        populateResources(ctrl);
     }
 
     private void populateResources(WorldController ctrl) {
-        JsonValue resourceLayer = tilemap.get("layers").get(2);
+        JsonValue resourceLayer = tilemap.get("layers").get(1);
         for (int row = 0; row < tilemapHeight; row++) {
             for (int col = 0; col < tilemapWidth; col++) {
                 if (resourceLayer.get("data").asIntArray()[row * tilemapWidth +
@@ -149,6 +168,9 @@ public class Tilemap {
                     FilmStrip waterFilmstrip = new FilmStrip(resourceTextures[0],
                                                              1,
                                                              13);
+                    FilmStrip sunFilmstrip = new FilmStrip(resourceTextures[1],
+                                                           1,
+                                                           9);
                     Water w = new Water(xMid,
                                         yMid,
                                         tileWidth,
@@ -156,7 +178,15 @@ public class Tilemap {
                                         waterFilmstrip,
                                         this,
                                         1);
+                    Sun s = new Sun(xMid,
+                                    yMid,
+                                    tileWidth,
+                                    tileHeight,
+                                    sunFilmstrip,
+                                    this,
+                                    1);
                     ctrl.addObject(w);
+                    ctrl.addObject(s);
                 }
             }
         }
@@ -168,25 +198,7 @@ public class Tilemap {
      * @param c The game canvas.
      */
     public void draw(GameCanvas c) {
-        JsonValue visualLayer = tilemap.get("layers").get(1);
-        for (int row = 0; row < tilemapHeight; row++) {
-            for (int col = 0; col < tilemapWidth; col++) {
-                int tileValue = visualLayer.get("data").asIntArray()[
-                        row * tilemapWidth + col];
-                if (tileValue != 0) {
-                    float x0 = col * tileWidth;
-                    float x1 = (col + 1) * tileWidth;
-                    float y0 = worldHeight - (row + 1) * tileHeight;
-                    float y1 = worldHeight - row * tileHeight;
-                    c.draw(tileTextures[tileValue - 1],
-                           Color.WHITE,
-                           x0,
-                           y0,
-                           tileWidth,
-                           tileHeight);
-                }
-            }
-        }
+        for (Tile tile : tiles) tile.draw(c);
     }
 
 }

@@ -11,10 +11,8 @@
 package com.syndic8.phytopolis;
 
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.Input;
 import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.audio.Sound;
-import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Cursor;
 import com.badlogic.gdx.graphics.Pixmap;
@@ -33,8 +31,8 @@ import com.syndic8.phytopolis.level.ResourceController;
 import com.syndic8.phytopolis.level.models.*;
 import com.syndic8.phytopolis.util.FilmStrip;
 import com.syndic8.phytopolis.util.Tilemap;
-
 import com.syndic8.phytopolis.util.Timer;
+
 import java.util.HashMap;
 
 /**
@@ -56,16 +54,15 @@ public class GameplayMode extends WorldController implements ContactListener {
      * Mark set to handle more sophisticated collision callbacks
      */
     protected ObjectSet<Fixture> sensorFixtures;
+    protected Texture jumpTexture;
     private TextureRegion branchCursorTexture;
     private Timer timer;
     private int starPoints;
-
     private TextureRegion leafCursorTexture;
     private TextureRegion waterCursorTexture;
     private Cursor branchCursor;
     private Cursor leafCursor;
     private Cursor waterCursor;
-    protected Texture jumpTexture;
     private PlantController plantController;
     private HazardController hazardController;
     private ResourceController resourceController;
@@ -81,6 +78,7 @@ public class GameplayMode extends WorldController implements ContactListener {
      */
     private BitmapFont timesFont;
     private TextureRegion background;
+    private TextureRegion vignette;
     /**
      * Texture asset for character avatar
      */
@@ -160,20 +158,22 @@ public class GameplayMode extends WorldController implements ContactListener {
      * @param directory Reference to global asset manager.
      */
     public void gatherAssets(AssetDirectory directory) {
-        branchCursorTexture = new TextureRegion(directory.getEntry("ui:branch-cursor",
+        branchCursorTexture = new TextureRegion(directory.getEntry(
+                "ui:branch-cursor",
                 Texture.class));
-        leafCursorTexture = new TextureRegion(directory.getEntry("ui:leaf-cursor",
+        leafCursorTexture = new TextureRegion(directory.getEntry(
+                "ui:leaf-cursor",
                 Texture.class));
-        waterCursorTexture = new TextureRegion(directory.getEntry("ui:water-cursor",
+        waterCursorTexture = new TextureRegion(directory.getEntry(
+                "ui:water-cursor",
                 Texture.class));
         Pixmap pixmap = getPixmapFromRegion(branchCursorTexture);
-        branchCursor = Gdx.graphics.newCursor(pixmap, 128 / 2, 128 / 2);
+        branchCursor = Gdx.graphics.newCursor(pixmap, 64 / 2, 64 / 2);
         pixmap = getPixmapFromRegion(leafCursorTexture);
-        leafCursor = Gdx.graphics.newCursor(pixmap, 128 / 2, 128 / 2);
+        leafCursor = Gdx.graphics.newCursor(pixmap, 64 / 2, 64 / 2);
         pixmap = getPixmapFromRegion(waterCursorTexture);
-        waterCursor = Gdx.graphics.newCursor(pixmap, 128 / 2, 128 / 2);
+        waterCursor = Gdx.graphics.newCursor(pixmap, 64 / 2, 64 / 2);
         pixmap.dispose();
-
 
         avatarTexture = new TextureRegion(directory.getEntry("gameplay:player",
                                                              Texture.class));
@@ -183,8 +183,11 @@ public class GameplayMode extends WorldController implements ContactListener {
         timesFont = directory.getEntry("times", BitmapFont.class);
         background = new TextureRegion(directory.getEntry("gameplay:background",
                                                           Texture.class));
+        vignette = new TextureRegion(directory.getEntry("gameplay:vignette",
+                Texture.class));
 
         background.setRegion(0, 0, 1920, 1080);
+        vignette.setRegion(0, 0, 1920, 1080);
 
         jumpTexture = directory.getEntry("jump", Texture.class);
         jumpAnimator = new FilmStrip(jumpTexture, 1, 13, 13);
@@ -203,9 +206,9 @@ public class GameplayMode extends WorldController implements ContactListener {
                                                  JsonValue.class));
         tilemap.gatherAssets(directory);
 
-//        this.branchTexture = new FilmStrip(directory.getEntry(
-//                "gameplay:branch",
-//                Texture.class), 1, 5, 5);
+        //        this.branchTexture = new FilmStrip(directory.getEntry(
+        //                "gameplay:branch",
+        //                Texture.class), 1, 5, 5);
 
         resourceController = new ResourceController();
         plantController = new PlantController(8,
@@ -340,7 +343,7 @@ public class GameplayMode extends WorldController implements ContactListener {
         }
 
         volume = constants.getFloat("volume", 1.0f);
-        timer = new Timer(60, 3, 20);
+        timer = new Timer(300, 3, 100);
         timer.startTimer();
     }
 
@@ -371,15 +374,19 @@ public class GameplayMode extends WorldController implements ContactListener {
         if (!region.getTexture().getTextureData().isPrepared()) {
             region.getTexture().getTextureData().prepare();
         }
-        Pixmap originalPixmap = region.getTexture().getTextureData().consumePixmap();
-        Pixmap cursorPixmap = new Pixmap(128, 128, originalPixmap.getFormat());
-        cursorPixmap.drawPixmap(
-                originalPixmap,
-                0, 0,
-                originalPixmap.getWidth(), originalPixmap.getHeight(),
-                0, 0,
-                cursorPixmap.getWidth(), cursorPixmap.getHeight()
-        );
+        Pixmap originalPixmap = region.getTexture()
+                .getTextureData()
+                .consumePixmap();
+        Pixmap cursorPixmap = new Pixmap(64, 64, originalPixmap.getFormat());
+        cursorPixmap.drawPixmap(originalPixmap,
+                                0,
+                                0,
+                                originalPixmap.getWidth(),
+                                originalPixmap.getHeight(),
+                                0,
+                                0,
+                                cursorPixmap.getWidth(),
+                                cursorPixmap.getHeight());
         originalPixmap.dispose(); // Avoid memory leaks
         return cursorPixmap;
     }
@@ -411,8 +418,8 @@ public class GameplayMode extends WorldController implements ContactListener {
         Vector2 unprojMousePos = canvas.unproject(projMousePos);
 
         // draw ghost branches
-//        Branch hoveringBranch = plantController.screenToBranch(unprojMousePos.x, unprojMousePos.y);
-//        if (hoveringBranch != null && !objects.contains(hoveringBranch)) objects.add(hoveringBranch);
+        //        Branch hoveringBranch = plantController.screenToBranch(unprojMousePos.x, unprojMousePos.y);
+        //        if (hoveringBranch != null && !objects.contains(hoveringBranch)) objects.add(hoveringBranch);
 
         if (InputController.getInstance().didMousePress()) {
             // process leaf stuff
@@ -420,17 +427,21 @@ public class GameplayMode extends WorldController implements ContactListener {
                 // don't grow if there's a fire there (prioritize fire)
                 if (!hazardController.hasFire(unprojMousePos)) {
                     Leaf.leafType lt = Leaf.leafType.NORMAL;
-//            if (InputController.getInstance().didSpecial())
-//                lt = Leaf.leafType.BOUNCY;
+                    //            if (InputController.getInstance().didSpecial())
+                    //                lt = Leaf.leafType.BOUNCY;
                     Model newLeaf = plantController.growLeaf(unprojMousePos.x,
-                            unprojMousePos.y + 0.5f * tilemap.getTileHeight(), lt);
+                                                             unprojMousePos.y +
+                                                                     0.5f *
+                                                                             tilemap.getTileHeight(),
+                                                             lt);
                     if (newLeaf != null) addObject(newLeaf);
                 }
             }
 
             // process branch stuff
             else {
-                Branch branch = plantController.growBranch(unprojMousePos.x, unprojMousePos.y);
+                Branch branch = plantController.growBranch(unprojMousePos.x,
+                                                           unprojMousePos.y);
                 if (branch != null) addObject(branch);
             }
         }
@@ -484,7 +495,7 @@ public class GameplayMode extends WorldController implements ContactListener {
             hazardController.extinguishFire(unprojMousePos);
         }
         plantController.propagateDestruction();
-//        System.out.println(objects.size());
+        //        System.out.println(objects.size());
         timer.updateTime();
     }
 
@@ -582,11 +593,10 @@ public class GameplayMode extends WorldController implements ContactListener {
             }
 
             // Check for win condition
-            if ((bd1 == avatar && bd1.getY() > 34) && timer.isRunning()) {
+            if ((bd1 == avatar && bd1.getY() > 34)) {
+                timer.setRunning(false);
                 starPoints = timer.getAcquiredStars();
                 setComplete(true);
-
-
 
             }
             //            //Check for bouncyness
@@ -673,7 +683,16 @@ public class GameplayMode extends WorldController implements ContactListener {
                                 ((Model) fix1.getBody()
                                         .getUserData()).getType() ==
                                         Model.ModelType.SUN);
-        if (isCollisionBetweenPlayerAndSun) {
+        boolean isCollisionBetweenLeafAndSun =
+                (((Model) fix1.getBody().getUserData()).getType() ==
+                        Model.ModelType.LEAF &&
+                        ((Model) fix2.getBody().getUserData()).getType() ==
+                                Model.ModelType.SUN) ||
+                        (((Model) fix2.getBody().getUserData()).getType() ==
+                                Model.ModelType.LEAF && ((Model) fix1.getBody()
+                                .getUserData()).getType() ==
+                                Model.ModelType.SUN);
+        if (isCollisionBetweenPlayerAndSun || isCollisionBetweenLeafAndSun) {
             Sun s;
             if (((Model) fix1.getBody().getUserData()).getType() ==
                     Model.ModelType.SUN) {
@@ -682,7 +701,10 @@ public class GameplayMode extends WorldController implements ContactListener {
                 s = (Sun) fix2.getBody().getUserData();
             }
             s.clear();
-            resourceController.pickupSun(s.getRegenRatio());
+            contact.setEnabled(false);
+            if (isCollisionBetweenPlayerAndSun) {
+                resourceController.pickupSun();
+            }
         }
         if (isCollisionBetweenPlayerAndWater) {
             Water w;
@@ -760,6 +782,15 @@ public class GameplayMode extends WorldController implements ContactListener {
         }
     }
 
+    private void drawVignette(){
+        canvas.draw(vignette.getTexture(),
+                Color.WHITE,
+                0,
+                0,
+                canvas.getWidth(),
+                canvas.getHeight());
+    }
+
     /**
      * Draw the physics objects to the canvas
      * <p>
@@ -775,6 +806,7 @@ public class GameplayMode extends WorldController implements ContactListener {
         canvas.clear();
         canvas.begin();
         drawBackground();
+        drawVignette();
         //timer.displayTime(canvas,timesFont, Color.BLACK, canvas.getWidth()/2, canvas.getHeight()/2, new Vector2(0.036f, 0.036f));
         //System.out.println(timer.getMinutes());
         //System.out.println(timer.getSeconds());
@@ -788,7 +820,9 @@ public class GameplayMode extends WorldController implements ContactListener {
         if (!ic.didSpecial()) {
             Vector2 projMousePos = new Vector2(ic.getMouseX(), ic.getMouseY());
             Vector2 unprojMousePos = canvas.unproject(projMousePos);
-            plantController.drawGhostBranch(canvas, unprojMousePos.x, unprojMousePos.y);
+            plantController.drawGhostBranch(canvas,
+                                            unprojMousePos.x,
+                                            unprojMousePos.y);
         }
         hazardController.draw(canvas);
         //player.draw(canvas);
@@ -802,11 +836,14 @@ public class GameplayMode extends WorldController implements ContactListener {
         canvas.endHud();
 
         canvas.beginText();
-        timer.displayTime(canvas, timesFont, Color.WHITE, Gdx.graphics.getWidth()/2.0f, Gdx.graphics.getHeight()/1.05f);
+        timer.displayTime(canvas,
+                          timesFont,
+                          Color.WHITE,
+                          Gdx.graphics.getWidth() / 2.1f,
+                          Gdx.graphics.getHeight() / 1.03f,
+                          new Vector2(1.7f, 1.7f));
         //canvas.drawTime(timesFont,"me", Color.WHITE, 800, 200);
         canvas.endtext();
-
-
 
     }
 

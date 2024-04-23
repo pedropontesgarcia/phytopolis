@@ -12,8 +12,10 @@
     "water_outline": "gameplay/water_woutline.png",
     "water_nooutline": "gameplay/water_nooutline.png",
     "gameplay:water_filmstrip": "gameplay/water-ui-sheet.png",
+    "gameplay:water_ui": "gameplay/waterUI_filmstrip.png",
     "gameplay:sun_filmstrip": "gameplay/sun-ui-sheet.png",
     "gameplay:background": "gameplay/back2.png",
+    "gameplay:vignette": "gameplay/vignette.png",
     "gameplay:block1": "gameplay/budblock1.png",
     "gameplay:block2": "gameplay/budblock2.png",
     "gameplay:block3": "gameplay/budblock3.png",
@@ -35,9 +37,9 @@
     "ui:water-cursor": "ui/water-cursor.png"
   },
   "jsons": {
-    "gameplay:tilemap": "gameplay/lvl1.json",
+    "gameplay:tilemap": "gameplay/lvl3.json",
     "gameplay:constants": "gameplay/constants.json",
-    "gameplay:tileset": "gameplay/default.json"
+    "gameplay:tileset": "gameplay/tileset.json"
   },
   "music": {
     "viridian": "gameplay/ViridianEXP1OGG.ogg",

@@ -100,7 +100,7 @@ public abstract class GameObject extends Model {
      * @param y Initial y position in world coordinates
      */
     protected GameObject(float x, float y, Tilemap tm, float texScl) {
-        super(tm, texScl);
+        super(x, y, tm, texScl);
 
         // Allocate the body information
         bodyinfo = new BodyDef();
