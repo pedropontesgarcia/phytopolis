@@ -1,6 +1,7 @@
 {
   "textures": {
-    "lvlsel:background": "gameplay/level_select_proto.png",
+    "lvlsel:background": "gameplay/levelselect-123-filmstrip.png",
+    "lvlsel:lighting": "gameplay/levelselect-lighting.png",
     "gameplay:player": "gameplay/static.png",
     "gameplay:leaf": "gameplay/leaf-filmstrip.png",
     "gameplay:bouncy": "gameplay/bounce.png",
