@@ -189,12 +189,12 @@ public class Tilemap {
                         float cx0 = x0 +
                                 colliderJson.getFloat("x") / tilePixelWidth *
                                         tileWidth;
-                        float cy0 = y0 -
+                        float cy1 = y1 -
                                 colliderJson.getFloat("y") / tilePixelHeight *
                                         tileHeight;
                         float cx1 = cx0 + colliderJson.getFloat("width") /
                                 tilePixelWidth * tileWidth;
-                        float cy1 = cy0 + colliderJson.getFloat("height") /
+                        float cy0 = cy1 - colliderJson.getFloat("height") /
                                 tilePixelHeight * tileHeight;
                         tile.addCollider(new float[]{cx0,
                                 cy0,
