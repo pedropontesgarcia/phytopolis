@@ -31,7 +31,9 @@
     "ui:water-cursor": "ui/water-cursor.png"
   },
   "jsons": {
-    "gameplay:lvl4": "gameplay/levels/lvl4.json",
+    "gameplay:lvl1": "gameplay/levels/lvl1.json",
+    "gameplay:lvl2": "gameplay/levels/lvl2.json",
+    "gameplay:lvl3": "gameplay/levels/lvl3.json",
     "gameplay:constants": "gameplay/constants.json",
     "gameplay:tileset": "gameplay/tileset.json"
   },
