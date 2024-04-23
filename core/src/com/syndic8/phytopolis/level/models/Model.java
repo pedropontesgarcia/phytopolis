@@ -1,6 +1,5 @@
 package com.syndic8.phytopolis.level.models;
 
-import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Vector2;
@@ -20,11 +19,6 @@ public abstract class Model {
      * Whether the object should be removed from the world on next pass
      */
     protected boolean toRemove;
-//    /**
-//     * Scale of the game objects
-//     */
-//    protected Vector2 scale = new Vector2(Gdx.graphics.getWidth() / 16f,
-//                                          Gdx.graphics.getHeight() / 9f);
     /**
      * The texture for the shape.
      */
@@ -178,7 +172,7 @@ public abstract class Model {
         /**
          * A star, which is created by a shell explosion
          */
-        FIRE, WATER, SUN, PLATFORM
+        FIRE, WATER, SUN, PLATFORM, TILE_FULL, TILE_NOTOP
     }
 
 }

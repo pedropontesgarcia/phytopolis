@@ -1,0 +1,261 @@
+{
+  "columns": 0,
+  "grid": {
+    "height": 1,
+    "orientation": "orthogonal",
+    "width": 1
+  },
+  "margin": 0,
+  "name": "default2",
+  "spacing": 0,
+  "tilecount": 8,
+  "tiledversion": "1.10.2",
+  "tileheight": 400,
+  "tiles": [
+    {
+      "id": 0,
+      "image": "gameplay:block1",
+      "imageheight": 400,
+      "imagewidth": 600,
+      "objectgroup": {
+        "draworder": "index",
+        "id": 2,
+        "name": "",
+        "objects": [
+          {
+            "height": 400,
+            "id": 1,
+            "name": "",
+            "rotation": 0,
+            "type": "",
+            "visible": true,
+            "width": 576,
+            "x": 0,
+            "y": 0
+          }
+        ],
+        "opacity": 1,
+        "type": "objectgroup",
+        "visible": true,
+        "x": 0,
+        "y": 0
+      },
+      "properties": [
+        {
+          "name": "collidetop",
+          "type": "bool",
+          "value": true
+        }
+      ]
+    },
+    {
+      "id": 1,
+      "image": "gameplay:block2",
+      "imageheight": 400,
+      "imagewidth": 600,
+      "objectgroup": {
+        "draworder": "index",
+        "id": 2,
+        "name": "",
+        "objects": [
+          {
+            "height": 400,
+            "id": 1,
+            "name": "",
+            "rotation": 0,
+            "type": "",
+            "visible": true,
+            "width": 576,
+            "x": 0,
+            "y": 0
+          }
+        ],
+        "opacity": 1,
+        "type": "objectgroup",
+        "visible": true,
+        "x": 0,
+        "y": 0
+      },
+      "properties": [
+        {
+          "name": "collidetop",
+          "type": "bool",
+          "value": true
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "image": "gameplay:block3",
+      "imageheight": 400,
+      "imagewidth": 600,
+      "objectgroup": {
+        "draworder": "index",
+        "id": 3,
+        "name": "",
+        "objects": [
+          {
+            "height": 400,
+            "id": 2,
+            "name": "",
+            "rotation": 0,
+            "type": "",
+            "visible": true,
+            "width": 600,
+            "x": 0,
+            "y": 0
+          }
+        ],
+        "opacity": 1,
+        "type": "objectgroup",
+        "visible": true,
+        "x": 0,
+        "y": 0
+      },
+      "properties": [
+        {
+          "name": "collidetop",
+          "type": "bool",
+          "value": true
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "image": "gameplay:balcony",
+      "imageheight": 400,
+      "imagewidth": 600,
+      "properties": [
+        {
+          "name": "collidetop",
+          "type": "bool",
+          "value": false
+        }
+      ]
+    },
+    {
+      "id": 4,
+      "image": "gameplay:clothes1a",
+      "imageheight": 400,
+      "imagewidth": 600,
+      "objectgroup": {
+        "draworder": "index",
+        "id": 2,
+        "name": "",
+        "objects": [
+          {
+            "height": 60.0360216129678,
+            "id": 1,
+            "name": "",
+            "rotation": 0,
+            "type": "",
+            "visible": true,
+            "width": 393.836301781069,
+            "x": 145.287172303382,
+            "y": 199.319591755053
+          }
+        ],
+        "opacity": 1,
+        "type": "objectgroup",
+        "visible": true,
+        "x": 0,
+        "y": 0
+      },
+      "properties": [
+        {
+          "name": "collidetop",
+          "type": "bool",
+          "value": false
+        }
+      ]
+    },
+    {
+      "id": 5,
+      "image": "gameplay:clothes1b",
+      "imageheight": 400,
+      "imagewidth": 600,
+      "objectgroup": {
+        "draworder": "index",
+        "id": 2,
+        "name": "",
+        "objects": [
+          {
+            "height": 50.430258154893,
+            "id": 1,
+            "name": "",
+            "rotation": 0,
+            "type": "",
+            "visible": true,
+            "width": 204.12247348409,
+            "x": 3.60216129677807,
+            "y": 262.957774664799
+          }
+        ],
+        "opacity": 1,
+        "type": "objectgroup",
+        "visible": true,
+        "x": 0,
+        "y": 0
+      },
+      "properties": [
+        {
+          "name": "collidetop",
+          "type": "bool",
+          "value": false
+        }
+      ]
+    },
+    {
+      "id": 6,
+      "image": "gameplay:clothes1c",
+      "imageheight": 400,
+      "imagewidth": 600,
+      "properties": [
+        {
+          "name": "collidetop",
+          "type": "bool",
+          "value": false
+        }
+      ]
+    },
+    {
+      "id": 7,
+      "image": "gameplay:clothes1d",
+      "imageheight": 400,
+      "imagewidth": 600,
+      "objectgroup": {
+        "draworder": "index",
+        "id": 2,
+        "name": "",
+        "objects": [
+          {
+            "height": 57.6345807484491,
+            "id": 1,
+            "name": "",
+            "rotation": 0,
+            "type": "",
+            "visible": true,
+            "width": 554.732839703822,
+            "x": 6.00360216129673,
+            "y": 240.144086451871
+          }
+        ],
+        "opacity": 1,
+        "type": "objectgroup",
+        "visible": true,
+        "x": 0,
+        "y": 0
+      },
+      "properties": [
+        {
+          "name": "collidetop",
+          "type": "bool",
+          "value": false
+        }
+      ]
+    }
+  ],
+  "tilewidth": 600,
+  "type": "tileset",
+  "version": "1.10"
+}
