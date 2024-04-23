@@ -750,6 +750,23 @@ public class GameplayMode extends WorldController implements ContactListener {
         //fireSound.stop(fireId);
     }
 
+    /**
+     * Called when this screen is no longer the current screen for a Game.
+     */
+    public void hide() {
+        // Useless if called in outside animation loop
+        super.hide();
+        backgroundMusic.stop();
+    }
+
+    /**
+     * Called when this screen becomes the current screen for a Game.
+     */
+    public void show() {
+        super.show();
+        backgroundMusic.play();
+    }
+
     private void drawBackground() {
         if (background != null) {
             canvas.draw(background.getTexture(),

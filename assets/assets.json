@@ -39,7 +39,8 @@
     "gameplay:tileset": "gameplay/default.json"
   },
   "music": {
-    "viridian": "gameplay/ViridianEXP1_16bit.wav"
+    "viridian": "gameplay/ViridianEXP1OGG.ogg",
+    "newgrowth": "gameplay/NewGrowthEXP3SOGG.ogg"
   },
   "fonts": {
     "times": {
