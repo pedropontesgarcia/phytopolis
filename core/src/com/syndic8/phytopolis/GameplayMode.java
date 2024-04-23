@@ -58,6 +58,8 @@ public class GameplayMode extends WorldController implements ContactListener {
     private TextureRegion branchCursorTexture;
     private Timer timer;
     private int starPoints;
+    private float scalex;
+    private float scaley;
     private TextureRegion leafCursorTexture;
     private TextureRegion waterCursorTexture;
     private Cursor branchCursor;
@@ -349,6 +351,8 @@ public class GameplayMode extends WorldController implements ContactListener {
 
         volume = constants.getFloat("volume", 1.0f);
         timer = new Timer(300, 3, 100);
+        scalex = Gdx.graphics.getWidth()/1129.412f;
+        scaley = Gdx.graphics.getHeight()/635.294f;
         timer.startTimer();
     }
 
@@ -827,14 +831,12 @@ public class GameplayMode extends WorldController implements ContactListener {
     }
 
     private void drawVignette(){
-        float base = Math.max((avatar.getY() - canvas.getHeight() / 6f),
-                0);
         float backgroundY = canvas.getCameraY()- canvas.getViewPortY() / 2;
         canvas.draw(vignette.getTexture(),
                 Color.WHITE,
                 0,
                 backgroundY,
-                getCanvas().getHeight(),
+                canvas.getHeight(),
                 canvas.getHeight());
     }
 
@@ -883,12 +885,15 @@ public class GameplayMode extends WorldController implements ContactListener {
         canvas.endHud();
 
         canvas.beginText();
+        // Fix scale changing later!!!!!!
         timer.displayTime(canvas,
                           timesFont,
                           Color.WHITE,
                           Gdx.graphics.getWidth() / 2.1f,
                           Gdx.graphics.getHeight() / 1.03f,
-                          new Vector2(Gdx.graphics.getWidth()/1129.412f, Gdx.graphics.getHeight()/635.294f));
+                (new Vector2(scalex, scaley)));
+        System.out.println(Gdx.graphics.getWidth());
+        System.out.println(Gdx.graphics.getHeight());
         //canvas.drawTime(timesFont,"me", Color.WHITE, 800, 200);
         canvas.endtext();
 
