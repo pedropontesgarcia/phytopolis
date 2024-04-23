@@ -78,6 +78,7 @@ public class GDXRoot extends Game implements ScreenListener {
             levelSelect.gatherAssets(directory);
             levelSelect.setScreenListener(this);
             levelSelect.setCanvas(canvas);
+            levelSelect.setBackgroundMusic(menu.getBackgroundMusic());
             setScreen(levelSelect);
             menu.dispose();
             menu = null;
