@@ -18,7 +18,7 @@ public class Sun extends Resource {
                Tilemap tm,
                float texScl) {
         super(x, y, w, h, tm, texScl);
-        bodyinfo.gravityScale = 0.005f;
+        bodyinfo.gravityScale = 0;
         sunFilmstrip = sf;
         setTexture(sf);
     }

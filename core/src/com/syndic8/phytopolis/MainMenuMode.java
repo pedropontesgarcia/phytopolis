@@ -221,7 +221,7 @@ public class MainMenuMode implements Screen {
                 playButton = internal.getEntry("play", Texture.class);
                 playButton.setFilter(TextureFilter.Linear,
                                      TextureFilter.Linear);
-                if(backgroundMusic == null){
+                if (backgroundMusic == null) {
                     backgroundMusic = assets.getEntry("newgrowth", Music.class);
                     backgroundMusic.setLooping(true);
                     backgroundMusic.play();
@@ -232,7 +232,7 @@ public class MainMenuMode implements Screen {
         }
     }
 
-    public Music getBackgroundMusic(){
+    public Music getBackgroundMusic() {
         return backgroundMusic;
     }
 
@@ -261,20 +261,22 @@ public class MainMenuMode implements Screen {
                     0,
                     (float) canvas.getWidth() / logo.getWidth(),
                     (float) canvas.getHeight() / logo.getHeight());
+        if (progress == 1.0f) {
+            tmr = 0;
+            progress = 2;
+        }
         Color tint = (pressState == 1 ?
                 Color.GRAY :
                 new Color(1f, 1f, 1f, (float) Math.pow(Math.sin(tmr), 2)));
-        if (progress == 1.0f) {
-            canvas.draw(playButton,
-                        tint,
-                        playButton.getWidth() / 2.0f,
-                        playButton.getHeight() / 2.0f,
-                        canvas.getWidth() / 2.0f,
-                        canvas.getHeight() / 4.0f,
-                        0,
-                        0.001f,
-                        0.001f);
-        }
+        if (progress > 1.0f) canvas.draw(playButton,
+                                         tint,
+                                         playButton.getWidth() / 2.0f,
+                                         playButton.getHeight() / 2.0f,
+                                         canvas.getWidth() / 2.0f,
+                                         canvas.getHeight() / 4.0f,
+                                         0,
+                                         0.001f,
+                                         0.001f);
         canvas.end();
     }
 

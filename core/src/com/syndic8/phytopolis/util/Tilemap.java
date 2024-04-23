@@ -235,7 +235,6 @@ public class Tilemap {
                             "tilesets").get(1).getInt("firstgid"));
                     float xMid = (col + 0.5f) * tileWidth;
                     float yMid = worldHeight - (row + 0.5f) * tileHeight;
-                    System.out.println(tileValue);
                     if (tileJson.get("properties")
                             .get(0)
                             .getString("value")
@@ -268,6 +267,7 @@ public class Tilemap {
                                         this,
                                         1);
                         ctrl.addObject(s);
+                        s.setVY(-0.5f);
                     }
                 }
             }

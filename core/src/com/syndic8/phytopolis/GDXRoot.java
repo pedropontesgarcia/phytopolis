@@ -82,8 +82,7 @@ public class GDXRoot extends Game implements ScreenListener {
             setScreen(levelSelect);
             menu.dispose();
             menu = null;
-        }
-        else if(screen == levelSelect){
+        } else if (screen == levelSelect) {
             //directory = menu.getAssets();
             ((GameplayMode) controller).setLevel(levelSelect.getLevel());
             controller.gatherAssets(directory);
@@ -91,8 +90,8 @@ public class GDXRoot extends Game implements ScreenListener {
             controller.setCanvas(canvas);
             controller.reset();
             setScreen(controller);
-//            menu.dispose();
-//            menu = null;
+            //            menu.dispose();
+            //            menu = null;
         } else if (exitCode == WorldController.EXIT_QUIT) {
             // We quit the main application
             Gdx.app.exit();
