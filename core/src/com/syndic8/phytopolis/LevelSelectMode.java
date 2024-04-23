@@ -1,6 +1,7 @@
 package com.syndic8.phytopolis;
 
 import com.badlogic.gdx.Screen;
+import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
@@ -8,6 +9,7 @@ import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import com.syndic8.phytopolis.assets.AssetDirectory;
 import com.syndic8.phytopolis.util.ScreenListener;
+import edu.cornell.gdiac.audio.AudioEngine;
 
 public class LevelSelectMode implements Screen {
     /**
@@ -25,16 +27,21 @@ public class LevelSelectMode implements Screen {
     private TextureRegion background;
     private boolean ready;
     private final Rectangle bounds;
+    private Music backgroundMusic;
+    private AudioEngine audioEngine;
 
 
     public LevelSelectMode(){
-        ready = false;
-        bounds = new Rectangle(0, 0, 16, 9);
+        this.ready = false;
+        this.bounds = new Rectangle(0, 0, 16, 9);
     }
 
     public void gatherAssets(AssetDirectory directory){
         background = new TextureRegion(directory.getEntry("lvlsel:background",
                 Texture.class));
+        backgroundMusic = directory.getEntry("newgrowth", Music.class);
+        backgroundMusic.setLooping(true);
+        backgroundMusic.play();
     }
 
     public void setCanvas(GameCanvas canvas) {
@@ -43,6 +50,7 @@ public class LevelSelectMode implements Screen {
     @Override
     public void show() {
         active = true;
+        if (backgroundMusic != null) backgroundMusic.play();
     }
 
     @Override
@@ -99,10 +107,11 @@ public class LevelSelectMode implements Screen {
     @Override
     public void hide() {
         active = false;
+        backgroundMusic.stop();
     }
 
     @Override
     public void dispose() {
-
+        backgroundMusic.dispose();
     }
 }

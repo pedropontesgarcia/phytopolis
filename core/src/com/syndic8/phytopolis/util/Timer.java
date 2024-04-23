@@ -2,11 +2,14 @@ package com.syndic8.phytopolis.util;
 
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
+import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.TimeUtils;
 import com.syndic8.phytopolis.GameCanvas;
 
 public class Timer {
+    private SpriteBatch batch;
+
     /**
      * The current number of minutes left
      */
@@ -72,6 +75,8 @@ public class Timer {
         minutes = startMinutes;
         numStars = stars;
         this.starTime = starTime;
+        batch = new SpriteBatch();
+
 
     }
 
@@ -137,10 +142,11 @@ public class Timer {
     public void displayTime(GameCanvas canvas,
                             BitmapFont font, Color color,
                             float x, float y){
-        //String timeDisplay = String.format("%02d:%02d", minutes, seconds);
-        String timeDisplay = "" + minutes + " : " + seconds;
-        font.setColor(color);
-        canvas.drawText(timeDisplay, font, x, y);
+        String timeDisplay = String.format("%02d:%02d", minutes, seconds);
+        //String timeDisplay = "" + minutes + " : " + seconds;
+//        font.setColor(color);
+//        canvas.drawText(timeDisplay, font, x, y);
+        canvas.drawTime(font, timeDisplay, color, x, y);
     }
 
     /**

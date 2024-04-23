@@ -167,11 +167,11 @@ public class GameplayMode extends WorldController implements ContactListener {
         waterCursorTexture = new TextureRegion(directory.getEntry("ui:water-cursor",
                 Texture.class));
         Pixmap pixmap = getPixmapFromRegion(branchCursorTexture);
-        branchCursor = Gdx.graphics.newCursor(pixmap, 128 / 2, 128 / 2);
+        branchCursor = Gdx.graphics.newCursor(pixmap, 64 / 2, 64 / 2);
         pixmap = getPixmapFromRegion(leafCursorTexture);
-        leafCursor = Gdx.graphics.newCursor(pixmap, 128 / 2, 128 / 2);
+        leafCursor = Gdx.graphics.newCursor(pixmap, 64 / 2, 64 / 2);
         pixmap = getPixmapFromRegion(waterCursorTexture);
-        waterCursor = Gdx.graphics.newCursor(pixmap, 128 / 2, 128 / 2);
+        waterCursor = Gdx.graphics.newCursor(pixmap, 64 / 2, 64 / 2);
         pixmap.dispose();
 
 
@@ -372,7 +372,7 @@ public class GameplayMode extends WorldController implements ContactListener {
             region.getTexture().getTextureData().prepare();
         }
         Pixmap originalPixmap = region.getTexture().getTextureData().consumePixmap();
-        Pixmap cursorPixmap = new Pixmap(128, 128, originalPixmap.getFormat());
+        Pixmap cursorPixmap = new Pixmap(64, 64, originalPixmap.getFormat());
         cursorPixmap.drawPixmap(
                 originalPixmap,
                 0, 0,
@@ -732,6 +732,23 @@ public class GameplayMode extends WorldController implements ContactListener {
         //fireSound.stop(fireId);
     }
 
+    /**
+     * Called when this screen is no longer the current screen for a Game.
+     */
+    public void hide() {
+        // Useless if called in outside animation loop
+        super.hide();
+        backgroundMusic.stop();
+    }
+
+    /**
+     * Called when this screen becomes the current screen for a Game.
+     */
+    public void show() {
+        super.show();
+        backgroundMusic.play();
+    }
+
     private void drawBackground() {
         if (background != null) {
             canvas.draw(background.getTexture(),
@@ -763,9 +780,10 @@ public class GameplayMode extends WorldController implements ContactListener {
         //System.out.println(timer.getSeconds());
 
         tilemap.draw(canvas);
+
         super.draw(dt);
 
-        plantController.draw(canvas);
+        //plantController.draw(canvas);
         InputController ic = InputController.getInstance();
         if (!ic.didSpecial()) {
             Vector2 projMousePos = new Vector2(ic.getMouseX(), ic.getMouseY());
@@ -782,6 +800,14 @@ public class GameplayMode extends WorldController implements ContactListener {
         hazardController.drawWarning(canvas, cameraVector);
         resourceController.draw(canvas);
         canvas.endHud();
+
+        canvas.beginText();
+        timer.displayTime(canvas, timesFont, Color.WHITE, Gdx.graphics.getWidth()/2.0f, Gdx.graphics.getHeight()/1.05f);
+        //canvas.drawTime(timesFont,"me", Color.WHITE, 800, 200);
+        canvas.endtext();
+
+
+
     }
 
 }
