@@ -440,10 +440,10 @@ public class GameplayMode extends WorldController implements ContactListener {
                     //            if (InputController.getInstance().didSpecial())
                     //                lt = Leaf.leafType.BOUNCY;
                     Model newLeaf = plantController.handleLeaf(unprojMousePos.x,
-                                                             unprojMousePos.y +
-                                                                     0.5f *
-                                                                             tilemap.getTileHeight(),
-                                                             lt);
+                                                               unprojMousePos.y +
+                                                                       0.5f *
+                                                                               tilemap.getTileHeight(),
+                                                               lt);
                     if (newLeaf != null) addObject(newLeaf);
                 }
             }
@@ -741,8 +741,29 @@ public class GameplayMode extends WorldController implements ContactListener {
                                 ((Model) fix1.getBody()
                                         .getUserData()).getType() ==
                                         Model.ModelType.SUN);
+        boolean isCollisionBetweenTileAndSun =
+                (((Model) fix1.getBody().getUserData()).getType() ==
+                        Model.ModelType.TILE_NOTOP &&
+                        ((Model) fix2.getBody().getUserData()).getType() ==
+                                Model.ModelType.SUN) ||
+                        (((Model) fix2.getBody().getUserData()).getType() ==
+                                Model.ModelType.TILE_NOTOP &&
+                                ((Model) fix1.getBody()
+                                        .getUserData()).getType() ==
+                                        Model.ModelType.SUN) ||
+                        (((Model) fix1.getBody().getUserData()).getType() ==
+                                Model.ModelType.TILE_FULL &&
+                                ((Model) fix2.getBody()
+                                        .getUserData()).getType() ==
+                                        Model.ModelType.SUN) ||
+                        (((Model) fix2.getBody().getUserData()).getType() ==
+                                Model.ModelType.TILE_FULL &&
+                                ((Model) fix1.getBody()
+                                        .getUserData()).getType() ==
+                                        Model.ModelType.SUN);
         if (isCollisionBetweenPlayerAndSun ||
-                isCollisionBetweenPlatformAndSun) {
+                isCollisionBetweenPlatformAndSun ||
+                isCollisionBetweenTileAndSun) {
             contact.setEnabled(false);
         }
         if (isCollisionBetweenLeafAndSun) {
@@ -842,11 +863,11 @@ public class GameplayMode extends WorldController implements ContactListener {
     private void drawVignette() {
         float backgroundY = canvas.getCameraY() - canvas.getViewPortY() / 2;
         canvas.draw(vignette.getTexture(),
-                Color.WHITE,
-                0,
-                backgroundY,
-                canvas.getWidth(),
-                canvas.getHeight());
+                    Color.WHITE,
+                    0,
+                    backgroundY,
+                    canvas.getWidth(),
+                    canvas.getHeight());
     }
 
     /**

@@ -141,6 +141,11 @@ public class Tilemap {
      * @param ctrl The WorldController to populate.
      */
     public void populateLevel(WorldController ctrl) {
+        populatePhysics(ctrl);
+        populateResources(ctrl);
+    }
+
+    private void populatePhysics(WorldController ctrl) {
         JsonValue layersJson = tilemap.get("layers");
         JsonValue physicsLayer = null;
         for (JsonValue layerJson : layersJson) {
@@ -165,7 +170,8 @@ public class Tilemap {
                     float x1 = (col + 1) * tileWidth;
                     float y0 = worldHeight - (row + 1) * tileHeight;
                     float y1 = worldHeight - row * tileHeight;
-                    JsonValue tileJson = tilesJson.get(tileValue - 1);
+                    JsonValue tileJson = tilesJson.get(tileValue - tilemap.get(
+                            "tilesets").get(0).getInt("firstgid"));
                     Texture tx = new Texture(
                             "gameplay/tiles/" + tileJson.getString("image"));
                     boolean hasCollider = tileJson.has("objectgroup");
@@ -183,7 +189,7 @@ public class Tilemap {
                         float cx0 = x0 +
                                 colliderJson.getFloat("x") / tilePixelWidth *
                                         tileWidth;
-                        float cy0 = y0 +
+                        float cy0 = y0 -
                                 colliderJson.getFloat("y") / tilePixelHeight *
                                         tileHeight;
                         float cx1 = cx0 + colliderJson.getFloat("width") /
@@ -191,12 +197,12 @@ public class Tilemap {
                         float cy1 = cy0 + colliderJson.getFloat("height") /
                                 tilePixelHeight * tileHeight;
                         tile.addCollider(new float[]{cx0,
-                                cy1,
-                                cx1,
-                                cy1,
-                                cx1,
                                 cy0,
                                 cx0,
+                                cy1,
+                                cx1,
+                                cy1,
+                                cx1,
                                 cy0});
                         ctrl.addObject(tile.getCollider());
                         tile.fixColliderUserData();
@@ -205,7 +211,6 @@ public class Tilemap {
                 }
             }
         }
-        populateResources(ctrl);
     }
 
     private void populateResources(WorldController ctrl) {
@@ -216,34 +221,54 @@ public class Tilemap {
                 resourceLayer = layerJson;
         }
         assert resourceLayer != null;
+        String tilesetName = tilemap.get("tilesets").get(1).getString("source");
+        JsonValue tilesetJson = directory.getEntry(tilesetName,
+                                                   JsonValue.class);
+        JsonValue tilesJson = tilesetJson.get("tiles");
+
         for (int row = 0; row < tilemapHeight; row++) {
             for (int col = 0; col < tilemapWidth; col++) {
-                if (resourceLayer.get("data").asIntArray()[row * tilemapWidth +
-                        col] != 0) {
+                int tileValue = resourceLayer.get("data").asIntArray()[
+                        row * tilemapWidth + col];
+                if (tileValue != 0) {
+                    JsonValue tileJson = tilesJson.get(tileValue - tilemap.get(
+                            "tilesets").get(1).getInt("firstgid"));
                     float xMid = (col + 0.5f) * tileWidth;
                     float yMid = worldHeight - (row + 0.5f) * tileHeight;
-                    FilmStrip waterFilmstrip = new FilmStrip(resourceTextures[0],
-                                                             1,
-                                                             13);
-                    FilmStrip sunFilmstrip = new FilmStrip(resourceTextures[1],
-                                                           1,
-                                                           1);
-                    Water w = new Water(xMid,
+                    System.out.println(tileValue);
+                    if (tileJson.get("properties")
+                            .get(0)
+                            .getString("value")
+                            .equals("water")) {
+                        FilmStrip waterFilmstrip = new FilmStrip(
+                                resourceTextures[0],
+                                1,
+                                13);
+                        Water w = new Water(xMid,
+                                            yMid,
+                                            tileWidth,
+                                            tileHeight,
+                                            waterFilmstrip,
+                                            this,
+                                            1);
+                        ctrl.addObject(w);
+
+                    } else if (tileJson.get("properties")
+                            .get(0)
+                            .getString("value")
+                            .equals("sun")) {
+                        FilmStrip sunFilmstrip = new FilmStrip(resourceTextures[1],
+                                                               1,
+                                                               1);
+                        Sun s = new Sun(xMid,
                                         yMid,
                                         tileWidth,
                                         tileHeight,
-                                        waterFilmstrip,
+                                        sunFilmstrip,
                                         this,
                                         1);
-                    Sun s = new Sun(xMid,
-                                    yMid,
-                                    tileWidth,
-                                    tileHeight,
-                                    sunFilmstrip,
-                                    this,
-                                    1);
-                    ctrl.addObject(w);
-                    ctrl.addObject(s);
+                        ctrl.addObject(s);
+                    }
                 }
             }
         }
