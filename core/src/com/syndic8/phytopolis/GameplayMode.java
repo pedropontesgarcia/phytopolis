@@ -439,7 +439,7 @@ public class GameplayMode extends WorldController implements ContactListener {
                     Leaf.leafType lt = Leaf.leafType.NORMAL;
                     //            if (InputController.getInstance().didSpecial())
                     //                lt = Leaf.leafType.BOUNCY;
-                    Model newLeaf = plantController.growLeaf(unprojMousePos.x,
+                    Model newLeaf = plantController.handleLeaf(unprojMousePos.x,
                                                              unprojMousePos.y +
                                                                      0.5f *
                                                                              tilemap.getTileHeight(),

@@ -10,6 +10,7 @@ import com.syndic8.phytopolis.level.models.Branch;
 import com.syndic8.phytopolis.level.models.Leaf;
 import com.syndic8.phytopolis.util.FilmStrip;
 import com.syndic8.phytopolis.util.Tilemap;
+import jdk.vm.ci.meta.Assumptions;
 
 public class PlantController {
 
@@ -220,6 +221,13 @@ public class PlantController {
         return null;
     }
 
+    public boolean hasLeaf(float x, float y) {
+        int xIndex = screenCoordToIndex(x, y)[0];
+        int yIndex = screenCoordToIndex(x, y)[1];
+        if (!inBounds(xIndex, yIndex)) return false;
+        return plantGrid[xIndex][yIndex].hasLeaf();
+    }
+
     /**
      * upgrades the leaf at the target node
      * @param x screen x coord of the target node
@@ -243,6 +251,17 @@ public class PlantController {
             return plantGrid[xIndex][yIndex].makeBranch(direction, type, world);
         }
         return null;
+    }
+
+    public Leaf handleLeaf(float x, float y, Leaf.leafType lt) {
+        int xIndex = screenCoordToIndex(x, y)[0];
+        int yIndex = screenCoordToIndex(x, y)[1];
+        if (!inBounds(xIndex, yIndex)) return null;
+        if (plantGrid[xIndex][yIndex].hasLeaf() && resourceController.canUpgrade()){
+            return upgradeLeaf(x, y, Leaf.leafType.BOUNCY);
+        } else {
+            return growLeaf(x, y, lt);
+        }
     }
 
     /**

@@ -48,7 +48,7 @@ public class ResourceController {
 
     public ResourceController() {
         currWater = MAX_WATER;
-        currSun = 0;
+        currSun = 1;
         ui = new UIController();
     }
 
