@@ -488,7 +488,7 @@ public class GameplayMode extends WorldController implements ContactListener {
 
         //handleDrop();
         cameraVector.set(8,
-                         Math.max(avatar.getY() - canvas.getHeight() / 6f,
+                         Math.max(avatar.getY(),
                                   canvas.getHeight() / 2f));
         // generate hazards please
         for (Model m : objects) {
@@ -511,6 +511,12 @@ public class GameplayMode extends WorldController implements ContactListener {
         plantController.propagateDestruction();
         //        System.out.println(objects.size());
         timer.updateTime();
+        // Check for win condition
+        if ((avatar.getY() > tilemap.getVictoryHeight() * tilemap.getTileHeight())) {
+            timer.setRunning(false);
+            starPoints = timer.getAcquiredStars();
+            setComplete(true);
+        }
     }
 
     //    /**
@@ -881,8 +887,8 @@ public class GameplayMode extends WorldController implements ContactListener {
      * @param dt Number of seconds since last animation frame
      */
     public void draw(float dt) {
-        canvas.cameraUpdate(cameraVector);
         canvas.clear();
+        canvas.cameraUpdate(cameraVector);
         canvas.begin();
         drawBackground();
         drawVignette();
@@ -926,7 +932,6 @@ public class GameplayMode extends WorldController implements ContactListener {
         System.out.println(Gdx.graphics.getHeight());
         //canvas.drawTime(timesFont,"me", Color.WHITE, 800, 200);
         canvas.endtext();
-
     }
 
 }

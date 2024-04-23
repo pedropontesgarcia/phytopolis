@@ -39,7 +39,7 @@ public class LevelBox {
         }
     }
 
-    public void setTexutre(Texture rs) {
+    public void setTexture(Texture rs) {
         texture = rs;
     }
     public boolean getSelected(){

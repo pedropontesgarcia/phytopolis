@@ -55,6 +55,8 @@ public class GDXRoot extends Game implements ScreenListener {
         // Call dispose on our children
         setScreen(null);
         controller.dispose();
+        levelSelect.dispose();
+        victory.dispose();
 
         canvas.dispose();
         canvas = null;
@@ -92,6 +94,15 @@ public class GDXRoot extends Game implements ScreenListener {
             setScreen(controller);
             //            menu.dispose();
             //            menu = null;
+        } else if (screen == victory) {
+            levelSelect.reset();
+            setScreen(levelSelect);
+        } else if (exitCode == WorldController.EXIT_VICTORY) {
+            victory.reset();
+            victory.gatherAssets(directory);
+            victory.setScreenListener(this);
+            victory.setCanvas(canvas);
+            setScreen(victory);
         } else if (exitCode == WorldController.EXIT_QUIT) {
             // We quit the main application
             Gdx.app.exit();

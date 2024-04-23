@@ -137,7 +137,7 @@ public class GameCanvas {
     public void cameraUpdate(Vector2 pos) {
         //camera.position.set(pos, 0);
         camera.position.interpolate(new Vector3(pos.x, pos.y, 0),
-                                    0.3f,
+                                    0.75f,
                                     Interpolation.fade);
         spriteBatch.setProjectionMatrix(camera.combined);
         camera.update();
@@ -394,6 +394,8 @@ public class GameCanvas {
         // Clear the screen
         //Gdx.gl.glClearColor(0, 0, 0, 0);  // Black
         ScreenUtils.clear(Color.BLACK);
+        camera.position.set(new Vector2(8f, 4.5f), 0);
+//        camera = new OrthographicCamera(width, height);
     }
 
     /**

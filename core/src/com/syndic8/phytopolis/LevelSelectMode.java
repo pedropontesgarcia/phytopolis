@@ -67,7 +67,7 @@ public class LevelSelectMode implements Screen {
                                      canvas.getHeight() / 3.3f);
         levelBoxes[2] = new LevelBox(canvas.getWidth() / 1.47f,
                                      canvas.getHeight() / 3.3f);
-        for (LevelBox lb : levelBoxes) if (lb != null) lb.setTexutre(rs);
+        for (LevelBox lb : levelBoxes) if (lb != null) lb.setTexture(rs);
     }
 
     public int getSelectedPot() {
@@ -93,6 +93,10 @@ public class LevelSelectMode implements Screen {
                 listener.exitScreen(this, 0);
             }
         }
+    }
+
+    public void reset() {
+        ready = false;
     }
 
     public void update(float delta) {

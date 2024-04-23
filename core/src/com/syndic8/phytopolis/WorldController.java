@@ -61,9 +61,13 @@ public abstract class WorldController implements Screen {
      */
     public static final int EXIT_PREV = 2;
     /**
+     * Exit code for victory screen
+     */
+    public static final int EXIT_VICTORY = 3;
+    /**
      * How many frames after winning/losing do we continue?
      */
-    public static final int EXIT_COUNT = 120;
+    public static final int EXIT_COUNT = 0;
     /**
      * The amount of time for a physics engine step.
      */
@@ -434,7 +438,7 @@ public abstract class WorldController implements Screen {
                 reset();
             } else if (complete) {
                 pause();
-                listener.exitScreen(this, EXIT_NEXT);
+                listener.exitScreen(this, EXIT_VICTORY);
                 return false;
             }
         }
