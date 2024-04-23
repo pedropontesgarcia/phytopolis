@@ -836,7 +836,7 @@ public class GameplayMode extends WorldController implements ContactListener {
                 Color.WHITE,
                 0,
                 backgroundY,
-                canvas.getHeight(),
+                canvas.getWidth(),
                 canvas.getHeight());
     }
 
