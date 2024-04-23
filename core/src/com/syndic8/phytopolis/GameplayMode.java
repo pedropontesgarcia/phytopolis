@@ -782,7 +782,7 @@ public class GameplayMode extends WorldController implements ContactListener {
         tilemap.draw(canvas);
         super.draw(dt);
 
-        plantController.draw(canvas);
+        //plantController.draw(canvas);
         InputController ic = InputController.getInstance();
         if (!ic.didSpecial()) {
             Vector2 projMousePos = new Vector2(ic.getMouseX(), ic.getMouseY());
