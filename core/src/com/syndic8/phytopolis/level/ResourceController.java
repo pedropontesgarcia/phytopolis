@@ -38,22 +38,16 @@ public class ResourceController {
      */
     private final UIController ui;
     /**
-     * All pickup resources in world
+     * Current amount of sun stored
      */
-    protected PooledList<Resource> resources = new PooledList<Resource>();
     private int currSun;
     /**
      * Current amount of water stored
      */
     private int currWater;
-    /**
-     * Frames on ground (for getting water)
-     */
-    private int framesOnGround;
 
     public ResourceController() {
         currWater = MAX_WATER;
-        framesOnGround = 0;
         currSun = 0;
         ui = new UIController();
     }
@@ -102,25 +96,19 @@ public class ResourceController {
     public boolean canUpgrade() { return currSun >= UPGRADE_AMT; }
 
     public void decrementGrowLeaf() {
-        if (!canGrowLeaf()) {
-            //System.out.println("NOT ENOUGH WATER!");
-        } else {
+        if (canGrowLeaf()) {
             currWater -= LEAF_GROW_AMT;
         }
     }
 
     public void decrementGrowBranch() {
-        if (!canGrowBranch()) {
-            //System.out.println("NOT ENOUGH WATER!");
-        } else {
+        if (canGrowBranch()) {
             currWater -= BRANCH_GROW_AMT;
         }
     }
 
     public void decrementExtinguish() {
-        if (!canExtinguish()) {
-            //System.out.println("NOT ENOUGH WATER!");
-        } else {
+        if (canExtinguish()) {
             currWater -= FIRE_AMT;
         }
     }
@@ -131,25 +119,6 @@ public class ResourceController {
         } else {
             currSun -= UPGRADE_AMT;
         }
-    }
-
-    //    public void addWater(float x, float y) {
-    //        Water w = new Water(x, y);
-    //        resources.add(w);
-    //    }
-
-    //    public void addSun(float x, float y) {
-    //        Sun s = new Sun(x, y);
-    //        resources.add(s);
-    //    }
-
-    public PooledList<Resource> getResources() {
-        return resources;
-    }
-
-    public void update() {
-
-
     }
 
     public void draw(GameCanvas c) {
