@@ -148,9 +148,6 @@ public class ResourceController {
     }
 
     public void update(Player player) {
-        for (Resource r : resources) {
-            r.regenerate();
-        }
         if (player.atBottom()) {
             //System.out.println("AT BOTTOM");
             framesOnGround++;

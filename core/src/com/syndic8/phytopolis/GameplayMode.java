@@ -483,8 +483,8 @@ public class GameplayMode extends WorldController implements ContactListener {
         // generate hazards please
         resourceController.update(avatar);
         for (Model m : objects) {
-            if (m instanceof Resource) {
-                ((Resource) m).regenerate();
+            if (m instanceof Water) {
+                ((Water) m).regenerate();
             }
         }
         hazardController.updateHazards();
