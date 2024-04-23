@@ -149,6 +149,7 @@ public class Tilemap {
                                 cx0,
                                 cy0});
                         ctrl.addObject(tile.getCollider());
+                        tile.fixColliderUserData();
                     }
                     tiles.add(tile);
                 }

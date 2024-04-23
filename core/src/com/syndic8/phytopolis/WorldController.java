@@ -140,7 +140,6 @@ public abstract class WorldController implements Screen {
      * Countdown active for winning or losing
      */
     private int countdown;
-
     /**
      * Creates a new game world with the default values.
      * <p>
@@ -194,6 +193,10 @@ public abstract class WorldController implements Screen {
         debug = false;
         active = false;
         countdown = -1;
+    }
+
+    public World getWorld() {
+        return world;
     }
 
     /**

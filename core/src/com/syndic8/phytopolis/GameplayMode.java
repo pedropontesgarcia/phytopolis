@@ -663,6 +663,14 @@ public class GameplayMode extends WorldController implements ContactListener {
                                 ((Model) fix1.getBody()
                                         .getUserData()).getType() ==
                                         Model.ModelType.LEAF);
+        boolean isCollisionBetweenPlayerAndNoTopTile =
+                (fix1.getBody() == avatar.getBody() &&
+                        ((Model) fix2.getBody().getUserData()).getType() ==
+                                Model.ModelType.TILE_NOTOP) ||
+                        (fix2.getBody() == avatar.getBody() &&
+                                ((Model) fix1.getBody()
+                                        .getUserData()).getType() ==
+                                        Model.ModelType.TILE_NOTOP);
         boolean isCollisionBetweenPlayerAndWater =
                 (fix1.getBody() == avatar.getBody() &&
                         ((Model) fix2.getBody().getUserData()).getType() ==
@@ -716,6 +724,7 @@ public class GameplayMode extends WorldController implements ContactListener {
         }
 
         boolean isPlayerGoingUp = avatar.getVY() >= 0;
+        boolean isPlayerGoingDown = avatar.getVY() <= 0;
         boolean isPlayerBelow = false;
         if (fix1.getBody() == avatar.getBody()) isPlayerBelow =
                 fix1.getBody().getPosition().y - avatar.getHeight() / 2f <
@@ -726,6 +735,9 @@ public class GameplayMode extends WorldController implements ContactListener {
         if (isCollisionBetweenPlayerAndLeaf &&
                 (isPlayerGoingUp || isPlayerBelow ||
                         InputController.getInstance().didDrop())) {
+            contact.setEnabled(false);
+        }
+        if (isCollisionBetweenPlayerAndNoTopTile && isPlayerGoingDown) {
             contact.setEnabled(false);
         }
         if (isCollisionBetweenPlayerAndLeaf) {
