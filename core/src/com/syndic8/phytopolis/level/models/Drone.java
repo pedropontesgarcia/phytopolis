@@ -30,8 +30,7 @@ public class Drone extends Hazard {
                  int timeTilExplosion,
                  Tilemap tm,
                  float texScl) {
-        super(tm, texScl, pos, location);
-        this.timer = timeTilExplosion;
+        super(tm, texScl, pos, location, timeTilExplosion);
         isAlive = true;
     }
 
@@ -54,20 +53,8 @@ public class Drone extends Hazard {
         return isAlive;
     }
 
-    /**
-     * Gets the time till explosion.
-     *
-     * @return The current location of the drone.
-     */
-    public int getTimer() {
-        return timer;
-    }
+    public void update(float delta) {
 
-    /**
-     * Sets the time till explosion.
-     */
-    public void setTimer(int time) {
-        timer = time;
     }
 
 }

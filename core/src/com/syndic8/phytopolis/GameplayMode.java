@@ -501,7 +501,9 @@ public class GameplayMode extends WorldController implements ContactListener {
                 }
             }
         }
-        hazardController.updateHazards();
+        for (Hazard h : hazardController.updateHazards()) {
+            addObject(h);
+        }
         InputController ic = InputController.getInstance();
         if (ic.didMousePress()) {
             Vector2 projMousePos = new Vector2(ic.getGrowX(), ic.getGrowY());
@@ -910,7 +912,7 @@ public class GameplayMode extends WorldController implements ContactListener {
 
         canvas.beginHud();
         hazardController.drawWarning(canvas, cameraVector);
-        resourceController.draw(canvas);
+        resourceController.drawUI(canvas);
         canvas.endHud();
 
         canvas.beginText();

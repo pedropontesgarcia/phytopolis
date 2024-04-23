@@ -121,7 +121,7 @@ public class ResourceController {
         }
     }
 
-    public void draw(GameCanvas c) {
+    public void drawUI(GameCanvas c) {
         ui.update((float) currWater / MAX_WATER, (float) currSun / MAX_SUN);
         ui.draw(c);
     }

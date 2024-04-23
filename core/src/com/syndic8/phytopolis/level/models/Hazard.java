@@ -5,12 +5,12 @@ import com.badlogic.gdx.math.Vector2;
 import com.syndic8.phytopolis.GameCanvas;
 import com.syndic8.phytopolis.util.Tilemap;
 
-public abstract class Hazard extends CircleObject {
+public abstract class Hazard extends Model {
 
-    /**
-     * Radius for hazard collisions
-     */
-    private static final int HAZARD_RADIUS = 30;
+//    /**
+//     * Radius for hazard collisions
+//     */
+//    private static final int HAZARD_RADIUS = 30;
 
     /**
      * The current location (index-wise) of the hazard.
@@ -18,11 +18,17 @@ public abstract class Hazard extends CircleObject {
     protected Vector2 location;
 
     /**
+     * Time until trigger event
+     */
+    private int timer;
+
+    /**
      * Creates a hazard object.
      */
-    public Hazard(Tilemap tm, float texScl, Vector2 pos, Vector2 location) {
-        super(pos.x, pos.y, HAZARD_RADIUS, tm, texScl);
+    public Hazard(Tilemap tm, float texScl, Vector2 pos, Vector2 location, int timer) {
+        super(pos.x, pos.y, tm, texScl);
         this.location = location;
+        this.timer = timer;
         zIndex = 4;
     }
 
@@ -53,6 +59,27 @@ public abstract class Hazard extends CircleObject {
      */
     @Override
     public abstract ModelType getType();
+
+    /**
+     * Gets the time till explosion.
+     *
+     * @return The current location of the drone.
+     */
+    public int getTimer() {
+        return timer;
+    }
+
+    /**
+     * Sets the time till explosion.
+     */
+    public void setTimer(int time) {
+        timer = time;
+    }
+
+    public boolean tick() {
+        timer--;
+        return timer == 0;
+    }
 
     /**
      * Draws the hazard on the provided GameCanvas.

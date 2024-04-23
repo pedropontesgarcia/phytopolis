@@ -55,10 +55,10 @@ public class Tile extends Model {
                     height);
     }
 
-    @Override
-    public void drawDebug(GameCanvas canvas) {
-
-    }
+//    @Override
+//    public void drawDebug(GameCanvas canvas) {
+//
+//    }
 
     public PolygonObject getCollider() {
         return collider;
