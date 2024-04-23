@@ -265,6 +265,8 @@ public class GameplayMode extends WorldController implements ContactListener {
         addQueue.clear();
         world.dispose();
 
+        InputController.getInstance().resetScrolled();
+
         world = new World(gravity, false);
         world.setContactListener(this);
         setComplete(false);
@@ -514,8 +516,9 @@ public class GameplayMode extends WorldController implements ContactListener {
         if (ic.didMousePress()) {
 //            System.out.println(ic.getGrowX()/ tilemap.getTileWidth() + " " + ic.getGrowY()/ tilemap.getTileHeight());
 //            System.out.println(tilemap.getTilemapWidth() + " " + );
-            System.out.println(cameraVector.x + " " + cameraVector.y);
-            System.out.println(ic.getScrolled());
+//            System.out.println(cameraVector.x + " " + cameraVector.y);
+//            System.out.println(ic.getScrolled());
+//            setComplete(true);
             Vector2 projMousePos = new Vector2(ic.getGrowX(), ic.getGrowY());
             Vector2 unprojMousePos = canvas.unproject(projMousePos);
             hazardController.extinguishFire(unprojMousePos);
