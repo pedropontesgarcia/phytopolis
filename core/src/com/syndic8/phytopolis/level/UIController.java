@@ -31,8 +31,8 @@ public class UIController {
      */
     public void gatherAssets(AssetDirectory directory) {
         waterdropStrip = new FilmStrip(directory.getEntry(
-                "gameplay:water_filmstrip",
-                Texture.class), 1, 13);
+                "gameplay:water_ui",
+                Texture.class), 1, 11);
         sunStrip = new FilmStrip(directory.getEntry("gameplay:sun_filmstrip",
                                                     Texture.class), 1, 9);
     }
@@ -60,13 +60,13 @@ public class UIController {
         float widthRatio = (float) waterdropStrip.getRegionHeight() /
                 waterdropStrip.getRegionWidth();
         c.drawHud(waterdropStrip,
-                  w * (-0.025f),
-                  h * 0.75f,
-                  w * 0.125f / widthRatio,
-                  w * 0.125f);
+                  w * (0.55f),
+                  h * 0.85f,
+                  w * 0.125f / widthRatio/1.5f,
+                  w * 0.125f/1.5f);
         c.drawHud(sunStrip,
-                  w * 0.075f,
-                  h * 0.75f,
+                  w * 0.33f,
+                  h * 0.81f,
                   w * 0.125f / widthRatio,
                   w * 0.125f);
     }
