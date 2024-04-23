@@ -75,7 +75,10 @@ public class LevelSelectMode extends FadingScreen implements Screen {
     @Override
     public void show() {
         active = true;
-        if (backgroundMusic != null) backgroundMusic.play();
+        if (backgroundMusic != null) {
+            backgroundMusic.setVolume(1);
+            backgroundMusic.play();
+        }
     }
 
     @Override
