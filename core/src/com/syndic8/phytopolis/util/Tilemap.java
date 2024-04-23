@@ -115,9 +115,8 @@ public class Tilemap {
                     float y0 = worldHeight - (row + 1) * tileHeight;
                     float y1 = worldHeight - row * tileHeight;
                     JsonValue tileJson = tilesJson.get(tileValue - 1);
-
-                    Texture tx = directory.getEntry(tileJson.getString("image"),
-                                                    Texture.class);
+                    Texture tx = new Texture(
+                            "gameplay/tiles/" + tileJson.getString("image"));
                     boolean hasCollider = tileJson.has("objectgroup");
                     boolean collideTop = tileJson.get("properties")
                             .get(0)
