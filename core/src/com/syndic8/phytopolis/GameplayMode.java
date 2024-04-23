@@ -786,10 +786,12 @@ public class GameplayMode extends WorldController implements ContactListener {
     }
 
     private void drawVignette(){
+        float base = Math.max(avatar.getY() - canvas.getHeight() / 6f,
+                canvas.getHeight() / 2f);
         canvas.draw(vignette.getTexture(),
                 Color.WHITE,
                 0,
-                0,
+                base,
                 canvas.getWidth(),
                 canvas.getHeight());
     }
