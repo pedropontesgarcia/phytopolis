@@ -14,6 +14,7 @@
     "gameplay:water_filmstrip": "gameplay/water-ui-sheet.png",
     "gameplay:water_ui": "gameplay/waterUI_filmstrip.png",
     "gameplay:sun_filmstrip": "gameplay/sun-ui-sheet.png",
+    "gameplay:sun_resource": "gameplay/sun-resource.png",
     "gameplay:background": "gameplay/back2.png",
     "gameplay:vignette": "gameplay/vignette.png",
     "hazards:fire": "hazards/fire.png",
