@@ -167,11 +167,11 @@ public class GameplayMode extends WorldController implements ContactListener {
         waterCursorTexture = new TextureRegion(directory.getEntry("ui:water-cursor",
                 Texture.class));
         Pixmap pixmap = getPixmapFromRegion(branchCursorTexture);
-        branchCursor = Gdx.graphics.newCursor(pixmap, 128 / 2, 128 / 2);
+        branchCursor = Gdx.graphics.newCursor(pixmap, 64 / 2, 64 / 2);
         pixmap = getPixmapFromRegion(leafCursorTexture);
-        leafCursor = Gdx.graphics.newCursor(pixmap, 128 / 2, 128 / 2);
+        leafCursor = Gdx.graphics.newCursor(pixmap, 64 / 2, 64 / 2);
         pixmap = getPixmapFromRegion(waterCursorTexture);
-        waterCursor = Gdx.graphics.newCursor(pixmap, 128 / 2, 128 / 2);
+        waterCursor = Gdx.graphics.newCursor(pixmap, 64 / 2, 64 / 2);
         pixmap.dispose();
 
 
@@ -372,7 +372,7 @@ public class GameplayMode extends WorldController implements ContactListener {
             region.getTexture().getTextureData().prepare();
         }
         Pixmap originalPixmap = region.getTexture().getTextureData().consumePixmap();
-        Pixmap cursorPixmap = new Pixmap(128, 128, originalPixmap.getFormat());
+        Pixmap cursorPixmap = new Pixmap(64, 64, originalPixmap.getFormat());
         cursorPixmap.drawPixmap(
                 originalPixmap,
                 0, 0,
