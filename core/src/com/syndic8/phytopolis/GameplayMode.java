@@ -628,14 +628,7 @@ public class GameplayMode extends WorldController implements ContactListener {
                                            fix1); // Could have more than one ground
             }
 
-            // Check for win condition
-            if ((bd1 == avatar && bd1.getY() >
-                    tilemap.getVictoryHeight() * tilemap.getTileHeight())) {
-                timer.setRunning(false);
-                starPoints = timer.getAcquiredStars();
-                setComplete(true);
 
-            }
             //            //Check for bouncyness
             //            if (bd1 == avatar && bd2 instanceof Leaf) {
             //                Leaf l1 = (Leaf) bd2;
@@ -928,8 +921,11 @@ public class GameplayMode extends WorldController implements ContactListener {
                           Gdx.graphics.getWidth() / 2.1f,
                           Gdx.graphics.getHeight() / 1.03f,
                           (new Vector2(scalex, scaley)));
-        System.out.println(Gdx.graphics.getWidth());
-        System.out.println(Gdx.graphics.getHeight());
+//        System.out.println(avatar.getY());
+//        System.out.println(isComplete());
+//        System.out.println(tilemap.getVictoryHeight()*tilemap.getTileHeight());
+//        System.out.println(Gdx.graphics.getWidth());
+//        System.out.println(Gdx.graphics.getHeight());
         //canvas.drawTime(timesFont,"me", Color.WHITE, 800, 200);
         canvas.endtext();
     }

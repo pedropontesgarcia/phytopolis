@@ -29,6 +29,7 @@ public class GDXRoot extends Game implements ScreenListener {
      */
     private MainMenuMode menu;
     private LevelSelectMode levelSelect;
+    private VictoryScreen victory;
     /**
      * Player mode for the the game proper (CONTROLLER CLASS)
      */
@@ -47,6 +48,7 @@ public class GDXRoot extends Game implements ScreenListener {
         menu = new MainMenuMode("assets.json", canvas, 1);
         controller = new GameplayMode();
         levelSelect = new LevelSelectMode();
+        victory = new VictoryScreen();
         menu.setScreenListener(this);
         setScreen(menu);
     }

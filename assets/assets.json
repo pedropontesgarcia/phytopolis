@@ -28,7 +28,8 @@
     "jog": "gameplay/jog-filmstrip.png",
     "ui:branch-cursor": "ui/branch-cursor.png",
     "ui:leaf-cursor": "ui/leaf-cursor.png",
-    "ui:water-cursor": "ui/water-cursor.png"
+    "ui:water-cursor": "ui/water-cursor.png",
+    "victory:background": "gameplay/victory_text.png"
   },
   "jsons": {
     "gameplay:lvl1": "gameplay/levels/lvl1.json",
