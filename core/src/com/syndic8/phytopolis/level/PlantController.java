@@ -1,5 +1,6 @@
 package com.syndic8.phytopolis.level;
 
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.World;
@@ -68,6 +69,10 @@ public class PlantController {
      * branch texture
      */
     protected FilmStrip branchTexture;
+    /**
+     * static branch texture
+     */
+    protected FilmStrip staticBranchTexture;
     /**
      * leaf texture
      */
@@ -404,6 +409,40 @@ public class PlantController {
     }
 
     /**
+     * draws the branch that the mouse hovers over
+     *
+     * @param canvas the canvas to draw to
+     */
+    public void drawGhostBranch(GameCanvas canvas, float x, float y) {
+        int xIndex = worldCoordToIndex(x, y)[0];
+        int yIndex = worldCoordToIndex(x, y)[1];
+        branchDirection direction = worldToBranch(x, y);
+        if (direction != null) {
+            float angle;
+            switch (direction) {
+                case MIDDLE:
+                    angle = 0; break;
+                case LEFT:
+                    angle = (float) Math.PI / 3; break;
+                case RIGHT:
+                    angle = (float) -Math.PI / 3; break;
+                default:
+                    angle = 0;
+            }
+            Branch branch = new Branch(
+                    plantGrid[xIndex][yIndex].getX(),
+                    plantGrid[xIndex][yIndex].getY(),
+                    angle,
+                    Branch.branchType.NORMAL,
+                    tilemap,
+                    1
+            );
+            branch.setFilmStrip(staticBranchTexture);
+            branch.drawGhost(canvas);
+        }
+    }
+
+    /**
      * draws the current plant to the canvas
      *
      * @param canvas the canvas to draw to
@@ -412,15 +451,6 @@ public class PlantController {
         try {
             for (PlantNode[] n : plantGrid) {
                 for (PlantNode node : n) {
-                    //                    canvas.draw(nodeTexture,
-                    //                                Color.WHITE,
-                    //                                nodeTexture.getWidth() / 2f,
-                    //                                nodeTexture.getHeight() / 2f,
-                    //                                node.getX(),
-                    //                                node.getY(),
-                    //                                0.0f,
-                    //                                0.005f,
-                    //                                0.006f);
                     try {
                         node.drawBranches(canvas);
                         node.drawLeaf(canvas);
@@ -466,6 +496,9 @@ public class PlantController {
         this.nodeTexture = directory.getEntry("gameplay:node", Texture.class);
         this.branchTexture = new FilmStrip(directory.getEntry("gameplay:branch", Texture.class),
                 1, 5, 5);
+        this.staticBranchTexture = new FilmStrip(directory.getEntry("gameplay:branch", Texture.class),
+                1, 5, 5);
+        this.staticBranchTexture.setFrame(4);
         this.leafTexture = new FilmStrip(directory.getEntry("gameplay:leaf", Texture.class),
                 1, 5, 5);
         this.bouncyLeafTexture = directory.getEntry("gameplay:bouncy",

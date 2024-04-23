@@ -189,6 +189,29 @@ public class Branch extends Model {
     }
 
     /**
+     * Draws this object to the canvas
+     *
+     * @param canvas The drawing context
+     */
+    public void drawGhost(GameCanvas canvas) {
+        float width = tilemap.getTileWidth() * textureSclInTiles;
+        float height = tilemap.getTileHeight() * textureSclInTiles;
+        float sclX = width / texture.getRegionWidth();
+        float sclY = height / texture.getRegionHeight();
+        float x = texture.getRegionWidth() / 2.0f;
+        float y = texture.getRegionHeight() / 2.0f;
+        canvas.draw(texture,
+                new Color(1, 1, 1, .5f),
+                x,
+                0,
+                getX(),
+                getY(),
+                angle,
+                sclX,
+                sclY);
+    }
+
+    /**
      * Draws the outline of the physics body.
      * <p>
      * This method can be helpful for understanding issues with collisions.

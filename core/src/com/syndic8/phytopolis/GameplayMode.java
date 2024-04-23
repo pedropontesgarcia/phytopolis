@@ -766,6 +766,12 @@ public class GameplayMode extends WorldController implements ContactListener {
         super.draw(dt);
 
         plantController.draw(canvas);
+        InputController ic = InputController.getInstance();
+        if (!ic.didSpecial()) {
+            Vector2 projMousePos = new Vector2(ic.getMouseX(), ic.getMouseY());
+            Vector2 unprojMousePos = canvas.unproject(projMousePos);
+            plantController.drawGhostBranch(canvas, unprojMousePos.x, unprojMousePos.y);
+        }
         hazardController.draw(canvas);
         //player.draw(canvas);
         canvas.end();
