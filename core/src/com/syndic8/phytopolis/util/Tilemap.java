@@ -7,6 +7,7 @@ import com.syndic8.phytopolis.GameCanvas;
 import com.syndic8.phytopolis.WorldController;
 import com.syndic8.phytopolis.assets.AssetDirectory;
 import com.syndic8.phytopolis.level.models.Resource;
+import com.syndic8.phytopolis.level.models.Sun;
 import com.syndic8.phytopolis.level.models.Tile;
 import com.syndic8.phytopolis.level.models.Water;
 
@@ -81,7 +82,10 @@ public class Tilemap {
         List<Texture> resourceTextureList = new ArrayList<>();
         Texture tx = directory.getEntry("gameplay:water_filmstrip",
                                         Texture.class);
+        Texture tx2 = directory.getEntry("gameplay:sun_filmstrip",
+                                         Texture.class);
         resourceTextureList.add(tx);
+        resourceTextureList.add(tx2);
         resourceTextures = resourceTextureList.toArray(new Texture[0]);
     }
 
@@ -164,6 +168,9 @@ public class Tilemap {
                     FilmStrip waterFilmstrip = new FilmStrip(resourceTextures[0],
                                                              1,
                                                              13);
+                    FilmStrip sunFilmstrip = new FilmStrip(resourceTextures[1],
+                                                           1,
+                                                           9);
                     Water w = new Water(xMid,
                                         yMid,
                                         tileWidth,
@@ -171,7 +178,15 @@ public class Tilemap {
                                         waterFilmstrip,
                                         this,
                                         1);
+                    Sun s = new Sun(xMid,
+                                    yMid,
+                                    tileWidth,
+                                    tileHeight,
+                                    sunFilmstrip,
+                                    this,
+                                    1);
                     ctrl.addObject(w);
+                    ctrl.addObject(s);
                 }
             }
         }
