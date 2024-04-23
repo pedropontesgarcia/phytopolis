@@ -11,6 +11,7 @@
     "water_outline": "gameplay/water_woutline.png",
     "water_nooutline": "gameplay/water_nooutline.png",
     "gameplay:water_filmstrip": "gameplay/water-ui-sheet.png",
+    "gameplay:water_ui": "gameplay/waterUI_filmstrip.png",
     "gameplay:sun_filmstrip": "gameplay/sun-ui-sheet.png",
     "gameplay:background": "gameplay/back2.png",
     "gameplay:block1": "gameplay/budblock1.png",
