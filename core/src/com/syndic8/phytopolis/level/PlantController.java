@@ -237,8 +237,12 @@ public class PlantController {
                 y * worldToPixelConversionRatio)[0];
         int yIndex = screenCoordToIndex(x * worldToPixelConversionRatio,
                 y * worldToPixelConversionRatio)[1];
-        plantGrid[xIndex][yIndex].unmakeBranch(direction);
-        return plantGrid[xIndex][yIndex].makeBranch(direction, type, world);
+        if (resourceController.canUpgrade()) {
+            resourceController.decrementUpgrade();
+            plantGrid[xIndex][yIndex].unmakeBranch(direction);
+            return plantGrid[xIndex][yIndex].makeBranch(direction, type, world);
+        }
+        return null;
     }
 
     /**
@@ -253,7 +257,8 @@ public class PlantController {
         int yIndex = screenCoordToIndex(x, y)[1];
         boolean lowerNode = xIndex % 2 == 0;
         if (!inBounds(xIndex, yIndex)) return null;
-        if (plantGrid[xIndex][yIndex].hasLeaf()){
+        if (plantGrid[xIndex][yIndex].hasLeaf() && resourceController.canUpgrade()){
+            resourceController.decrementUpgrade();
             plantGrid[xIndex][yIndex].unmakeLeaf();
             return plantGrid[xIndex][yIndex].makeLeaf(type);
         }

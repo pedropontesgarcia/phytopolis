@@ -26,6 +26,10 @@ public class ResourceController {
      * Amount of water required to extinguish a fire
      */
     private final int FIRE_AMT = 20;
+    /**
+     * Amount of sun required for an upgrade
+     */
+    private final int UPGRADE_AMT = 1;
     private final int SUN_ON_PICKUP = 1;
     private final int WATER_ON_PICKUP = 10;
 
@@ -95,6 +99,8 @@ public class ResourceController {
         return currWater >= FIRE_AMT;
     }
 
+    public boolean canUpgrade() { return currSun >= UPGRADE_AMT; }
+
     public void decrementGrowLeaf() {
         if (!canGrowLeaf()) {
             //System.out.println("NOT ENOUGH WATER!");
@@ -116,6 +122,14 @@ public class ResourceController {
             //System.out.println("NOT ENOUGH WATER!");
         } else {
             currWater -= FIRE_AMT;
+        }
+    }
+
+    public void decrementUpgrade() {
+        if (!canUpgrade()) {
+
+        } else {
+            currSun -= UPGRADE_AMT;
         }
     }
 
