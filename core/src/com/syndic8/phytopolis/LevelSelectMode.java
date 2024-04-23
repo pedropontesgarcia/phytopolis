@@ -8,6 +8,7 @@ import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import com.syndic8.phytopolis.assets.AssetDirectory;
+import com.syndic8.phytopolis.util.FilmStrip;
 import com.syndic8.phytopolis.util.ScreenListener;
 import edu.cornell.gdiac.audio.AudioEngine;
 
@@ -24,7 +25,8 @@ public class LevelSelectMode implements Screen {
      * Listener that will update the player mode when we are done
      */
     private ScreenListener listener;
-    private TextureRegion background;
+    private FilmStrip background;
+    private Texture lighting;
     private boolean ready;
     private final Rectangle bounds;
     private Music backgroundMusic;
@@ -37,8 +39,9 @@ public class LevelSelectMode implements Screen {
     }
 
     public void gatherAssets(AssetDirectory directory){
-        background = new TextureRegion(directory.getEntry("lvlsel:background",
-                Texture.class));
+        background = new FilmStrip(directory.getEntry("lvlsel:background",
+                Texture.class), 1, 4);
+        lighting = directory.getEntry("lvlsel:lighting", Texture.class);
         backgroundMusic = directory.getEntry("newgrowth", Music.class);
         backgroundMusic.setLooping(true);
         backgroundMusic.play();
@@ -75,13 +78,22 @@ public class LevelSelectMode implements Screen {
     }
 
     public void draw(){
+        canvas.clear();
         canvas.begin();
+        canvas.setBlendState(GameCanvas.BlendState.ADDITIVE);
         canvas.draw(background,
                 Color.WHITE,
                 0,
                 0,
                 canvas.getWidth(),
                 canvas.getHeight());
+        canvas.draw(lighting,
+                Color.WHITE,
+                0,
+                0,
+                canvas.getWidth(),
+                canvas.getHeight());
+        canvas.setBlendState(GameCanvas.BlendState.NO_PREMULT);
         canvas.end();
     }
 
