@@ -701,6 +701,7 @@ public class GameplayMode extends WorldController implements ContactListener {
                 s = (Sun) fix2.getBody().getUserData();
             }
             s.clear();
+            contact.setEnabled(false);
             if (isCollisionBetweenPlayerAndSun) {
                 resourceController.pickupSun();
             }
