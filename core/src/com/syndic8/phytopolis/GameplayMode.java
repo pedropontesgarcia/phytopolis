@@ -692,7 +692,10 @@ public class GameplayMode extends WorldController implements ContactListener {
                                 Model.ModelType.LEAF && ((Model) fix1.getBody()
                                 .getUserData()).getType() ==
                                 Model.ModelType.SUN);
-        if (isCollisionBetweenPlayerAndSun || isCollisionBetweenLeafAndSun) {
+        if (isCollisionBetweenPlayerAndSun) {
+            contact.setEnabled(false);
+        }
+        if (isCollisionBetweenLeafAndSun) {
             Sun s;
             if (((Model) fix1.getBody().getUserData()).getType() ==
                     Model.ModelType.SUN) {
@@ -702,9 +705,9 @@ public class GameplayMode extends WorldController implements ContactListener {
             }
             s.clear();
             contact.setEnabled(false);
-            if (isCollisionBetweenPlayerAndSun) {
-                resourceController.pickupSun();
-            }
+//            if (isCollisionBetweenPlayerAndSun) {
+            resourceController.pickupSun();
+//            }
         }
         if (isCollisionBetweenPlayerAndWater) {
             Water w;
