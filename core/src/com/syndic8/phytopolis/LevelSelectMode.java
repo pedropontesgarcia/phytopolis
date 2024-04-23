@@ -160,7 +160,7 @@ public class LevelSelectMode implements Screen {
     public String getLevel() {
         switch(getSelectedPot()){
             case 0:
-                return "gameplay:lvl1";
+                return "gameplay:lvl4";
             case 1:
                 return "gameplay:lvl2";
             case 2:
