@@ -16,6 +16,7 @@ import com.badlogic.gdx.graphics.Texture.TextureFilter;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import com.syndic8.phytopolis.assets.AssetDirectory;
+import com.syndic8.phytopolis.util.FadingScreen;
 import com.syndic8.phytopolis.util.ScreenListener;
 
 /**
@@ -31,7 +32,7 @@ import com.syndic8.phytopolis.util.ScreenListener;
  * the application.  That is why we try to have as few resources as possible for this
  * loading screen.
  */
-public class MainMenuMode implements Screen {
+public class MainMenuMode extends FadingScreen implements Screen {
 
     /**
      * Default budget for asset loader (do nothing but load 60 fps)
@@ -141,6 +142,7 @@ public class MainMenuMode implements Screen {
         assets = new AssetDirectory(file);
         assets.loadAssets();
         active = true;
+        fadeIn(1f);
     }
 
     /**
@@ -172,15 +174,6 @@ public class MainMenuMode implements Screen {
     }
 
     /**
-     * Returns true if all assets are loaded and the player is ready to go.
-     *
-     * @return true if the player is ready to go
-     */
-    public boolean isReady() {
-        return pressState == 1;
-    }
-
-    /**
      * Returns the asset directory produced by this loading screen
      * <p>
      * This asset loader is NOT owned by this loading scene, so it persists even
@@ -193,12 +186,34 @@ public class MainMenuMode implements Screen {
         return assets;
     }
 
+    public Music getBackgroundMusic() {
+        return backgroundMusic;
+    }
+
     /**
-     * Called when this screen should release all resources.
+     * Called when this screen becomes the current screen for a Game.
      */
-    public void dispose() {
-        internal.unloadAssets();
-        internal.dispose();
+    public void show() {
+        active = true;
+    }
+
+    /**
+     * Called when the Screen should render itself.
+     * <p>
+     * We defer to the other methods update() and draw().  However, it is VERY important
+     * that we only quit AFTER a draw.
+     *
+     * @param delta Number of seconds since last animation frame
+     */
+    public void render(float delta) {
+        if (active) {
+            update(delta);
+            draw();
+
+            if (isReady() && listener != null) {
+                listener.exitScreen(this, 0);
+            }
+        }
     }
 
     /**
@@ -210,7 +225,8 @@ public class MainMenuMode implements Screen {
      *
      * @param delta Number of seconds since last animation frame
      */
-    private void update(float delta) {
+    protected void update(float delta) {
+        super.update(delta);
         tmr += delta;
         InputController.getInstance().readInput(bounds, Vector2.Zero.add(1, 1));
         if (playButton == null) {
@@ -229,11 +245,8 @@ public class MainMenuMode implements Screen {
             }
         } else if (InputController.getInstance().didSecondary()) {
             pressState = 1;
+            fadeOut(3);
         }
-    }
-
-    public Music getBackgroundMusic() {
-        return backgroundMusic;
     }
 
     /**
@@ -278,25 +291,16 @@ public class MainMenuMode implements Screen {
                                          0.001f,
                                          0.001f);
         canvas.end();
+        super.draw(canvas);
     }
 
     /**
-     * Called when the Screen should render itself.
-     * <p>
-     * We defer to the other methods update() and draw().  However, it is VERY important
-     * that we only quit AFTER a draw.
+     * Returns true if all assets are loaded and the player is ready to go.
      *
-     * @param delta Number of seconds since last animation frame
+     * @return true if the player is ready to go
      */
-    public void render(float delta) {
-        if (active) {
-            update(delta);
-            draw();
-
-            if (isReady() && listener != null) {
-                listener.exitScreen(this, 0);
-            }
-        }
+    public boolean isReady() {
+        return pressState == 1 && isFadeDone();
     }
 
     /**
@@ -339,17 +343,18 @@ public class MainMenuMode implements Screen {
     }
 
     /**
-     * Called when this screen becomes the current screen for a Game.
-     */
-    public void show() {
-        active = true;
-    }
-
-    /**
      * Called when this screen is no longer the current screen for a Game.
      */
     public void hide() {
         active = false;
+    }
+
+    /**
+     * Called when this screen should release all resources.
+     */
+    public void dispose() {
+        internal.unloadAssets();
+        internal.dispose();
     }
 
     /**

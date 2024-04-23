@@ -1,0 +1,76 @@
+package com.syndic8.phytopolis.util;
+
+import com.badlogic.gdx.math.Interpolation;
+import com.syndic8.phytopolis.GameCanvas;
+
+public abstract class FadingScreen {
+
+    private float tmr;
+    private float fadeDuration;
+    private float alpha;
+    private Fade fadeState;
+    private boolean done;
+    private float volume;
+
+    public FadingScreen() {
+        tmr = 0;
+        fadeState = Fade.STATIC;
+        done = false;
+        volume = 1;
+    }
+
+    protected void update(float deltaTime) {
+        // Clamp between 0 and 1
+        float linearAlpha = Math.max(Math.min(tmr / fadeDuration, 1), 0);
+        float interpolatedAlpha = Interpolation.fade.apply(0, 1, linearAlpha);
+        switch (fadeState) {
+            case FADE_IN:
+                alpha = 1 - interpolatedAlpha;
+                if (alpha == 0) fadeState = Fade.STATIC;
+                break;
+            case FADE_OUT:
+                alpha = interpolatedAlpha;
+                if (alpha == 1) done = true;
+                break;
+            default:
+                alpha = 0;
+                break;
+        }
+        volume = Math.max(Math.min(1 - alpha, 1), 0);
+        if (fadeState != Fade.STATIC) {
+            tmr += deltaTime;
+        }
+    }
+
+    protected void draw(GameCanvas c) {
+        c.beginShape();
+        c.getShapeRenderer().setColor(0, 0, 0, alpha);
+        c.getShapeRenderer().rect(0, 0, c.getWidth(), c.getHeight());
+        c.endShape();
+    }
+
+    protected void fadeIn(float seconds) {
+        fadeDuration = seconds;
+        fadeState = Fade.FADE_IN;
+        tmr = 0;
+        done = false;
+    }
+
+    protected void fadeOut(float seconds) {
+        fadeDuration = seconds;
+        fadeState = Fade.FADE_OUT;
+        tmr = 0;
+        done = false;
+    }
+
+    public float getVolume() {
+        return volume;
+    }
+
+    protected boolean isFadeDone() {
+        return done;
+    }
+
+    public enum Fade {FADE_IN, STATIC, FADE_OUT}
+
+}

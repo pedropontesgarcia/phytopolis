@@ -24,8 +24,8 @@ import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.World;
 import com.syndic8.phytopolis.assets.AssetDirectory;
 import com.syndic8.phytopolis.level.models.GameObject;
-import com.syndic8.phytopolis.level.models.Leaf;
 import com.syndic8.phytopolis.level.models.Model;
+import com.syndic8.phytopolis.util.FadingScreen;
 import com.syndic8.phytopolis.util.PooledList;
 import com.syndic8.phytopolis.util.ScreenListener;
 
@@ -46,7 +46,7 @@ import java.util.Iterator;
  * This is the purpose of our AssetState variable; it ensures that multiple instances
  * place nicely with the static assets.
  */
-public abstract class WorldController implements Screen {
+public abstract class WorldController extends FadingScreen implements Screen {
 
     /**
      * Exit code for quitting the game
@@ -165,22 +165,6 @@ public abstract class WorldController implements Screen {
      * with the Box2d coordinates.  The bounds are in terms of the Box2d
      * world, not the screen.
      *
-     * @param width   The width in Box2d coordinates
-     * @param height  The height in Box2d coordinates
-     * @param gravity The downward gravity
-     */
-    protected WorldController(float width, float height, float gravity) {
-        this(new Rectangle(0, 0, width, height),
-             new Vector2(0, DEFAULT_GRAVITY));
-    }
-
-    /**
-     * Creates a new game world
-     * <p>
-     * The game world is scaled so that the screen coordinates do not agree
-     * with the Box2d coordinates.  The bounds are in terms of the Box2d
-     * world, not the screen.
-     *
      * @param bounds  The game bounds in Box2d coordinates
      * @param gravity The gravitational force on this Box2d world
      */
@@ -199,6 +183,22 @@ public abstract class WorldController implements Screen {
         debug = false;
         active = false;
         countdown = -1;
+    }
+
+    /**
+     * Creates a new game world
+     * <p>
+     * The game world is scaled so that the screen coordinates do not agree
+     * with the Box2d coordinates.  The bounds are in terms of the Box2d
+     * world, not the screen.
+     *
+     * @param width   The width in Box2d coordinates
+     * @param height  The height in Box2d coordinates
+     * @param gravity The downward gravity
+     */
+    protected WorldController(float width, float height, float gravity) {
+        this(new Rectangle(0, 0, width, height),
+             new Vector2(0, DEFAULT_GRAVITY));
     }
 
     public World getWorld() {
@@ -225,31 +225,6 @@ public abstract class WorldController implements Screen {
      */
     public void setDebug(boolean value) {
         debug = value;
-    }
-
-    /**
-     * Returns true if the level is completed.
-     * <p>
-     * If true, the level will advance after a countdown
-     *
-     * @return true if the level is completed.
-     */
-    public boolean isComplete() {
-        return complete;
-    }
-
-    /**
-     * Sets whether the level is completed.
-     * <p>
-     * If true, the level will advance after a countdown
-     *
-     * @param value whether the level is completed.
-     */
-    public void setComplete(boolean value) {
-        if (value) {
-            countdown = EXIT_COUNT;
-        }
-        complete = value;
     }
 
     /**
@@ -310,26 +285,6 @@ public abstract class WorldController implements Screen {
     }
 
     /**
-     * Dispose of all (non-static) resources allocated to this mode.
-     */
-    public void dispose() {
-        for (Model obj : objects) {
-            if (obj instanceof GameObject) {
-                ((GameObject) obj).deactivatePhysics(world);
-            }
-        }
-        objects.clear();
-        addQueue.clear();
-        world.dispose();
-        objects = null;
-        addQueue = null;
-        bounds = null;
-        scale = null;
-        world = null;
-        canvas = null;
-    }
-
-    /**
      * Gather the assets for this controller.
      * <p>
      * This method extracts the asset variables from the given asset directory. It
@@ -355,20 +310,6 @@ public abstract class WorldController implements Screen {
     }
 
     /**
-     * Immediately adds the object to the physics world
-     * <p>
-     * param obj The object to add
-     */
-    public void addObject(Model obj) {
-        assert inBounds(obj) : "Object is not in bounds";
-        objects.add(obj);
-        if (obj instanceof GameObject) {
-            ((GameObject) obj).activatePhysics(world);
-        }
-        objects.sort(Comparator.comparingInt(Model::getZIndex));
-    }
-
-    /**
      * Returns true if the object is in bounds.
      * <p>
      * This assertion is useful for debugging the physics.
@@ -385,11 +326,68 @@ public abstract class WorldController implements Screen {
     }
 
     /**
-     * Resets the status of the game so that we can play again.
+     * Method to ensure that a sound asset is only played once.
      * <p>
-     * This method disposes of the world and creates a new one.
+     * Every time you play a sound asset, it makes a new instance of that sound.
+     * If you play the sounds to close together, you will have overlapping copies.
+     * To prevent that, you must stop the sound before you play it again.  That
+     * is the purpose of this method.  It stops the current instance playing (if
+     * any) and then returns the id of the new instance for tracking.
+     *
+     * @param sound   The sound asset to play
+     * @param soundId The previously playing sound instance
+     * @return the new sound instance for this asset.
      */
-    public abstract void reset();
+    public long playSound(Sound sound, long soundId) {
+        return playSound(sound, soundId, 1.0f);
+    }
+
+    /**
+     * Method to ensure that a sound asset is only played once.
+     * <p>
+     * Every time you play a sound asset, it makes a new instance of that sound.
+     * If you play the sounds to close together, you will have overlapping copies.
+     * To prevent that, you must stop the sound before you play it again.  That
+     * is the purpose of this method.  It stops the current instance playing (if
+     * any) and then returns the id of the new instance for tracking.
+     *
+     * @param sound   The sound asset to play
+     * @param soundId The previously playing sound instance
+     * @param volume  The sound volume
+     * @return the new sound instance for this asset.
+     */
+    public long playSound(Sound sound, long soundId, float volume) {
+        if (soundId != -1) {
+            sound.stop(soundId);
+        }
+        return sound.play(volume);
+    }
+
+    /**
+     * Called when this screen becomes the current screen for a Game.
+     */
+    public void show() {
+        // Useless if called in outside animation loop
+        active = true;
+    }
+
+    /**
+     * Called when the Screen should render itself.
+     * <p>
+     * We defer to the other methods update() and draw().  However, it is VERY important
+     * that we only quit AFTER a draw.
+     *
+     * @param delta Number of seconds since last animation frame
+     */
+    public void render(float delta) {
+        if (active) {
+            if (preUpdate(delta)) {
+                update(delta); // This is the one that must be defined.
+                postUpdate(delta);
+            }
+            draw(delta);
+        }
+    }
 
     /**
      * Returns whether to process the update loop
@@ -402,15 +400,11 @@ public abstract class WorldController implements Screen {
      * @return whether to process the update loop
      */
     public boolean preUpdate(float dt) {
+        super.update(dt);
         InputController input = InputController.getInstance();
         input.readInput(bounds, scale);
         if (listener == null) {
             return true;
-        }
-
-        // Toggle debug
-        if (input.didDebug()) {
-            debug = !debug;
         }
 
         // Handle resets
@@ -431,16 +425,13 @@ public abstract class WorldController implements Screen {
             pause();
             listener.exitScreen(this, EXIT_PREV);
             return false;
-        } else if (countdown > 0) {
-            countdown--;
-        } else if (countdown == 0) {
-            if (failed) {
-                reset();
-            } else if (complete) {
-                pause();
-                listener.exitScreen(this, EXIT_VICTORY);
-                return false;
-            }
+        } else if (failed) {
+            reset();
+        } else if (isComplete() && isFadeDone()) {
+            pause();
+            listener.exitScreen(this, EXIT_VICTORY);
+            return false;
+
         }
         return true;
     }
@@ -513,73 +504,52 @@ public abstract class WorldController implements Screen {
      * @param dt Number of seconds since last animation frame
      */
     public void draw(float dt) {
-        //        int x = 0;
         for (Model obj : objects) {
             obj.draw(canvas);
-//            if (obj instanceof Leaf && ((Leaf) obj).getLeafType() == Leaf.leafType.BOUNCY) {
-//                System.out.println(obj.getZIndex());
-//            }
         }
-        //        System.out.println(x);
-        //
-        //        if (debug) {
-        //            canvas.beginDebug();
-        //            for (Model obj : objects) {
-        //                obj.drawDebug(canvas);
-        //            }
-        //            canvas.endDebug();
-        //        }
-
-        // Final message
-        //        if (complete && !failed) {
-        //            displayFont.setColor(Color.YELLOW);
-        //            canvas.begin(); // DO NOT SCALE
-        //            canvas.drawTextCentered("VICTORY!", displayFont, 0.0f);
-        //            canvas.end();
-        //        } else if (failed) {
-        //            displayFont.setColor(Color.RED);
-        //            canvas.begin(); // DO NOT SCALE
-        //            canvas.drawTextCentered("FAILURE!", displayFont, 0.0f);
-        //            canvas.end();
-        //        }
     }
 
     /**
-     * Method to ensure that a sound asset is only played once.
+     * Resets the status of the game so that we can play again.
      * <p>
-     * Every time you play a sound asset, it makes a new instance of that sound.
-     * If you play the sounds to close together, you will have overlapping copies.
-     * To prevent that, you must stop the sound before you play it again.  That
-     * is the purpose of this method.  It stops the current instance playing (if
-     * any) and then returns the id of the new instance for tracking.
-     *
-     * @param sound   The sound asset to play
-     * @param soundId The previously playing sound instance
-     * @return the new sound instance for this asset.
+     * This method disposes of the world and creates a new one.
      */
-    public long playSound(Sound sound, long soundId) {
-        return playSound(sound, soundId, 1.0f);
+    public abstract void reset();
+
+    /**
+     * Returns true if the level is completed.
+     * <p>
+     * If true, the level will advance after a countdown
+     *
+     * @return true if the level is completed.
+     */
+    public boolean isComplete() {
+        return complete;
     }
 
     /**
-     * Method to ensure that a sound asset is only played once.
+     * Sets whether the level is completed.
      * <p>
-     * Every time you play a sound asset, it makes a new instance of that sound.
-     * If you play the sounds to close together, you will have overlapping copies.
-     * To prevent that, you must stop the sound before you play it again.  That
-     * is the purpose of this method.  It stops the current instance playing (if
-     * any) and then returns the id of the new instance for tracking.
+     * If true, the level will advance after a countdown
      *
-     * @param sound   The sound asset to play
-     * @param soundId The previously playing sound instance
-     * @param volume  The sound volume
-     * @return the new sound instance for this asset.
+     * @param value whether the level is completed.
      */
-    public long playSound(Sound sound, long soundId, float volume) {
-        if (soundId != -1) {
-            sound.stop(soundId);
+    public void setComplete(boolean value) {
+        complete = value;
+    }
+
+    /**
+     * Immediately adds the object to the physics world
+     * <p>
+     * param obj The object to add
+     */
+    public void addObject(Model obj) {
+        assert inBounds(obj) : "Object is not in bounds";
+        objects.add(obj);
+        if (obj instanceof GameObject) {
+            ((GameObject) obj).activatePhysics(world);
         }
-        return sound.play(volume);
+        objects.sort(Comparator.comparingInt(Model::getZIndex));
     }
 
     /**
@@ -593,24 +563,6 @@ public abstract class WorldController implements Screen {
      */
     public void resize(int width, int height) {
         // IGNORE FOR NOW
-    }
-
-    /**
-     * Called when the Screen should render itself.
-     * <p>
-     * We defer to the other methods update() and draw().  However, it is VERY important
-     * that we only quit AFTER a draw.
-     *
-     * @param delta Number of seconds since last animation frame
-     */
-    public void render(float delta) {
-        if (active) {
-            if (preUpdate(delta)) {
-                update(delta); // This is the one that must be defined.
-                postUpdate(delta);
-            }
-            draw(delta);
-        }
     }
 
     /**
@@ -633,19 +585,31 @@ public abstract class WorldController implements Screen {
     }
 
     /**
-     * Called when this screen becomes the current screen for a Game.
-     */
-    public void show() {
-        // Useless if called in outside animation loop
-        active = true;
-    }
-
-    /**
      * Called when this screen is no longer the current screen for a Game.
      */
     public void hide() {
         // Useless if called in outside animation loop
         active = false;
+    }
+
+    /**
+     * Dispose of all (non-static) resources allocated to this mode.
+     */
+    public void dispose() {
+        for (Model obj : objects) {
+            if (obj instanceof GameObject) {
+                ((GameObject) obj).deactivatePhysics(world);
+            }
+        }
+        objects.clear();
+        addQueue.clear();
+        world.dispose();
+        objects = null;
+        addQueue = null;
+        bounds = null;
+        scale = null;
+        world = null;
+        canvas = null;
     }
 
     /**

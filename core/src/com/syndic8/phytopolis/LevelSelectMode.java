@@ -8,14 +8,16 @@ import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import com.syndic8.phytopolis.assets.AssetDirectory;
 import com.syndic8.phytopolis.levelselect.LevelBox;
+import com.syndic8.phytopolis.util.FadingScreen;
 import com.syndic8.phytopolis.util.FilmStrip;
 import com.syndic8.phytopolis.util.ScreenListener;
 import edu.cornell.gdiac.audio.AudioEngine;
 
-public class LevelSelectMode implements Screen {
+public class LevelSelectMode extends FadingScreen implements Screen {
 
     private final Rectangle bounds;
     private final int numLevels = 6;
+    private final LevelBox[] levelBoxes;
     /**
      * Whether or not this screen is active
      */
@@ -33,7 +35,6 @@ public class LevelSelectMode implements Screen {
     private boolean ready;
     private Music backgroundMusic;
     private AudioEngine audioEngine;
-    private final LevelBox[] levelBoxes;
     private Texture rs;
 
     public LevelSelectMode() {
@@ -42,6 +43,7 @@ public class LevelSelectMode implements Screen {
 
         //Setup levelboxes
         this.levelBoxes = new LevelBox[numLevels];
+        fadeIn(0.5f);
     }
 
     public void gatherAssets(AssetDirectory directory) {
@@ -49,12 +51,12 @@ public class LevelSelectMode implements Screen {
                                                       Texture.class), 1, 4);
         lighting = directory.getEntry("lvlsel:lighting", Texture.class);
         rs = directory.getEntry("lvlsel:redsquare", Texture.class);
-//        backgroundMusic = directory.getEntry("newgrowth", Music.class);
-//        backgroundMusic.setLooping(true);
-//        backgroundMusic.play();
+        //        backgroundMusic = directory.getEntry("newgrowth", Music.class);
+        //        backgroundMusic.setLooping(true);
+        //        backgroundMusic.play();
     }
 
-    public void setBackgroundMusic(Music m){
+    public void setBackgroundMusic(Music m) {
         backgroundMusic = m;
     }
 
@@ -70,13 +72,6 @@ public class LevelSelectMode implements Screen {
         for (LevelBox lb : levelBoxes) if (lb != null) lb.setTexture(rs);
     }
 
-    public int getSelectedPot() {
-        for (int i = 0; i < numLevels; i++) {
-            if (levelBoxes[i] != null && levelBoxes[i].getSelected()) return i;
-        }
-        return -1;
-    }
-
     @Override
     public void show() {
         active = true;
@@ -89,17 +84,14 @@ public class LevelSelectMode implements Screen {
             update(delta);
             draw();
 
-            if (listener != null && ready) {
+            if (listener != null && ready && isFadeDone()) {
                 listener.exitScreen(this, 0);
             }
         }
     }
 
-    public void reset() {
-        ready = false;
-    }
-
     public void update(float delta) {
+        super.update(delta);
         //        float mouseX = InputController.getInstance().getMouseX();
         //        float mouseY = InputController.getInstance().getMouseY();
         InputController ic = InputController.getInstance();
@@ -113,8 +105,10 @@ public class LevelSelectMode implements Screen {
         InputController.getInstance().readInput(bounds, Vector2.Zero.add(1, 1));
         if (getSelectedPot() != -1 &&
                 InputController.getInstance().didMousePress()) {
+            fadeOut(1);
             ready = true;
         }
+        if (ready) backgroundMusic.setVolume(super.getVolume());
     }
 
     public void draw() {
@@ -137,10 +131,14 @@ public class LevelSelectMode implements Screen {
         canvas.setBlendState(GameCanvas.BlendState.NO_PREMULT);
         for (LevelBox lb : levelBoxes) if (lb != null) lb.draw(canvas);
         canvas.end();
+        super.draw(canvas);
     }
 
-    public void setScreenListener(ScreenListener listener) {
-        this.listener = listener;
+    public int getSelectedPot() {
+        for (int i = 0; i < numLevels; i++) {
+            if (levelBoxes[i] != null && levelBoxes[i].getSelected()) return i;
+        }
+        return -1;
     }
 
     @Override
@@ -167,6 +165,15 @@ public class LevelSelectMode implements Screen {
     @Override
     public void dispose() {
         backgroundMusic.dispose();
+    }
+
+    public void reset() {
+        ready = false;
+        fadeIn(0.5f);
+    }
+
+    public void setScreenListener(ScreenListener listener) {
+        this.listener = listener;
     }
 
     public String getLevel() {

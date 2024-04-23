@@ -7,12 +7,11 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import com.syndic8.phytopolis.assets.AssetDirectory;
-import com.syndic8.phytopolis.levelselect.LevelBox;
-import com.syndic8.phytopolis.util.FilmStrip;
+import com.syndic8.phytopolis.util.FadingScreen;
 import com.syndic8.phytopolis.util.ScreenListener;
 import edu.cornell.gdiac.audio.AudioEngine;
 
-public class VictoryScreen implements Screen {
+public class VictoryScreen extends FadingScreen implements Screen {
 
     private final Rectangle bounds;
     /**
@@ -40,12 +39,12 @@ public class VictoryScreen implements Screen {
 
     public void gatherAssets(AssetDirectory directory) {
         background = directory.getEntry("victory:background", Texture.class);
-//        backgroundMusic = directory.getEntry("newgrowth", Music.class);
-//        backgroundMusic.setLooping(true);
-//        backgroundMusic.play();
+        //        backgroundMusic = directory.getEntry("newgrowth", Music.class);
+        //        backgroundMusic.setLooping(true);
+        //        backgroundMusic.play();
     }
 
-    public void setBackgroundMusic(Music m){
+    public void setBackgroundMusic(Music m) {
         backgroundMusic = m;
     }
 
@@ -56,7 +55,8 @@ public class VictoryScreen implements Screen {
     @Override
     public void show() {
         active = true;
-//        if (backgroundMusic != null) backgroundMusic.play();
+        fadeIn(0.5f);
+        //        if (backgroundMusic != null) backgroundMusic.play();
     }
 
     @Override
@@ -65,20 +65,18 @@ public class VictoryScreen implements Screen {
             update(delta);
             draw();
 
-            if (listener != null && ready) {
+            if (listener != null && ready && isFadeDone()) {
                 listener.exitScreen(this, 0);
             }
         }
     }
 
-    public void reset() {
-        ready = false;
-    }
-
     public void update(float delta) {
+        super.update(delta);
         InputController.getInstance().readInput(bounds, Vector2.Zero.add(1, 1));
         if (InputController.getInstance().didSecondary()) {
             ready = true;
+            fadeOut(0.5f);
         }
     }
 
@@ -86,16 +84,13 @@ public class VictoryScreen implements Screen {
         canvas.clear();
         canvas.begin();
         canvas.draw(background,
-                Color.WHITE,
-                0,
-                0,
-                canvas.getWidth(),
-                canvas.getHeight());
+                    Color.WHITE,
+                    0,
+                    0,
+                    canvas.getWidth(),
+                    canvas.getHeight());
         canvas.end();
-    }
-
-    public void setScreenListener(ScreenListener listener) {
-        this.listener = listener;
+        super.draw(canvas);
     }
 
     @Override
@@ -116,12 +111,20 @@ public class VictoryScreen implements Screen {
     @Override
     public void hide() {
         active = false;
-//        backgroundMusic.stop();
+        //        backgroundMusic.stop();
     }
 
     @Override
     public void dispose() {
-//        backgroundMusic.dispose();
+        //        backgroundMusic.dispose();
+    }
+
+    public void reset() {
+        ready = false;
+    }
+
+    public void setScreenListener(ScreenListener listener) {
+        this.listener = listener;
     }
 
 }

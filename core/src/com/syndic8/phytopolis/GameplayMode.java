@@ -46,9 +46,6 @@ import java.util.HashMap;
  */
 public class GameplayMode extends WorldController implements ContactListener {
 
-    // Define collision categories (bits)
-    final short CATEGORY_PLAYER = 0x0001;
-    final short CATEGORY_PLATFORM = 0x0002;
     private final Vector2 cameraVector;
     /**
      * Mark set to handle more sophisticated collision callbacks
@@ -149,7 +146,7 @@ public class GameplayMode extends WorldController implements ContactListener {
         super();
         world.setContactListener(this);
         cameraVector = new Vector2();
-        sensorFixtures = new ObjectSet<Fixture>();
+        sensorFixtures = new ObjectSet<>();
     }
 
     public void setLevel(String lvl) {
@@ -238,14 +235,220 @@ public class GameplayMode extends WorldController implements ContactListener {
         super.gatherAssets(directory);
         backgroundMusic = directory.getEntry("viridian", Music.class);
         backgroundMusic.setLooping(true);
+        backgroundMusic.setVolume(0);
         backgroundMusic.play();
     }
 
     /**
-     *
+     * Called when this screen becomes the current screen for a Game.
      */
-    private void setPlayer(Player player) {
-        this.player = player;
+    public void show() {
+        super.show();
+        backgroundMusic.play();
+        fadeIn(0.5f);
+    }
+
+    /**
+     * Returns whether to process the update loop
+     * <p>
+     * At the start of the update loop, we check if it is time
+     * to switch to a new game mode.  If not, the update proceeds
+     * normally.
+     *
+     * @param dt Number of seconds since last animation frame
+     * @return whether to process the update loop
+     */
+    public boolean preUpdate(float dt) {
+        if (!super.preUpdate(dt)) {
+            return false;
+        }
+
+        if (!isFailure() && avatar.getY() < -1) {
+            setFailure(true);
+            return false;
+        }
+
+        return true;
+    }
+
+    /**
+     * The core gameplay loop of this world.
+     * <p>
+     * This method contains the specific update code for this mini-game. It does
+     * not handle collisions, as those are managed by the parent class WorldController.
+     * This method is called after input is read, but before collisions are resolved.
+     * The very last thing that it should do is apply forces to the appropriate objects.
+     *
+     * @param dt Number of seconds since last animation frame
+     */
+    public void update(float dt) {
+        backgroundMusic.setVolume(super.getVolume());
+        // Process actions in object model
+        avatar.setMovement(InputController.getInstance().getHorizontal() *
+                                   avatar.getForce());
+        avatar.setJumping(InputController.getInstance().didPrimary());
+        //Leaf.leafType ltype = plantController.getLeafType(plantController.xWorldCoordToIndex(avatar.getX()), plantController.yWorldCoordToIndex(avatar.getY()));
+        //avatar.setBouncy(ltype == Leaf.leafType.BOUNCY);
+
+        //avatar.setShooting(InputController.getInstance().didSecondary());
+        processPlantGrowth();
+
+        avatar.applyForce();
+        avatar.setBouncy(false);
+        //System.out.println(avatar.getY());
+        //System.out.println(avatar.atBottom());
+        //        if (avatar.isJumping()) {
+        //jumpId = playSound(jumpSound, jumpId, volume);
+        //        }
+
+        //handleDrop();
+        InputController ic = InputController.getInstance();
+        if (ic.didScrollReset()) {
+            ic.resetScrolled();
+        }
+        InputController.setHeight(
+                tilemap.getTilemapHeight() - canvas.getHeight());
+        cameraVector.set(canvas.getWidth() / 2f,
+                         Math.max(canvas.getHeight() / 2f,
+                                  Math.min(tilemap.getTilemapHeight() -
+                                                   canvas.getHeight() / 2f,
+                                           avatar.getY()) + ic.getScrolled()));
+        //                         Math.max(avatar.getY(),
+        //                                  canvas.getHeight() / 2f));
+        // generate hazards please
+        for (Model m : objects) {
+            if (m instanceof Water) {
+                ((Water) m).regenerate();
+            }
+            if (m instanceof Sun) {
+                if (((Sun) m).belowScreen()) {
+                    ((Sun) m).clear();
+                }
+            }
+        }
+        for (Hazard h : hazardController.updateHazards()) {
+            addObject(h);
+        }
+
+        if (ic.didMousePress()) {
+            //            System.out.println(ic.getGrowX()/ tilemap.getTileWidth() + " " + ic.getGrowY()/ tilemap.getTileHeight());
+            //            System.out.println(tilemap.getTilemapWidth() + " " + );
+            //            System.out.println(cameraVector.x + " " + cameraVector.y);
+            //            System.out.println(ic.getScrolled());
+            //            setComplete(true);
+            Vector2 projMousePos = new Vector2(ic.getGrowX(), ic.getGrowY());
+            Vector2 unprojMousePos = canvas.unproject(projMousePos);
+            hazardController.extinguishFire(unprojMousePos);
+        }
+        plantController.propagateDestruction();
+        //        System.out.println(objects.size());
+        timer.updateTime();
+        // Check for win condition
+        if ((avatar.getY() >
+                tilemap.getVictoryHeight() * tilemap.getTileHeight()) &&
+                !isComplete()) {
+            timer.setRunning(false);
+            starPoints = timer.getAcquiredStars();
+            setComplete(true);
+            fadeOut(3);
+        }
+    }
+
+    /**
+     * Processes plant growth using player input. Grows a branch in the
+     * corresponding direction at the node closest to the player's position.
+     */
+    public void processPlantGrowth() {
+        // get mouse position
+        InputController ic = InputController.getInstance();
+        Vector2 projMousePos = new Vector2(ic.getMouseX(), ic.getMouseY());
+        Vector2 unprojMousePos = canvas.unproject(projMousePos);
+
+        // draw ghost branches
+        //        Branch hoveringBranch = plantController.screenToBranch(unprojMousePos.x, unprojMousePos.y);
+        //        if (hoveringBranch != null && !objects.contains(hoveringBranch)) objects.add(hoveringBranch);
+
+        if (InputController.getInstance().didMousePress()) {
+            // process leaf stuff
+            if (InputController.getInstance().didSpecial()) {
+                // don't grow if there's a fire there (prioritize fire)
+                if (!hazardController.hasFire(unprojMousePos)) {
+                    Leaf.leafType lt = Leaf.leafType.NORMAL;
+                    //            if (InputController.getInstance().didSpecial())
+                    //                lt = Leaf.leafType.BOUNCY;
+                    Model newLeaf = plantController.handleLeaf(unprojMousePos.x,
+                                                               unprojMousePos.y +
+                                                                       0.5f *
+                                                                               tilemap.getTileHeight(),
+                                                               lt);
+                    if (newLeaf != null) addObject(newLeaf);
+                }
+            }
+
+            // process branch stuff
+            else {
+                Branch branch = plantController.growBranch(unprojMousePos.x,
+                                                           unprojMousePos.y);
+                if (branch != null) addObject(branch);
+            }
+        }
+    }
+
+    /**
+     * Draw the physics objects to the canvas
+     * <p>
+     * For simple worlds, this method is enough by itself.  It will need
+     * to be overriden if the world needs fancy backgrounds or the like.
+     * <p>
+     * The method draws all objects in the order that they were added.
+     *
+     * @param dt Number of seconds since last animation frame
+     */
+    public void draw(float dt) {
+        canvas.clear();
+        canvas.cameraUpdate(cameraVector);
+        canvas.begin();
+        drawBackground();
+        drawVignette();
+
+        tilemap.draw(canvas);
+
+        super.draw(dt);
+
+        InputController ic = InputController.getInstance();
+        if (!ic.didSpecial()) {
+            Vector2 projMousePos = new Vector2(ic.getMouseX(), ic.getMouseY());
+            Vector2 unprojMousePos = canvas.unproject(projMousePos);
+            plantController.drawGhostBranch(canvas,
+                                            unprojMousePos.x,
+                                            unprojMousePos.y);
+        }
+        hazardController.draw(canvas);
+        canvas.end();
+
+        updateCursor();
+
+        canvas.beginHud();
+        hazardController.drawWarning(canvas, cameraVector);
+        resourceController.drawUI(canvas);
+        canvas.endHud();
+
+        canvas.beginText();
+        // Fix scale changing later!!!!!!
+        timer.displayTime(canvas,
+                          timesFont,
+                          Color.WHITE,
+                          Gdx.graphics.getWidth() / 2.1f,
+                          Gdx.graphics.getHeight() / 1.03f,
+                          (new Vector2(scalex, scaley)));
+        //        System.out.println(avatar.getY());
+        //        System.out.println(isComplete());
+        //        System.out.println(tilemap.getVictoryHeight()*tilemap.getTileHeight());
+        //        System.out.println(Gdx.graphics.getWidth());
+        //        System.out.println(Gdx.graphics.getHeight());
+        //canvas.drawTime(timesFont,"me", Color.WHITE, 800, 200);
+        canvas.endText();
+        super.draw(canvas);
     }
 
     /**
@@ -362,178 +565,10 @@ public class GameplayMode extends WorldController implements ContactListener {
     }
 
     /**
-     * Returns whether to process the update loop
-     * <p>
-     * At the start of the update loop, we check if it is time
-     * to switch to a new game mode.  If not, the update proceeds
-     * normally.
      *
-     * @param dt Number of seconds since last animation frame
-     * @return whether to process the update loop
      */
-    public boolean preUpdate(float dt) {
-        if (!super.preUpdate(dt)) {
-            return false;
-        }
-
-        if (!isFailure() && avatar.getY() < -1) {
-            setFailure(true);
-            return false;
-        }
-
-        return true;
-    }
-
-    private Pixmap getPixmapFromRegion(TextureRegion region) {
-        if (!region.getTexture().getTextureData().isPrepared()) {
-            region.getTexture().getTextureData().prepare();
-        }
-        Pixmap originalPixmap = region.getTexture()
-                .getTextureData()
-                .consumePixmap();
-        Pixmap cursorPixmap = new Pixmap(64, 64, originalPixmap.getFormat());
-        cursorPixmap.drawPixmap(originalPixmap,
-                                0,
-                                0,
-                                originalPixmap.getWidth(),
-                                originalPixmap.getHeight(),
-                                0,
-                                0,
-                                cursorPixmap.getWidth(),
-                                cursorPixmap.getHeight());
-        originalPixmap.dispose(); // Avoid memory leaks
-        return cursorPixmap;
-    }
-
-    /**
-     * Updates the custom cursor
-     */
-    public void updateCursor() {
-        Gdx.graphics.setCursor(branchCursor);
-        if (InputController.getInstance().didSpecial()) {
-            Gdx.graphics.setCursor(leafCursor);
-        }
-        InputController ic = InputController.getInstance();
-        Vector2 projMousePos = new Vector2(ic.getMouseX(), ic.getMouseY());
-        Vector2 unprojMousePos = canvas.unproject(projMousePos);
-        if (hazardController.hasFire(unprojMousePos)) {
-            Gdx.graphics.setCursor(waterCursor);
-        }
-    }
-
-    /**
-     * Processes plant growth using player input. Grows a branch in the
-     * corresponding direction at the node closest to the player's position.
-     */
-    public void processPlantGrowth() {
-        // get mouse position
-        InputController ic = InputController.getInstance();
-        Vector2 projMousePos = new Vector2(ic.getMouseX(), ic.getMouseY());
-        Vector2 unprojMousePos = canvas.unproject(projMousePos);
-
-        // draw ghost branches
-        //        Branch hoveringBranch = plantController.screenToBranch(unprojMousePos.x, unprojMousePos.y);
-        //        if (hoveringBranch != null && !objects.contains(hoveringBranch)) objects.add(hoveringBranch);
-
-        if (InputController.getInstance().didMousePress()) {
-            // process leaf stuff
-            if (InputController.getInstance().didSpecial()) {
-                // don't grow if there's a fire there (prioritize fire)
-                if (!hazardController.hasFire(unprojMousePos)) {
-                    Leaf.leafType lt = Leaf.leafType.NORMAL;
-                    //            if (InputController.getInstance().didSpecial())
-                    //                lt = Leaf.leafType.BOUNCY;
-                    Model newLeaf = plantController.handleLeaf(unprojMousePos.x,
-                                                               unprojMousePos.y +
-                                                                       0.5f *
-                                                                               tilemap.getTileHeight(),
-                                                               lt);
-                    if (newLeaf != null) addObject(newLeaf);
-                }
-            }
-
-            // process branch stuff
-            else {
-                Branch branch = plantController.growBranch(unprojMousePos.x,
-                                                           unprojMousePos.y);
-                if (branch != null) addObject(branch);
-            }
-        }
-    }
-
-    /**
-     * The core gameplay loop of this world.
-     * <p>
-     * This method contains the specific update code for this mini-game. It does
-     * not handle collisions, as those are managed by the parent class WorldController.
-     * This method is called after input is read, but before collisions are resolved.
-     * The very last thing that it should do is apply forces to the appropriate objects.
-     *
-     * @param dt Number of seconds since last animation frame
-     */
-    public void update(float dt) {
-        // Process actions in object model
-        avatar.setMovement(InputController.getInstance().getHorizontal() *
-                                   avatar.getForce());
-        avatar.setJumping(InputController.getInstance().didPrimary());
-        //Leaf.leafType ltype = plantController.getLeafType(plantController.xWorldCoordToIndex(avatar.getX()), plantController.yWorldCoordToIndex(avatar.getY()));
-        //avatar.setBouncy(ltype == Leaf.leafType.BOUNCY);
-
-        //avatar.setShooting(InputController.getInstance().didSecondary());
-        processPlantGrowth();
-
-        avatar.applyForce();
-        avatar.setBouncy(false);
-        //System.out.println(avatar.getY());
-        //System.out.println(avatar.atBottom());
-        //        if (avatar.isJumping()) {
-        //jumpId = playSound(jumpSound, jumpId, volume);
-        //        }
-
-        //handleDrop();
-        InputController ic = InputController.getInstance();
-        if (ic.didScrollReset()) {
-            ic.resetScrolled();
-        }
-        InputController.setHeight(tilemap.getTilemapHeight() - canvas.getHeight());
-        cameraVector.set(canvas.getWidth() / 2f,
-                Math.max(canvas.getHeight() / 2f, Math.min(tilemap.getTilemapHeight() - canvas.getHeight() / 2f, avatar.getY()) + ic.getScrolled()));
-//                         Math.max(avatar.getY(),
-//                                  canvas.getHeight() / 2f));
-        // generate hazards please
-        for (Model m : objects) {
-            if (m instanceof Water) {
-                ((Water) m).regenerate();
-            }
-            if (m instanceof Sun) {
-                if (((Sun) m).belowScreen()) {
-                    ((Sun) m).clear();
-                }
-            }
-        }
-        for (Hazard h : hazardController.updateHazards()) {
-            addObject(h);
-        }
-
-        if (ic.didMousePress()) {
-//            System.out.println(ic.getGrowX()/ tilemap.getTileWidth() + " " + ic.getGrowY()/ tilemap.getTileHeight());
-//            System.out.println(tilemap.getTilemapWidth() + " " + );
-//            System.out.println(cameraVector.x + " " + cameraVector.y);
-//            System.out.println(ic.getScrolled());
-//            setComplete(true);
-            Vector2 projMousePos = new Vector2(ic.getGrowX(), ic.getGrowY());
-            Vector2 unprojMousePos = canvas.unproject(projMousePos);
-            hazardController.extinguishFire(unprojMousePos);
-        }
-        plantController.propagateDestruction();
-        //        System.out.println(objects.size());
-        timer.updateTime();
-        // Check for win condition
-        if ((avatar.getY() > tilemap.getVictoryHeight() * tilemap.getTileHeight())) {
-            timer.setRunning(false);
-            starPoints = timer.getAcquiredStars();
-            setComplete(true);
-        }
+    private void setPlayer(Player player) {
+        this.player = player;
     }
 
     //    /**
@@ -575,6 +610,85 @@ public class GameplayMode extends WorldController implements ContactListener {
     //            startHeight = 0;
     //        }
     //    }
+
+    /**
+     * Called when the Screen is paused.
+     * <p>
+     * We need this method to stop all sounds when we pause.
+     * Pausing happens when we switch game modes.
+     */
+    public void pause() {
+        //jumpSound.stop(jumpId);
+        //plopSound.stop(plopId);
+        //fireSound.stop(fireId);
+    }
+
+    /**
+     * Called when this screen is no longer the current screen for a Game.
+     */
+    public void hide() {
+        // Useless if called in outside animation loop
+        super.hide();
+        backgroundMusic.stop();
+    }
+
+    private void drawBackground() {
+        if (background != null) {
+            canvas.draw(background.getTexture(),
+                        Color.WHITE,
+                        0,
+                        0,
+                        canvas.getWidth(),
+                        canvas.getHeight() * 4);
+        }
+    }
+
+    private void drawVignette() {
+        float backgroundY = canvas.getCameraY() - canvas.getViewPortY() / 2;
+        canvas.draw(vignette.getTexture(),
+                    Color.WHITE,
+                    0,
+                    backgroundY,
+                    canvas.getWidth(),
+                    canvas.getHeight());
+    }
+
+    /**
+     * Updates the custom cursor
+     */
+    public void updateCursor() {
+        Gdx.graphics.setCursor(branchCursor);
+        if (InputController.getInstance().didSpecial()) {
+            Gdx.graphics.setCursor(leafCursor);
+        }
+        InputController ic = InputController.getInstance();
+        Vector2 projMousePos = new Vector2(ic.getMouseX(), ic.getMouseY());
+        Vector2 unprojMousePos = canvas.unproject(projMousePos);
+        if (hazardController.hasFire(unprojMousePos)) {
+            Gdx.graphics.setCursor(waterCursor);
+        }
+    }
+
+    private Pixmap getPixmapFromRegion(TextureRegion region) {
+        if (!region.getTexture().getTextureData().isPrepared()) {
+            region.getTexture().getTextureData().prepare();
+        }
+        Pixmap originalPixmap = region.getTexture()
+                .getTextureData()
+                .consumePixmap();
+        Pixmap cursorPixmap = new Pixmap(64, 64, originalPixmap.getFormat());
+        cursorPixmap.drawPixmap(originalPixmap,
+                                0,
+                                0,
+                                originalPixmap.getWidth(),
+                                originalPixmap.getHeight(),
+                                0,
+                                0,
+                                cursorPixmap.getWidth(),
+                                cursorPixmap.getHeight());
+        originalPixmap.dispose(); // Avoid memory leaks
+        return cursorPixmap;
+    }
 
     /**
      * @param categoryBits the collision category for the
@@ -636,7 +750,6 @@ public class GameplayMode extends WorldController implements ContactListener {
                                            fix1); // Could have more than one ground
             }
 
-
             //            //Check for bouncyness
             //            if (bd1 == avatar && bd2 instanceof Leaf) {
             //                Leaf l1 = (Leaf) bd2;
@@ -681,12 +794,6 @@ public class GameplayMode extends WorldController implements ContactListener {
         //        if (bd1 == avatar && bd2 instanceof Leaf) {
         //            avatar.setBouncy(false);
         //        }
-    }
-
-    /**
-     * Unused ContactListener method
-     */
-    public void postSolve(Contact contact, ContactImpulse impulse) {
     }
 
     /**
@@ -828,114 +935,9 @@ public class GameplayMode extends WorldController implements ContactListener {
     }
 
     /**
-     * Called when the Screen is paused.
-     * <p>
-     * We need this method to stop all sounds when we pause.
-     * Pausing happens when we switch game modes.
+     * Unused ContactListener method
      */
-    public void pause() {
-        //jumpSound.stop(jumpId);
-        //plopSound.stop(plopId);
-        //fireSound.stop(fireId);
-    }
-
-    /**
-     * Called when this screen is no longer the current screen for a Game.
-     */
-    public void hide() {
-        // Useless if called in outside animation loop
-        super.hide();
-        backgroundMusic.stop();
-    }
-
-    /**
-     * Called when this screen becomes the current screen for a Game.
-     */
-    public void show() {
-        super.show();
-        backgroundMusic.play();
-    }
-
-    private void drawBackground() {
-        if (background != null) {
-            canvas.draw(background.getTexture(),
-                        Color.WHITE,
-                        0,
-                        0,
-                        canvas.getWidth(),
-                        canvas.getHeight() * 4);
-        }
-    }
-
-    private void drawVignette() {
-        float backgroundY = canvas.getCameraY() - canvas.getViewPortY() / 2;
-        canvas.draw(vignette.getTexture(),
-                    Color.WHITE,
-                    0,
-                    backgroundY,
-                    canvas.getWidth(),
-                    canvas.getHeight());
-    }
-
-    /**
-     * Draw the physics objects to the canvas
-     * <p>
-     * For simple worlds, this method is enough by itself.  It will need
-     * to be overriden if the world needs fancy backgrounds or the like.
-     * <p>
-     * The method draws all objects in the order that they were added.
-     *
-     * @param dt Number of seconds since last animation frame
-     */
-    public void draw(float dt) {
-        canvas.clear();
-        canvas.cameraUpdate(cameraVector);
-        canvas.begin();
-        drawBackground();
-        drawVignette();
-        //timer.displayTime(canvas,timesFont, Color.BLACK, canvas.getWidth()/2, canvas.getHeight()/2, new Vector2(0.036f, 0.036f));
-        //System.out.println(timer.getMinutes());
-        //System.out.println(timer.getSeconds());
-
-        tilemap.draw(canvas);
-
-        super.draw(dt);
-
-        //plantController.draw(canvas);
-        InputController ic = InputController.getInstance();
-        if (!ic.didSpecial()) {
-            Vector2 projMousePos = new Vector2(ic.getMouseX(), ic.getMouseY());
-            Vector2 unprojMousePos = canvas.unproject(projMousePos);
-            plantController.drawGhostBranch(canvas,
-                                            unprojMousePos.x,
-                                            unprojMousePos.y);
-        }
-        hazardController.draw(canvas);
-        //player.draw(canvas);
-        canvas.end();
-
-        updateCursor();
-
-        canvas.beginHud();
-        hazardController.drawWarning(canvas, cameraVector);
-        resourceController.drawUI(canvas);
-        canvas.endHud();
-
-        canvas.beginText();
-        // Fix scale changing later!!!!!!
-        timer.displayTime(canvas,
-                          timesFont,
-                          Color.WHITE,
-                          Gdx.graphics.getWidth() / 2.1f,
-                          Gdx.graphics.getHeight() / 1.03f,
-                          (new Vector2(scalex, scaley)));
-//        System.out.println(avatar.getY());
-//        System.out.println(isComplete());
-//        System.out.println(tilemap.getVictoryHeight()*tilemap.getTileHeight());
-//        System.out.println(Gdx.graphics.getWidth());
-//        System.out.println(Gdx.graphics.getHeight());
-        //canvas.drawTime(timesFont,"me", Color.WHITE, 800, 200);
-        canvas.endtext();
+    public void postSolve(Contact contact, ContactImpulse impulse) {
     }
 
 }
