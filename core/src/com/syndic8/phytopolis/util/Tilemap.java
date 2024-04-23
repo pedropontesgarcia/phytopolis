@@ -106,7 +106,7 @@ public class Tilemap {
         List<Texture> resourceTextureList = new ArrayList<>();
         Texture tx = directory.getEntry("gameplay:water_filmstrip",
                                         Texture.class);
-        Texture tx2 = directory.getEntry("gameplay:sun_filmstrip",
+        Texture tx2 = directory.getEntry("gameplay:sun_resource",
                                          Texture.class);
         resourceTextureList.add(tx);
         resourceTextureList.add(tx2);
@@ -206,7 +206,7 @@ public class Tilemap {
                                                              13);
                     FilmStrip sunFilmstrip = new FilmStrip(resourceTextures[1],
                                                            1,
-                                                           9);
+                                                           1);
                     Water w = new Water(xMid,
                                         yMid,
                                         tileWidth,
