@@ -28,8 +28,12 @@ public class GameCanvas {
      * Camera for the underlying SpriteBatch
      */
     private final OrthographicCamera hudCamera;
+
+    private final OrthographicCamera textCamera;
     private final Viewport viewport;
     private final Viewport hudViewport;
+
+    private final Viewport textViewPort;
     /**
      * Value to cache window width (if we are currently full screen)
      */
@@ -46,6 +50,8 @@ public class GameCanvas {
      * Drawing context to handle HUD
      */
     private SpriteBatch hudBatch;
+
+    private SpriteBatch textBatch;
     /**
      * Track whether we are active (for error checking)
      */
@@ -88,25 +94,33 @@ public class GameCanvas {
         active = DrawPass.INACTIVE;
         spriteBatch = new PolygonSpriteBatch();
         hudBatch = new SpriteBatch();
+        textBatch = new SpriteBatch();
         debugRender = new ShapeRenderer();
 
         // Set the projection matrix (for proper scaling)
         camera = new OrthographicCamera(width, height);
         hudCamera = new OrthographicCamera(width, height);
+        textCamera = new OrthographicCamera(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
 
         viewport = new FitViewport(width, height, camera);
         hudViewport = new FitViewport(width, height, hudCamera);
+        textViewPort = new FitViewport(Gdx.graphics.getWidth(), Gdx.graphics.getHeight(), textCamera);
+
         int screenWidth = Gdx.graphics.getDisplayMode().width;
         int screenHeight = Gdx.graphics.getDisplayMode().height;
         viewport.setScreenSize(screenWidth, screenHeight);
         hudViewport.setScreenSize(screenWidth, screenHeight);
+        textViewPort.setScreenSize(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
         camera.position.set(width / 2f, height / 2f, 0);
         hudCamera.position.set(width / 2f, height / 2f, 0);
+        textCamera.position.set(Gdx.graphics.getWidth()/2f, Gdx.graphics.getHeight()/2f, 0);
 
         camera.update();
         hudCamera.update();
+        textCamera.update();
         spriteBatch.setProjectionMatrix(camera.combined);
         hudBatch.setProjectionMatrix(hudCamera.combined);
+        textBatch.setProjectionMatrix(textCamera.combined);
         debugRender.setProjectionMatrix(camera.combined);
 
         // Initialize the cache objects
@@ -142,6 +156,8 @@ public class GameCanvas {
         }
         spriteBatch.dispose();
         hudBatch.dispose();
+        textBatch.dispose();
+        textBatch = null;
         hudBatch = null;
         spriteBatch = null;
         local = null;
@@ -303,6 +319,7 @@ public class GameCanvas {
     public void resizeScreen(int width, int height) {
         viewport.update(width, height);
         hudViewport.update(width, height);
+        //textViewPort.update(width, height);
     }
 
     public void drawBackground(Texture image, float x, float y) {
@@ -400,6 +417,7 @@ public class GameCanvas {
     public void begin(float sx, float sy) {
         viewport.apply();
         hudViewport.apply();
+        textViewPort.apply();
         global.idt();
         global.scl(sx, sy, 1.0f);
         global.mulLeft(camera.combined);
@@ -412,6 +430,10 @@ public class GameCanvas {
     public void beginHud() {
         hudBatch.setProjectionMatrix(hudCamera.combined);
         hudBatch.begin();
+    }
+    public void beginText(){
+        textBatch.setProjectionMatrix(textCamera.combined);
+        textBatch.begin();
     }
 
     /**
@@ -436,6 +458,10 @@ public class GameCanvas {
 
     public void endHud() {
         hudBatch.end();
+    }
+
+    public void endtext(){
+        textBatch.end();
     }
 
     /**
@@ -474,6 +500,11 @@ public class GameCanvas {
      */
     public void drawHud(TextureRegion t, float x, float y, float w, float h) {
         hudBatch.draw(t, x, y, w, h);
+    }
+
+    public void drawTime(BitmapFont font, String s, Color color, float x, float y){
+        font.setColor(color);
+        font.draw(textBatch,s,  x, y);
     }
 
     /**
