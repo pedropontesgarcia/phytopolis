@@ -481,7 +481,6 @@ public class GameplayMode extends WorldController implements ContactListener {
                          Math.max(avatar.getY() - canvas.getHeight() / 6f,
                                   canvas.getHeight() / 2f));
         // generate hazards please
-        resourceController.update(avatar);
         for (Model m : objects) {
             if (m instanceof Water) {
                 ((Water) m).regenerate();
