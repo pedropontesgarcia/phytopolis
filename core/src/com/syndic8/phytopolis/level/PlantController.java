@@ -1,5 +1,6 @@
 package com.syndic8.phytopolis.level;
 
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.World;
@@ -69,6 +70,10 @@ public class PlantController {
      */
     protected FilmStrip branchTexture;
     /**
+     * static branch texture
+     */
+    protected FilmStrip staticBranchTexture;
+    /**
      * leaf texture
      */
     protected FilmStrip leafTexture;
@@ -137,18 +142,65 @@ public class PlantController {
      *
      * @param x         the x coordinate of the node to grow the branch at
      * @param y         the y coordinate of the node to grow the branch at
-     * @param direction the direction in which to grow the branch
-     * @param type      the type of branch to grow
      */
-    public Branch growBranch(float x,
-                           float y,
-                           branchDirection direction,
-                           Branch.branchType type) {
-        int xIndex = screenCoordToIndex(x * worldToPixelConversionRatio,
-                                        y * worldToPixelConversionRatio)[0];
-        int yIndex = screenCoordToIndex(x * worldToPixelConversionRatio,
-                                        y * worldToPixelConversionRatio)[1];
-        return plantGrid[xIndex][yIndex].makeBranch(direction, type, world);
+    public Branch growBranch(float x, float y) {
+        int xIndex = worldCoordToIndex(x, y)[0];
+        int yIndex = worldCoordToIndex(x, y)[1];
+        branchDirection direction = worldToBranch(x, y);
+        if (direction == null) return null;
+        return plantGrid[xIndex][yIndex].makeBranch(direction, Branch.branchType.NORMAL, world);
+    }
+
+    /**
+     * returns a branch at the given screen coords
+     *
+     * @param x         the x coordinate of the node to grow the branch at
+     * @param y         the y coordinate of the node to grow the branch at
+     */
+    public branchDirection worldToBranch(float x, float y) {
+        // Convert screen coordinates to grid indices
+        int xIndex = worldCoordToIndex(x, y)[0];
+        int yIndex = worldCoordToIndex(x, y)[1];
+        if (!inBounds(xIndex, yIndex)) return null;
+
+        // Convert indices back to world coordinates to find the center of the cell
+        Vector2 cellCenter = indexToWorldCoord(xIndex, yIndex);
+
+        // Calculate angle from the center of the node to the click position
+        float angle = (float)Math.atan2(y - cellCenter.y, x - cellCenter.x);
+
+        // Normalize angle into a range from 0 to 2*PI
+        angle = (angle + (float)(2 * Math.PI)) % (float)(2 * Math.PI);
+        if (angle >= Math.PI) return null;
+
+        // Divide the space around the node into six segments (each segment is 60 degrees)
+        branchDirection direction = getBranchDirection(angle);
+
+        // Grow branch
+        if (!branchExists(xIndex, yIndex, direction) && canGrowAtIndex(xIndex, yIndex))
+            return direction;
+        return null;
+    }
+
+    private branchDirection getBranchDirection(float angle) {
+        branchDirection direction;
+        if (angle < Math.PI / 3) {
+            direction = branchDirection.RIGHT;
+        } else if (angle < 2 * Math.PI / 3) {
+            direction = branchDirection.MIDDLE;
+        } else if (angle < Math.PI) {
+            direction = branchDirection.LEFT;
+        }
+        // For branches under the node
+        else if (angle < 4 * Math.PI / 3) {
+            direction = branchDirection.RIGHT;
+        } else if (angle < 5 * Math.PI / 3) {
+            System.out.println("rawr");
+            direction = branchDirection.MIDDLE;
+        } else {
+            direction = branchDirection.LEFT;
+        }
+        return direction;
     }
 
     /**
@@ -357,6 +409,40 @@ public class PlantController {
     }
 
     /**
+     * draws the branch that the mouse hovers over
+     *
+     * @param canvas the canvas to draw to
+     */
+    public void drawGhostBranch(GameCanvas canvas, float x, float y) {
+        int xIndex = worldCoordToIndex(x, y)[0];
+        int yIndex = worldCoordToIndex(x, y)[1];
+        branchDirection direction = worldToBranch(x, y);
+        if (direction != null) {
+            float angle;
+            switch (direction) {
+                case MIDDLE:
+                    angle = 0; break;
+                case LEFT:
+                    angle = (float) Math.PI / 3; break;
+                case RIGHT:
+                    angle = (float) -Math.PI / 3; break;
+                default:
+                    angle = 0;
+            }
+            Branch branch = new Branch(
+                    plantGrid[xIndex][yIndex].getX(),
+                    plantGrid[xIndex][yIndex].getY(),
+                    angle,
+                    Branch.branchType.NORMAL,
+                    tilemap,
+                    1
+            );
+            branch.setFilmStrip(staticBranchTexture);
+            branch.drawGhost(canvas);
+        }
+    }
+
+    /**
      * draws the current plant to the canvas
      *
      * @param canvas the canvas to draw to
@@ -365,15 +451,6 @@ public class PlantController {
         try {
             for (PlantNode[] n : plantGrid) {
                 for (PlantNode node : n) {
-                    //                    canvas.draw(nodeTexture,
-                    //                                Color.WHITE,
-                    //                                nodeTexture.getWidth() / 2f,
-                    //                                nodeTexture.getHeight() / 2f,
-                    //                                node.getX(),
-                    //                                node.getY(),
-                    //                                0.0f,
-                    //                                0.005f,
-                    //                                0.006f);
                     try {
                         node.drawBranches(canvas);
                         node.drawLeaf(canvas);
@@ -419,6 +496,9 @@ public class PlantController {
         this.nodeTexture = directory.getEntry("gameplay:node", Texture.class);
         this.branchTexture = new FilmStrip(directory.getEntry("gameplay:branch", Texture.class),
                 1, 5, 5);
+        this.staticBranchTexture = new FilmStrip(directory.getEntry("gameplay:branch", Texture.class),
+                1, 5, 5);
+        this.staticBranchTexture.setFrame(4);
         this.leafTexture = new FilmStrip(directory.getEntry("gameplay:leaf", Texture.class),
                 1, 5, 5);
         this.bouncyLeafTexture = directory.getEntry("gameplay:bouncy",

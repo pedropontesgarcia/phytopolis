@@ -390,7 +390,7 @@ public class GameplayMode extends WorldController implements ContactListener {
     public void updateCursor() {
         Gdx.graphics.setCursor(branchCursor);
         if (InputController.getInstance().didSpecial()) {
-            Gdx.graphics.setCursor(leafCursor); //
+            Gdx.graphics.setCursor(leafCursor);
         }
         InputController ic = InputController.getInstance();
         Vector2 projMousePos = new Vector2(ic.getMouseX(), ic.getMouseY());
@@ -405,52 +405,34 @@ public class GameplayMode extends WorldController implements ContactListener {
      * corresponding direction at the node closest to the player's position.
      */
     public void processPlantGrowth() {
-        float avatarX = avatar.getX();
-        float avatarY = avatar.getY();
-        Branch.branchType bt = Branch.branchType.NORMAL;
-        if (InputController.getInstance().didSpecial())
-            bt = Branch.branchType.REINFORCED;
-        if (InputController.getInstance().didGrowUp() &&
-                (plantController.branchGrowableAt(avatarX,
-                                                  avatarY,
-                                                  PlantController.branchDirection.MIDDLE))) {
-            addObject(plantController.growBranch(avatarX,
-                                       avatarY,
-                                       PlantController.branchDirection.MIDDLE,
-                                       bt));
-//            System.out.println("BRANCH");
-        } else if (InputController.getInstance().didGrowRight() &&
-                (plantController.branchGrowableAt(avatarX,
-                                                  avatarY,
-                                                  PlantController.branchDirection.RIGHT))) {
-            addObject(plantController.growBranch(avatarX,
-                                       avatarY,
-                                       PlantController.branchDirection.RIGHT,
-                                       bt));
-        } else if (InputController.getInstance().didGrowLeft() &&
-                (plantController.branchGrowableAt(avatarX,
-                                                  avatarY,
-                                                  PlantController.branchDirection.LEFT))) {
-            addObject(plantController.growBranch(avatarX,
-                                       avatarY,
-                                       PlantController.branchDirection.LEFT,
-                                       bt));
+        // get mouse position
+        InputController ic = InputController.getInstance();
+        Vector2 projMousePos = new Vector2(ic.getMouseX(), ic.getMouseY());
+        Vector2 unprojMousePos = canvas.unproject(projMousePos);
 
-        } else if (InputController.getInstance().didMousePress() && InputController.getInstance().didSpecial()) {
-            // don't grow if there's a fire there (prioritize fire)
-            InputController ic = InputController.getInstance();
-            Vector2 projMousePos = new Vector2(ic.getGrowX(), ic.getGrowY());
-            Vector2 unprojMousePos = canvas.unproject(projMousePos);
-            if (!hazardController.hasFire(unprojMousePos)) {
-                Leaf.leafType lt = Leaf.leafType.NORMAL;
+        // draw ghost branches
+//        Branch hoveringBranch = plantController.screenToBranch(unprojMousePos.x, unprojMousePos.y);
+//        if (hoveringBranch != null && !objects.contains(hoveringBranch)) objects.add(hoveringBranch);
+
+        if (InputController.getInstance().didMousePress()) {
+            // process leaf stuff
+            if (InputController.getInstance().didSpecial()) {
+                // don't grow if there's a fire there (prioritize fire)
+                if (!hazardController.hasFire(unprojMousePos)) {
+                    Leaf.leafType lt = Leaf.leafType.NORMAL;
 //            if (InputController.getInstance().didSpecial())
 //                lt = Leaf.leafType.BOUNCY;
-                Model newLeaf = plantController.growLeaf(unprojMousePos.x,
-                        unprojMousePos.y + 0.5f * tilemap.getTileHeight(), lt);
-                if (newLeaf != null) addObject(newLeaf);
+                    Model newLeaf = plantController.growLeaf(unprojMousePos.x,
+                            unprojMousePos.y + 0.5f * tilemap.getTileHeight(), lt);
+                    if (newLeaf != null) addObject(newLeaf);
+                }
             }
 
-
+            // process branch stuff
+            else {
+                Branch branch = plantController.growBranch(unprojMousePos.x, unprojMousePos.y);
+                if (branch != null) addObject(branch);
+            }
         }
     }
 
@@ -801,6 +783,12 @@ public class GameplayMode extends WorldController implements ContactListener {
         super.draw(dt);
 
         plantController.draw(canvas);
+        InputController ic = InputController.getInstance();
+        if (!ic.didSpecial()) {
+            Vector2 projMousePos = new Vector2(ic.getMouseX(), ic.getMouseY());
+            Vector2 unprojMousePos = canvas.unproject(projMousePos);
+            plantController.drawGhostBranch(canvas, unprojMousePos.x, unprojMousePos.y);
+        }
         hazardController.draw(canvas);
         //player.draw(canvas);
         canvas.end();
