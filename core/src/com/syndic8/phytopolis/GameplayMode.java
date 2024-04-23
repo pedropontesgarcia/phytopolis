@@ -81,6 +81,7 @@ public class GameplayMode extends WorldController implements ContactListener {
      */
     private BitmapFont timesFont;
     private TextureRegion background;
+    private TextureRegion vignette;
     /**
      * Texture asset for character avatar
      */
@@ -183,8 +184,11 @@ public class GameplayMode extends WorldController implements ContactListener {
         timesFont = directory.getEntry("times", BitmapFont.class);
         background = new TextureRegion(directory.getEntry("gameplay:background",
                                                           Texture.class));
+        vignette = new TextureRegion(directory.getEntry("gameplay:vignette",
+                Texture.class));
 
         background.setRegion(0, 0, 1920, 1080);
+        vignette.setRegion(0, 0, 1920, 1080);
 
         jumpTexture = directory.getEntry("jump", Texture.class);
         jumpAnimator = new FilmStrip(jumpTexture, 1, 13, 13);
@@ -773,6 +777,15 @@ public class GameplayMode extends WorldController implements ContactListener {
         }
     }
 
+    private void drawVignette(){
+        canvas.draw(vignette.getTexture(),
+                Color.WHITE,
+                0,
+                0,
+                canvas.getWidth(),
+                canvas.getHeight());
+    }
+
     /**
      * Draw the physics objects to the canvas
      * <p>
@@ -788,6 +801,7 @@ public class GameplayMode extends WorldController implements ContactListener {
         canvas.clear();
         canvas.begin();
         drawBackground();
+        drawVignette();
         //timer.displayTime(canvas,timesFont, Color.BLACK, canvas.getWidth()/2, canvas.getHeight()/2, new Vector2(0.036f, 0.036f));
         //System.out.println(timer.getMinutes());
         //System.out.println(timer.getSeconds());
