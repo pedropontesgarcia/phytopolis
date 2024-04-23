@@ -802,7 +802,7 @@ public class GameplayMode extends WorldController implements ContactListener {
         canvas.endHud();
 
         canvas.beginText();
-        timer.displayTime(canvas, timesFont, Color.BLACK, Gdx.graphics.getWidth()/2.0f, Gdx.graphics.getHeight()/1.05f);
+        timer.displayTime(canvas, timesFont, Color.WHITE, Gdx.graphics.getWidth()/2.0f, Gdx.graphics.getHeight()/1.05f);
         //canvas.drawTime(timesFont,"me", Color.WHITE, 800, 200);
         canvas.endtext();
 
