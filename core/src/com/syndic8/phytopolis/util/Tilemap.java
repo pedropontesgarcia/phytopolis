@@ -27,7 +27,9 @@ public class Tilemap {
     float tileWidth;
     Texture[] resourceTextures;
     Resource[] resources;
-    float timer;
+    int time;
+    int star;
+    int starTime;
     float fireRate;
 
     /**
@@ -68,9 +70,13 @@ public class Tilemap {
         return tileWidth;
     }
 
-    public float getTimer() {
-        return timer;
+    public int getTime() {
+        return time;
     }
+
+    public int getStar(){return star;}
+
+    public int getStarTime(){return starTime;}
 
     public float getFireRate() {
         return fireRate;
@@ -99,9 +105,13 @@ public class Tilemap {
         for (JsonValue propertyJson : propertiesJson) {
             if (propertyJson.getString("name").equals("firerate"))
                 fireRate = propertyJson.getFloat("value");
-            else if (propertyJson.getString("name").equals("timer"))
-                timer = propertyJson.getInt("value");
+//            else if (propertyJson.getString("name").equals("timer"))
+//                timer = propertyJson.getInt("value");
         }
+        JsonValue timer = tilemap.get("timer");
+        time = timer.getInt("time");
+        star = timer.getInt("star");
+        starTime = timer.getInt("starTime");
 
         List<Texture> resourceTextureList = new ArrayList<>();
         Texture tx = directory.getEntry("gameplay:water_filmstrip",
@@ -134,6 +144,8 @@ public class Tilemap {
         float tilePixelHeight = tilesetJson.getFloat("tileheight");
         JsonValue tilesJson = tilesetJson.get("tiles");
         tiles = new PooledList<>();
+
+
 
         for (int row = 0; row < tilemapHeight; row++) {
             for (int col = 0; col < tilemapWidth; col++) {

@@ -350,7 +350,7 @@ public class GameplayMode extends WorldController implements ContactListener {
         }
 
         volume = constants.getFloat("volume", 1.0f);
-        timer = new Timer(300, 3, 100);
+        timer = new Timer(tilemap.getTime(), tilemap.getStar(), tilemap.getStarTime());
         scalex = Gdx.graphics.getWidth()/1129.412f;
         scaley = Gdx.graphics.getHeight()/635.294f;
         timer.startTimer();
