@@ -14,6 +14,8 @@ public class ResourceController {
     private final int MAX_WATER = 100;
 
     private final int MAX_SUN = 8;
+
+    private final int STARTING_SUN = 1;
     /**
      * Amount of water required to grow a leaf
      */
@@ -48,7 +50,7 @@ public class ResourceController {
 
     public ResourceController() {
         currWater = MAX_WATER;
-        currSun = 1;
+        currSun = STARTING_SUN;
         ui = new UIController();
     }
 
@@ -118,6 +120,11 @@ public class ResourceController {
         } else {
             currSun -= UPGRADE_AMT;
         }
+    }
+
+    public void reset() {
+        currWater = MAX_WATER;
+        currSun = STARTING_SUN;
     }
 
     public void drawUI(GameCanvas c) {

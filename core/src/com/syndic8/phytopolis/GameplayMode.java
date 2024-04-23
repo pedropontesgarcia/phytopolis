@@ -267,6 +267,8 @@ public class GameplayMode extends WorldController implements ContactListener {
 
         InputController.getInstance().resetScrolled();
 
+        resourceController.reset();
+
         world = new World(gravity, false);
         world.setContactListener(this);
         setComplete(false);
