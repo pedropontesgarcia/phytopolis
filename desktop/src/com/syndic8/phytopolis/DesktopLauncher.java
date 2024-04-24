@@ -5,6 +5,7 @@ import com.badlogic.gdx.backends.lwjgl3.Lwjgl3Application;
 import com.badlogic.gdx.backends.lwjgl3.Lwjgl3ApplicationConfiguration;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.logging.Logger;
 
@@ -26,8 +27,9 @@ public class DesktopLauncher {
                 goodDisplayModes.add(displayMode);
             }
         }
-        goodDisplayModes.sort((Graphics.DisplayMode dm1, Graphics.DisplayMode dm2) ->
-                                      dm1.width - dm2.width);
+        goodDisplayModes.sort(Comparator.comparingInt((Graphics.DisplayMode dm) -> dm.width));
+        // Uncomment this line to force windowed mode
+        // goodDisplayModes.clear();
         if (goodDisplayModes.isEmpty()) {
             LOGGER.warning("No valid fullscreen resolutions were detected, " +
                                    "switching to compatibility (windowed) " +

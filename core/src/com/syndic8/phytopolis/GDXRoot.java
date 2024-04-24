@@ -90,10 +90,10 @@ public class GDXRoot extends Game implements ScreenListener {
             menu = null;
         } else if (screen == levelSelect) {
             controller.setLevel(levelSelect.getLevel());
+            controller.setCanvas(canvas);
             controller.gatherAssets(directory);
             controller.reset();
             controller.setScreenListener(this);
-            controller.setCanvas(canvas);
             controller.fadeIn(0.5f);
             setScreen(controller);
         } else if (screen == victory) {

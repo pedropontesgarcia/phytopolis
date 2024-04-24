@@ -31,7 +31,6 @@ import com.syndic8.phytopolis.level.ResourceController;
 import com.syndic8.phytopolis.level.models.*;
 import com.syndic8.phytopolis.util.FilmStrip;
 import com.syndic8.phytopolis.util.Tilemap;
-import com.syndic8.phytopolis.util.Timer;
 
 import java.util.HashMap;
 
@@ -53,7 +52,6 @@ public class GameplayMode extends WorldController implements ContactListener {
     protected ObjectSet<Fixture> sensorFixtures;
     protected Texture jumpTexture;
     private TextureRegion branchCursorTexture;
-    private Timer timer;
     private int starPoints;
     private float scalex;
     private float scaley;
@@ -209,11 +207,7 @@ public class GameplayMode extends WorldController implements ContactListener {
                               directory.getEntry(lvl, JsonValue.class));
         tilemap.gatherAssets(directory);
 
-        //        this.branchTexture = new FilmStrip(directory.getEntry(
-        //                "gameplay:branch",
-        //                Texture.class), 1, 5, 5);
-
-        resourceController = new ResourceController();
+        resourceController = new ResourceController(canvas, tilemap);
         plantController = new PlantController(8,
                                               40,
                                               tilemap.getTileHeight(),
@@ -288,21 +282,10 @@ public class GameplayMode extends WorldController implements ContactListener {
         avatar.setMovement(InputController.getInstance().getHorizontal() *
                                    avatar.getForce());
         avatar.setJumping(InputController.getInstance().didPrimary());
-        //Leaf.leafType ltype = plantController.getLeafType(plantController.xWorldCoordToIndex(avatar.getX()), plantController.yWorldCoordToIndex(avatar.getY()));
-        //avatar.setBouncy(ltype == Leaf.leafType.BOUNCY);
-
-        //avatar.setShooting(InputController.getInstance().didSecondary());
         processPlantGrowth();
 
         avatar.applyForce();
         avatar.setBouncy(false);
-        //System.out.println(avatar.getY());
-        //System.out.println(avatar.atBottom());
-        //        if (avatar.isJumping()) {
-        //jumpId = playSound(jumpSound, jumpId, volume);
-        //        }
-
-        //handleDrop();
         InputController ic = InputController.getInstance();
         if (ic.didScrollReset()) {
             ic.resetScrolled();
@@ -314,8 +297,6 @@ public class GameplayMode extends WorldController implements ContactListener {
                                   Math.min(tilemap.getTilemapHeight() -
                                                    canvas.getHeight() / 2f,
                                            avatar.getY()) + ic.getScrolled()));
-        //                         Math.max(avatar.getY(),
-        //                                  canvas.getHeight() / 2f));
         // generate hazards please
         for (Model m : objects) {
             if (m instanceof Water) {
@@ -332,24 +313,15 @@ public class GameplayMode extends WorldController implements ContactListener {
         }
 
         if (ic.didMousePress()) {
-            //            System.out.println(ic.getGrowX()/ tilemap.getTileWidth() + " " + ic.getGrowY()/ tilemap.getTileHeight());
-            //            System.out.println(tilemap.getTilemapWidth() + " " + );
-            //            System.out.println(cameraVector.x + " " + cameraVector.y);
-            //            System.out.println(ic.getScrolled());
-            //            setComplete(true);
             Vector2 projMousePos = new Vector2(ic.getGrowX(), ic.getGrowY());
             Vector2 unprojMousePos = canvas.unproject(projMousePos);
             hazardController.extinguishFire(unprojMousePos);
         }
         plantController.propagateDestruction();
-        //        System.out.println(objects.size());
-        timer.updateTime();
         // Check for win condition
         if ((avatar.getY() >
                 tilemap.getVictoryHeight() * tilemap.getTileHeight()) &&
                 !isComplete()) {
-            timer.setRunning(false);
-            starPoints = timer.getAcquiredStars();
             setComplete(true);
             fadeOut(3);
         }
@@ -365,18 +337,12 @@ public class GameplayMode extends WorldController implements ContactListener {
         Vector2 projMousePos = new Vector2(ic.getMouseX(), ic.getMouseY());
         Vector2 unprojMousePos = canvas.unproject(projMousePos);
 
-        // draw ghost branches
-        //        Branch hoveringBranch = plantController.screenToBranch(unprojMousePos.x, unprojMousePos.y);
-        //        if (hoveringBranch != null && !objects.contains(hoveringBranch)) objects.add(hoveringBranch);
-
         if (InputController.getInstance().didMousePress()) {
             // process leaf stuff
             if (InputController.getInstance().didSpecial()) {
                 // don't grow if there's a fire there (prioritize fire)
                 if (!hazardController.hasFire(unprojMousePos)) {
                     Leaf.leafType lt = Leaf.leafType.NORMAL;
-                    //            if (InputController.getInstance().didSpecial())
-                    //                lt = Leaf.leafType.BOUNCY;
                     Model newLeaf = plantController.handleLeaf(unprojMousePos.x,
                                                                unprojMousePos.y +
                                                                        0.5f *
@@ -433,22 +399,6 @@ public class GameplayMode extends WorldController implements ContactListener {
         hazardController.drawWarning(canvas, cameraVector);
         resourceController.drawUI(canvas);
         canvas.endHud();
-
-        canvas.beginText();
-        // Fix scale changing later!!!!!!
-        timer.displayTime(canvas,
-                          timesFont,
-                          Color.WHITE,
-                          Gdx.graphics.getWidth() / 2.1f,
-                          Gdx.graphics.getHeight() / 1.03f,
-                          (new Vector2(scalex, scaley)));
-        //        System.out.println(avatar.getY());
-        //        System.out.println(isComplete());
-        //        System.out.println(tilemap.getVictoryHeight()*tilemap.getTileHeight());
-        //        System.out.println(Gdx.graphics.getWidth());
-        //        System.out.println(Gdx.graphics.getHeight());
-        //canvas.drawTime(timesFont,"me", Color.WHITE, 800, 200);
-        canvas.endText();
         super.draw(canvas);
     }
 
@@ -559,12 +509,8 @@ public class GameplayMode extends WorldController implements ContactListener {
         }
 
         volume = constants.getFloat("volume", 1.0f);
-        timer = new Timer(tilemap.getTime(),
-                          tilemap.getStar(),
-                          tilemap.getStarTime());
         scalex = Gdx.graphics.getWidth() / 1129.412f;
         scaley = Gdx.graphics.getHeight() / 635.294f;
-        timer.startTimer();
     }
 
     /**
@@ -573,46 +519,6 @@ public class GameplayMode extends WorldController implements ContactListener {
     private void setPlayer(Player player) {
         this.player = player;
     }
-
-    //    /**
-    //     * Handles the drop mechanic when the player has
-    //     * pressed S
-    //     */
-    //    private void handleDrop() {
-    //        if (avatar.isPlayerOnPlatform(world) &&
-    //                InputController.getInstance().dropped()) {
-    //            for (Fixture fixture : avatar.getBody().getFixtureList()) {
-    //                originalCollisionProperties.put(fixture,
-    //                        fixture.getFilterData());
-    //            }
-    //            fall = true;
-    //        }
-    //        if (fall) {
-    //            for (Fixture fixture : avatar.getBody().getFixtureList()) {
-    //                fixture.setFilterData(createFilterData(
-    //                        CATEGORY_PLAYER_FALL_THROUGH,
-    //                        MASK_PLAYER_FALL_THROUGH,
-    //                        false));
-    //                fixture.setSensor(true);
-    //                startHeight = avatar.getY();
-    //            }
-    //            fall = false;
-    //        }
-    //        if ((avatar.getY() <= startHeight - distance)) {
-    //            Array<Fixture> fixtures = avatar.getBody().getFixtureList();
-    //            for (Fixture fixture : fixtures) {
-    //                Filter originalProperties = originalCollisionProperties.get(
-    //                        fixture);
-    //                if (originalProperties != null) {
-    //                    fixture.setFilterData(originalProperties);
-    //                    //                    fixture.setSensor(false);
-    //                }
-    //            }
-    //            originalCollisionProperties.clear();
-    //
-    //            startHeight = 0;
-    //        }
-    //    }
 
     /**
      * Called when the Screen is paused.
@@ -753,13 +659,6 @@ public class GameplayMode extends WorldController implements ContactListener {
                                            fix1); // Could have more than one ground
             }
 
-            //            //Check for bouncyness
-            //            if (bd1 == avatar && bd2 instanceof Leaf) {
-            //                Leaf l1 = (Leaf) bd2;
-            //                if(l1.getLeafType() == Leaf.leafType.BOUNCY &&
-            //                        bd1.getY() > bd2.getY() + 0.9f) avatar.setBouncy(true);
-            //            }
-
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -794,9 +693,6 @@ public class GameplayMode extends WorldController implements ContactListener {
                 avatar.setGrounded(false);
             }
         }
-        //        if (bd1 == avatar && bd2 instanceof Leaf) {
-        //            avatar.setBouncy(false);
-        //        }
     }
 
     /**

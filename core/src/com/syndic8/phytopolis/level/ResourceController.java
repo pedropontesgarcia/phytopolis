@@ -2,9 +2,7 @@ package com.syndic8.phytopolis.level;
 
 import com.syndic8.phytopolis.GameCanvas;
 import com.syndic8.phytopolis.assets.AssetDirectory;
-import com.syndic8.phytopolis.level.models.Player;
-import com.syndic8.phytopolis.level.models.Resource;
-import com.syndic8.phytopolis.util.PooledList;
+import com.syndic8.phytopolis.util.Tilemap;
 
 public class ResourceController {
 
@@ -48,10 +46,10 @@ public class ResourceController {
      */
     private int currWater;
 
-    public ResourceController() {
+    public ResourceController(GameCanvas c, Tilemap tm) {
         currWater = MAX_WATER;
         currSun = STARTING_SUN;
-        ui = new UIController();
+        ui = new UIController(c, tm);
     }
 
     public void gatherAssets(AssetDirectory directory) {
@@ -82,24 +80,14 @@ public class ResourceController {
         return currSun == MAX_SUN;
     }
 
-    public boolean canGrowLeaf() {
-        return currWater >= LEAF_GROW_AMT;
-    }
-
-    public boolean canGrowBranch() {
-        return currWater >= BRANCH_GROW_AMT;
-    }
-
-    public boolean canExtinguish() {
-        return currWater >= FIRE_AMT;
-    }
-
-    public boolean canUpgrade() { return currSun >= UPGRADE_AMT; }
-
     public void decrementGrowLeaf() {
         if (canGrowLeaf()) {
             currWater -= LEAF_GROW_AMT;
         }
+    }
+
+    public boolean canGrowLeaf() {
+        return currWater >= LEAF_GROW_AMT;
     }
 
     public void decrementGrowBranch() {
@@ -108,10 +96,18 @@ public class ResourceController {
         }
     }
 
+    public boolean canGrowBranch() {
+        return currWater >= BRANCH_GROW_AMT;
+    }
+
     public void decrementExtinguish() {
         if (canExtinguish()) {
             currWater -= FIRE_AMT;
         }
+    }
+
+    public boolean canExtinguish() {
+        return currWater >= FIRE_AMT;
     }
 
     public void decrementUpgrade() {
@@ -120,6 +116,10 @@ public class ResourceController {
         } else {
             currSun -= UPGRADE_AMT;
         }
+    }
+
+    public boolean canUpgrade() {
+        return currSun >= UPGRADE_AMT;
     }
 
     public void reset() {

@@ -5,7 +5,10 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.graphics.g2d.*;
+import com.badlogic.gdx.graphics.g2d.PolygonRegion;
+import com.badlogic.gdx.graphics.g2d.PolygonSpriteBatch;
+import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.*;
 import com.badlogic.gdx.physics.box2d.CircleShape;
@@ -49,8 +52,6 @@ public class GameCanvas {
      * Drawing context to handle HUD
      */
     private SpriteBatch hudBatch;
-
-    private SpriteBatch textBatch;
     private ShapeRenderer shapeRenderer;
     /**
      * Track whether we are active (for error checking)
@@ -88,40 +89,32 @@ public class GameCanvas {
         active = DrawPass.INACTIVE;
         spriteBatch = new PolygonSpriteBatch();
         hudBatch = new SpriteBatch();
-        textBatch = new SpriteBatch();
         debugRender = new ShapeRenderer();
         shapeRenderer = new ShapeRenderer();
 
         // Set the projection matrix (for proper scaling)
         camera = new OrthographicCamera(width, height);
         hudCamera = new OrthographicCamera(width, height);
-        textCamera = new OrthographicCamera(Gdx.graphics.getWidth(),
-                                            Gdx.graphics.getHeight());
+        textCamera = new OrthographicCamera(width * 100f, height * 100f);
 
         viewport = new FitViewport(width, height, camera);
         hudViewport = new FitViewport(width, height, hudCamera);
-        textViewport = new FitViewport(Gdx.graphics.getWidth(),
-                                       Gdx.graphics.getHeight(),
-                                       textCamera);
+        textViewport = new FitViewport(width * 100f, height * 100f, textCamera);
 
         int screenWidth = Gdx.graphics.getDisplayMode().width;
         int screenHeight = Gdx.graphics.getDisplayMode().height;
         viewport.setScreenSize(screenWidth, screenHeight);
         hudViewport.setScreenSize(screenWidth, screenHeight);
-        textViewport.setScreenSize(Gdx.graphics.getWidth(),
-                                   Gdx.graphics.getHeight());
+        textViewport.setScreenSize(screenWidth, screenHeight);
         camera.position.set(width / 2f, height / 2f, 0);
         hudCamera.position.set(width / 2f, height / 2f, 0);
-        textCamera.position.set(Gdx.graphics.getWidth() / 2f,
-                                Gdx.graphics.getHeight() / 2f,
-                                0);
+        textCamera.position.set(width * 100f / 2f, height * 100f / 2f, 0);
 
         camera.update();
         hudCamera.update();
         textCamera.update();
         spriteBatch.setProjectionMatrix(camera.combined);
         hudBatch.setProjectionMatrix(hudCamera.combined);
-        textBatch.setProjectionMatrix(textCamera.combined);
         debugRender.setProjectionMatrix(camera.combined);
         shapeRenderer.setProjectionMatrix(hudCamera.combined);
 
@@ -174,9 +167,7 @@ public class GameCanvas {
         }
         spriteBatch.dispose();
         hudBatch.dispose();
-        textBatch.dispose();
         shapeRenderer.dispose();
-        textBatch = null;
         hudBatch = null;
         spriteBatch = null;
         shapeRenderer = null;
@@ -214,7 +205,6 @@ public class GameCanvas {
         this.width = width;
         this.height = height;
         resizeCanvas();
-
     }
 
     /**
@@ -256,9 +246,6 @@ public class GameCanvas {
             return;
         }
         this.width = width;
-        //        if (!isFullscreen()) {
-        //            Gdx.graphics.setWindowedMode(width, height);
-        //        }
         resizeCanvas();
     }
 
@@ -333,7 +320,7 @@ public class GameCanvas {
     public void resizeScreen(int width, int height) {
         viewport.update(width, height);
         hudViewport.update(width, height);
-        //textViewPort.update(width, height);
+        textViewport.update(width, height);
     }
 
     public float getCameraY() {
@@ -402,39 +389,9 @@ public class GameCanvas {
         blend = state;
     }
 
-    //    public void drawBackground(Texture image, float x, float y) {
-    //        if (active != DrawPass.STANDARD) {
-    //            Gdx.app.error("GameCanvas",
-    //                          "Cannot draw without active begin()",
-    //                          new IllegalStateException());
-    //            return;
-    //        }
-    //
-    //        float h = getHeight();
-    //        spriteBatch.draw(image, x, y);
-    //        spriteBatch.draw(image, x, y + h);
-    //    }
-    //
-    //    /**
-    //     * Returns the current color blending state for this canvas.
-    //     * <p>
-    //     * Textures draw to this canvas will be composited according
-    //     * to the rules of this blend state.
-    //     *
-    //     * @return the current color blending state for this canvas
-    //     */
-    //    public BlendState getBlendState() {
-    //        return blend;
-    //    }
-
     public void beginHud() {
         hudBatch.setProjectionMatrix(hudCamera.combined);
         hudBatch.begin();
-    }
-
-    public void beginText() {
-        textBatch.setProjectionMatrix(textCamera.combined);
-        textBatch.begin();
     }
 
     /**
@@ -461,31 +418,6 @@ public class GameCanvas {
         hudBatch.end();
     }
 
-    //    /**
-    //     * Start a standard drawing sequence.
-    //     * <p>
-    //     * Nothing is flushed to the graphics card until the method end() is called.
-    //     *
-    //     * @param sx the amount to scale the x-axis
-    //     * @param sy the amount to scale the y-axis
-    //     */
-    //    public void begin(float sx, float sy) {
-    //        viewport.apply();
-    //        hudViewport.apply();
-    //        textViewPort.apply();
-    //        global.idt();
-    //        global.scl(sx, sy, 1.0f);
-    //        global.mulLeft(camera.combined);
-    //        spriteBatch.setProjectionMatrix(global);
-    //
-    //        spriteBatch.begin();
-    //        active = DrawPass.STANDARD;
-    //    }
-
-    public void endText() {
-        textBatch.end();
-    }
-
     /**
      * Draws the tinted texture at the given position.
      * <p>
@@ -508,7 +440,6 @@ public class GameCanvas {
             return;
         }
 
-        // Unlike Lab 1, we can shortcut without a master drawing method
         spriteBatch.setColor(Color.WHITE);
         spriteBatch.draw(image, x, y);
     }
@@ -522,15 +453,6 @@ public class GameCanvas {
      */
     public void drawHud(TextureRegion t, float x, float y, float w, float h) {
         hudBatch.draw(t, x, y, w, h);
-    }
-
-    public void drawTime(BitmapFont font,
-                         String s,
-                         Color color,
-                         float x,
-                         float y) {
-        font.setColor(color);
-        font.draw(textBatch, s, x, y);
     }
 
     /**
@@ -664,7 +586,6 @@ public class GameCanvas {
             return;
         }
 
-        // Unlike Lab 1, we can shortcut without a master drawing method
         spriteBatch.setColor(tint);
         spriteBatch.draw(region, x, y, width, height);
     }
@@ -755,9 +676,6 @@ public class GameCanvas {
             return;
         }
 
-        // BUG: The draw command for texture regions does not work properly.
-        // There is a workaround, but it will break if the bug is fixed.
-        // For now, it is better to set the affine transform directly.
         computeTransform(ox, oy, x, y, angle, sx, sy);
         spriteBatch.setColor(tint);
         spriteBatch.draw(region,
@@ -1157,104 +1075,6 @@ public class GameCanvas {
     }
 
     /**
-     * Draws text on the screen.
-     *
-     * @param text The string to draw
-     * @param font The font to use
-     * @param x    The x-coordinate of the lower-left corner
-     * @param y    The y-coordinate of the lower-left corner
-     */
-    public void drawText(String text, BitmapFont font, float x, float y) {
-        if (active != DrawPass.STANDARD) {
-            Gdx.app.error("GameCanvas",
-                          "Cannot draw without active begin()",
-                          new IllegalStateException());
-            return;
-        }
-        GlyphLayout layout = new GlyphLayout(font, text);
-        font.draw(spriteBatch, layout, x, y);
-    }
-
-    /**
-     * Draws text centered on the screen.
-     *
-     * @param text   The string to draw
-     * @param font   The font to use
-     * @param offset The y-value offset from the center of the screen.
-     */
-    public void drawTextCentered(String text, BitmapFont font, float offset) {
-        if (active != DrawPass.STANDARD) {
-            Gdx.app.error("GameCanvas",
-                          "Cannot draw without active begin()",
-                          new IllegalStateException());
-            return;
-        }
-
-        GlyphLayout layout = new GlyphLayout(font, text);
-        float x = (getWidth() - layout.width) / 2.0f;
-        float y = (getHeight() + layout.height) / 2.0f;
-        font.draw(spriteBatch, layout, x, y + offset);
-    }
-
-    /**
-     * Start the debug drawing sequence.
-     * <p>
-     * Nothing is flushed to the graphics card until the method end() is called.
-     *
-     * @param affine the global transform apply to the camera
-     */
-    public void beginDebug(Affine2 affine) {
-        global.setAsAffine(affine);
-        global.mulLeft(camera.combined);
-        debugRender.setProjectionMatrix(global);
-
-        debugRender.begin(ShapeRenderer.ShapeType.Line);
-        active = DrawPass.DEBUG;
-    }
-
-    /**
-     * Start the debug drawing sequence.
-     * <p>
-     * Nothing is flushed to the graphics card until the method end() is called.
-     *
-     * @param sx the amount to scale the x-axis
-     * @param sy the amount to scale the y-axis
-     */
-    public void beginDebug(float sx, float sy) {
-        global.idt();
-        global.scl(sx, sy, 1.0f);
-        global.mulLeft(camera.combined);
-        debugRender.setProjectionMatrix(global);
-
-        debugRender.begin(ShapeRenderer.ShapeType.Line);
-        active = DrawPass.DEBUG;
-    }
-
-    /**
-     * Start the debug drawing sequence.
-     * <p>
-     * Nothing is flushed to the graphics card until the method end() is called.
-     */
-    public void beginDebug() {
-        debugRender.setProjectionMatrix(camera.combined);
-        debugRender.begin(ShapeRenderer.ShapeType.Filled);
-        debugRender.setColor(Color.RED);
-        debugRender.circle(0, 0, 10);
-        debugRender.end();
-
-        debugRender.begin(ShapeRenderer.ShapeType.Line);
-        active = DrawPass.DEBUG;
-    }
-
-    /**
-     * Ends the debug drawing sequence, flushing textures to the graphics card.
-     */
-    public void endDebug() {
-        debugRender.end();
-        active = DrawPass.INACTIVE;
-    }
-
-    /**
      * Draws the outline of the given shape in the specified color
      *
      * @param shape The Box2d shape
@@ -1342,6 +1162,10 @@ public class GameCanvas {
         debugRender.ellipse(x0 - w, y0 - h, 2 * w, 2 * h, 12);
     }
 
+    public Viewport getTextViewport() {
+        return textViewport;
+    }
+
     /**
      * Enumeration to track which pass we are in
      */
@@ -1385,114 +1209,5 @@ public class GameCanvas {
          */
         OPAQUE
     }
-
-    //    /**
-    //     * Draws the outline of the given shape in the specified color
-    //     *
-    //     * @param shape The Box2d shape
-    //     * @param color The outline color
-    //     * @param x     The x-coordinate of the shape position
-    //     * @param y     The y-coordinate of the shape position
-    //     */
-    //    public void drawPhysics(PolygonShape shape, Color color, float x, float y) {
-    //        if (active != DrawPass.DEBUG) {
-    //            Gdx.app.error("GameCanvas",
-    //                          "Cannot draw without active beginDebug()",
-    //                          new IllegalStateException());
-    //            return;
-    //        }
-    //
-    //        float x0, y0, x1, y1;
-    //        debugRender.setColor(color);
-    //        for (int ii = 0; ii < shape.getVertexCount() - 1; ii++) {
-    //            shape.getVertex(ii, vertex);
-    //            x0 = x + vertex.x;
-    //            y0 = y + vertex.y;
-    //            shape.getVertex(ii + 1, vertex);
-    //            x1 = x + vertex.x;
-    //            y1 = y + vertex.y;
-    //            debugRender.line(x0, y0, x1, y1);
-    //        }
-    //        // Close the loop
-    //        shape.getVertex(shape.getVertexCount() - 1, vertex);
-    //        x0 = x + vertex.x;
-    //        y0 = y + vertex.y;
-    //        shape.getVertex(0, vertex);
-    //        x1 = x + vertex.x;
-    //        y1 = y + vertex.y;
-    //        debugRender.line(x0, y0, x1, y1);
-    //    }
-    //
-    //    /**
-    //     * Draws the outline of the given shape in the specified color
-    //     *
-    //     * @param shape The Box2d shape
-    //     * @param color The outline color
-    //     * @param x     The x-coordinate of the shape position
-    //     * @param y     The y-coordinate of the shape position
-    //     * @param angle The shape angle of rotation
-    //     */
-    //    public void drawPhysics(PolygonShape shape,
-    //                            Color color,
-    //                            float x,
-    //                            float y,
-    //                            float angle) {
-    //        if (active != DrawPass.DEBUG) {
-    //            Gdx.app.error("GameCanvas",
-    //                          "Cannot draw without active beginDebug()",
-    //                          new IllegalStateException());
-    //            return;
-    //        }
-    //
-    //        local.setToTranslation(x, y);
-    //        local.rotateRad(angle);
-    //
-    //        float x0, y0, x1, y1;
-    //        debugRender.setColor(color);
-    //        for (int ii = 0; ii < shape.getVertexCount() - 1; ii++) {
-    //            shape.getVertex(ii, vertex);
-    //            local.applyTo(vertex);
-    //            x0 = vertex.x;
-    //            y0 = vertex.y;
-    //            shape.getVertex(ii + 1, vertex);
-    //            local.applyTo(vertex);
-    //            x1 = vertex.x;
-    //            y1 = vertex.y;
-    //            debugRender.line(x0, y0, x1, y1);
-    //        }
-    //        // Close the loop
-    //        shape.getVertex(shape.getVertexCount() - 1, vertex);
-    //        local.applyTo(vertex);
-    //        x0 = vertex.x;
-    //        y0 = vertex.y;
-    //        shape.getVertex(0, vertex);
-    //        local.applyTo(vertex);
-    //        x1 = vertex.x;
-    //        y1 = vertex.y;
-    //        debugRender.line(x0, y0, x1, y1);
-    //    }
-
-    //    /**
-    //     * Draws the outline of the given shape in the specified color
-    //     * <p>
-    //     * The position of the circle is ignored.  Only the radius is used. To move the
-    //     * circle, change the x and y parameters.
-    //     *
-    //     * @param shape The Box2d shape
-    //     * @param color The outline color
-    //     * @param x     The x-coordinate of the shape position
-    //     * @param y     The y-coordinate of the shape position
-    //     */
-    //    public void drawPhysics(CircleShape shape, Color color, float x, float y) {
-    //        if (active != DrawPass.DEBUG) {
-    //            Gdx.app.error("GameCanvas",
-    //                          "Cannot draw without active beginDebug()",
-    //                          new IllegalStateException());
-    //            return;
-    //        }
-    //
-    //        debugRender.setColor(color);
-    //        debugRender.circle(x, y, shape.getRadius(), 12);
-    //    }
 
 }
