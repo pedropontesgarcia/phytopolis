@@ -29,7 +29,8 @@ public class GDXRoot extends Game implements ScreenListener {
      */
     private MainMenuMode menu;
     private LevelSelectMode levelSelect;
-    private VictoryScreen victory;
+    private VictoryMode victory;
+    private PauseMode pause;
     /**
      * Player mode for the the game proper (CONTROLLER CLASS)
      */
@@ -37,7 +38,7 @@ public class GDXRoot extends Game implements ScreenListener {
     /**
      * WorldController
      */
-    private WorldController controller;
+    private GameplayMode controller;
 
     public GDXRoot() {
     }
@@ -48,7 +49,8 @@ public class GDXRoot extends Game implements ScreenListener {
         menu = new MainMenuMode("assets.json", canvas, 1);
         controller = new GameplayMode();
         levelSelect = new LevelSelectMode();
-        victory = new VictoryScreen();
+        victory = new VictoryMode();
+        pause = new PauseMode();
         menu.setScreenListener(this);
         setScreen(menu);
     }
@@ -87,26 +89,33 @@ public class GDXRoot extends Game implements ScreenListener {
             menu.dispose();
             menu = null;
         } else if (screen == levelSelect) {
-            //directory = menu.getAssets();
-            ((GameplayMode) controller).setLevel(levelSelect.getLevel());
+            controller.setLevel(levelSelect.getLevel());
             controller.gatherAssets(directory);
+            controller.reset();
             controller.setScreenListener(this);
             controller.setCanvas(canvas);
-            controller.reset();
+            controller.fadeIn(0.5f);
             setScreen(controller);
-            //            menu.dispose();
-            //            menu = null;
         } else if (screen == victory) {
             levelSelect.reset();
             setScreen(levelSelect);
-        } else if (exitCode == WorldController.EXIT_VICTORY) {
-            victory.reset();
+        } else if (screen == pause) {
+            controller.setScreenListener(this);
+            controller.setPaused(false);
+            controller.fadeIn(0.25f);
+            setScreen(controller);
+        } else if (exitCode ==
+                WorldController.ExitCode.EXIT_VICTORY.ordinal()) {
             victory.gatherAssets(directory);
+            victory.reset();
             victory.setScreenListener(this);
             victory.setCanvas(canvas);
             setScreen(victory);
-        } else if (exitCode == WorldController.EXIT_QUIT) {
-            // We quit the main application
+        } else if (exitCode == WorldController.ExitCode.EXIT_PAUSE.ordinal()) {
+            pause.setScreenListener(this);
+            pause.setCanvas(canvas);
+            setScreen(pause);
+        } else if (exitCode == WorldController.ExitCode.EXIT_QUIT.ordinal()) {
             Gdx.app.exit();
         }
     }

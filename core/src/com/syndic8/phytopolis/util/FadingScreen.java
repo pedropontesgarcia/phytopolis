@@ -26,7 +26,10 @@ public abstract class FadingScreen {
         switch (fadeState) {
             case FADE_IN:
                 alpha = 1 - interpolatedAlpha;
-                if (alpha == 0) fadeState = Fade.STATIC;
+                if (alpha == 0) {
+                    done = true;
+                    fadeState = Fade.STATIC;
+                }
                 break;
             case FADE_OUT:
                 alpha = interpolatedAlpha;
@@ -49,14 +52,14 @@ public abstract class FadingScreen {
         c.endShape();
     }
 
-    protected void fadeIn(float seconds) {
+    public void fadeIn(float seconds) {
         fadeDuration = seconds;
         fadeState = Fade.FADE_IN;
         tmr = 0;
         done = false;
     }
 
-    protected void fadeOut(float seconds) {
+    public void fadeOut(float seconds) {
         fadeDuration = seconds;
         fadeState = Fade.FADE_OUT;
         tmr = 0;

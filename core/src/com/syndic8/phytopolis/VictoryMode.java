@@ -11,7 +11,7 @@ import com.syndic8.phytopolis.util.FadingScreen;
 import com.syndic8.phytopolis.util.ScreenListener;
 import edu.cornell.gdiac.audio.AudioEngine;
 
-public class VictoryScreen extends FadingScreen implements Screen {
+public class VictoryMode extends FadingScreen implements Screen {
 
     private final Rectangle bounds;
     /**
@@ -32,7 +32,7 @@ public class VictoryScreen extends FadingScreen implements Screen {
     private AudioEngine audioEngine;
     private Texture rs;
 
-    public VictoryScreen() {
+    public VictoryMode() {
         this.ready = false;
         this.bounds = new Rectangle(0, 0, 16, 9);
     }

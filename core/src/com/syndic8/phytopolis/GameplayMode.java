@@ -244,8 +244,9 @@ public class GameplayMode extends WorldController implements ContactListener {
      */
     public void show() {
         super.show();
-        backgroundMusic.play();
-        fadeIn(0.5f);
+        if (!backgroundMusic.isPlaying()) {
+            backgroundMusic.play();
+        }
     }
 
     /**
@@ -467,6 +468,8 @@ public class GameplayMode extends WorldController implements ContactListener {
         objects.clear();
         addQueue.clear();
         world.dispose();
+        backgroundMusic.stop();
+        backgroundMusic.play();
 
         InputController.getInstance().resetScrolled();
 
@@ -629,7 +632,7 @@ public class GameplayMode extends WorldController implements ContactListener {
     public void hide() {
         // Useless if called in outside animation loop
         super.hide();
-        backgroundMusic.stop();
+        backgroundMusic.pause();
     }
 
     private void drawBackground() {

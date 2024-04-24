@@ -243,7 +243,8 @@ public class MainMenuMode extends FadingScreen implements Screen {
                     backgroundMusic.play();
                 }
             }
-        } else if (InputController.getInstance().didSecondary()) {
+        } else if (InputController.getInstance().didSecondary() &&
+                pressState != 1) {
             pressState = 1;
             fadeOut(3);
         }

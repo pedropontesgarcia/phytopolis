@@ -49,22 +49,6 @@ import java.util.Iterator;
 public abstract class WorldController extends FadingScreen implements Screen {
 
     /**
-     * Exit code for quitting the game
-     */
-    public static final int EXIT_QUIT = 0;
-    /**
-     * Exit code for advancing to next level
-     */
-    public static final int EXIT_NEXT = 1;
-    /**
-     * Exit code for jumping back to previous level
-     */
-    public static final int EXIT_PREV = 2;
-    /**
-     * Exit code for victory screen
-     */
-    public static final int EXIT_VICTORY = 3;
-    /**
      * How many frames after winning/losing do we continue?
      */
     public static final int EXIT_COUNT = 0;
@@ -145,6 +129,7 @@ public abstract class WorldController extends FadingScreen implements Screen {
      * Countdown active for winning or losing
      */
     private int countdown;
+    private boolean paused;
 
     /**
      * Creates a new game world with the default values.
@@ -183,6 +168,7 @@ public abstract class WorldController extends FadingScreen implements Screen {
         debug = false;
         active = false;
         countdown = -1;
+        paused = false;
     }
 
     /**
@@ -413,23 +399,27 @@ public abstract class WorldController extends FadingScreen implements Screen {
         }
 
         // Now it is time to maybe switch screens.
-        if (input.didExit()) {
+        if (input.didExit() && !isPaused() && isFadeDone()) {
             pause();
-            listener.exitScreen(this, EXIT_QUIT);
-            return false;
+            setPaused(true);
+            fadeOut(0.25f);
+            return true;
         } else if (input.didAdvance()) {
             pause();
-            listener.exitScreen(this, EXIT_NEXT);
+            listener.exitScreen(this, ExitCode.EXIT_NEXT.ordinal());
             return false;
         } else if (input.didRetreat()) {
             pause();
-            listener.exitScreen(this, EXIT_PREV);
+            listener.exitScreen(this, ExitCode.EXIT_PREV.ordinal());
             return false;
         } else if (failed) {
             reset();
+        } else if (isPaused() && isFadeDone()) {
+            listener.exitScreen(this, ExitCode.EXIT_PAUSE.ordinal());
+            return false;
         } else if (isComplete() && isFadeDone()) {
             pause();
-            listener.exitScreen(this, EXIT_VICTORY);
+            listener.exitScreen(this, ExitCode.EXIT_VICTORY.ordinal());
             return false;
 
         }
@@ -516,6 +506,14 @@ public abstract class WorldController extends FadingScreen implements Screen {
      */
     public abstract void reset();
 
+    private boolean isPaused() {
+        return paused;
+    }
+
+    public void setPaused(boolean p) {
+        paused = p;
+    }
+
     /**
      * Returns true if the level is completed.
      * <p>
@@ -572,7 +570,7 @@ public abstract class WorldController extends FadingScreen implements Screen {
      * also paused before it is destroyed.
      */
     public void pause() {
-        // TODO Auto-generated method stub
+        setPaused(true);
     }
 
     /**
@@ -619,6 +617,10 @@ public abstract class WorldController extends FadingScreen implements Screen {
      */
     public void setScreenListener(ScreenListener listener) {
         this.listener = listener;
+    }
+
+    public enum ExitCode {
+        EXIT_QUIT, EXIT_NEXT, EXIT_PREV, EXIT_VICTORY, EXIT_PAUSE
     }
 
 }
