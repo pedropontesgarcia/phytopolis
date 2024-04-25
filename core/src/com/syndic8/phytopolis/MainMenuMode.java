@@ -142,7 +142,7 @@ public class MainMenuMode extends FadingScreen implements Screen {
         assets = new AssetDirectory(file);
         assets.loadAssets();
         active = true;
-        fadeIn(1f);
+        fadeIn(0.5f);
     }
 
     /**
@@ -246,7 +246,7 @@ public class MainMenuMode extends FadingScreen implements Screen {
         } else if (InputController.getInstance().didSecondary() &&
                 pressState != 1) {
             pressState = 1;
-            fadeOut(3);
+            fadeOut(1.5f);
         }
     }
 

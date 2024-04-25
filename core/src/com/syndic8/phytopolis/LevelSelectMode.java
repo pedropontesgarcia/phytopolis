@@ -43,7 +43,6 @@ public class LevelSelectMode extends FadingScreen implements Screen {
 
         //Setup levelboxes
         this.levelBoxes = new LevelBox[numLevels];
-        fadeIn(0.5f);
     }
 
     public void gatherAssets(AssetDirectory directory) {
@@ -51,6 +50,8 @@ public class LevelSelectMode extends FadingScreen implements Screen {
                                                       Texture.class), 1, 4);
         lighting = directory.getEntry("lvlsel:lighting", Texture.class);
         rs = directory.getEntry("lvlsel:redsquare", Texture.class);
+        fadeIn(0.5f);
+        ready = false;
         //        backgroundMusic = directory.getEntry("newgrowth", Music.class);
         //        backgroundMusic.setLooping(true);
         //        backgroundMusic.play();

@@ -2,6 +2,7 @@ package com.syndic8.phytopolis;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
+import com.badlogic.gdx.InputMultiplexer;
 import com.badlogic.gdx.InputProcessor;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
@@ -39,6 +40,7 @@ public class InputController implements InputProcessor {
      * The crosshair cache (for using as a return value)
      */
     private final Vector2 crosscache;
+    private final InputMultiplexer multiplexer;
     /**
      * An X-Box controller (if it is connected)
      */
@@ -135,6 +137,8 @@ public class InputController implements InputProcessor {
         }
         crosshair = new Vector2();
         crosscache = new Vector2();
+        multiplexer = new InputMultiplexer();
+        multiplexer.addProcessor(this);
     }
 
     /**
@@ -145,13 +149,16 @@ public class InputController implements InputProcessor {
     public static InputController getInstance() {
         if (theController == null) {
             theController = new InputController();
-            Gdx.input.setInputProcessor(theController);
         }
         return theController;
     }
 
     public static void setHeight(int h) {
         height = h;
+    }
+
+    public InputMultiplexer getMultiplexer() {
+        return multiplexer;
     }
 
     /**
@@ -439,7 +446,8 @@ public class InputController implements InputProcessor {
         exitPressed = (secondary && exitPressed) ||
                 (Gdx.input.isKeyPressed(Input.Keys.ESCAPE));
         specialToggled = (secondary && specialToggled) ||
-                Gdx.input.isKeyPressed(Input.Keys.SHIFT_LEFT) || Gdx.input.isKeyPressed(Input.Keys.SHIFT_RIGHT);
+                Gdx.input.isKeyPressed(Input.Keys.SHIFT_LEFT) ||
+                Gdx.input.isKeyPressed(Input.Keys.SHIFT_RIGHT);
 
         // Directional controls
         horizontal = (secondary ? horizontal : 0.0f);
@@ -558,4 +566,5 @@ public class InputController implements InputProcessor {
         scrolled = Math.max(0, Math.min(height, scrolled));
         return false;
     }
+
 }

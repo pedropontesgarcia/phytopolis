@@ -127,9 +127,17 @@ public class ResourceController {
         currSun = STARTING_SUN;
     }
 
+    public void update(float dt) {
+        ui.update(dt, (float) currWater / MAX_WATER, (float) currSun / MAX_SUN);
+
+    }
+
     public void drawUI(GameCanvas c) {
-        ui.update((float) currWater / MAX_WATER, (float) currSun / MAX_SUN);
         ui.draw(c);
+    }
+
+    public UIController getUIController() {
+        return ui;
     }
 
 }

@@ -241,6 +241,7 @@ public class GameplayMode extends WorldController implements ContactListener {
         if (!backgroundMusic.isPlaying()) {
             backgroundMusic.play();
         }
+        resourceController.getUIController().startTimer();
     }
 
     /**
@@ -318,6 +319,7 @@ public class GameplayMode extends WorldController implements ContactListener {
             hazardController.extinguishFire(unprojMousePos);
         }
         plantController.propagateDestruction();
+        resourceController.update(dt);
         // Check for win condition
         if ((avatar.getY() >
                 tilemap.getVictoryHeight() * tilemap.getTileHeight()) &&
@@ -539,6 +541,7 @@ public class GameplayMode extends WorldController implements ContactListener {
         // Useless if called in outside animation loop
         super.hide();
         backgroundMusic.pause();
+        resourceController.getUIController().pauseTimer();
     }
 
     private void drawBackground() {

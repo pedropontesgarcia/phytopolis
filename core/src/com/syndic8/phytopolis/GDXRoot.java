@@ -50,8 +50,10 @@ public class GDXRoot extends Game implements ScreenListener {
         controller = new GameplayMode();
         levelSelect = new LevelSelectMode();
         victory = new VictoryMode();
-        pause = new PauseMode();
+        pause = new PauseMode(canvas);
         menu.setScreenListener(this);
+        Gdx.input.setInputProcessor(InputController.getInstance()
+                                            .getMultiplexer());
         setScreen(menu);
     }
 
@@ -99,11 +101,18 @@ public class GDXRoot extends Game implements ScreenListener {
         } else if (screen == victory) {
             levelSelect.reset();
             setScreen(levelSelect);
-        } else if (screen == pause) {
+        } else if (screen == pause &&
+                exitCode == PauseMode.ExitCode.EXIT_RESUME.ordinal()) {
             controller.setScreenListener(this);
             controller.setPaused(false);
             controller.fadeIn(0.25f);
             setScreen(controller);
+        } else if (screen == pause &&
+                exitCode == PauseMode.ExitCode.EXIT_MAIN_MENU.ordinal()) {
+            controller.setPaused(false);
+            menu = new MainMenuMode("assets.json", canvas, 1);
+            menu.setScreenListener(this);
+            setScreen(menu);
         } else if (exitCode ==
                 WorldController.ExitCode.EXIT_VICTORY.ordinal()) {
             victory.gatherAssets(directory);

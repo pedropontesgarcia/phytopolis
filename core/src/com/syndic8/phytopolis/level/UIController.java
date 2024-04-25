@@ -31,8 +31,8 @@ public class UIController {
      * Initializes a UIController.
      */
     public UIController(GameCanvas c, Tilemap tm) {
-        timer = new Timer(tm.getTime(), tm.getStar(), tm.getStarTime());
-        timer.startTimer();
+        timer = new Timer(tm.getTime());
+        timer.start();
         stage = new Stage(c.getTextViewport());
         FreeTypeFontGenerator generator = new FreeTypeFontGenerator(Gdx.files.internal(
                 "fonts/JBM.ttf"));
@@ -76,12 +76,20 @@ public class UIController {
      * @param waterLvl level of water, in percentage between 0 and 1.
      * @param sunLvl   level of sun, in percentage between 0 and 1.
      */
-    public void update(float waterLvl, float sunLvl) {
+    public void update(float dt, float waterLvl, float sunLvl) {
         waterdropStrip.setFrame(Math.round(
                 (waterdropStrip.getSize() - 1) * waterLvl));
         sunStrip.setFrame(Math.round((sunStrip.getSize() - 1) * sunLvl));
-        timer.updateTime();
+        timer.updateTime(dt);
         label.setText(timer.toString());
+    }
+
+    public void pauseTimer() {
+        timer.pause();
+    }
+
+    public void startTimer() {
+        timer.start();
     }
 
     /**
