@@ -36,6 +36,7 @@ public class LevelSelectMode extends FadingScreen implements Screen {
     private Music backgroundMusic;
     private AudioEngine audioEngine;
     private Texture rs;
+    private String level;
 
     public LevelSelectMode() {
         this.ready = false;
@@ -109,6 +110,7 @@ public class LevelSelectMode extends FadingScreen implements Screen {
         InputController.getInstance().readInput(bounds, Vector2.Zero.add(1, 1));
         if (getSelectedPot() != -1 &&
                 InputController.getInstance().didMousePress()) {
+            setLevel();
             fadeOut(1);
             ready = true;
         }
@@ -180,16 +182,21 @@ public class LevelSelectMode extends FadingScreen implements Screen {
         this.listener = listener;
     }
 
-    public String getLevel() {
+    public void setLevel() {
         switch (getSelectedPot()) {
             case 0:
-                return "gameplay:lvl1";
+                level = "gameplay:lvl1";
+                break;
             case 1:
-                return "gameplay:lvl2";
+                level = "gameplay:lvl2";
+                break;
             case 2:
-                return "gameplay:lvl3";
+                level = "gameplay:lvl3";
+                break;
         }
-        return "";
     }
 
+    public String getLevel() {
+        return level;
+    }
 }

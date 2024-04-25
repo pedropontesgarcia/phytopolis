@@ -137,6 +137,14 @@ public class PlantController {
         }
     }
 
+    public void reset() {
+        for (int x = 0; x < width; x++) {
+            for (int y = 0; y < height; y++) {
+                plantGrid[x][y].reset();
+            }
+        }
+    }
+
     /**
      * grows a branch at the desired position
      *
@@ -886,14 +894,30 @@ public class PlantController {
         public boolean hasBranchInDirection(branchDirection direction) {
             switch (direction) {
                 case MIDDLE:
-                    return middle != null && !middle.isDestroyed();
+                    return middle != null && !middle.isRemoved();
                 case LEFT:
-                    return left != null && !left.isDestroyed();
+                    return left != null && !left.isRemoved();
                 case RIGHT:
-                    return right != null && !right.isDestroyed();
+                    return right != null && !right.isRemoved();
                 default:
                     return false;
             }
+        }
+
+        public void reset() {
+            if (middle != null) {
+                middle.markRemoved(true);
+            }
+            if (left != null) {
+                left.markRemoved(true);
+            }
+            if (right != null) {
+                right.markRemoved(true);
+            }
+            middle = null;
+            left = null;
+            right = null;
+            leafExists = false;
         }
 
         public boolean hasLeaf() {
