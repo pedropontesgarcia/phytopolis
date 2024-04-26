@@ -8,29 +8,28 @@ package com.syndic8.phytopolis;
  * Updated asset version, 2/6/2021
  */
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.Texture.TextureFilter;
 import com.badlogic.gdx.math.Rectangle;
-import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.scenes.scene2d.InputEvent;
+import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
+import com.badlogic.gdx.utils.Align;
 import com.syndic8.phytopolis.assets.AssetDirectory;
 import com.syndic8.phytopolis.util.FadingScreen;
 import com.syndic8.phytopolis.util.ScreenListener;
+import com.syndic8.phytopolis.util.menu.Menu;
+import com.syndic8.phytopolis.util.menu.MenuContainer;
+import com.syndic8.phytopolis.util.menu.MenuItem;
 
 /**
  * Class that provides a loading screen for the state of the game.
  * <p>
- * You still DO NOT need to understand this class for this lab.  We will talk about this
- * class much later in the course.  This class provides a basic template for a loading
- * screen to be used at the start of the game or between levels.  Feel free to adopt
- * this to your needs.
- * <p>
- * You will note that this mode has some textures that are not loaded by the AssetManager.
- * You are never required to load through the AssetManager.  But doing this will block
- * the application.  That is why we try to have as few resources as possible for this
- * loading screen.
+ * This class provides a basic template for a loading screen to be used at
+ * the start of the game.
  */
 public class MainMenuMode extends FadingScreen implements Screen {
 
@@ -55,27 +54,15 @@ public class MainMenuMode extends FadingScreen implements Screen {
      */
     private final Texture logo;
     /**
-     * Reference to GameCanvas created by the root
+     * Reference to GameCanvas
      */
     private final GameCanvas canvas;
     private final Rectangle bounds;
-    private float tmr;
-    /**
-     * The current state of the play button
-     */
-    private int pressState;
-    /**
-     * Play button to display when done
-     */
-    private Texture playButton;
+    private boolean ready;
     /**
      * Listener that will update the player mode when we are done
      */
     private ScreenListener listener;
-    /**
-     * Scaling factor for when the student changes the resolution.
-     */
-    private float scale;
     /**
      * Current progress (0 to 1) of the asset manager
      */
@@ -88,8 +75,11 @@ public class MainMenuMode extends FadingScreen implements Screen {
      * Whether or not this player mode is still active
      */
     private boolean active;
-
     private Music backgroundMusic;
+    private MenuContainer menuContainer;
+    private Menu menu;
+    private Menu optionsMenu;
+    private boolean exit;
 
     /**
      * Creates a MainMenuMode with the default budget, size and position.
@@ -113,14 +103,10 @@ public class MainMenuMode extends FadingScreen implements Screen {
      * @param canvas The game canvas to draw to
      * @param millis The loading budget in milliseconds
      */
-    public MainMenuMode(String file, GameCanvas canvas, int millis) {
-        tmr = 0;
-        this.canvas = canvas;
+    public MainMenuMode(String file, GameCanvas c, int millis) {
+        canvas = c;
         budget = millis;
         bounds = new Rectangle(0, 0, 16, 9);
-
-        // Compute the dimensions from the canvas
-        resize(canvas.getWidth(), canvas.getHeight());
 
         // We need these files loaded immediately
         internal = new AssetDirectory("mainmenu.json");
@@ -128,7 +114,6 @@ public class MainMenuMode extends FadingScreen implements Screen {
         internal.finishLoading();
 
         // Load the next two images immediately.
-        playButton = null;
         background = internal.getEntry("background", Texture.class);
         background.setFilter(TextureFilter.Linear, TextureFilter.Linear);
         logo = internal.getEntry("logo", Texture.class);
@@ -136,13 +121,79 @@ public class MainMenuMode extends FadingScreen implements Screen {
 
         // No progress so far.
         progress = 0;
-        pressState = 0;
+
+        // Create menu
+        createMenu();
 
         // Start loading the real assets
         assets = new AssetDirectory(file);
         assets.loadAssets();
         active = true;
-        fadeIn(0.5f);
+        ready = false;
+        exit = false;
+    }
+
+    private void createMenu() {
+        menu = new Menu(3, 0.1f, 0, -0.2f, Align.center);
+        optionsMenu = new Menu(2, 0.15f);
+        menuContainer = new MenuContainer(menu, canvas);
+        ClickListener lvlListener = new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                exit = true;
+            }
+        };
+        ClickListener exitListener = new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                Gdx.app.exit();
+            }
+        };
+        menu.addItem(new MenuItem("PLAY",
+                                  menu.getSeparation(),
+                                  0,
+                                  menu.getLength(),
+                                  lvlListener,
+                                  menuContainer,
+                                  canvas,
+                                  menu.getXOffset(),
+                                  menu.getYOffset(),
+                                  menu.getAlignment()));
+        menu.addItem(new MenuItem("OPTIONS",
+                                  menu.getSeparation(),
+                                  1,
+                                  menu.getLength(),
+                                  optionsMenu,
+                                  menuContainer,
+                                  canvas,
+                                  menu.getXOffset(),
+                                  menu.getYOffset(),
+                                  menu.getAlignment()));
+        menu.addItem(new MenuItem("QUIT",
+                                  menu.getSeparation(),
+                                  2,
+                                  menu.getLength(),
+                                  exitListener,
+                                  menuContainer,
+                                  canvas,
+                                  menu.getXOffset(),
+                                  menu.getYOffset(),
+                                  menu.getAlignment()));
+        optionsMenu.addItem(new MenuItem("QUIT",
+                                         optionsMenu.getSeparation(),
+                                         0,
+                                         optionsMenu.getLength(),
+                                         exitListener,
+                                         menuContainer,
+                                         canvas));
+        optionsMenu.addItem(new MenuItem("BACK",
+                                         optionsMenu.getSeparation(),
+                                         1,
+                                         optionsMenu.getLength(),
+                                         menu,
+                                         menuContainer,
+                                         canvas));
+        menuContainer.populate();
     }
 
     /**
@@ -190,11 +241,21 @@ public class MainMenuMode extends FadingScreen implements Screen {
         return backgroundMusic;
     }
 
+    public void setBackgroundMusic(Music m) {
+        backgroundMusic = m;
+    }
+
     /**
      * Called when this screen becomes the current screen for a Game.
      */
     public void show() {
         active = true;
+        ready = false;
+        exit = false;
+        if (getFadeState() != Fade.SHOWN) {
+            fadeIn(0.5f);
+        }
+        menuContainer.activate();
     }
 
     /**
@@ -210,116 +271,15 @@ public class MainMenuMode extends FadingScreen implements Screen {
             update(delta);
             draw();
 
-            if (isReady() && listener != null) {
+            if (ready && isFadeDone()) {
                 listener.exitScreen(this, 0);
             }
         }
     }
 
-    /**
-     * Update the status of this player mode.
-     * <p>
-     * We prefer to separate update and draw from one another as separate methods, instead
-     * of using the single render() method that LibGDX does.  We will talk about why we
-     * prefer this in lecture.
-     *
-     * @param delta Number of seconds since last animation frame
-     */
-    protected void update(float delta) {
-        super.update(delta);
-        tmr += delta;
-        InputController.getInstance().readInput(bounds, Vector2.Zero.add(1, 1));
-        if (playButton == null) {
-            assets.update(budget);
-            this.progress = assets.getProgress();
-            if (progress >= 1.0f) {
-                this.progress = 1.0f;
-                playButton = internal.getEntry("play", Texture.class);
-                playButton.setFilter(TextureFilter.Linear,
-                                     TextureFilter.Linear);
-                if (backgroundMusic == null) {
-                    backgroundMusic = assets.getEntry("newgrowth", Music.class);
-                    backgroundMusic.setLooping(true);
-                    backgroundMusic.play();
-                }
-            }
-        } else if (InputController.getInstance().didSecondary() &&
-                pressState != 1) {
-            pressState = 1;
-            fadeOut(1.5f);
-        }
-    }
+    @Override
+    public void resize(int i, int i1) {
 
-    /**
-     * Draw the status of this player mode.
-     * <p>
-     * We prefer to separate update and draw from one another as separate methods, instead
-     * of using the single render() method that LibGDX does.  We will talk about why we
-     * prefer this in lecture.
-     */
-    private void draw() {
-        canvas.begin();
-        canvas.draw(background,
-                    Color.WHITE,
-                    0,
-                    0,
-                    canvas.getWidth(),
-                    canvas.getHeight());
-
-        canvas.draw(logo,
-                    Color.WHITE,
-                    logo.getWidth() / 2.0f,
-                    logo.getHeight() / 2.0f,
-                    canvas.getWidth() / 2.0f,
-                    canvas.getHeight() * 2.0f / 3.0f,
-                    0,
-                    (float) canvas.getWidth() / logo.getWidth(),
-                    (float) canvas.getHeight() / logo.getHeight());
-        if (progress == 1.0f) {
-            tmr = 0;
-            progress = 2;
-        }
-        Color tint = (pressState == 1 ?
-                Color.GRAY :
-                new Color(1f, 1f, 1f, (float) Math.pow(Math.sin(tmr), 2)));
-        if (progress > 1.0f) canvas.draw(playButton,
-                                         tint,
-                                         playButton.getWidth() / 2.0f,
-                                         playButton.getHeight() / 2.0f,
-                                         canvas.getWidth() / 2.0f,
-                                         canvas.getHeight() / 4.0f,
-                                         0,
-                                         0.001f,
-                                         0.001f);
-        canvas.end();
-        super.draw(canvas);
-    }
-
-    /**
-     * Returns true if all assets are loaded and the player is ready to go.
-     *
-     * @return true if the player is ready to go
-     */
-    public boolean isReady() {
-        return pressState == 1 && isFadeDone();
-    }
-
-    /**
-     * Called when the Screen is resized.
-     * <p>
-     * This can happen at any point during a non-paused state but will never happen
-     * before a call to show().
-     *
-     * @param width  The new width in pixels
-     * @param height The new height in pixels
-     */
-    public void resize(int width, int height) {
-        float sx = ((float) width);
-        float sy = ((float) height);
-        scale = (Math.min(sx, sy));
-        /**
-         * The height of the canvas window (necessary since sprite origin != screen origin)
-         */
     }
 
     /**
@@ -329,8 +289,6 @@ public class MainMenuMode extends FadingScreen implements Screen {
      * also paused before it is destroyed.
      */
     public void pause() {
-        // TODO Auto-generated method stub
-
     }
 
     /**
@@ -339,8 +297,6 @@ public class MainMenuMode extends FadingScreen implements Screen {
      * This is usually when it regains focus.
      */
     public void resume() {
-        // TODO Auto-generated method stub
-
     }
 
     /**
@@ -359,12 +315,74 @@ public class MainMenuMode extends FadingScreen implements Screen {
     }
 
     /**
+     * Update the status of this player mode.
+     * <p>
+     * We prefer to separate update and draw from one another as separate methods, instead
+     * of using the single render() method that LibGDX does.  We will talk about why we
+     * prefer this in lecture.
+     *
+     * @param delta Number of seconds since last animation frame
+     */
+    protected void update(float delta) {
+        if (progress < 1) {
+            assets.update(budget);
+            progress = assets.getProgress();
+            if (progress >= 1) {
+                progress = 1;
+                fadeIn(0.5f);
+                if (backgroundMusic == null) {
+                    backgroundMusic = assets.getEntry("newgrowth", Music.class);
+                    backgroundMusic.setLooping(true);
+                    backgroundMusic.play();
+                }
+            }
+        }
+        if (exit) {
+            exit = false;
+            ready = true;
+            fadeOut(0.5f);
+            menuContainer.deactivate();
+        }
+        menuContainer.update(delta);
+        super.update(delta);
+    }
+
+    /**
+     * Draw the status of this mode.
+     */
+    private void draw() {
+        if (progress == 1) {
+            if (menuContainer.getMenu() == menu) {
+                canvas.begin();
+                canvas.draw(background,
+                            Color.WHITE,
+                            0,
+                            0,
+                            canvas.getWidth(),
+                            canvas.getHeight());
+                canvas.draw(logo,
+                            Color.WHITE,
+                            logo.getWidth() / 2.0f,
+                            logo.getHeight() / 2.0f,
+                            canvas.getWidth() / 2.0f,
+                            canvas.getHeight() * 2.0f / 3.0f,
+                            0,
+                            (float) canvas.getWidth() / logo.getWidth(),
+                            (float) canvas.getHeight() / logo.getHeight());
+                canvas.end();
+            }
+            menuContainer.draw(canvas);
+        }
+        super.draw(canvas);
+    }
+
+    /**
      * Sets the ScreenListener for this mode
      * <p>
      * The ScreenListener will respond to requests to quit.
      */
-    public void setScreenListener(ScreenListener listener) {
-        this.listener = listener;
+    public void setScreenListener(ScreenListener l) {
+        listener = l;
     }
 
 }

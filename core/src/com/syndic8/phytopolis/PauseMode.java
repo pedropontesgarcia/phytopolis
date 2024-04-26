@@ -18,35 +18,31 @@ public class PauseMode extends FadingScreen implements Screen {
     private final MenuContainer menuContainer;
     private ScreenListener listener;
     private boolean ready;
+    private boolean exit;
     private boolean active;
     private GameCanvas canvas;
     private ExitCode exitCode;
 
     public PauseMode(GameCanvas c) {
+        exit = false;
         ready = false;
         bounds = new Rectangle(0, 0, 16, 9);
         canvas = c;
-        Menu menu = new Menu(3, 150f);
+        Menu menu = new Menu(4, 0.15f);
+        Menu submenu = new Menu(2, 0.15f);
+        menuContainer = new MenuContainer(menu, c);
         ClickListener resumeListener = new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
-                ready = true;
-                fadeOut(0.1f);
-                InputController.getInstance()
-                        .getMultiplexer()
-                        .removeProcessor(menuContainer.getStage());
+                exit = true;
                 exitCode = ExitCode.EXIT_RESUME;
             }
         };
         ClickListener mainMenuListener = new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
-                ready = true;
-                fadeOut(0.1f);
-                InputController.getInstance()
-                        .getMultiplexer()
-                        .removeProcessor(menuContainer.getStage());
-                exitCode = ExitCode.EXIT_MAIN_MENU;
+                exit = true;
+                exitCode = ExitCode.EXIT_LEVELS;
             }
         };
         ClickListener exitListener = new ClickListener() {
@@ -60,20 +56,44 @@ public class PauseMode extends FadingScreen implements Screen {
                                   0,
                                   menu.getLength(),
                                   resumeListener,
+                                  menuContainer,
                                   canvas));
-        menu.addItem(new MenuItem("EXIT TO MAIN MENU",
+        menu.addItem(new MenuItem("OPTIONS",
                                   menu.getSeparation(),
                                   1,
                                   menu.getLength(),
-                                  mainMenuListener,
+                                  submenu,
+                                  menuContainer,
                                   canvas));
-        menu.addItem(new MenuItem("QUIT",
+        menu.addItem(new MenuItem("EXIT TO LEVELS",
                                   menu.getSeparation(),
                                   2,
                                   menu.getLength(),
-                                  exitListener,
+                                  mainMenuListener,
+                                  menuContainer,
                                   canvas));
-        menuContainer = new MenuContainer(menu, c);
+        menu.addItem(new MenuItem("QUIT",
+                                  menu.getSeparation(),
+                                  3,
+                                  menu.getLength(),
+                                  exitListener,
+                                  menuContainer,
+                                  canvas));
+        submenu.addItem(new MenuItem("QUIT",
+                                     submenu.getSeparation(),
+                                     0,
+                                     submenu.getLength(),
+                                     exitListener,
+                                     menuContainer,
+                                     canvas));
+        submenu.addItem(new MenuItem("BACK",
+                                     submenu.getSeparation(),
+                                     1,
+                                     submenu.getLength(),
+                                     menu,
+                                     menuContainer,
+                                     canvas));
+        menuContainer.populate();
     }
 
     public void setCanvas(GameCanvas c) {
@@ -82,12 +102,12 @@ public class PauseMode extends FadingScreen implements Screen {
 
     @Override
     public void show() {
+        exit = false;
         active = true;
         ready = false;
+        exitCode = null;
         fadeIn(0.1f);
-        InputController.getInstance()
-                .getMultiplexer()
-                .addProcessor(menuContainer.getStage());
+        menuContainer.activate();
     }
 
     @Override
@@ -95,10 +115,6 @@ public class PauseMode extends FadingScreen implements Screen {
         if (active) {
             update(delta);
             draw();
-
-            if (listener != null && ready && isFadeDone()) {
-                listener.exitScreen(this, exitCode.ordinal());
-            }
         }
 
     }
@@ -130,21 +146,26 @@ public class PauseMode extends FadingScreen implements Screen {
 
     public void update(float delta) {
         super.update(delta);
+        menuContainer.update(delta);
         InputController.getInstance().readInput(bounds, Vector2.Zero.add(1, 1));
-        if (InputController.getInstance().didExit() && !ready) {
-            ready = true;
-            fadeOut(0.1f);
-            InputController.getInstance()
-                    .getMultiplexer()
-                    .removeProcessor(menuContainer.getStage());
+        if (InputController.getInstance().didExit()) {
+            exit = true;
             exitCode = ExitCode.EXIT_RESUME;
         }
-        menuContainer.update();
+        if (exit) {
+            exit = false;
+            ready = true;
+            fadeOut(0.1f);
+            menuContainer.deactivate();
+        }
+        if (ready && isFadeDone()) {
+            listener.exitScreen(this, exitCode.ordinal());
+        }
     }
 
     public void draw() {
         canvas.clear();
-        menuContainer.draw();
+        menuContainer.draw(canvas);
         super.draw(canvas);
     }
 
@@ -152,6 +173,6 @@ public class PauseMode extends FadingScreen implements Screen {
         listener = l;
     }
 
-    public enum ExitCode {EXIT_MAIN_MENU, EXIT_RESUME}
+    public enum ExitCode {EXIT_LEVELS, EXIT_RESUME}
 
 }

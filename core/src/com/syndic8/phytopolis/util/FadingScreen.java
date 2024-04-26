@@ -14,7 +14,7 @@ public abstract class FadingScreen {
 
     public FadingScreen() {
         tmr = 0;
-        fadeState = Fade.STATIC;
+        fadeState = Fade.HIDDEN;
         done = false;
         volume = 1;
     }
@@ -28,19 +28,22 @@ public abstract class FadingScreen {
                 alpha = 1 - interpolatedAlpha;
                 if (alpha == 0) {
                     done = true;
-                    fadeState = Fade.STATIC;
+                    fadeState = Fade.SHOWN;
                 }
                 break;
             case FADE_OUT:
                 alpha = interpolatedAlpha;
-                if (alpha == 1) done = true;
+                if (alpha == 1) {
+                    done = true;
+                    fadeState = Fade.HIDDEN;
+                }
                 break;
             default:
                 alpha = 0;
                 break;
         }
         volume = Math.max(Math.min(1 - alpha, 1), 0);
-        if (fadeState != Fade.STATIC) {
+        if (fadeState != Fade.HIDDEN && fadeState != Fade.SHOWN) {
             tmr += deltaTime;
         }
     }
@@ -74,6 +77,10 @@ public abstract class FadingScreen {
         return done;
     }
 
-    public enum Fade {FADE_IN, STATIC, FADE_OUT}
+    public Fade getFadeState() {
+        return fadeState;
+    }
+
+    public enum Fade {HIDDEN, FADE_IN, SHOWN, FADE_OUT}
 
 }

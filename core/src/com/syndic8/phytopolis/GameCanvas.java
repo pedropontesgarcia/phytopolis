@@ -75,6 +75,8 @@ public class GameCanvas {
      * Cache object to handle raw textures
      */
     private TextureRegion holder;
+    private final Vector3 cameraCache;
+    private final Vector2 sizeCache;
 
     /**
      * Creates a new GameCanvas determined by the application configuration.
@@ -123,6 +125,8 @@ public class GameCanvas {
         local = new Affine2();
         global = new Matrix4();
         vertex = new Vector2();
+        cameraCache = new Vector3();
+        sizeCache = new Vector2();
     }
 
     public ShapeRenderer getShapeRenderer() {
@@ -146,10 +150,8 @@ public class GameCanvas {
     }
 
     public void cameraUpdate(Vector2 pos) {
-        //camera.position.set(pos, 0);
-        camera.position.interpolate(new Vector3(pos.x, pos.y, 0),
-                                    0.75f,
-                                    Interpolation.fade);
+        cameraCache.set(pos.x, pos.y, 0);
+        camera.position.interpolate(cameraCache, 0.75f, Interpolation.fade);
         spriteBatch.setProjectionMatrix(camera.combined);
         camera.update();
 
@@ -183,7 +185,8 @@ public class GameCanvas {
      * @return the dimensions of this canvas
      */
     public Vector2 getSize() {
-        return new Vector2(width, height);
+        sizeCache.set(width, height);
+        return sizeCache;
     }
 
     /**

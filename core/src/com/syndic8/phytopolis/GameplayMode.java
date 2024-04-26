@@ -46,6 +46,7 @@ import java.util.HashMap;
 public class GameplayMode extends WorldController implements ContactListener {
 
     private final Vector2 cameraVector;
+    private final Vector2 projMousePosCache;
     /**
      * Mark set to handle more sophisticated collision callbacks
      */
@@ -64,7 +65,6 @@ public class GameplayMode extends WorldController implements ContactListener {
     private HazardController hazardController;
     private ResourceController resourceController;
     private FilmStrip jumpAnimator;
-
     private Texture jogTexture;
     private FilmStrip jogAnimator;
     private int sunCollected;
@@ -145,6 +145,7 @@ public class GameplayMode extends WorldController implements ContactListener {
         world.setContactListener(this);
         cameraVector = new Vector2();
         sensorFixtures = new ObjectSet<>();
+        projMousePosCache = new Vector2();
     }
 
     public void setLevel(String lvl) {
@@ -170,11 +171,11 @@ public class GameplayMode extends WorldController implements ContactListener {
                 "ui:water-cursor",
                 Texture.class));
         Pixmap pixmap = getPixmapFromRegion(branchCursorTexture);
-        branchCursor = Gdx.graphics.newCursor(pixmap, 64 / 2, 64 / 2);
+        branchCursor = Gdx.graphics.newCursor(pixmap, 0, 0);
         pixmap = getPixmapFromRegion(leafCursorTexture);
-        leafCursor = Gdx.graphics.newCursor(pixmap, 64 / 2, 64 / 2);
+        leafCursor = Gdx.graphics.newCursor(pixmap, 0, 0);
         pixmap = getPixmapFromRegion(waterCursorTexture);
-        waterCursor = Gdx.graphics.newCursor(pixmap, 64 / 2, 64 / 2);
+        waterCursor = Gdx.graphics.newCursor(pixmap, 0, 0);
         pixmap.dispose();
 
         avatarTexture = new TextureRegion(directory.getEntry("gameplay:player",
@@ -314,8 +315,8 @@ public class GameplayMode extends WorldController implements ContactListener {
         }
 
         if (ic.didMousePress()) {
-            Vector2 projMousePos = new Vector2(ic.getGrowX(), ic.getGrowY());
-            Vector2 unprojMousePos = canvas.unproject(projMousePos);
+            projMousePosCache.set(ic.getGrowX(), ic.getGrowY());
+            Vector2 unprojMousePos = canvas.unproject(projMousePosCache);
             hazardController.extinguishFire(unprojMousePos);
         }
         plantController.propagateDestruction();
@@ -336,8 +337,8 @@ public class GameplayMode extends WorldController implements ContactListener {
     public void processPlantGrowth() {
         // get mouse position
         InputController ic = InputController.getInstance();
-        Vector2 projMousePos = new Vector2(ic.getMouseX(), ic.getMouseY());
-        Vector2 unprojMousePos = canvas.unproject(projMousePos);
+        projMousePosCache.set(ic.getMouseX(), ic.getMouseY());
+        Vector2 unprojMousePos = canvas.unproject(projMousePosCache);
 
         if (InputController.getInstance().didMousePress()) {
             // process leaf stuff
@@ -386,8 +387,8 @@ public class GameplayMode extends WorldController implements ContactListener {
 
         InputController ic = InputController.getInstance();
         if (!ic.didSpecial()) {
-            Vector2 projMousePos = new Vector2(ic.getMouseX(), ic.getMouseY());
-            Vector2 unprojMousePos = canvas.unproject(projMousePos);
+            projMousePosCache.set(ic.getMouseX(), ic.getMouseY());
+            Vector2 unprojMousePos = canvas.unproject(projMousePosCache);
             plantController.drawGhostBranch(canvas,
                                             unprojMousePos.x,
                                             unprojMousePos.y);
@@ -575,8 +576,8 @@ public class GameplayMode extends WorldController implements ContactListener {
             Gdx.graphics.setCursor(leafCursor);
         }
         InputController ic = InputController.getInstance();
-        Vector2 projMousePos = new Vector2(ic.getMouseX(), ic.getMouseY());
-        Vector2 unprojMousePos = canvas.unproject(projMousePos);
+        projMousePosCache.set(ic.getMouseX(), ic.getMouseY());
+        Vector2 unprojMousePos = canvas.unproject(projMousePosCache);
         if (hazardController.hasFire(unprojMousePos)) {
             Gdx.graphics.setCursor(waterCursor);
         }
@@ -603,26 +604,26 @@ public class GameplayMode extends WorldController implements ContactListener {
         return cursorPixmap;
     }
 
-    /**
-     * @param categoryBits the collision category for the
-     *                     player character when falling through the platform
-     *                     What  the player is.
-     * @param maskBits     Categories the player can collide
-     *                     with
-     * @param collide      whether fixtures wit the same
-     *                     category should collide or not
-     * @return Filter that will allow the player to pass
-     * through a platform without collision
-     */
-    private Filter createFilterData(short categoryBits,
-                                    short maskBits,
-                                    boolean collide) {
-        Filter filter = new Filter();
-        filter.categoryBits = categoryBits;
-        filter.maskBits = maskBits;
-        filter.groupIndex = 0; // Default group index, modify if necessary
-        return filter;
-    }
+    //    /**
+    //     * @param categoryBits the collision category for the
+    //     *                     player character when falling through the platform
+    //     *                     What  the player is.
+    //     * @param maskBits     Categories the player can collide
+    //     *                     with
+    //     * @param collide      whether fixtures wit the same
+    //     *                     category should collide or not
+    //     * @return Filter that will allow the player to pass
+    //     * through a platform without collision
+    //     */
+    //    private Filter createFilterData(short categoryBits,
+    //                                    short maskBits,
+    //                                    boolean collide) {
+    //        Filter filter = new Filter();
+    //        filter.categoryBits = categoryBits;
+    //        filter.maskBits = maskBits;
+    //        filter.groupIndex = 0; // Default group index, modify if necessary
+    //        return filter;
+    //    }
 
     /**
      * Callback method for the start of a collision

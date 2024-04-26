@@ -3,32 +3,63 @@ package com.syndic8.phytopolis.util.menu;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.syndic8.phytopolis.GameCanvas;
+import com.syndic8.phytopolis.InputController;
+import com.syndic8.phytopolis.util.FadingScreen;
 
-public class MenuContainer {
+public class MenuContainer extends FadingScreen {
 
     private final Stage stage;
-    private final Menu menu;
+    private boolean menuChangeScheduled;
+    private Menu menu;
+    private Menu targetMenu;
 
     public MenuContainer(Menu m, GameCanvas c) {
         menu = m;
         stage = new Stage(c.getTextViewport());
-        for (TextButton b : m.gatherLabels()) {
+        menuChangeScheduled = false;
+    }
+
+    public void populate() {
+        for (TextButton b : menu.gatherLabels()) {
             stage.addActor(b);
         }
-
     }
 
-    public Stage getStage() {
-        return stage;
+    public void activate() {
+        InputController.getInstance().getMultiplexer().addProcessor(stage);
     }
 
-    public void update() {
-        System.out.println("ACTING");
+    public void deactivate() {
+        InputController.getInstance().getMultiplexer().removeProcessor(stage);
+    }
+
+    public Menu getMenu() {
+        return menu;
+    }
+
+    public void setMenu(Menu m) {
+        targetMenu = m;
+        menuChangeScheduled = true;
+        fadeOut(0.1f);
+    }
+
+    public void update(float dt) {
+        super.update(dt);
+        if (menuChangeScheduled && isFadeDone()) {
+            menuChangeScheduled = false;
+            stage.clear();
+            menu = targetMenu;
+            for (TextButton b : menu.gatherLabels()) {
+                stage.addActor(b);
+            }
+            fadeIn(0.1f);
+        }
         stage.act();
     }
 
-    public void draw() {
+    public void draw(GameCanvas c) {
         stage.draw();
+        super.draw(c);
     }
 
 }

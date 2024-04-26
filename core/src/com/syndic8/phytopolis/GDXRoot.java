@@ -31,13 +31,6 @@ public class GDXRoot extends Game implements ScreenListener {
     private LevelSelectMode levelSelect;
     private VictoryMode victory;
     private PauseMode pause;
-    /**
-     * Player mode for the the game proper (CONTROLLER CLASS)
-     */
-    private int current;
-    /**
-     * WorldController
-     */
     private GameplayMode controller;
 
     public GDXRoot() {
@@ -48,12 +41,12 @@ public class GDXRoot extends Game implements ScreenListener {
         canvas.setSize(16, 9);
         menu = new MainMenuMode("assets.json", canvas, 1);
         controller = new GameplayMode();
-        levelSelect = new LevelSelectMode();
+        levelSelect = new LevelSelectMode(canvas);
         victory = new VictoryMode();
         pause = new PauseMode(canvas);
-        menu.setScreenListener(this);
         Gdx.input.setInputProcessor(InputController.getInstance()
                                             .getMultiplexer());
+        menu.setScreenListener(this);
         setScreen(menu);
     }
 
@@ -85,12 +78,15 @@ public class GDXRoot extends Game implements ScreenListener {
             directory = menu.getAssets();
             levelSelect.gatherAssets(directory);
             levelSelect.setScreenListener(this);
-            levelSelect.setCanvas(canvas);
             levelSelect.setBackgroundMusic(menu.getBackgroundMusic());
             setScreen(levelSelect);
-            menu.dispose();
-            menu = null;
-        } else if (screen == levelSelect) {
+        } else if (screen == levelSelect &&
+                exitCode == LevelSelectMode.ExitCode.EXIT_MAIN_MENU.ordinal()) {
+            menu.setScreenListener(this);
+            menu.setBackgroundMusic(levelSelect.getBackgroundMusic());
+            setScreen(menu);
+        } else if (screen == levelSelect &&
+                exitCode == LevelSelectMode.ExitCode.EXIT_LEVEL.ordinal()) {
             controller.setLevel(levelSelect.getLevel());
             controller.setCanvas(canvas);
             controller.gatherAssets(directory);
@@ -108,11 +104,12 @@ public class GDXRoot extends Game implements ScreenListener {
             controller.fadeIn(0.25f);
             setScreen(controller);
         } else if (screen == pause &&
-                exitCode == PauseMode.ExitCode.EXIT_MAIN_MENU.ordinal()) {
+                exitCode == PauseMode.ExitCode.EXIT_LEVELS.ordinal()) {
             controller.setPaused(false);
-            menu = new MainMenuMode("assets.json", canvas, 1);
-            menu.setScreenListener(this);
-            setScreen(menu);
+            levelSelect.reset();
+            levelSelect.setScreenListener(this);
+            levelSelect.setBackgroundMusic(menu.getBackgroundMusic());
+            setScreen(levelSelect);
         } else if (exitCode ==
                 WorldController.ExitCode.EXIT_VICTORY.ordinal()) {
             victory.gatherAssets(directory);
