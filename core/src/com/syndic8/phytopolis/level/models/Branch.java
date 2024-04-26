@@ -16,6 +16,8 @@ public class Branch extends Model {
     private branchType type;
     private float animFrame;
 
+    private final Color ghostColor = new Color(1, 1, 1, .5f);
+
     public Branch(float x,
                   float y,
                   float angle,
@@ -148,7 +150,7 @@ public class Branch extends Model {
         float x = texture.getRegionWidth() / 2.0f;
         float y = texture.getRegionHeight() / 2.0f;
         canvas.draw(texture,
-                new Color(1, 1, 1, .5f),
+                ghostColor,
                 x,
                 0,
                 getX(),

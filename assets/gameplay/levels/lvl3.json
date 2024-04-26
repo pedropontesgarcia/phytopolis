@@ -111,7 +111,7 @@
         {
          "name":"firerate",
          "type":"float",
-         "value":3
+         "value":5
         }, 
         {
          "name":"leaftype",

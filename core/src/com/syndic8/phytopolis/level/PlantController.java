@@ -10,7 +10,6 @@ import com.syndic8.phytopolis.level.models.Branch;
 import com.syndic8.phytopolis.level.models.Leaf;
 import com.syndic8.phytopolis.util.FilmStrip;
 import com.syndic8.phytopolis.util.Tilemap;
-import jdk.vm.ci.meta.Assumptions;
 
 public class PlantController {
 
