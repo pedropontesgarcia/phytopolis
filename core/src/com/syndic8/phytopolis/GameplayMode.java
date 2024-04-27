@@ -137,7 +137,7 @@ public class GameplayMode extends WorldController implements ContactListener {
             background = new TextureRegion(directory.getEntry(
                     "gameplay:background",
                     Texture.class));
-            vignette = new TextureRegion(directory.getEntry("gameplay:vignette",
+            vignette = new TextureRegion(directory.getEntry("ui:vignette",
                                                             Texture.class));
 
             background.setRegion(0, 0, 1920, 1080);
@@ -338,7 +338,6 @@ public class GameplayMode extends WorldController implements ContactListener {
         canvas.cameraUpdate(cameraVector);
         canvas.begin();
         drawBackground();
-        drawVignette();
 
         tilemap.draw(canvas);
 
@@ -352,6 +351,7 @@ public class GameplayMode extends WorldController implements ContactListener {
                                             unprojMousePos.y);
         }
         hazardController.draw(canvas);
+        drawVignette();
         canvas.end();
 
         updateCursor();
@@ -520,14 +520,14 @@ public class GameplayMode extends WorldController implements ContactListener {
      * Updates the custom cursor
      */
     public void updateCursor() {
-        Gdx.graphics.setCursor(branchCursor);
-        if (ic.didSpecial()) {
-            Gdx.graphics.setCursor(leafCursor);
-        }
         projMousePosCache.set(ic.getMouseX(), ic.getMouseY());
         Vector2 unprojMousePos = canvas.unproject(projMousePosCache);
-        if (hazardController.hasFire(unprojMousePos)) {
+        if (ic.didSpecial()) {
+            Gdx.graphics.setCursor(leafCursor);
+        } else if (hazardController.hasFire(unprojMousePos)) {
             Gdx.graphics.setCursor(waterCursor);
+        } else {
+            Gdx.graphics.setCursor(branchCursor);
         }
     }
 

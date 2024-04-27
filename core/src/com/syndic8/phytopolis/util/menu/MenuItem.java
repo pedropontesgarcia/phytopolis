@@ -1,15 +1,13 @@
 package com.syndic8.phytopolis.util.menu;
 
-import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
-import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.utils.Align;
 import com.syndic8.phytopolis.GameCanvas;
+import com.syndic8.phytopolis.util.SharedAssetContainer;
 
 public class MenuItem {
 
@@ -66,22 +64,7 @@ public class MenuItem {
                      int align) {
         container = ctr;
         submenu = sm;
-        FreeTypeFontGenerator generator = new FreeTypeFontGenerator(Gdx.files.internal(
-                "fonts/Krungthep.ttf"));
-        FreeTypeFontGenerator.setMaxTextureSize(4096);
-        FreeTypeFontGenerator.FreeTypeFontParameter parameter = new FreeTypeFontGenerator.FreeTypeFontParameter();
-        parameter.size = 256;
-        parameter.color = Color.WHITE;
-        parameter.shadowColor = new Color(0, 0.6f, 0.6f, 1);
-        parameter.shadowOffsetX = 15;
-        parameter.shadowOffsetY = 15;
-        BitmapFont font = generator.generateFont(parameter);
-        font.getRegion()
-                .getTexture()
-                .setFilter(Texture.TextureFilter.Linear,
-                           Texture.TextureFilter.Linear);
-        font.getData().setScale(0.2f);
-        generator.dispose();
+        BitmapFont font = SharedAssetContainer.getInstance().uiFont;
         TextButton.TextButtonStyle buttonStyle = new TextButton.TextButtonStyle();
         buttonStyle.font = font;
         buttonStyle.overFontColor = new Color(0.7f, 0.7f, 0.7f, 1);

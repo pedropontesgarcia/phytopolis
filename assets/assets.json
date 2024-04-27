@@ -16,7 +16,6 @@
     "gameplay:sun_filmstrip": "gameplay/sun-ui-filmstrip.png",
     "gameplay:sun_resource": "gameplay/sun-resource.png",
     "gameplay:background": "gameplay/back2.png",
-    "gameplay:vignette": "gameplay/vignette.png",
     "hazards:fire": "hazards/fire.png",
     "hazards:drone": "hazards/drone.png",
     "hazards:red-warning": "hazards/red_warning.png",
@@ -28,6 +27,7 @@
     "ui:branch-cursor": "ui/branch-cursor.png",
     "ui:leaf-cursor": "ui/leaf-cursor.png",
     "ui:water-cursor": "ui/water-cursor.png",
+    "ui:vignette": "ui/vignette.png",
     "over:victory": "gameplay/victory_text.png",
     "over:failure": "gameplay/failure.png"
   },

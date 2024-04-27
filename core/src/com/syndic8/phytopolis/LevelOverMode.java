@@ -6,22 +6,28 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.scenes.scene2d.InputEvent;
+import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
+import com.badlogic.gdx.utils.Align;
 import com.syndic8.phytopolis.assets.AssetDirectory;
 import com.syndic8.phytopolis.util.FadingScreen;
 import com.syndic8.phytopolis.util.ScreenListener;
+import com.syndic8.phytopolis.util.menu.Menu;
+import com.syndic8.phytopolis.util.menu.MenuContainer;
+import com.syndic8.phytopolis.util.menu.MenuItem;
 import edu.cornell.gdiac.audio.AudioEngine;
 
 public class LevelOverMode extends FadingScreen implements Screen {
 
     private final Rectangle bounds;
     /**
+     * Reference to GameCanvas created by the root
+     */
+    private final GameCanvas canvas;
+    /**
      * Whether or not this screen is active
      */
     private boolean active;
-    /**
-     * Reference to GameCanvas created by the root
-     */
-    private GameCanvas canvas;
     /**
      * Listener that will update the player mode when we are done
      */
@@ -34,11 +40,37 @@ public class LevelOverMode extends FadingScreen implements Screen {
     private Music backgroundMusic;
     private AudioEngine audioEngine;
     private Texture rs;
+    private MenuContainer menuContainer;
 
-    public LevelOverMode() {
+    public LevelOverMode(GameCanvas c) {
         this.ready = false;
         this.bounds = new Rectangle(0, 0, 16, 9);
         gathered = false;
+        canvas = c;
+        createMenu();
+    }
+
+    private void createMenu() {
+        Menu menu = new Menu(1, 0, 0.3f, -0.1f, Align.center);
+        menuContainer = new MenuContainer(menu, canvas);
+        ClickListener exitListener = new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                ready = true;
+                fadeOut(0.5f);
+            }
+        };
+        menu.addItem(new MenuItem("NEXT",
+                                  menu.getSeparation(),
+                                  0,
+                                  menu.getLength(),
+                                  exitListener,
+                                  menuContainer,
+                                  canvas,
+                                  menu.getXOffset(),
+                                  menu.getYOffset(),
+                                  menu.getAlignment()));
+        menuContainer.populate();
     }
 
     public void gatherAssets(AssetDirectory directory) {
@@ -56,10 +88,6 @@ public class LevelOverMode extends FadingScreen implements Screen {
         backgroundMusic = m;
     }
 
-    public void setCanvas(GameCanvas canvas) {
-        this.canvas = canvas;
-    }
-
     public void setWon(boolean value) {
         won = value;
     }
@@ -67,6 +95,7 @@ public class LevelOverMode extends FadingScreen implements Screen {
     @Override
     public void show() {
         active = true;
+        menuContainer.activate();
         fadeIn(0.5f);
         //        if (backgroundMusic != null) backgroundMusic.play();
     }
@@ -78,6 +107,7 @@ public class LevelOverMode extends FadingScreen implements Screen {
             draw();
 
             if (listener != null && ready && isFadeDone()) {
+                menuContainer.deactivate();
                 listener.exitScreen(this, 0);
             }
         }
@@ -85,6 +115,7 @@ public class LevelOverMode extends FadingScreen implements Screen {
 
     public void update(float delta) {
         super.update(delta);
+        menuContainer.update(delta);
         InputController.getInstance().readInput(bounds, Vector2.Zero.add(1, 1));
         if (InputController.getInstance().didSecondary()) {
             ready = true;
@@ -102,6 +133,7 @@ public class LevelOverMode extends FadingScreen implements Screen {
                     canvas.getWidth(),
                     canvas.getHeight());
         canvas.end();
+        menuContainer.draw(canvas);
         super.draw(canvas);
     }
 

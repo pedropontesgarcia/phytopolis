@@ -44,7 +44,7 @@ public class GDXRoot extends Game implements ScreenListener {
         menu = new MainMenuMode("assets.json", canvas, 1);
         controller = new GameplayMode();
         levelSelect = new LevelSelectMode(canvas);
-        levelOver = new LevelOverMode();
+        levelOver = new LevelOverMode(canvas);
         pause = new PauseMode(canvas);
         Gdx.input.setInputProcessor(InputController.getInstance()
                                             .getMultiplexer());
@@ -137,7 +137,6 @@ public class GDXRoot extends Game implements ScreenListener {
         levelOver.gatherAssets(directory);
         levelOver.reset();
         levelOver.setScreenListener(this);
-        levelOver.setCanvas(canvas);
         setScreen(levelOver);
     }
 
