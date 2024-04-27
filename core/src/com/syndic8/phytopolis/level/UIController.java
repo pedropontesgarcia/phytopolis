@@ -1,10 +1,16 @@
 package com.syndic8.phytopolis.level;
 
+import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.graphics.Cursor;
+import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.syndic8.phytopolis.GameCanvas;
+import com.syndic8.phytopolis.InputController;
 import com.syndic8.phytopolis.assets.AssetDirectory;
 import com.syndic8.phytopolis.util.FilmStrip;
 import com.syndic8.phytopolis.util.SharedAssetContainer;
@@ -16,14 +22,23 @@ public class UIController {
     private final Stage stage;
     private final Timer timer;
     private final Label label;
+    private final Vector2 projMousePosCache;
+    private final InputController ic;
+    private final GameCanvas canvas;
     private FilmStrip waterdropStrip;
+    private Cursor branchCursor;
+    private Cursor leafCursor;
+    private Cursor waterCursor;
 
     /**
      * Initializes a UIController.
      */
     public UIController(GameCanvas c, Tilemap tm) {
+        canvas = c;
         timer = new Timer(tm.getTime());
         timer.start();
+        projMousePosCache = new Vector2();
+        ic = InputController.getInstance();
         stage = new Stage(c.getTextViewport());
         BitmapFont font = SharedAssetContainer.getInstance().uiFont;
         Label.LabelStyle labelStyle = new Label.LabelStyle();
@@ -45,6 +60,43 @@ public class UIController {
                                                           Texture.class),
                                        1,
                                        11);
+        TextureRegion branchCursorTexture = new TextureRegion(directory.getEntry(
+                "ui:branch-cursor",
+                Texture.class));
+        TextureRegion leafCursorTexture = new TextureRegion(directory.getEntry(
+                "ui:leaf-cursor",
+                Texture.class));
+        TextureRegion waterCursorTexture = new TextureRegion(directory.getEntry(
+                "ui:water-cursor",
+                Texture.class));
+        Pixmap pixmap = getPixmapFromRegion(branchCursorTexture);
+        branchCursor = Gdx.graphics.newCursor(pixmap, 0, 0);
+        pixmap = getPixmapFromRegion(leafCursorTexture);
+        leafCursor = Gdx.graphics.newCursor(pixmap, 0, 0);
+        pixmap = getPixmapFromRegion(waterCursorTexture);
+        waterCursor = Gdx.graphics.newCursor(pixmap, 0, 0);
+        pixmap.dispose();
+    }
+
+    private Pixmap getPixmapFromRegion(TextureRegion region) {
+        if (!region.getTexture().getTextureData().isPrepared()) {
+            region.getTexture().getTextureData().prepare();
+        }
+        Pixmap originalPixmap = region.getTexture()
+                .getTextureData()
+                .consumePixmap();
+        Pixmap cursorPixmap = new Pixmap(64, 64, originalPixmap.getFormat());
+        cursorPixmap.drawPixmap(originalPixmap,
+                                0,
+                                0,
+                                originalPixmap.getWidth(),
+                                originalPixmap.getHeight(),
+                                0,
+                                0,
+                                cursorPixmap.getWidth(),
+                                cursorPixmap.getHeight());
+        originalPixmap.dispose(); // Avoid memory leaks
+        return cursorPixmap;
     }
 
     /**
@@ -52,11 +104,29 @@ public class UIController {
      *
      * @param waterLvl level of water, in percentage between 0 and 1.
      */
-    public void update(float dt, float waterLvl) {
+    public void update(float dt,
+                       float waterLvl,
+                       HazardController hazardController) {
+        updateCursor(hazardController);
         waterdropStrip.setFrame(Math.round(
                 (waterdropStrip.getSize() - 1) * waterLvl));
         timer.updateTime(dt);
         label.setText(timer.toString());
+    }
+
+    /**
+     * Updates the custom cursor
+     */
+    public void updateCursor(HazardController hazardController) {
+        projMousePosCache.set(ic.getMouseX(), ic.getMouseY());
+        Vector2 unprojMousePos = canvas.unproject(projMousePosCache);
+        if (ic.didSpecial()) {
+            Gdx.graphics.setCursor(leafCursor);
+        } else if (hazardController.hasFire(unprojMousePos)) {
+            Gdx.graphics.setCursor(waterCursor);
+        } else {
+            Gdx.graphics.setCursor(branchCursor);
+        }
     }
 
     public void pauseTimer() {
@@ -73,10 +143,6 @@ public class UIController {
 
     public void addTime() {
         timer.addTime();
-    }
-
-    public void eatTime(float t) {
-        timer.eatTime(t);
     }
 
     public boolean timerDone() {

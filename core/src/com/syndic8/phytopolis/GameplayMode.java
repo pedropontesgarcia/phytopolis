@@ -10,26 +10,20 @@
  */
 package com.syndic8.phytopolis;
 
-import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.graphics.Cursor;
-import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Vector2;
-import com.badlogic.gdx.physics.box2d.*;
-import com.badlogic.gdx.utils.Array;
+import com.badlogic.gdx.physics.box2d.BodyDef;
+import com.badlogic.gdx.physics.box2d.World;
 import com.badlogic.gdx.utils.JsonValue;
-import com.badlogic.gdx.utils.ObjectSet;
 import com.syndic8.phytopolis.assets.AssetDirectory;
 import com.syndic8.phytopolis.level.*;
 import com.syndic8.phytopolis.level.models.*;
 import com.syndic8.phytopolis.util.FilmStrip;
 import com.syndic8.phytopolis.util.Tilemap;
-
-import java.util.HashMap;
 
 /**
  * Gameplay specific controller for the platformer game.
@@ -40,22 +34,12 @@ import java.util.HashMap;
  * This is the purpose of our AssetState variable; it ensures that multiple instances
  * place nicely with the static assets.
  */
-public class GameplayMode extends WorldController implements ContactListener {
+public class GameplayMode extends WorldController {
 
     private final Vector2 cameraVector;
     private final Vector2 projMousePosCache;
-    private final InputController ic = InputController.getInstance();
-    /**
-     * Mark set to handle more sophisticated collision callbacks
-     */
-    protected ObjectSet<Fixture> sensorFixtures;
+    private final InputController ic;
     protected Texture jumpTexture;
-    private TextureRegion branchCursorTexture;
-    private TextureRegion leafCursorTexture;
-    private TextureRegion waterCursorTexture;
-    private Cursor branchCursor;
-    private Cursor leafCursor;
-    private Cursor waterCursor;
     private PlantController plantController;
     private HazardController hazardController;
     private ResourceController resourceController;
@@ -71,13 +55,12 @@ public class GameplayMode extends WorldController implements ContactListener {
     private TextureRegion avatarTexture;
     private Tilemap tilemap;
     private Texture waterTexture;
-    private Texture nodeTexture;
     private float volume;
     private JsonValue constants;
     private Player avatar;
-    private HashMap<Fixture, Filter> originalCollisionProperties;
     private Music backgroundMusic;
     private String lvl;
+    private CollisionController collisionController;
 
     /**
      * Creates and initialize a new instance of the platformer game
@@ -86,11 +69,10 @@ public class GameplayMode extends WorldController implements ContactListener {
      */
     public GameplayMode() {
         super();
-        world.setContactListener(this);
         cameraVector = new Vector2();
-        sensorFixtures = new ObjectSet<>();
         projMousePosCache = new Vector2();
         gathered = false;
+        ic = InputController.getInstance();
     }
 
     public void setLevel(String lvl) {
@@ -112,23 +94,6 @@ public class GameplayMode extends WorldController implements ContactListener {
         tilemap.gatherAssets(directory);
         if (!gathered) {
             gathered = true;
-            branchCursorTexture = new TextureRegion(directory.getEntry(
-                    "ui:branch-cursor",
-                    Texture.class));
-            leafCursorTexture = new TextureRegion(directory.getEntry(
-                    "ui:leaf-cursor",
-                    Texture.class));
-            waterCursorTexture = new TextureRegion(directory.getEntry(
-                    "ui:water-cursor",
-                    Texture.class));
-            Pixmap pixmap = getPixmapFromRegion(branchCursorTexture);
-            branchCursor = Gdx.graphics.newCursor(pixmap, 0, 0);
-            pixmap = getPixmapFromRegion(leafCursorTexture);
-            leafCursor = Gdx.graphics.newCursor(pixmap, 0, 0);
-            pixmap = getPixmapFromRegion(waterCursorTexture);
-            waterCursor = Gdx.graphics.newCursor(pixmap, 0, 0);
-            pixmap.dispose();
-
             avatarTexture = new TextureRegion(directory.getEntry(
                     "gameplay:player",
                     Texture.class));
@@ -139,7 +104,6 @@ public class GameplayMode extends WorldController implements ContactListener {
                     Texture.class));
             vignette = new TextureRegion(directory.getEntry("ui:vignette",
                                                             Texture.class));
-
             background.setRegion(0, 0, 1920, 1080);
             vignette.setRegion(0, 0, 1920, 1080);
 
@@ -280,7 +244,9 @@ public class GameplayMode extends WorldController implements ContactListener {
             hazardController.extinguishFire(unprojMousePos);
         }
         plantController.propagateDestruction();
-        uiController.update(dt, resourceController.getCurrRatio());
+        uiController.update(dt,
+                            resourceController.getCurrRatio(),
+                            hazardController);
         // Check for win condition
         if ((plantController.getMaxLeafHeight() >
                 tilemap.getVictoryHeight() * tilemap.getTileHeight()) &&
@@ -354,8 +320,6 @@ public class GameplayMode extends WorldController implements ContactListener {
         drawVignette();
         canvas.end();
 
-        updateCursor();
-
         canvas.beginHud();
         hazardController.drawWarning(canvas, cameraVector);
         uiController.draw(canvas);
@@ -389,7 +353,6 @@ public class GameplayMode extends WorldController implements ContactListener {
         plantController.reset();
 
         world = new World(gravity, false);
-        world.setContactListener(this);
         setComplete(false);
         setFailure(false);
         populateLevel();
@@ -462,14 +425,10 @@ public class GameplayMode extends WorldController implements ContactListener {
         avatar.setTexture(avatarTexture);
         avatar.setName("dude");
         addObject(avatar);
-
-        originalCollisionProperties = new HashMap<>();
-
-        Array<Fixture> fixtures = avatar.getBody().getFixtureList();
-        for (Fixture fixture : fixtures) {
-            originalCollisionProperties.put(fixture, fixture.getFilterData());
-        }
-
+        collisionController = new CollisionController(avatar,
+                                                      uiController,
+                                                      resourceController);
+        world.setContactListener(collisionController);
         volume = constants.getFloat("volume", 1.0f);
     }
 
@@ -514,300 +473,6 @@ public class GameplayMode extends WorldController implements ContactListener {
                     backgroundY,
                     canvas.getWidth(),
                     canvas.getHeight());
-    }
-
-    /**
-     * Updates the custom cursor
-     */
-    public void updateCursor() {
-        projMousePosCache.set(ic.getMouseX(), ic.getMouseY());
-        Vector2 unprojMousePos = canvas.unproject(projMousePosCache);
-        if (ic.didSpecial()) {
-            Gdx.graphics.setCursor(leafCursor);
-        } else if (hazardController.hasFire(unprojMousePos)) {
-            Gdx.graphics.setCursor(waterCursor);
-        } else {
-            Gdx.graphics.setCursor(branchCursor);
-        }
-    }
-
-    private Pixmap getPixmapFromRegion(TextureRegion region) {
-        if (!region.getTexture().getTextureData().isPrepared()) {
-            region.getTexture().getTextureData().prepare();
-        }
-        Pixmap originalPixmap = region.getTexture()
-                .getTextureData()
-                .consumePixmap();
-        Pixmap cursorPixmap = new Pixmap(64, 64, originalPixmap.getFormat());
-        cursorPixmap.drawPixmap(originalPixmap,
-                                0,
-                                0,
-                                originalPixmap.getWidth(),
-                                originalPixmap.getHeight(),
-                                0,
-                                0,
-                                cursorPixmap.getWidth(),
-                                cursorPixmap.getHeight());
-        originalPixmap.dispose(); // Avoid memory leaks
-        return cursorPixmap;
-    }
-
-    //    /**
-    //     * @param categoryBits the collision category for the
-    //     *                     player character when falling through the platform
-    //     *                     What  the player is.
-    //     * @param maskBits     Categories the player can collide
-    //     *                     with
-    //     * @param collide      whether fixtures wit the same
-    //     *                     category should collide or not
-    //     * @return Filter that will allow the player to pass
-    //     * through a platform without collision
-    //     */
-    //    private Filter createFilterData(short categoryBits,
-    //                                    short maskBits,
-    //                                    boolean collide) {
-    //        Filter filter = new Filter();
-    //        filter.categoryBits = categoryBits;
-    //        filter.maskBits = maskBits;
-    //        filter.groupIndex = 0; // Default group index, modify if necessary
-    //        return filter;
-    //    }
-
-    /**
-     * Callback method for the start of a collision
-     * <p>
-     * This method is called when we first get a collision between two objects.  We use
-     * this method to test if it is the "right" kind of collision.  In particular, we
-     * use it to test if we made it to the win door.
-     *
-     * @param contact The two bodies that collided
-     */
-    public void beginContact(Contact contact) {
-        Fixture fix1 = contact.getFixtureA();
-        Fixture fix2 = contact.getFixtureB();
-
-        Body body1 = fix1.getBody();
-        Body body2 = fix2.getBody();
-
-        Object fd1 = fix1.getUserData();
-        Object fd2 = fix2.getUserData();
-
-        try {
-            Model bd1 = (Model) body1.getUserData();
-            Model bd2 = (Model) body2.getUserData();
-
-            // See if we have landed on the ground.
-            if ((avatar.getSensorName().equals(fd2) && avatar != bd1 &&
-                    (bd1.getType() == Model.ModelType.LEAF ||
-                            bd1.getType() == Model.ModelType.PLATFORM ||
-                            bd1.getType() == Model.ModelType.TILE_FULL)) ||
-                    (avatar.getSensorName().equals(fd1) && avatar != bd2) &&
-                            (bd2.getType() == Model.ModelType.LEAF ||
-                                    bd2.getType() == Model.ModelType.PLATFORM ||
-                                    bd2.getType() ==
-                                            Model.ModelType.TILE_FULL)) {
-                avatar.setGrounded(true);
-                sensorFixtures.add(avatar == bd1 ?
-                                           fix2 :
-                                           fix1); // Could have more than one ground
-            }
-            if ((avatar.getSensorName().equals(fd2) && avatar != bd1 &&
-                    bd1.getType() == Model.ModelType.LEAF) ||
-                    (avatar.getSensorName().equals(fd1) && avatar != bd2 &&
-                            bd2.getType() == Model.ModelType.LEAF)) {
-                Leaf l = (Leaf) (avatar == bd1 ? bd2 : bd1);
-                if (l.getLeafType() == Leaf.leafType.BOUNCY) {
-                    avatar.setBouncy(true);
-                }
-            }
-
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-    }
-
-    /**
-     * Callback method for the end of a collision
-     * <p>
-     * This method is called when two objects cease to touch.  The main use of this method
-     * is to determine when the characer is NOT on the ground.  This is how we prevent
-     * double jumping.
-     */
-    public void endContact(Contact contact) {
-        contact.setEnabled(true);
-        Fixture fix1 = contact.getFixtureA();
-        Fixture fix2 = contact.getFixtureB();
-
-        Body body1 = fix1.getBody();
-        Body body2 = fix2.getBody();
-
-        Object fd1 = fix1.getUserData();
-        Object fd2 = fix2.getUserData();
-
-        Object bd1 = body1.getUserData();
-        Object bd2 = body2.getUserData();
-
-        if ((avatar.getSensorName().equals(fd2) && avatar != bd1) ||
-                (avatar.getSensorName().equals(fd1) && avatar != bd2)) {
-            sensorFixtures.remove(avatar == bd1 ? fix2 : fix1);
-            if (sensorFixtures.size == 0) {
-                avatar.setGrounded(false);
-            }
-        }
-        try {
-            if (((Model) bd1).getType() == Model.ModelType.LEAF ||
-                    ((Model) bd2).getType() == Model.ModelType.LEAF) {
-                Leaf l = (Leaf) (avatar == bd1 ? bd2 : bd1);
-                if (l.getLeafType() == Leaf.leafType.BOUNCY) {
-                    avatar.setBouncy(false);
-                }
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-    }
-
-    /**
-     * Unused ContactListener method
-     */
-    public void preSolve(Contact contact, Manifold oldManifold) {
-        Fixture fix1 = contact.getFixtureA();
-        Fixture fix2 = contact.getFixtureB();
-        boolean isCollisionBetweenPlayerAndLeaf =
-                (fix1.getBody() == avatar.getBody() &&
-                        ((Model) fix2.getBody().getUserData()).getType() ==
-                                Model.ModelType.LEAF) ||
-                        (fix2.getBody() == avatar.getBody() &&
-                                ((Model) fix1.getBody()
-                                        .getUserData()).getType() ==
-                                        Model.ModelType.LEAF);
-        boolean isCollisionBetweenPlayerAndNoTopTile =
-                (fix1.getBody() == avatar.getBody() &&
-                        ((Model) fix2.getBody().getUserData()).getType() ==
-                                Model.ModelType.TILE_NOTOP) ||
-                        (fix2.getBody() == avatar.getBody() &&
-                                ((Model) fix1.getBody()
-                                        .getUserData()).getType() ==
-                                        Model.ModelType.TILE_NOTOP);
-        boolean isCollisionBetweenPlayerAndWater =
-                (fix1.getBody() == avatar.getBody() &&
-                        ((Model) fix2.getBody().getUserData()).getType() ==
-                                Model.ModelType.WATER) ||
-                        (fix2.getBody() == avatar.getBody() &&
-                                ((Model) fix1.getBody()
-                                        .getUserData()).getType() ==
-                                        Model.ModelType.WATER);
-        boolean isCollisionBetweenPlayerAndSun =
-                (fix1.getBody() == avatar.getBody() &&
-                        ((Model) fix2.getBody().getUserData()).getType() ==
-                                Model.ModelType.SUN) ||
-                        (fix2.getBody() == avatar.getBody() &&
-                                ((Model) fix1.getBody()
-                                        .getUserData()).getType() ==
-                                        Model.ModelType.SUN);
-        boolean isCollisionBetweenLeafAndSun =
-                (((Model) fix1.getBody().getUserData()).getType() ==
-                        Model.ModelType.LEAF &&
-                        ((Model) fix2.getBody().getUserData()).getType() ==
-                                Model.ModelType.SUN) ||
-                        (((Model) fix2.getBody().getUserData()).getType() ==
-                                Model.ModelType.LEAF && ((Model) fix1.getBody()
-                                .getUserData()).getType() ==
-                                Model.ModelType.SUN);
-        boolean isCollisionBetweenPlatformAndSun =
-                (((Model) fix1.getBody().getUserData()).getType() ==
-                        Model.ModelType.PLATFORM &&
-                        ((Model) fix2.getBody().getUserData()).getType() ==
-                                Model.ModelType.SUN) ||
-                        (((Model) fix2.getBody().getUserData()).getType() ==
-                                Model.ModelType.PLATFORM &&
-                                ((Model) fix1.getBody()
-                                        .getUserData()).getType() ==
-                                        Model.ModelType.SUN);
-        boolean isCollisionBetweenTileAndSun =
-                (((Model) fix1.getBody().getUserData()).getType() ==
-                        Model.ModelType.TILE_NOTOP &&
-                        ((Model) fix2.getBody().getUserData()).getType() ==
-                                Model.ModelType.SUN) ||
-                        (((Model) fix2.getBody().getUserData()).getType() ==
-                                Model.ModelType.TILE_NOTOP &&
-                                ((Model) fix1.getBody()
-                                        .getUserData()).getType() ==
-                                        Model.ModelType.SUN) ||
-                        (((Model) fix1.getBody().getUserData()).getType() ==
-                                Model.ModelType.TILE_FULL &&
-                                ((Model) fix2.getBody()
-                                        .getUserData()).getType() ==
-                                        Model.ModelType.SUN) ||
-                        (((Model) fix2.getBody().getUserData()).getType() ==
-                                Model.ModelType.TILE_FULL &&
-                                ((Model) fix1.getBody()
-                                        .getUserData()).getType() ==
-                                        Model.ModelType.SUN);
-        if (isCollisionBetweenPlayerAndSun ||
-                isCollisionBetweenPlatformAndSun ||
-                isCollisionBetweenTileAndSun) {
-            contact.setEnabled(false);
-        }
-        if (isCollisionBetweenLeafAndSun) {
-            Sun s;
-            if (((Model) fix1.getBody().getUserData()).getType() ==
-                    Model.ModelType.SUN) {
-                s = (Sun) fix1.getBody().getUserData();
-            } else {
-                s = (Sun) fix2.getBody().getUserData();
-            }
-            contact.setEnabled(false);
-            s.clear();
-            uiController.addTime();
-        }
-        if (isCollisionBetweenPlayerAndWater) {
-            Water w;
-            if (((Model) fix1.getBody().getUserData()).getType() ==
-                    Model.ModelType.WATER) {
-                w = (Water) fix1.getBody().getUserData();
-            } else {
-                w = (Water) fix2.getBody().getUserData();
-            }
-            contact.setEnabled(false);
-            if (w.isFull()) {
-                w.clear();
-                resourceController.pickupWater();
-            }
-        }
-
-        boolean isPlayerGoingUp = avatar.getVY() >= 0;
-        boolean isPlayerGoingDown = avatar.getVY() <= 0;
-        boolean isPlayerBelow = false;
-        if (fix1.getBody() == avatar.getBody()) isPlayerBelow =
-                fix1.getBody().getPosition().y - avatar.getHeight() / 2f <
-                        fix2.getBody().getPosition().y;
-        else if (fix2.getBody() == avatar.getBody()) isPlayerBelow =
-                fix2.getBody().getPosition().y - avatar.getHeight() / 2f <
-                        fix1.getBody().getPosition().y;
-        if (isCollisionBetweenPlayerAndLeaf &&
-                (isPlayerGoingUp || isPlayerBelow || ic.didDrop())) {
-            contact.setEnabled(false);
-        }
-        if (isCollisionBetweenPlayerAndNoTopTile && isPlayerGoingDown) {
-            contact.setEnabled(false);
-        }
-        //        if (isCollisionBetweenPlayerAndLeaf) {
-        //            Leaf l;
-        //            if (fix1.getBody() == avatar.getBody())
-        //                l = (Leaf) fix2.getBody().getUserData();
-        //            else l = (Leaf) fix1.getBody().getUserData();
-        //            if (l.getLeafType() == Leaf.leafType.BOUNCY &&
-        //                    avatar.getY() > l.getY()) avatar.setBouncy(true);
-        //        }
-    }
-
-    /**
-     * Unused ContactListener method
-     */
-    public void postSolve(Contact contact, ContactImpulse impulse) {
     }
 
 }
