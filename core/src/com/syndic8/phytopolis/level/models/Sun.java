@@ -38,6 +38,8 @@ public class Sun extends Resource {
     }
 
     public void draw(GameCanvas canvas) {
+        setVX(0);
+        setVY(-0.5f);
         float sclX = width / sunFilmstrip.getRegionWidth();
         float sclY = height / sunFilmstrip.getRegionHeight();
         canvas.draw(sunFilmstrip,

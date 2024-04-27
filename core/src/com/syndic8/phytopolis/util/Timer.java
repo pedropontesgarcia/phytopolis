@@ -80,6 +80,10 @@ public class Timer {
 
     }
 
+    public void addTime(float t) {
+        time += t;
+    }
+
     public String toString() {
         return String.format("%02d:%02d", getMinutes(), getSeconds());
     }

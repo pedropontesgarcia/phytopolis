@@ -70,6 +70,11 @@ public class ResourceController {
 
     public void pickupSun() {
         currSun = Math.min(MAX_SUN, currSun + SUN_ON_PICKUP);
+        addTime(10);
+    }
+
+    public void addTime(float t) {
+        ui.addTime(t);
     }
 
     public boolean fullWater() {

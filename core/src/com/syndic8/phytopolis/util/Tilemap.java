@@ -261,8 +261,8 @@ public class Tilemap {
                                                                1);
                         Sun s = new Sun(xMid,
                                         yMid,
-                                        tileWidth,
-                                        tileHeight,
+                                        tileWidth * 0.5f,
+                                        tileHeight * 0.5f,
                                         sunFilmstrip,
                                         this,
                                         1);

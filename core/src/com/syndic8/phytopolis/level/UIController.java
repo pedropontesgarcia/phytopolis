@@ -92,6 +92,10 @@ public class UIController {
         timer.start();
     }
 
+    public void addTime(float t) {
+        timer.addTime(t);
+    }
+
     /**
      * Draws the UIController to the canvas.
      *

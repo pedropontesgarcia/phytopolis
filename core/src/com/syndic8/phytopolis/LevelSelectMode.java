@@ -226,7 +226,7 @@ public class LevelSelectMode extends FadingScreen implements Screen {
 
     @Override
     public void dispose() {
-        backgroundMusic.dispose();
+        if (backgroundMusic != null) backgroundMusic.dispose();
     }
 
     public void reset() {

@@ -12,7 +12,6 @@ package com.syndic8.phytopolis;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.audio.Music;
-import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Cursor;
 import com.badlogic.gdx.graphics.Pixmap;
@@ -28,6 +27,7 @@ import com.syndic8.phytopolis.assets.AssetDirectory;
 import com.syndic8.phytopolis.level.HazardController;
 import com.syndic8.phytopolis.level.PlantController;
 import com.syndic8.phytopolis.level.ResourceController;
+import com.syndic8.phytopolis.level.SunController;
 import com.syndic8.phytopolis.level.models.*;
 import com.syndic8.phytopolis.util.FilmStrip;
 import com.syndic8.phytopolis.util.Tilemap;
@@ -53,9 +53,6 @@ public class GameplayMode extends WorldController implements ContactListener {
     protected ObjectSet<Fixture> sensorFixtures;
     protected Texture jumpTexture;
     private TextureRegion branchCursorTexture;
-    private int starPoints;
-    private float scalex;
-    private float scaley;
     private TextureRegion leafCursorTexture;
     private TextureRegion waterCursorTexture;
     private Cursor branchCursor;
@@ -64,73 +61,23 @@ public class GameplayMode extends WorldController implements ContactListener {
     private PlantController plantController;
     private HazardController hazardController;
     private ResourceController resourceController;
+    private SunController sunController;
     private FilmStrip jumpAnimator;
     private Texture jogTexture;
     private FilmStrip jogAnimator;
     private int sunCollected;
     private int waterCollected;
     private Player player;
-    /**
-     * The font for giving messages to the player
-     */
     private BitmapFont timesFont;
     private TextureRegion background;
     private TextureRegion vignette;
-    /**
-     * Texture asset for character avatar
-     */
     private TextureRegion avatarTexture;
     private Tilemap tilemap;
-    /**
-     * Texture asset for water symbol
-     */
     private Texture waterTexture;
-    /**
-     * Texture asset for the spinning barrier
-     */
-    private TextureRegion barrierTexture;
-    /**
-     * Texture asset for the bullet
-     */
-    private TextureRegion bulletTexture;
-    /**
-     * Texture asset for the bridge plank
-     */
-    private TextureRegion bridgeTexture;
-    /**
-     * Texture asset for a node
-     */
     private Texture nodeTexture;
-    /**
-     * The jump sound.  We only want to play once.
-     */
-    private Sound jumpSound;
-    /**
-     * The weapon fire sound.  We only want to play once.
-     */
-    private Sound fireSound;
-    /**
-     * The weapon pop sound.  We only want to play once.
-     */
-    private Sound plopSound;
-    /**
-     * The default sound volume
-     */
     private float volume;
-    /**
-     * Physics constants for initialization
-     */
     private JsonValue constants;
-    /**
-     * Reference to the character avatar
-     */
     private Player avatar;
-    /**
-     * Reference to the goalDoor (for collision detection)
-     */
-    private BoxObject goalDoor;
-    private boolean fall;
-    private float startHeight;
     private HashMap<Fixture, Filter> originalCollisionProperties;
     private Music backgroundMusic;
     private String lvl;
@@ -180,8 +127,6 @@ public class GameplayMode extends WorldController implements ContactListener {
 
         avatarTexture = new TextureRegion(directory.getEntry("gameplay:player",
                                                              Texture.class));
-        barrierTexture = new TextureRegion(directory.getEntry("gameplay:barrier",
-                                                              Texture.class));
         waterTexture = directory.getEntry("water_nooutline", Texture.class);
         timesFont = directory.getEntry("times", BitmapFont.class);
         background = new TextureRegion(directory.getEntry("gameplay:background",
@@ -198,10 +143,6 @@ public class GameplayMode extends WorldController implements ContactListener {
         jogTexture = directory.getEntry("jog", Texture.class);
         jogAnimator = new FilmStrip(jogTexture, 1, 8, 8);
 
-        //jumpSound = directory.getEntry("platform:jump", Sound.class);
-        //fireSound = directory.getEntry("platform:pew", Sound.class);
-        //plopSound = directory.getEntry("platform:plop", Sound.class);
-
         constants = directory.getEntry("gameplay:constants", JsonValue.class);
         tilemap = new Tilemap(DEFAULT_WIDTH,
                               DEFAULT_HEIGHT,
@@ -209,10 +150,13 @@ public class GameplayMode extends WorldController implements ContactListener {
         tilemap.gatherAssets(directory);
 
         resourceController = new ResourceController(canvas, tilemap);
-        plantController = new PlantController(8,
+        float branchHeight = tilemap.getTileHeight();
+        float plantWidth = branchHeight * (float) Math.sqrt(3) * 4 / 2;
+        float plantXOrigin = bounds.width / 2 - plantWidth / 2;
+        plantController = new PlantController(5,
                                               40,
                                               tilemap.getTileHeight(),
-                                              tilemap.getTileWidth(),
+                                              plantXOrigin,
                                               0,
                                               world,
                                               scale,
@@ -224,9 +168,16 @@ public class GameplayMode extends WorldController implements ContactListener {
                                                 8,
                                                 6,
                                                 tilemap);
+        sunController = new SunController(5,
+                                          10,
+                                          tilemap.getTileWidth() * 1.5f,
+                                          bounds.width -
+                                                  tilemap.getTileWidth() * 1.5f,
+                                          bounds.height);
         plantController.gatherAssets(directory);
         hazardController.gatherAssets(directory);
         resourceController.gatherAssets(directory);
+        sunController.gatherAssets(directory);
         super.gatherAssets(directory);
         backgroundMusic = directory.getEntry("viridian", Music.class);
         backgroundMusic.setLooping(true);
@@ -305,11 +256,15 @@ public class GameplayMode extends WorldController implements ContactListener {
                 ((Water) m).regenerate();
             }
             if (m instanceof Sun) {
-                if (((Sun) m).belowScreen()) {
-                    ((Sun) m).clear();
+                Sun s = (Sun) m;
+                if (s.belowScreen() ||
+                        s.getY() < plantController.getMaxLeafHeight() - 1) {
+                    s.clear();
                 }
             }
         }
+        Sun s = sunController.spawnSuns(dt, tilemap);
+        if (s != null) addObject(s);
         for (Hazard h : hazardController.updateHazards()) {
             addObject(h);
         }
@@ -322,7 +277,7 @@ public class GameplayMode extends WorldController implements ContactListener {
         plantController.propagateDestruction();
         resourceController.update(dt);
         // Check for win condition
-        if ((avatar.getY() >
+        if ((plantController.getMaxLeafHeight() >
                 tilemap.getVictoryHeight() * tilemap.getTileHeight()) &&
                 !isComplete()) {
             setComplete(true);
@@ -513,8 +468,6 @@ public class GameplayMode extends WorldController implements ContactListener {
         }
 
         volume = constants.getFloat("volume", 1.0f);
-        scalex = Gdx.graphics.getWidth() / 1129.412f;
-        scaley = Gdx.graphics.getHeight() / 635.294f;
     }
 
     /**
