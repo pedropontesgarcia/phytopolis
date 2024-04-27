@@ -68,18 +68,26 @@ public class UIController {
                                        11);
         sunStrip = new FilmStrip(directory.getEntry("gameplay:sun_filmstrip",
                                                     Texture.class), 1, 9);
+        sunStrip.setFrame(sunStrip.getSize() - 1);
     }
 
     /**
      * Updates the UIController.
      *
      * @param waterLvl level of water, in percentage between 0 and 1.
-     * @param sunLvl   level of sun, in percentage between 0 and 1.
+//     * @param sunLvl   level of sun, in percentage between 0 and 1.
      */
-    public void update(float dt, float waterLvl, float sunLvl) {
+//    public void update(float dt, float waterLvl, float sunLvl) {
+//        waterdropStrip.setFrame(Math.round(
+//                (waterdropStrip.getSize() - 1) * waterLvl));
+//        sunStrip.setFrame(Math.round((sunStrip.getSize() - 1) * sunLvl));
+//        timer.updateTime(dt);
+//        label.setText(timer.toString());
+//    }
+//
+    public void update(float dt, float waterLvl) {
         waterdropStrip.setFrame(Math.round(
                 (waterdropStrip.getSize() - 1) * waterLvl));
-        sunStrip.setFrame(Math.round((sunStrip.getSize() - 1) * sunLvl));
         timer.updateTime(dt);
         label.setText(timer.toString());
     }
@@ -94,6 +102,10 @@ public class UIController {
 
     public void addTime(float t) {
         timer.addTime(t);
+    }
+
+    public void addTime() {
+        timer.addTime();
     }
 
     public boolean timerDone() { return timer.isOver(); }

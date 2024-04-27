@@ -8,8 +8,11 @@ package com.syndic8.phytopolis;
 import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
+import com.badlogic.gdx.physics.box2d.World;
 import com.syndic8.phytopolis.assets.AssetDirectory;
 import com.syndic8.phytopolis.util.ScreenListener;
+
+import static com.syndic8.phytopolis.WorldController.ExitCode;
 
 /**
  * LibGDX's root class.
@@ -83,12 +86,12 @@ public class GDXRoot extends Game implements ScreenListener {
             levelSelect.setBackgroundMusic(menu.getBackgroundMusic());
             setScreen(levelSelect);
         } else if (screen == levelSelect &&
-                exitCode == LevelSelectMode.ExitCode.EXIT_MAIN_MENU.ordinal()) {
+                exitCode == ExitCode.EXIT_MAIN_MENU.ordinal()) {
             menu.setScreenListener(this);
             menu.setBackgroundMusic(levelSelect.getBackgroundMusic());
             setScreen(menu);
         } else if (screen == levelSelect &&
-                exitCode == LevelSelectMode.ExitCode.EXIT_LEVEL.ordinal()) {
+                exitCode == ExitCode.EXIT_LEVELS.ordinal()) {
             controller.setLevel(levelSelect.getLevel());
             controller.setCanvas(canvas);
             controller.gatherAssets(directory);
@@ -100,27 +103,27 @@ public class GDXRoot extends Game implements ScreenListener {
             levelSelect.reset();
             setScreen(levelSelect);
         } else if (screen == pause &&
-                exitCode == PauseMode.ExitCode.EXIT_RESUME.ordinal()) {
+                exitCode == ExitCode.EXIT_RESUME.ordinal()) {
             controller.setScreenListener(this);
             controller.setPaused(false);
             controller.fadeIn(0.25f);
             setScreen(controller);
         } else if (screen == pause &&
-                exitCode == PauseMode.ExitCode.EXIT_LEVELS.ordinal()) {
+                exitCode == ExitCode.EXIT_LEVELS.ordinal()) {
             controller.setPaused(false);
             levelSelect.reset();
             levelSelect.setScreenListener(this);
             levelSelect.setBackgroundMusic(menu.getBackgroundMusic());
             setScreen(levelSelect);
-        } else if (exitCode == WorldController.ExitCode.EXIT_VICTORY.ordinal()) {
+        } else if (exitCode == ExitCode.EXIT_VICTORY.ordinal()) {
             endLevel(true);
-        } else if (exitCode == WorldController.ExitCode.EXIT_FAILURE.ordinal()) {
+        } else if (exitCode == ExitCode.EXIT_FAILURE.ordinal()) {
             endLevel(false);
-        } else if (exitCode == WorldController.ExitCode.EXIT_PAUSE.ordinal()) {
+        } else if (exitCode == ExitCode.EXIT_PAUSE.ordinal()) {
             pause.setScreenListener(this);
             pause.setCanvas(canvas);
             setScreen(pause);
-        } else if (exitCode == WorldController.ExitCode.EXIT_QUIT.ordinal()) {
+        } else if (exitCode == ExitCode.EXIT_QUIT.ordinal()) {
             Gdx.app.exit();
         }
     }

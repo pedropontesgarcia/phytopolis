@@ -12,6 +12,8 @@ import com.syndic8.phytopolis.util.menu.Menu;
 import com.syndic8.phytopolis.util.menu.MenuContainer;
 import com.syndic8.phytopolis.util.menu.MenuItem;
 
+import static com.syndic8.phytopolis.WorldController.ExitCode;
+
 public class PauseMode extends FadingScreen implements Screen {
 
     private final Rectangle bounds;
@@ -34,21 +36,27 @@ public class PauseMode extends FadingScreen implements Screen {
         ClickListener resumeListener = new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
-                exit = true;
+//                exit = true;
                 exitCode = ExitCode.EXIT_RESUME;
+                fadeOut();
             }
         };
         ClickListener mainMenuListener = new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
-                exit = true;
+//                exit = true;
                 exitCode = ExitCode.EXIT_LEVELS;
+                fadeOut();
             }
         };
         ClickListener exitListener = new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
-                Gdx.app.exit();
+//                Gdx.app.exit();
+//                exit = true;
+                menuContainer.deactivate();
+                exitCode = ExitCode.EXIT_QUIT;
+//                fadeOut();
             }
         };
         menu.addItem(new MenuItem("RESUME",
@@ -149,18 +157,28 @@ public class PauseMode extends FadingScreen implements Screen {
         menuContainer.update(delta);
         InputController.getInstance().readInput(bounds, Vector2.Zero.add(1, 1));
         if (InputController.getInstance().didExit()) {
-            exit = true;
+//            exit = true;
+//            System.out.println("X");
             exitCode = ExitCode.EXIT_RESUME;
+            fadeOut();
+
         }
         if (exit) {
             exit = false;
             ready = true;
-            fadeOut(0.1f);
-            menuContainer.deactivate();
+//            fadeOut(0.1f);
+//            menuContainer.deactivate();
         }
-        if (ready && isFadeDone()) {
+
+        if ((ready && isFadeDone()) || exitCode == ExitCode.EXIT_QUIT) {
+            resetFade();
             listener.exitScreen(this, exitCode.ordinal());
         }
+    }
+
+    public void fadeOut() {
+        super.fadeOut(0.1f);
+        menuContainer.deactivate();
     }
 
     public void draw() {
@@ -173,6 +191,6 @@ public class PauseMode extends FadingScreen implements Screen {
         listener = l;
     }
 
-    public enum ExitCode {EXIT_LEVELS, EXIT_RESUME}
+//    public enum ExitCode {EXIT_LEVELS, EXIT_RESUME}
 
 }

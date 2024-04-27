@@ -15,6 +15,10 @@ public class Timer {
     //     */
     //    public int starTime;
     /**
+     * The time in seconds granted by collecting sun
+     */
+    private float sunTime;
+    /**
      * The time in seconds that this timer has left
      */
     private float time;
@@ -31,7 +35,12 @@ public class Timer {
      * @param initialTime The initial time represented in seconds
      */
     public Timer(float initialTime) {
+        this(initialTime, 10);
+    }
+
+    public Timer(float initialTime, float sunTime) {
         time = initialTime;
+        this.sunTime = sunTime;
     }
 
     /**
@@ -82,6 +91,10 @@ public class Timer {
 
     public void addTime(float t) {
         time += t;
+    }
+
+    public void addTime() {
+        addTime(sunTime);
     }
 
     public String toString() {

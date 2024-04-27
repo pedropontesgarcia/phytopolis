@@ -88,7 +88,6 @@ public class PlantController {
      * how many more frames until the next propagation of destruction
      */
     private int plantCoyoteTimeRemaining = 0;
-    private float maxLeafHeight;
 
     /**
      * Initialize a PlantController with specified height and width
@@ -123,7 +122,6 @@ public class PlantController {
                         ((this.gridSpacing / 2f) * (this.gridSpacing / 2f))));
         this.resourceController = rc;
         tilemap = tm;
-        maxLeafHeight = 0;
         for (int x = 0; x < width; x++) {
             for (int y = 0; y < height; y++) {
                 float yOffset = 0;
@@ -147,7 +145,14 @@ public class PlantController {
     }
 
     public float getMaxLeafHeight() {
-        return maxLeafHeight;
+        for (int y = height - 1; y >= 0; y--) {
+            for (int x = 0; x < width; x++) {
+                if (plantGrid[x][y].hasLeaf()) {
+                    return plantGrid[x][y].getLeaf().getY();
+                }
+            }
+        }
+        return 0;
     }
 
     /**
@@ -343,38 +348,27 @@ public class PlantController {
         return null;
     }
 
-    public Leaf handleLeaf(float x, float y, Leaf.leafType lt) {
-        int xIndex = screenCoordToIndex(x, y)[0];
-        int yIndex = screenCoordToIndex(x, y)[1];
-        if (!inBounds(xIndex, yIndex)) return null;
-        if (plantGrid[xIndex][yIndex].hasLeaf() &&
-                resourceController.canUpgrade()) {
-            return upgradeLeaf(x, y, Leaf.leafType.BOUNCY);
-        } else {
-            return growLeaf(x, y, lt);
-        }
-    }
-
     /**
      * upgrades the leaf at the target node
      *
      * @param x    screen x coord of the target node
      * @param y    screen y coord of the target node
-     * @param type type of branch to upgrade to
+     * @param lt type of Leaf to upgrade to
      * @return the new Leaf object
      */
-    public Leaf upgradeLeaf(float x, float y, Leaf.leafType type) {
+    public Leaf upgradeLeaf(float x, float y, Leaf.leafType lt) {
         int xIndex = screenCoordToIndex(x, y)[0];
         int yIndex = screenCoordToIndex(x, y)[1];
-        boolean lowerNode = xIndex % 2 == 0;
         if (!inBounds(xIndex, yIndex)) return null;
         if (plantGrid[xIndex][yIndex].hasLeaf() &&
+                plantGrid[xIndex][yIndex].getLeafType() != Leaf.leafType.BOUNCY &&
                 resourceController.canUpgrade()) {
-            resourceController.decrementUpgrade();
             plantGrid[xIndex][yIndex].unmakeLeaf();
-            return plantGrid[xIndex][yIndex].makeLeaf(type);
+            resourceController.decrementUpgrade();
+            return plantGrid[xIndex][yIndex].makeLeaf(Leaf.leafType.BOUNCY);
+        } else {
+            return growLeaf(x, y, lt);
         }
-        return null;
     }
 
     /**
@@ -394,12 +388,7 @@ public class PlantController {
         if (!plantGrid[xIndex][yIndex].hasLeaf() &&
                 (yIndex > 0 || !lowerNode) &&
                 resourceController.canGrowLeaf()) {
-            Leaf l = plantGrid[xIndex][yIndex].makeLeaf(type);
-            if (l != null) {
-                float leafHeight = l.getY();
-                maxLeafHeight = (Math.max(leafHeight, maxLeafHeight));
-            }
-            return l;
+            return plantGrid[xIndex][yIndex].makeLeaf(type);
         }
         return null;
     }
@@ -912,18 +901,6 @@ public class PlantController {
          */
         public float getY() {
             return y;
-        }
-
-        public void drawBranches(GameCanvas canvas) {
-            if (left != null) left.draw(canvas);
-            if (right != null) right.draw(canvas);
-            if (middle != null) middle.draw(canvas);
-        }
-
-        public void drawLeaf(GameCanvas canvas) {
-            if (leaf != null && !leaf.isRemoved()) {
-                leaf.draw(canvas);
-            }
         }
 
         public void reset() {

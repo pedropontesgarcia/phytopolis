@@ -24,10 +24,7 @@ import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.JsonValue;
 import com.badlogic.gdx.utils.ObjectSet;
 import com.syndic8.phytopolis.assets.AssetDirectory;
-import com.syndic8.phytopolis.level.HazardController;
-import com.syndic8.phytopolis.level.PlantController;
-import com.syndic8.phytopolis.level.ResourceController;
-import com.syndic8.phytopolis.level.SunController;
+import com.syndic8.phytopolis.level.*;
 import com.syndic8.phytopolis.level.models.*;
 import com.syndic8.phytopolis.util.FilmStrip;
 import com.syndic8.phytopolis.util.Tilemap;
@@ -47,6 +44,7 @@ public class GameplayMode extends WorldController implements ContactListener {
 
     private final Vector2 cameraVector;
     private final Vector2 projMousePosCache;
+    private final InputController ic = InputController.getInstance();
     /**
      * Mark set to handle more sophisticated collision callbacks
      */
@@ -62,6 +60,7 @@ public class GameplayMode extends WorldController implements ContactListener {
     private HazardController hazardController;
     private ResourceController resourceController;
     private SunController sunController;
+    private UIController uiController;
     private FilmStrip jumpAnimator;
     private Texture jogTexture;
     private FilmStrip jogAnimator;
@@ -151,6 +150,7 @@ public class GameplayMode extends WorldController implements ContactListener {
             tilemap.gatherAssets(directory);
 
             resourceController = new ResourceController(canvas, tilemap);
+            uiController = new UIController(canvas, tilemap);
             float branchHeight = tilemap.getTileHeight();
             float plantWidth = branchHeight * (float) Math.sqrt(3) * 4 / 2;
             float plantXOrigin = bounds.width / 2 - plantWidth / 2;
@@ -177,7 +177,7 @@ public class GameplayMode extends WorldController implements ContactListener {
                     bounds.height);
             plantController.gatherAssets(directory);
             hazardController.gatherAssets(directory);
-            resourceController.gatherAssets(directory);
+            uiController.gatherAssets(directory);
             sunController.gatherAssets(directory);
             super.gatherAssets(directory);
             backgroundMusic = directory.getEntry("viridian", Music.class);
@@ -195,7 +195,7 @@ public class GameplayMode extends WorldController implements ContactListener {
         if (!backgroundMusic.isPlaying()) {
             backgroundMusic.play();
         }
-        resourceController.getUIController().startTimer();
+        uiController.startTimer();
     }
 
     /**
@@ -213,7 +213,7 @@ public class GameplayMode extends WorldController implements ContactListener {
             return false;
         }
 
-        if (!isFailure() && resourceController.getUIController().timerDone()) {
+        if (!isFailure() && uiController.timerDone()) {
             setFailure(true);
             fadeOut(1.5f);
             return false;
@@ -233,15 +233,15 @@ public class GameplayMode extends WorldController implements ContactListener {
      * @param dt Number of seconds since last animation frame
      */
     public void update(float dt) {
+
         backgroundMusic.setVolume(super.getVolume());
         // Process actions in object model
-        avatar.setMovement(InputController.getInstance().getHorizontal() *
-                                   avatar.getForce());
-        avatar.setJumping(InputController.getInstance().didPrimary());
+        avatar.setMovement(ic.getHorizontal() * avatar.getForce());
+        avatar.setJumping(ic.didPrimary());
         processPlantGrowth();
 
         avatar.applyForce();
-        InputController ic = InputController.getInstance();
+
         if (ic.didScrollReset()) {
             ic.resetScrolled();
         }
@@ -277,7 +277,7 @@ public class GameplayMode extends WorldController implements ContactListener {
             hazardController.extinguishFire(unprojMousePos);
         }
         plantController.propagateDestruction();
-        resourceController.update(dt);
+        uiController.update(dt, resourceController.getCurrRatio());
         // Check for win condition
         if ((plantController.getMaxLeafHeight() >
                 tilemap.getVictoryHeight() * tilemap.getTileHeight()) &&
@@ -293,17 +293,16 @@ public class GameplayMode extends WorldController implements ContactListener {
      */
     public void processPlantGrowth() {
         // get mouse position
-        InputController ic = InputController.getInstance();
         projMousePosCache.set(ic.getMouseX(), ic.getMouseY());
         Vector2 unprojMousePos = canvas.unproject(projMousePosCache);
 
-        if (InputController.getInstance().didMousePress()) {
+        if (ic.didMousePress()) {
             // process leaf stuff
-            if (InputController.getInstance().didSpecial()) {
+            if (ic.didSpecial()) {
                 // don't grow if there's a fire there (prioritize fire)
                 if (!hazardController.hasFire(unprojMousePos)) {
                     Leaf.leafType lt = Leaf.leafType.NORMAL;
-                    Model newLeaf = plantController.handleLeaf(unprojMousePos.x,
+                    Model newLeaf = plantController.upgradeLeaf(unprojMousePos.x,
                                                                unprojMousePos.y +
                                                                        0.5f *
                                                                                tilemap.getTileHeight(),
@@ -342,7 +341,6 @@ public class GameplayMode extends WorldController implements ContactListener {
 
         super.draw(dt);
 
-        InputController ic = InputController.getInstance();
         if (!ic.didSpecial()) {
             projMousePosCache.set(ic.getMouseX(), ic.getMouseY());
             Vector2 unprojMousePos = canvas.unproject(projMousePosCache);
@@ -357,7 +355,7 @@ public class GameplayMode extends WorldController implements ContactListener {
 
         canvas.beginHud();
         hazardController.drawWarning(canvas, cameraVector);
-        resourceController.drawUI(canvas);
+        uiController.draw(canvas);
         canvas.endHud();
         super.draw(canvas);
     }
@@ -381,7 +379,7 @@ public class GameplayMode extends WorldController implements ContactListener {
         backgroundMusic.stop();
         backgroundMusic.play();
 
-        InputController.getInstance().resetScrolled();
+        ic.resetScrolled();
 
         resourceController.reset();
         plantController.reset();
@@ -490,7 +488,7 @@ public class GameplayMode extends WorldController implements ContactListener {
         // Useless if called in outside animation loop
         super.hide();
         backgroundMusic.pause();
-        resourceController.getUIController().pauseTimer();
+        uiController.pauseTimer();
     }
 
     private void drawBackground() {
@@ -519,10 +517,9 @@ public class GameplayMode extends WorldController implements ContactListener {
      */
     public void updateCursor() {
         Gdx.graphics.setCursor(branchCursor);
-        if (InputController.getInstance().didSpecial()) {
+        if (ic.didSpecial()) {
             Gdx.graphics.setCursor(leafCursor);
         }
-        InputController ic = InputController.getInstance();
         projMousePosCache.set(ic.getMouseX(), ic.getMouseY());
         Vector2 unprojMousePos = canvas.unproject(projMousePosCache);
         if (hazardController.hasFire(unprojMousePos)) {
@@ -758,7 +755,7 @@ public class GameplayMode extends WorldController implements ContactListener {
             }
             contact.setEnabled(false);
             s.clear();
-            resourceController.pickupSun();
+            uiController.addTime();
         }
         if (isCollisionBetweenPlayerAndWater) {
             Water w;
@@ -786,7 +783,7 @@ public class GameplayMode extends WorldController implements ContactListener {
                         fix1.getBody().getPosition().y;
         if (isCollisionBetweenPlayerAndLeaf &&
                 (isPlayerGoingUp || isPlayerBelow ||
-                        InputController.getInstance().didDrop())) {
+                        ic.didDrop())) {
             contact.setEnabled(false);
         }
         if (isCollisionBetweenPlayerAndNoTopTile && isPlayerGoingDown) {

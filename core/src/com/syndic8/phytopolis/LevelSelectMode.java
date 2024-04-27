@@ -18,6 +18,7 @@ import com.syndic8.phytopolis.util.menu.Menu;
 import com.syndic8.phytopolis.util.menu.MenuContainer;
 import com.syndic8.phytopolis.util.menu.MenuItem;
 import edu.cornell.gdiac.audio.AudioEngine;
+import static com.syndic8.phytopolis.WorldController.ExitCode;
 
 public class LevelSelectMode extends FadingScreen implements Screen {
 
@@ -98,10 +99,12 @@ public class LevelSelectMode extends FadingScreen implements Screen {
                     Texture.class), 1, 4);
             lighting = directory.getEntry("lvlsel:lighting", Texture.class);
             rs = directory.getEntry("lvlsel:redsquare", Texture.class);
-            fadeIn(0.5f);
-            ready = false;
             gathered = true;
         }
+        fadeIn(0.5f);
+        ready = false;
+
+
         //        backgroundMusic = directory.getEntry("newgrowth", Music.class);
         //        backgroundMusic.setLooping(true);
         //        backgroundMusic.play();
@@ -152,13 +155,13 @@ public class LevelSelectMode extends FadingScreen implements Screen {
         }
         InputController.getInstance().readInput(bounds, Vector2.Zero.add(1, 1));
         if (getSelectedPot() != -1 &&
-                InputController.getInstance().didMousePress()) {
+                InputController.getInstance().didMousePress() && !ready) {
             setLevel();
             fadeOut(1);
             ready = true;
-            exitCode = ExitCode.EXIT_LEVEL;
+            exitCode = ExitCode.EXIT_LEVELS;
         }
-        if (ready && exitCode == ExitCode.EXIT_LEVEL)
+        if (ready && exitCode == ExitCode.EXIT_LEVELS)
             backgroundMusic.setVolume(super.getVolume());
     }
 
@@ -226,7 +229,7 @@ public class LevelSelectMode extends FadingScreen implements Screen {
     public void hide() {
         active = false;
         menuContainer.deactivate();
-        if (exitCode == ExitCode.EXIT_LEVEL) backgroundMusic.stop();
+        if (exitCode == ExitCode.EXIT_LEVELS) backgroundMusic.stop();
     }
 
     @Override
@@ -247,6 +250,5 @@ public class LevelSelectMode extends FadingScreen implements Screen {
         return level;
     }
 
-    public enum ExitCode {EXIT_MAIN_MENU, EXIT_LEVEL}
 
 }

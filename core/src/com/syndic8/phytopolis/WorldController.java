@@ -393,6 +393,7 @@ public abstract class WorldController extends FadingScreen implements Screen {
         // Now it is time to maybe switch screens.
         if (input.didExit() && !isPaused() && isFadeDone()) {
             pause();
+            setPaused(true);
             fadeOut(0.25f);
             return true;
         } else if (input.didAdvance()) {
@@ -614,7 +615,7 @@ public abstract class WorldController extends FadingScreen implements Screen {
     }
 
     public enum ExitCode {
-        EXIT_QUIT, EXIT_NEXT, EXIT_PREV, EXIT_VICTORY, EXIT_PAUSE, EXIT_FAILURE
+        EXIT_QUIT, EXIT_NEXT, EXIT_PREV, EXIT_VICTORY, EXIT_PAUSE, EXIT_FAILURE, EXIT_LEVELS, EXIT_RESUME, EXIT_MAIN_MENU
     }
 
 }

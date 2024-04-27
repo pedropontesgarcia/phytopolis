@@ -27,16 +27,12 @@ public class ResourceController {
      */
     private final int FIRE_AMT = 20;
     /**
-     * Amount of sun required for an upgrade
+     * Amount of water required for an upgrade, IN TOTAL
      */
-    private final int UPGRADE_AMT = 1;
+    private final int UPGRADE_AMT = 50;
     private final int SUN_ON_PICKUP = 1;
     private final int WATER_ON_PICKUP = 50;
 
-    /**
-     * Controller for UI.
-     */
-    private final UIController ui;
     /**
      * Current amount of sun stored
      */
@@ -49,16 +45,13 @@ public class ResourceController {
     public ResourceController(GameCanvas c, Tilemap tm) {
         currWater = MAX_WATER;
         currSun = STARTING_SUN;
-        ui = new UIController(c, tm);
-    }
-
-    public void gatherAssets(AssetDirectory directory) {
-        ui.gatherAssets(directory);
     }
 
     public int getCurrWater() {
         return currWater;
     }
+
+    public float getCurrRatio() { return (float) currWater / MAX_WATER; }
 
     public void pickupWater() {
         currWater = Math.min(MAX_WATER, currWater + WATER_ON_PICKUP);
@@ -68,14 +61,14 @@ public class ResourceController {
         return currSun;
     }
 
-    public void pickupSun() {
-        currSun = Math.min(MAX_SUN, currSun + SUN_ON_PICKUP);
-        addTime(10);
-    }
-
-    public void addTime(float t) {
-        ui.addTime(t);
-    }
+//    public void pickupSun() {
+//        currSun = Math.min(MAX_SUN, currSun + SUN_ON_PICKUP);
+//        addTime(10);
+//    }
+//
+//    public void addTime(float t) {
+//        ui.addTime(t);
+//    }
 
     public boolean fullWater() {
         return currWater == MAX_WATER;
@@ -116,15 +109,13 @@ public class ResourceController {
     }
 
     public void decrementUpgrade() {
-        if (!canUpgrade()) {
-
-        } else {
-            currSun -= UPGRADE_AMT;
+        if (canUpgrade()) {
+            currWater -= UPGRADE_AMT - LEAF_GROW_AMT;
         }
     }
 
     public boolean canUpgrade() {
-        return currSun >= UPGRADE_AMT;
+        return currWater >= UPGRADE_AMT;
     }
 
     public void reset() {
@@ -132,17 +123,9 @@ public class ResourceController {
         currSun = STARTING_SUN;
     }
 
-    public void update(float dt) {
-        ui.update(dt, (float) currWater / MAX_WATER, (float) currSun / MAX_SUN);
-
-    }
-
-    public void drawUI(GameCanvas c) {
-        ui.draw(c);
-    }
-
-    public UIController getUIController() {
-        return ui;
-    }
+//    public void update(float dt) {
+//        ui.update(dt, (float) currWater / MAX_WATER, (float) currSun / MAX_SUN);
+//
+//    }
 
 }

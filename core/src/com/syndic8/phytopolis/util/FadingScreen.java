@@ -77,6 +77,8 @@ public abstract class FadingScreen {
         return done;
     }
 
+    protected void resetFade() { done = false; }
+
     public Fade getFadeState() {
         return fadeState;
     }
