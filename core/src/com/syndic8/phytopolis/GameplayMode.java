@@ -302,7 +302,7 @@ public class GameplayMode extends WorldController implements ContactListener {
                 // don't grow if there's a fire there (prioritize fire)
                 if (!hazardController.hasFire(unprojMousePos)) {
                     Leaf.leafType lt = Leaf.leafType.NORMAL;
-                    Model newLeaf = plantController.upgradeLeaf(unprojMousePos.x,
+                    Model newLeaf = plantController.makeLeaf(unprojMousePos.x,
                                                                unprojMousePos.y +
                                                                        0.5f *
                                                                                tilemap.getTileHeight(),

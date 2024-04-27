@@ -88,6 +88,7 @@ public class PlantController {
      * how many more frames until the next propagation of destruction
      */
     private int plantCoyoteTimeRemaining = 0;
+    private Vector2 maxLeafIndex;
 
     /**
      * Initialize a PlantController with specified height and width
@@ -116,6 +117,7 @@ public class PlantController {
         this.yOrigin = yOrigin * worldToPixelConversionRatio;
         this.width = width;
         this.height = height;
+        maxLeafIndex = new Vector2(-1, -1);
         this.gridSpacing = gridSpacing * worldToPixelConversionRatio;
         this.xSpacing = (float) (Math.sqrt(
                 (this.gridSpacing * this.gridSpacing) -
@@ -145,14 +147,36 @@ public class PlantController {
     }
 
     public float getMaxLeafHeight() {
+        if (getMaxLeafXIndex() != -1) {
+            return plantGrid[getMaxLeafXIndex()][getMaxLeafYIndex()].getLeaf().getY();
+        }
+        return 0;
+    }
+
+    public void calculateMaxLeafIndex() {
         for (int y = height - 1; y >= 0; y--) {
-            for (int x = 0; x < width; x++) {
+            for (int x = 1; x < width; x += 2) {
                 if (plantGrid[x][y].hasLeaf()) {
-                    return plantGrid[x][y].getLeaf().getY();
+                    maxLeafIndex.set(x, y);
+                    return;
+                }
+            }
+            for (int x = 0; x < width; x += 2) {
+                if (plantGrid[x][y].hasLeaf()) {
+                    maxLeafIndex.set(x, y);
+                    return;
                 }
             }
         }
-        return 0;
+        maxLeafIndex.set(-1, -1);
+    }
+
+    public int getMaxLeafXIndex() {
+        return (int) maxLeafIndex.x;
+    }
+
+    public int getMaxLeafYIndex() {
+        return (int) maxLeafIndex.y;
     }
 
     /**
@@ -349,23 +373,28 @@ public class PlantController {
     }
 
     /**
-     * upgrades the leaf at the target node
+     * upgrades the leaf at the target node if there is already one; otherwise makes a normal leaf
      *
      * @param x    screen x coord of the target node
      * @param y    screen y coord of the target node
      * @param lt type of Leaf to upgrade to
      * @return the new Leaf object
      */
-    public Leaf upgradeLeaf(float x, float y, Leaf.leafType lt) {
+    public Leaf makeLeaf(float x, float y, Leaf.leafType lt) {
         int xIndex = screenCoordToIndex(x, y)[0];
         int yIndex = screenCoordToIndex(x, y)[1];
+        System.out.println(xIndex + " " + yIndex);
         if (!inBounds(xIndex, yIndex)) return null;
         if (plantGrid[xIndex][yIndex].hasLeaf() &&
                 plantGrid[xIndex][yIndex].getLeafType() != Leaf.leafType.BOUNCY &&
                 resourceController.canUpgrade()) {
             plantGrid[xIndex][yIndex].unmakeLeaf();
             resourceController.decrementUpgrade();
-            return plantGrid[xIndex][yIndex].makeLeaf(Leaf.leafType.BOUNCY);
+            Leaf l = plantGrid[xIndex][yIndex].makeLeaf(Leaf.leafType.BOUNCY);
+            if (l != null && l.getY() > getMaxLeafHeight()) {
+                maxLeafIndex.set(xIndex, yIndex);
+            }
+            return l;
         } else {
             return growLeaf(x, y, lt);
         }
@@ -388,7 +417,11 @@ public class PlantController {
         if (!plantGrid[xIndex][yIndex].hasLeaf() &&
                 (yIndex > 0 || !lowerNode) &&
                 resourceController.canGrowLeaf()) {
-            return plantGrid[xIndex][yIndex].makeLeaf(type);
+            Leaf l = plantGrid[xIndex][yIndex].makeLeaf(type);
+            if (l != null && l.getY() > getMaxLeafHeight()) {
+                maxLeafIndex.set(xIndex, yIndex);
+            }
+            return l;
         }
         return null;
     }
@@ -475,6 +508,7 @@ public class PlantController {
             nodeToDestroy.unmakeBranch(branchDirection.RIGHT);
         else nodeToDestroy.setBranchType(branchDirection.RIGHT,
                                          Branch.branchType.NORMAL);
+        calculateMaxLeafIndex();
         plantCoyoteTimeRemaining = plantCoyoteTime;
         destructionQueue.addLast(new int[]{xArg, yArg});
     }
