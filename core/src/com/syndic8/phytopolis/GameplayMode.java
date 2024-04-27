@@ -238,7 +238,6 @@ public class GameplayMode extends WorldController implements ContactListener {
         processPlantGrowth();
 
         avatar.applyForce();
-        avatar.setBouncy(false);
         InputController ic = InputController.getInstance();
         if (ic.didScrollReset()) {
             ic.resetScrolled();
@@ -458,7 +457,6 @@ public class GameplayMode extends WorldController implements ContactListener {
         avatar.setTexture(avatarTexture);
         avatar.setName("dude");
         addObject(avatar);
-        setPlayer(avatar);
 
         originalCollisionProperties = new HashMap<>();
 
@@ -612,9 +610,16 @@ public class GameplayMode extends WorldController implements ContactListener {
                                     bd2.getType() ==
                                             Model.ModelType.TILE_FULL)) {
                 avatar.setGrounded(true);
-                sensorFixtures.add(avatar == bd1 ?
-                                           fix2 :
-                                           fix1); // Could have more than one ground
+                sensorFixtures.add(avatar == bd1 ? fix2 : fix1); // Could have more than one ground
+            }
+            if ((avatar.getSensorName().equals(fd2) && avatar != bd1 &&
+                    bd1.getType() == Model.ModelType.LEAF) ||
+                    (avatar.getSensorName().equals(fd1) && avatar != bd2 &&
+                        bd2.getType() == Model.ModelType.LEAF)) {
+                Leaf l = (Leaf) (avatar == bd1 ? bd2 : bd1);
+                if (l.getLeafType() == Leaf.leafType.BOUNCY) {
+                    avatar.setBouncy(true);
+                }
             }
 
         } catch (Exception e) {
@@ -651,14 +656,24 @@ public class GameplayMode extends WorldController implements ContactListener {
                 avatar.setGrounded(false);
             }
         }
+        try {
+            if (((Model) bd1).getType() == Model.ModelType.LEAF ||
+                    ((Model) bd2).getType() == Model.ModelType.LEAF) {
+                Leaf l = (Leaf) (avatar == bd1 ? bd2 : bd1);
+                if (l.getLeafType() == Leaf.leafType.BOUNCY) {
+                    avatar.setBouncy(false);
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
     }
 
     /**
      * Unused ContactListener method
      */
     public void preSolve(Contact contact, Manifold oldManifold) {
-        sunCollected = 0;
-        waterCollected = 0;
         Fixture fix1 = contact.getFixtureA();
         Fixture fix2 = contact.getFixtureB();
         boolean isCollisionBetweenPlayerAndLeaf =
@@ -781,14 +796,14 @@ public class GameplayMode extends WorldController implements ContactListener {
         if (isCollisionBetweenPlayerAndNoTopTile && isPlayerGoingDown) {
             contact.setEnabled(false);
         }
-        if (isCollisionBetweenPlayerAndLeaf) {
-            Leaf l;
-            if (fix1.getBody() == avatar.getBody())
-                l = (Leaf) fix2.getBody().getUserData();
-            else l = (Leaf) fix1.getBody().getUserData();
-            if (l.getLeafType() == Leaf.leafType.BOUNCY &&
-                    avatar.getY() > l.getY()) avatar.setBouncy(true);
-        }
+//        if (isCollisionBetweenPlayerAndLeaf) {
+//            Leaf l;
+//            if (fix1.getBody() == avatar.getBody())
+//                l = (Leaf) fix2.getBody().getUserData();
+//            else l = (Leaf) fix1.getBody().getUserData();
+//            if (l.getLeafType() == Leaf.leafType.BOUNCY &&
+//                    avatar.getY() > l.getY()) avatar.setBouncy(true);
+//        }
     }
 
     /**

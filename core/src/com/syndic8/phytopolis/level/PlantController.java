@@ -719,10 +719,6 @@ public class PlantController {
          * the leaf for this node
          */
         private Leaf leaf;
-        /**
-         * if a leaf exists at this node
-         */
-        private boolean leafExists = false;
 
         /**
          * initialize a new PlantNode object
@@ -791,7 +787,7 @@ public class PlantController {
         public Leaf makeLeaf(Leaf.leafType type) {
             if (screenCoordToIndex(x / worldToPixelConversionRatio,
                                    y / worldToPixelConversionRatio)[1] > 0 &&
-                    !leafExists && hasBranch() ||
+                    !hasLeaf() && hasBranch() ||
                     leafGrowableAt(x / worldToPixelConversionRatio,
                                    y / worldToPixelConversionRatio)) {
                 leaf = new Leaf(x / worldToPixelConversionRatio,
@@ -868,7 +864,6 @@ public class PlantController {
         }
 
         public void unmakeLeaf() {
-            leafExists = false;
             if (leaf != null) {
                 leaf.markRemoved(true);
                 leaf = null;
@@ -941,7 +936,11 @@ public class PlantController {
             middle = null;
             left = null;
             right = null;
-            leafExists = false;
+            leaf = null;
+        }
+
+        public boolean hasLeaf() {
+            return leaf != null;
         }
 
         /**
