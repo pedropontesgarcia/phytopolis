@@ -107,6 +107,12 @@ public class GDXRoot extends Game implements ScreenListener {
             controller.setPaused(false);
             controller.fadeIn(0.25f);
             setScreen(controller);
+        } else if (screen == pause && exitCode == EXIT_RESET.ordinal()) {
+            controller.reset();
+            controller.setScreenListener(this);
+            controller.setPaused(false);
+            controller.fadeIn(0.5f);
+            setScreen(controller);
         } else if (screen == pause && exitCode == EXIT_LEVELS.ordinal()) {
             controller.setPaused(false);
             levelSelect.reset();
@@ -144,6 +150,7 @@ public class GDXRoot extends Game implements ScreenListener {
         EXIT_FAILURE,
         EXIT_LEVELS,
         EXIT_RESUME,
+        EXIT_RESET,
         EXIT_MAIN_MENU
     }
 

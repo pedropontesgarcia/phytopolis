@@ -74,10 +74,10 @@ public abstract class FadingScreen {
     }
 
     protected boolean isFadeDone() {
-        return done;
+        boolean doneState = done;
+        if (done) done = false;
+        return doneState;
     }
-
-    protected void resetFade() { done = false; }
 
     public Fade getFadeState() {
         return fadeState;

@@ -29,14 +29,21 @@ public class PauseMode extends FadingScreen implements Screen {
         ready = false;
         bounds = new Rectangle(0, 0, 16, 9);
         canvas = c;
-        Menu menu = new Menu(4, 0.15f);
+        Menu menu = new Menu(5, 0.15f);
         Menu submenu = new Menu(2, 0.15f);
         menuContainer = new MenuContainer(menu, c);
         ClickListener resumeListener = new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
-                //                exit = true;
                 exitCode = ExitCode.EXIT_RESUME;
+                exit = true;
+                fadeOut();
+            }
+        };
+        ClickListener resetListener = new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                exitCode = ExitCode.EXIT_RESET;
                 exit = true;
                 fadeOut();
             }
@@ -44,21 +51,16 @@ public class PauseMode extends FadingScreen implements Screen {
         ClickListener mainMenuListener = new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
-                //                exit = true;
                 exitCode = ExitCode.EXIT_LEVELS;
                 exit = true;
-                fadeOut();
+                fadeOut(0.5f);
             }
         };
         ClickListener exitListener = new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
-                //                Gdx.app.exit();
-                //                exit = true;
-                menuContainer.deactivate();
                 exit = true;
                 exitCode = ExitCode.EXIT_QUIT;
-                //                fadeOut();
             }
         };
         menu.addItem(new MenuItem("RESUME",
@@ -75,16 +77,23 @@ public class PauseMode extends FadingScreen implements Screen {
                                   submenu,
                                   menuContainer,
                                   canvas));
-        menu.addItem(new MenuItem("EXIT TO LEVELS",
+        menu.addItem(new MenuItem("RESET LEVEL",
                                   menu.getSeparation(),
                                   2,
+                                  menu.getLength(),
+                                  resetListener,
+                                  menuContainer,
+                                  canvas));
+        menu.addItem(new MenuItem("EXIT TO LEVELS",
+                                  menu.getSeparation(),
+                                  3,
                                   menu.getLength(),
                                   mainMenuListener,
                                   menuContainer,
                                   canvas));
         menu.addItem(new MenuItem("QUIT",
                                   menu.getSeparation(),
-                                  3,
+                                  4,
                                   menu.getLength(),
                                   exitListener,
                                   menuContainer,
@@ -165,7 +174,6 @@ public class PauseMode extends FadingScreen implements Screen {
         InputController.getInstance().readInput(bounds, Vector2.Zero.add(1, 1));
         if (InputController.getInstance().didExit()) {
             //            exit = true;
-            //            System.out.println("X");
             exitCode = ExitCode.EXIT_RESUME;
             fadeOut();
 
@@ -173,12 +181,10 @@ public class PauseMode extends FadingScreen implements Screen {
         if (exit) {
             exit = false;
             ready = true;
-            //            fadeOut(0.1f);
-            //            menuContainer.deactivate();
+            menuContainer.deactivate();
         }
 
         if ((ready && isFadeDone())) {
-            resetFade();
             listener.exitScreen(this, exitCode.ordinal());
         }
     }
