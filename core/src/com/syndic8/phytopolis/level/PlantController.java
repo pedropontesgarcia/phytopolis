@@ -805,11 +805,14 @@ public class PlantController {
                         leaf.setTexture(bouncyLeafTexture);
                         break;
                 }
-                leafExists = true;
                 resourceController.decrementGrowLeaf();
                 return leaf;
             }
             return null;
+        }
+
+        public boolean hasLeaf() {
+            return leaf != null;
         }
 
         public boolean hasBranch() {
@@ -939,10 +942,6 @@ public class PlantController {
             leaf = null;
         }
 
-        public boolean hasLeaf() {
-            return leaf != null;
-        }
-
         /**
          * returns whether this branch is empty or not
          *
@@ -952,10 +951,6 @@ public class PlantController {
             return !(hasBranchInDirection(branchDirection.LEFT) ||
                     hasBranchInDirection(branchDirection.RIGHT) ||
                     hasBranchInDirection(branchDirection.MIDDLE) || hasLeaf());
-        }
-
-        public boolean hasLeaf() {
-            return leafExists;
         }
 
         /**
