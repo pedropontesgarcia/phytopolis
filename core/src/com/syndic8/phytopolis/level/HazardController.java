@@ -30,6 +30,10 @@ public class HazardController {
      */
     private final int droneFrequency;
     /**
+     * The frequency at which bugs are generated
+     */
+    private final int bugFrequency;
+    /**
      * Random number generator for various hazard generation.
      */
     private final Random random = new Random();
@@ -50,13 +54,17 @@ public class HazardController {
      */
     private final int width;
     /**
-     * The duration that a fire continues to burn in seconds.
+     * The duration that a fire continues to burn in seconds. (fire duration)
      */
     private final int burnTime;
     /**
-     * The time until drone explodes after it spawns in seconds.
+     * The time until drone explodes after it spawns in seconds. (drone duration)
      */
     private final int explodeTime;
+    /**
+     * The time it takes a bug to eat a leaf (bug duration)
+     */
+    private final int eatTime;
     /**
      * Update timer for hazards
      */
@@ -73,6 +81,10 @@ public class HazardController {
      * Texture for drone hazard.
      */
     protected Texture droneTexture;
+    /**
+     * Texture for bug hazard
+     */
+    protected Texture bugTexture;
     /**
      * Texture for yellow warning indicator.
      */
@@ -104,7 +116,7 @@ public class HazardController {
      * @param plantController The PlantController instance associated with this HazardController.
      */
     public HazardController(PlantController plantController, Tilemap tm) {
-        this(plantController, 300, 300, 100, 100, tm);
+        this(plantController, 8, 100000000, 6, 8, 6, 6, tm);
     }
 
     /**
@@ -118,15 +130,19 @@ public class HazardController {
     public HazardController(PlantController plantController,
                             int fireFrequency,
                             int droneFrequency,
+                            int bugFrequency,
                             int burnTime,
                             int explodeTime,
+                            int eatTime,
                             Tilemap tm) {
         this.fireFrequency = fireFrequency;
         this.droneFrequency = droneFrequency;
+        this.bugFrequency = bugFrequency;
         this.plantController = plantController;
         this.resourceController = plantController.getResourceController();
         this.burnTime = burnTime;
         this.explodeTime = explodeTime;
+        this.eatTime = eatTime;
         hazards = new ArrayList<>();
         height = plantController.getHeight();
         width = plantController.getWidth();
@@ -264,8 +280,8 @@ public class HazardController {
         long currentTime = System.currentTimeMillis();
         if (currentTime - lastUpdateTime >= 1000) { // Check if one second has passed
             lastUpdateTime = currentTime; // Reset the last update time
-            list.add(generateHazard(Model.ModelType.FIRE));
-            list.add(generateHazard(Model.ModelType.DRONE));
+            list.add(generateFire());
+            list.add(generateDrone());
             int i = 0;
             while (i < hazards.size()) {
                 Hazard h = hazards.get(i);
@@ -396,6 +412,7 @@ public class HazardController {
     public void gatherAssets(AssetDirectory directory) {
         this.fireTexture = directory.getEntry("hazards:fire", Texture.class);
         this.droneTexture = directory.getEntry("hazards:drone", Texture.class);
+//        this.bugTexture = directory.getEntry("hazards:bug", Texture.class);
         this.redWarningTexture = new TextureRegion(directory.getEntry("hazards:red-warning", Texture.class));
         this.yellowWarningTexture = new TextureRegion(directory.getEntry("hazards:yellow-warning", Texture.class));
         this.arrowDownTexture = new TextureRegion(directory.getEntry("hazards:arrow-down", Texture.class));

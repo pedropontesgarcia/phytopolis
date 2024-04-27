@@ -97,6 +97,8 @@ public class Timer {
         addTime(sunTime);
     }
 
+    public void eatTime(float t) { addTime(-t); }
+
     public String toString() {
         return String.format("%02d:%02d", getMinutes(), getSeconds());
     }

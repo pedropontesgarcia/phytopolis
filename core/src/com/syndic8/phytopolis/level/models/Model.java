@@ -207,7 +207,11 @@ public abstract class Model {
         /**
          * Tile without a top
          */
-        TILE_NOTOP
+        TILE_NOTOP,
+        /**
+         * Bug hazard
+         */
+        BUG
     }
 
 }

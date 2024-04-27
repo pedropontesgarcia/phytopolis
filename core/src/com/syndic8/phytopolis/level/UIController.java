@@ -108,6 +108,10 @@ public class UIController {
         timer.addTime();
     }
 
+    public void eatTime(float t) {
+        timer.eatTime(t);
+    }
+
     public boolean timerDone() { return timer.isOver(); }
 
     /**

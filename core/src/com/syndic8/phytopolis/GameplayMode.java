@@ -166,7 +166,9 @@ public class GameplayMode extends WorldController implements ContactListener {
             hazardController = new HazardController(plantController,
                     (int) tilemap.getFireRate(),
                     1000000000,
+                    6,
                     8,
+                    6,
                     6,
                     tilemap);
             sunController = new SunController(5,
