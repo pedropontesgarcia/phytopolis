@@ -40,6 +40,7 @@ public class LevelSelectMode extends FadingScreen implements Screen {
     private FilmStrip background;
     private Texture lighting;
     private boolean ready;
+    private boolean gathered;
     private Music backgroundMusic;
     private AudioEngine audioEngine;
     private Texture rs;
@@ -56,6 +57,7 @@ public class LevelSelectMode extends FadingScreen implements Screen {
         levelBoxes = new LevelBox[numLevels];
         projMousePosCache = new Vector2();
         createMenu();
+        gathered = false;
     }
 
     private void createMenu() {
@@ -91,12 +93,15 @@ public class LevelSelectMode extends FadingScreen implements Screen {
     }
 
     public void gatherAssets(AssetDirectory directory) {
-        background = new FilmStrip(directory.getEntry("lvlsel:background",
-                                                      Texture.class), 1, 4);
-        lighting = directory.getEntry("lvlsel:lighting", Texture.class);
-        rs = directory.getEntry("lvlsel:redsquare", Texture.class);
-        fadeIn(0.5f);
-        ready = false;
+        if (!gathered) {
+            background = new FilmStrip(directory.getEntry("lvlsel:background",
+                    Texture.class), 1, 4);
+            lighting = directory.getEntry("lvlsel:lighting", Texture.class);
+            rs = directory.getEntry("lvlsel:redsquare", Texture.class);
+            fadeIn(0.5f);
+            ready = false;
+            gathered = true;
+        }
         //        backgroundMusic = directory.getEntry("newgrowth", Music.class);
         //        backgroundMusic.setLooping(true);
         //        backgroundMusic.play();

@@ -125,10 +125,6 @@ public abstract class WorldController extends FadingScreen implements Screen {
      * Whether or not debug mode is active
      */
     private boolean debug;
-    /**
-     * Countdown active for winning or losing
-     */
-    private int countdown;
     private boolean paused;
 
     /**
@@ -167,7 +163,6 @@ public abstract class WorldController extends FadingScreen implements Screen {
         failed = false;
         debug = false;
         active = false;
-        countdown = -1;
         paused = false;
     }
 
@@ -232,9 +227,6 @@ public abstract class WorldController extends FadingScreen implements Screen {
      * @param value whether the level is failed.
      */
     public void setFailure(boolean value) {
-        if (value) {
-            countdown = EXIT_COUNT;
-        }
         failed = value;
     }
 
@@ -401,7 +393,6 @@ public abstract class WorldController extends FadingScreen implements Screen {
         // Now it is time to maybe switch screens.
         if (input.didExit() && !isPaused() && isFadeDone()) {
             pause();
-            setPaused(true);
             fadeOut(0.25f);
             return true;
         } else if (input.didAdvance()) {
@@ -412,16 +403,19 @@ public abstract class WorldController extends FadingScreen implements Screen {
             pause();
             listener.exitScreen(this, ExitCode.EXIT_PREV.ordinal());
             return false;
-        } else if (failed) {
-            reset();
-        } else if (isPaused() && isFadeDone()) {
-            listener.exitScreen(this, ExitCode.EXIT_PAUSE.ordinal());
-            return false;
         } else if (isComplete() && isFadeDone()) {
             pause();
             listener.exitScreen(this, ExitCode.EXIT_VICTORY.ordinal());
             return false;
-
+        } else if (isFailure() && isFadeDone()) {
+//            reset();
+            pause();
+            listener.exitScreen(this, ExitCode.EXIT_FAILURE.ordinal());
+            return false;
+        } else if (isPaused() && isFadeDone()) {
+            pause();
+            listener.exitScreen(this, ExitCode.EXIT_PAUSE.ordinal());
+            return false;
         }
         return true;
     }
@@ -620,7 +614,7 @@ public abstract class WorldController extends FadingScreen implements Screen {
     }
 
     public enum ExitCode {
-        EXIT_QUIT, EXIT_NEXT, EXIT_PREV, EXIT_VICTORY, EXIT_PAUSE
+        EXIT_QUIT, EXIT_NEXT, EXIT_PREV, EXIT_VICTORY, EXIT_PAUSE, EXIT_FAILURE
     }
 
 }

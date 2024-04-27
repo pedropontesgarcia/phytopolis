@@ -29,7 +29,7 @@ public class GDXRoot extends Game implements ScreenListener {
      */
     private MainMenuMode menu;
     private LevelSelectMode levelSelect;
-    private VictoryMode victory;
+    private LevelOverMode levelOver;
     private PauseMode pause;
     private GameplayMode controller;
 
@@ -42,7 +42,7 @@ public class GDXRoot extends Game implements ScreenListener {
         menu = new MainMenuMode("assets.json", canvas, 1);
         controller = new GameplayMode();
         levelSelect = new LevelSelectMode(canvas);
-        victory = new VictoryMode();
+        levelOver = new LevelOverMode();
         pause = new PauseMode(canvas);
         Gdx.input.setInputProcessor(InputController.getInstance()
                                             .getMultiplexer());
@@ -53,9 +53,11 @@ public class GDXRoot extends Game implements ScreenListener {
     public void dispose() {
         // Call dispose on our children
         setScreen(null);
+        menu.dispose();
         controller.dispose();
         levelSelect.dispose();
-        victory.dispose();
+        levelOver.dispose();
+        pause.dispose();
 
         canvas.dispose();
         canvas = null;
@@ -94,7 +96,7 @@ public class GDXRoot extends Game implements ScreenListener {
             controller.setScreenListener(this);
             controller.fadeIn(0.5f);
             setScreen(controller);
-        } else if (screen == victory) {
+        } else if (screen == levelOver) {
             levelSelect.reset();
             setScreen(levelSelect);
         } else if (screen == pause &&
@@ -110,13 +112,10 @@ public class GDXRoot extends Game implements ScreenListener {
             levelSelect.setScreenListener(this);
             levelSelect.setBackgroundMusic(menu.getBackgroundMusic());
             setScreen(levelSelect);
-        } else if (exitCode ==
-                WorldController.ExitCode.EXIT_VICTORY.ordinal()) {
-            victory.gatherAssets(directory);
-            victory.reset();
-            victory.setScreenListener(this);
-            victory.setCanvas(canvas);
-            setScreen(victory);
+        } else if (exitCode == WorldController.ExitCode.EXIT_VICTORY.ordinal()) {
+            endLevel(true);
+        } else if (exitCode == WorldController.ExitCode.EXIT_FAILURE.ordinal()) {
+            endLevel(false);
         } else if (exitCode == WorldController.ExitCode.EXIT_PAUSE.ordinal()) {
             pause.setScreenListener(this);
             pause.setCanvas(canvas);
@@ -124,6 +123,15 @@ public class GDXRoot extends Game implements ScreenListener {
         } else if (exitCode == WorldController.ExitCode.EXIT_QUIT.ordinal()) {
             Gdx.app.exit();
         }
+    }
+
+    private void endLevel(boolean won) {
+        levelOver.setWon(won);
+        levelOver.gatherAssets(directory);
+        levelOver.reset();
+        levelOver.setScreenListener(this);
+        levelOver.setCanvas(canvas);
+        setScreen(levelOver);
     }
 
 }

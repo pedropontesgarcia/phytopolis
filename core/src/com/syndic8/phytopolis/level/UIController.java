@@ -96,6 +96,8 @@ public class UIController {
         timer.addTime(t);
     }
 
+    public boolean timerDone() { return timer.isOver(); }
+
     /**
      * Draws the UIController to the canvas.
      *

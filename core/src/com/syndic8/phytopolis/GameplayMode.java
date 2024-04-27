@@ -65,9 +65,7 @@ public class GameplayMode extends WorldController implements ContactListener {
     private FilmStrip jumpAnimator;
     private Texture jogTexture;
     private FilmStrip jogAnimator;
-    private int sunCollected;
-    private int waterCollected;
-    private Player player;
+    private boolean gathered;
     private BitmapFont timesFont;
     private TextureRegion background;
     private TextureRegion vignette;
@@ -93,6 +91,7 @@ public class GameplayMode extends WorldController implements ContactListener {
         cameraVector = new Vector2();
         sensorFixtures = new ObjectSet<>();
         projMousePosCache = new Vector2();
+        gathered = false;
     }
 
     public void setLevel(String lvl) {
@@ -108,81 +107,84 @@ public class GameplayMode extends WorldController implements ContactListener {
      * @param directory Reference to global asset manager.
      */
     public void gatherAssets(AssetDirectory directory) {
-        branchCursorTexture = new TextureRegion(directory.getEntry(
-                "ui:branch-cursor",
-                Texture.class));
-        leafCursorTexture = new TextureRegion(directory.getEntry(
-                "ui:leaf-cursor",
-                Texture.class));
-        waterCursorTexture = new TextureRegion(directory.getEntry(
-                "ui:water-cursor",
-                Texture.class));
-        Pixmap pixmap = getPixmapFromRegion(branchCursorTexture);
-        branchCursor = Gdx.graphics.newCursor(pixmap, 0, 0);
-        pixmap = getPixmapFromRegion(leafCursorTexture);
-        leafCursor = Gdx.graphics.newCursor(pixmap, 0, 0);
-        pixmap = getPixmapFromRegion(waterCursorTexture);
-        waterCursor = Gdx.graphics.newCursor(pixmap, 0, 0);
-        pixmap.dispose();
+        if (!gathered) {
+            gathered = true;
+            branchCursorTexture = new TextureRegion(directory.getEntry(
+                    "ui:branch-cursor",
+                    Texture.class));
+            leafCursorTexture = new TextureRegion(directory.getEntry(
+                    "ui:leaf-cursor",
+                    Texture.class));
+            waterCursorTexture = new TextureRegion(directory.getEntry(
+                    "ui:water-cursor",
+                    Texture.class));
+            Pixmap pixmap = getPixmapFromRegion(branchCursorTexture);
+            branchCursor = Gdx.graphics.newCursor(pixmap, 0, 0);
+            pixmap = getPixmapFromRegion(leafCursorTexture);
+            leafCursor = Gdx.graphics.newCursor(pixmap, 0, 0);
+            pixmap = getPixmapFromRegion(waterCursorTexture);
+            waterCursor = Gdx.graphics.newCursor(pixmap, 0, 0);
+            pixmap.dispose();
 
-        avatarTexture = new TextureRegion(directory.getEntry("gameplay:player",
-                                                             Texture.class));
-        waterTexture = directory.getEntry("water_nooutline", Texture.class);
-        timesFont = directory.getEntry("times", BitmapFont.class);
-        background = new TextureRegion(directory.getEntry("gameplay:background",
-                                                          Texture.class));
-        vignette = new TextureRegion(directory.getEntry("gameplay:vignette",
-                                                        Texture.class));
+            avatarTexture = new TextureRegion(directory.getEntry("gameplay:player",
+                    Texture.class));
+            waterTexture = directory.getEntry("water_nooutline", Texture.class);
+            timesFont = directory.getEntry("times", BitmapFont.class);
+            background = new TextureRegion(directory.getEntry("gameplay:background",
+                    Texture.class));
+            vignette = new TextureRegion(directory.getEntry("gameplay:vignette",
+                    Texture.class));
 
-        background.setRegion(0, 0, 1920, 1080);
-        vignette.setRegion(0, 0, 1920, 1080);
+            background.setRegion(0, 0, 1920, 1080);
+            vignette.setRegion(0, 0, 1920, 1080);
 
-        jumpTexture = directory.getEntry("jump", Texture.class);
-        jumpAnimator = new FilmStrip(jumpTexture, 1, 13, 13);
+            jumpTexture = directory.getEntry("jump", Texture.class);
+            jumpAnimator = new FilmStrip(jumpTexture, 1, 13, 13);
 
-        jogTexture = directory.getEntry("jog", Texture.class);
-        jogAnimator = new FilmStrip(jogTexture, 1, 8, 8);
+            jogTexture = directory.getEntry("jog", Texture.class);
+            jogAnimator = new FilmStrip(jogTexture, 1, 8, 8);
 
-        constants = directory.getEntry("gameplay:constants", JsonValue.class);
-        tilemap = new Tilemap(DEFAULT_WIDTH,
-                              DEFAULT_HEIGHT,
-                              directory.getEntry(lvl, JsonValue.class));
-        tilemap.gatherAssets(directory);
+            constants = directory.getEntry("gameplay:constants", JsonValue.class);
+            tilemap = new Tilemap(DEFAULT_WIDTH,
+                    DEFAULT_HEIGHT,
+                    directory.getEntry(lvl, JsonValue.class));
+            tilemap.gatherAssets(directory);
 
-        resourceController = new ResourceController(canvas, tilemap);
-        float branchHeight = tilemap.getTileHeight();
-        float plantWidth = branchHeight * (float) Math.sqrt(3) * 4 / 2;
-        float plantXOrigin = bounds.width / 2 - plantWidth / 2;
-        plantController = new PlantController(5,
-                                              40,
-                                              tilemap.getTileHeight(),
-                                              plantXOrigin,
-                                              0,
-                                              world,
-                                              scale,
-                                              resourceController,
-                                              tilemap);
-        hazardController = new HazardController(plantController,
-                                                (int) tilemap.getFireRate(),
-                                                1000000000,
-                                                8,
-                                                6,
-                                                tilemap);
-        sunController = new SunController(5,
-                                          10,
-                                          tilemap.getTileWidth() * 1.5f,
-                                          bounds.width -
-                                                  tilemap.getTileWidth() * 1.5f,
-                                          bounds.height);
-        plantController.gatherAssets(directory);
-        hazardController.gatherAssets(directory);
-        resourceController.gatherAssets(directory);
-        sunController.gatherAssets(directory);
-        super.gatherAssets(directory);
-        backgroundMusic = directory.getEntry("viridian", Music.class);
-        backgroundMusic.setLooping(true);
-        backgroundMusic.setVolume(0);
-        backgroundMusic.play();
+            resourceController = new ResourceController(canvas, tilemap);
+            float branchHeight = tilemap.getTileHeight();
+            float plantWidth = branchHeight * (float) Math.sqrt(3) * 4 / 2;
+            float plantXOrigin = bounds.width / 2 - plantWidth / 2;
+            plantController = new PlantController(5,
+                    40,
+                    tilemap.getTileHeight(),
+                    plantXOrigin,
+                    0,
+                    world,
+                    scale,
+                    resourceController,
+                    tilemap);
+            hazardController = new HazardController(plantController,
+                    (int) tilemap.getFireRate(),
+                    1000000000,
+                    8,
+                    6,
+                    tilemap);
+            sunController = new SunController(5,
+                    10,
+                    tilemap.getTileWidth() * 1.5f,
+                    bounds.width -
+                            tilemap.getTileWidth() * 1.5f,
+                    bounds.height);
+            plantController.gatherAssets(directory);
+            hazardController.gatherAssets(directory);
+            resourceController.gatherAssets(directory);
+            sunController.gatherAssets(directory);
+            super.gatherAssets(directory);
+            backgroundMusic = directory.getEntry("viridian", Music.class);
+            backgroundMusic.setLooping(true);
+            backgroundMusic.setVolume(0);
+            backgroundMusic.play();
+        }
     }
 
     /**
@@ -211,8 +213,9 @@ public class GameplayMode extends WorldController implements ContactListener {
             return false;
         }
 
-        if (!isFailure() && avatar.getY() < -1) {
+        if (!isFailure() && resourceController.getUIController().timerDone()) {
             setFailure(true);
+            fadeOut(1.5f);
             return false;
         }
 
@@ -466,13 +469,6 @@ public class GameplayMode extends WorldController implements ContactListener {
         }
 
         volume = constants.getFloat("volume", 1.0f);
-    }
-
-    /**
-     *
-     */
-    private void setPlayer(Player player) {
-        this.player = player;
     }
 
     /**

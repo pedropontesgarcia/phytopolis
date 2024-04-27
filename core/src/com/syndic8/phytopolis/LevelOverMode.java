@@ -11,7 +11,7 @@ import com.syndic8.phytopolis.util.FadingScreen;
 import com.syndic8.phytopolis.util.ScreenListener;
 import edu.cornell.gdiac.audio.AudioEngine;
 
-public class VictoryMode extends FadingScreen implements Screen {
+public class LevelOverMode extends FadingScreen implements Screen {
 
     private final Rectangle bounds;
     /**
@@ -26,19 +26,27 @@ public class VictoryMode extends FadingScreen implements Screen {
      * Listener that will update the player mode when we are done
      */
     private ScreenListener listener;
-    private Texture background;
+    private Texture victory;
+    private Texture failure;
     private boolean ready;
+    private boolean won;
+    private boolean gathered;
     private Music backgroundMusic;
     private AudioEngine audioEngine;
     private Texture rs;
 
-    public VictoryMode() {
+    public LevelOverMode() {
         this.ready = false;
         this.bounds = new Rectangle(0, 0, 16, 9);
+        gathered = false;
     }
 
     public void gatherAssets(AssetDirectory directory) {
-        background = directory.getEntry("victory:background", Texture.class);
+        if (!gathered) {
+            victory = directory.getEntry("over:victory", Texture.class);
+            failure = directory.getEntry("over:failure", Texture.class);
+            gathered = true;
+        }
         //        backgroundMusic = directory.getEntry("newgrowth", Music.class);
         //        backgroundMusic.setLooping(true);
         //        backgroundMusic.play();
@@ -50,6 +58,10 @@ public class VictoryMode extends FadingScreen implements Screen {
 
     public void setCanvas(GameCanvas canvas) {
         this.canvas = canvas;
+    }
+
+    public void setWon(boolean value) {
+        won = value;
     }
 
     @Override
@@ -83,7 +95,7 @@ public class VictoryMode extends FadingScreen implements Screen {
     public void draw() {
         canvas.clear();
         canvas.begin();
-        canvas.draw(background,
+        canvas.draw((won ? victory : failure),
                     Color.WHITE,
                     0,
                     0,

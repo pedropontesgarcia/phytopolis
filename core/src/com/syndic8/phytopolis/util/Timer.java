@@ -96,8 +96,8 @@ public class Timer {
         return (int) (time % 60);
     }
 
-    public boolean isRunning() {
-        return running;
+    public boolean isOver() {
+        return !running;
     }
 
     public void pause() {
