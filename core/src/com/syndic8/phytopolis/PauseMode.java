@@ -38,6 +38,7 @@ public class PauseMode extends FadingScreen implements Screen {
             public void clicked(InputEvent event, float x, float y) {
 //                exit = true;
                 exitCode = ExitCode.EXIT_RESUME;
+                exit = true;
                 fadeOut();
             }
         };
@@ -46,6 +47,7 @@ public class PauseMode extends FadingScreen implements Screen {
             public void clicked(InputEvent event, float x, float y) {
 //                exit = true;
                 exitCode = ExitCode.EXIT_LEVELS;
+                exit = true;
                 fadeOut();
             }
         };
@@ -55,6 +57,7 @@ public class PauseMode extends FadingScreen implements Screen {
 //                Gdx.app.exit();
 //                exit = true;
                 menuContainer.deactivate();
+                exit = true;
                 exitCode = ExitCode.EXIT_QUIT;
 //                fadeOut();
             }
@@ -170,7 +173,7 @@ public class PauseMode extends FadingScreen implements Screen {
 //            menuContainer.deactivate();
         }
 
-        if ((ready && isFadeDone()) || exitCode == ExitCode.EXIT_QUIT) {
+        if ((ready && isFadeDone())) {
             resetFade();
             listener.exitScreen(this, exitCode.ordinal());
         }
