@@ -260,11 +260,8 @@ public class GameplayMode extends WorldController implements ContactListener {
                 ((Water) m).regenerate();
             }
             if (m instanceof Sun) {
-                Sun s = (Sun) m;
-                if (s.belowScreen() ||
-                        s.getY() < plantController.getMaxLeafHeight() - 1) {
-                    s.clear();
-                }
+                ((Sun) m).update(m.getY() < plantController.getMaxLeafHeight());
+
             }
         }
         Sun s = sunController.spawnSuns(dt, tilemap);
