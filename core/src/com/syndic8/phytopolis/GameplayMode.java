@@ -54,8 +54,6 @@ public class GameplayMode extends WorldController implements ContactListener {
     protected Texture jumpTexture;
     private TextureRegion branchCursorTexture;
     private int starPoints;
-    private float scalex;
-    private float scaley;
     private TextureRegion leafCursorTexture;
     private TextureRegion waterCursorTexture;
     private Cursor branchCursor;
@@ -82,18 +80,6 @@ public class GameplayMode extends WorldController implements ContactListener {
      * Texture asset for water symbol
      */
     private Texture waterTexture;
-    /**
-     * Texture asset for the spinning barrier
-     */
-    private TextureRegion barrierTexture;
-    /**
-     * Texture asset for the bullet
-     */
-    private TextureRegion bulletTexture;
-    /**
-     * Texture asset for the bridge plank
-     */
-    private TextureRegion bridgeTexture;
     /**
      * Texture asset for a node
      */
@@ -122,12 +108,6 @@ public class GameplayMode extends WorldController implements ContactListener {
      * Reference to the character avatar
      */
     private Player avatar;
-    /**
-     * Reference to the goalDoor (for collision detection)
-     */
-    private BoxObject goalDoor;
-    private boolean fall;
-    private float startHeight;
     private HashMap<Fixture, Filter> originalCollisionProperties;
     private Music backgroundMusic;
     private String lvl;
@@ -177,8 +157,6 @@ public class GameplayMode extends WorldController implements ContactListener {
 
         avatarTexture = new TextureRegion(directory.getEntry("gameplay:player",
                                                              Texture.class));
-        barrierTexture = new TextureRegion(directory.getEntry("gameplay:barrier",
-                                                              Texture.class));
         waterTexture = directory.getEntry("water_nooutline", Texture.class);
         timesFont = directory.getEntry("times", BitmapFont.class);
         background = new TextureRegion(directory.getEntry("gameplay:background",
@@ -508,8 +486,6 @@ public class GameplayMode extends WorldController implements ContactListener {
         }
 
         volume = constants.getFloat("volume", 1.0f);
-        scalex = Gdx.graphics.getWidth() / 1129.412f;
-        scaley = Gdx.graphics.getHeight() / 635.294f;
     }
 
     /**
