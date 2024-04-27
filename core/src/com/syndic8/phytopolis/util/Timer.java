@@ -17,7 +17,7 @@ public class Timer {
     /**
      * The time in seconds granted by collecting sun
      */
-    private float sunTime;
+    private final float sunTime;
     /**
      * The time in seconds that this timer has left
      */
@@ -41,6 +41,10 @@ public class Timer {
     public Timer(float initialTime, float sunTime) {
         time = initialTime;
         this.sunTime = sunTime;
+    }
+
+    public void setTime(float t) {
+        time = t;
     }
 
     /**
@@ -89,15 +93,17 @@ public class Timer {
 
     }
 
-    public void addTime(float t) {
-        time += t;
-    }
-
     public void addTime() {
         addTime(sunTime);
     }
 
-    public void eatTime(float t) { addTime(-t); }
+    public void addTime(float t) {
+        time += t;
+    }
+
+    public void eatTime(float t) {
+        addTime(-t);
+    }
 
     public String toString() {
         return String.format("%02d:%02d", getMinutes(), getSeconds());

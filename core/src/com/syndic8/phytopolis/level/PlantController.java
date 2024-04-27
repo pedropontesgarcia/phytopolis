@@ -60,6 +60,7 @@ public class PlantController {
      */
     private final ResourceController resourceController;
     private final Tilemap tilemap;
+    private final Vector2 maxLeafIndex;
     /**
      * node texture
      */
@@ -88,7 +89,6 @@ public class PlantController {
      * how many more frames until the next propagation of destruction
      */
     private int plantCoyoteTimeRemaining = 0;
-    private Vector2 maxLeafIndex;
 
     /**
      * Initialize a PlantController with specified height and width
@@ -144,39 +144,6 @@ public class PlantController {
                 plantGrid[x][y].reset();
             }
         }
-    }
-
-    public float getMaxLeafHeight() {
-        if (getMaxLeafXIndex() != -1) {
-            return plantGrid[getMaxLeafXIndex()][getMaxLeafYIndex()].getLeaf().getY();
-        }
-        return 0;
-    }
-
-    public void calculateMaxLeafIndex() {
-        for (int y = height - 1; y >= 0; y--) {
-            for (int x = 1; x < width; x += 2) {
-                if (plantGrid[x][y].hasLeaf()) {
-                    maxLeafIndex.set(x, y);
-                    return;
-                }
-            }
-            for (int x = 0; x < width; x += 2) {
-                if (plantGrid[x][y].hasLeaf()) {
-                    maxLeafIndex.set(x, y);
-                    return;
-                }
-            }
-        }
-        maxLeafIndex.set(-1, -1);
-    }
-
-    public int getMaxLeafXIndex() {
-        return (int) maxLeafIndex.x;
-    }
-
-    public int getMaxLeafYIndex() {
-        return (int) maxLeafIndex.y;
     }
 
     /**
@@ -375,8 +342,8 @@ public class PlantController {
     /**
      * upgrades the leaf at the target node if there is already one; otherwise makes a normal leaf
      *
-     * @param x    screen x coord of the target node
-     * @param y    screen y coord of the target node
+     * @param x  screen x coord of the target node
+     * @param y  screen y coord of the target node
      * @param lt type of Leaf to upgrade to
      * @return the new Leaf object
      */
@@ -386,7 +353,8 @@ public class PlantController {
         System.out.println(xIndex + " " + yIndex);
         if (!inBounds(xIndex, yIndex)) return null;
         if (plantGrid[xIndex][yIndex].hasLeaf() &&
-                plantGrid[xIndex][yIndex].getLeafType() != Leaf.leafType.BOUNCY &&
+                plantGrid[xIndex][yIndex].getLeafType() !=
+                        Leaf.leafType.BOUNCY &&
                 resourceController.canUpgrade()) {
             plantGrid[xIndex][yIndex].unmakeLeaf();
             resourceController.decrementUpgrade();
@@ -398,6 +366,16 @@ public class PlantController {
         } else {
             return growLeaf(x, y, lt);
         }
+    }
+
+    public float getMaxLeafHeight() {
+        if (getMaxLeafXIndex() != -1 &&
+                inBounds(getMaxLeafXIndex(), getMaxLeafYIndex()) &&
+                plantGrid[getMaxLeafXIndex()][getMaxLeafYIndex()].hasLeaf()) {
+            return plantGrid[getMaxLeafXIndex()][getMaxLeafYIndex()].getLeaf()
+                    .getY();
+        }
+        return 0;
     }
 
     /**
@@ -424,6 +402,14 @@ public class PlantController {
             return l;
         }
         return null;
+    }
+
+    public int getMaxLeafXIndex() {
+        return (int) maxLeafIndex.x;
+    }
+
+    public int getMaxLeafYIndex() {
+        return (int) maxLeafIndex.y;
     }
 
     /**
@@ -511,6 +497,24 @@ public class PlantController {
         calculateMaxLeafIndex();
         plantCoyoteTimeRemaining = plantCoyoteTime;
         destructionQueue.addLast(new int[]{xArg, yArg});
+    }
+
+    public void calculateMaxLeafIndex() {
+        for (int y = height - 1; y >= 0; y--) {
+            for (int x = 1; x < width; x += 2) {
+                if (plantGrid[x][y].hasLeaf()) {
+                    maxLeafIndex.set(x, y);
+                    return;
+                }
+            }
+            for (int x = 0; x < width; x += 2) {
+                if (plantGrid[x][y].hasLeaf()) {
+                    maxLeafIndex.set(x, y);
+                    return;
+                }
+            }
+        }
+        maxLeafIndex.set(-1, -1);
     }
 
     public boolean leafGrowableAt(float xArg, float yArg) {

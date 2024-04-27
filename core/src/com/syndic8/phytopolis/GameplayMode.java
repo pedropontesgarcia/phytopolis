@@ -106,6 +106,10 @@ public class GameplayMode extends WorldController implements ContactListener {
      * @param directory Reference to global asset manager.
      */
     public void gatherAssets(AssetDirectory directory) {
+        tilemap = new Tilemap(DEFAULT_WIDTH,
+                              DEFAULT_HEIGHT,
+                              directory.getEntry(lvl, JsonValue.class));
+        tilemap.gatherAssets(directory);
         if (!gathered) {
             gathered = true;
             branchCursorTexture = new TextureRegion(directory.getEntry(
@@ -125,14 +129,16 @@ public class GameplayMode extends WorldController implements ContactListener {
             waterCursor = Gdx.graphics.newCursor(pixmap, 0, 0);
             pixmap.dispose();
 
-            avatarTexture = new TextureRegion(directory.getEntry("gameplay:player",
+            avatarTexture = new TextureRegion(directory.getEntry(
+                    "gameplay:player",
                     Texture.class));
             waterTexture = directory.getEntry("water_nooutline", Texture.class);
             timesFont = directory.getEntry("times", BitmapFont.class);
-            background = new TextureRegion(directory.getEntry("gameplay:background",
+            background = new TextureRegion(directory.getEntry(
+                    "gameplay:background",
                     Texture.class));
             vignette = new TextureRegion(directory.getEntry("gameplay:vignette",
-                    Texture.class));
+                                                            Texture.class));
 
             background.setRegion(0, 0, 1920, 1080);
             vignette.setRegion(0, 0, 1920, 1080);
@@ -143,11 +149,8 @@ public class GameplayMode extends WorldController implements ContactListener {
             jogTexture = directory.getEntry("jog", Texture.class);
             jogAnimator = new FilmStrip(jogTexture, 1, 8, 8);
 
-            constants = directory.getEntry("gameplay:constants", JsonValue.class);
-            tilemap = new Tilemap(DEFAULT_WIDTH,
-                    DEFAULT_HEIGHT,
-                    directory.getEntry(lvl, JsonValue.class));
-            tilemap.gatherAssets(directory);
+            constants = directory.getEntry("gameplay:constants",
+                                           JsonValue.class);
 
             resourceController = new ResourceController(canvas, tilemap);
             uiController = new UIController(canvas, tilemap);
@@ -155,28 +158,29 @@ public class GameplayMode extends WorldController implements ContactListener {
             float plantWidth = branchHeight * (float) Math.sqrt(3) * 4 / 2;
             float plantXOrigin = bounds.width / 2 - plantWidth / 2;
             plantController = new PlantController(5,
-                    40,
-                    tilemap.getTileHeight(),
-                    plantXOrigin,
-                    0,
-                    world,
-                    scale,
-                    resourceController,
-                    tilemap);
+                                                  40,
+                                                  tilemap.getTileHeight(),
+                                                  plantXOrigin,
+                                                  0,
+                                                  world,
+                                                  scale,
+                                                  resourceController,
+                                                  tilemap);
             hazardController = new HazardController(plantController,
-                    (int) tilemap.getFireRate(),
-                    1000000000,
-                    6,
-                    8,
-                    6,
-                    6,
-                    tilemap);
+                                                    (int) tilemap.getFireRate(),
+                                                    1000000000,
+                                                    6,
+                                                    8,
+                                                    6,
+                                                    6,
+                                                    tilemap);
             sunController = new SunController(5,
-                    10,
-                    tilemap.getTileWidth() * 1.5f,
-                    bounds.width -
-                            tilemap.getTileWidth() * 1.5f,
-                    bounds.height);
+                                              10,
+                                              tilemap.getTileWidth() * 1.5f,
+                                              bounds.width -
+                                                      tilemap.getTileWidth() *
+                                                              1.5f,
+                                              bounds.height);
             plantController.gatherAssets(directory);
             hazardController.gatherAssets(directory);
             uiController.gatherAssets(directory);
@@ -302,10 +306,10 @@ public class GameplayMode extends WorldController implements ContactListener {
                 if (!hazardController.hasFire(unprojMousePos)) {
                     Leaf.leafType lt = Leaf.leafType.NORMAL;
                     Model newLeaf = plantController.makeLeaf(unprojMousePos.x,
-                                                               unprojMousePos.y +
-                                                                       0.5f *
-                                                                               tilemap.getTileHeight(),
-                                                               lt);
+                                                             unprojMousePos.y +
+                                                                     0.5f *
+                                                                             tilemap.getTileHeight(),
+                                                             lt);
                     if (newLeaf != null) addObject(newLeaf);
                 }
             }
@@ -377,6 +381,7 @@ public class GameplayMode extends WorldController implements ContactListener {
         world.dispose();
         backgroundMusic.stop();
         backgroundMusic.play();
+        uiController.reset(tilemap);
 
         ic.resetScrolled();
 
@@ -602,12 +607,14 @@ public class GameplayMode extends WorldController implements ContactListener {
                                     bd2.getType() ==
                                             Model.ModelType.TILE_FULL)) {
                 avatar.setGrounded(true);
-                sensorFixtures.add(avatar == bd1 ? fix2 : fix1); // Could have more than one ground
+                sensorFixtures.add(avatar == bd1 ?
+                                           fix2 :
+                                           fix1); // Could have more than one ground
             }
             if ((avatar.getSensorName().equals(fd2) && avatar != bd1 &&
                     bd1.getType() == Model.ModelType.LEAF) ||
                     (avatar.getSensorName().equals(fd1) && avatar != bd2 &&
-                        bd2.getType() == Model.ModelType.LEAF)) {
+                            bd2.getType() == Model.ModelType.LEAF)) {
                 Leaf l = (Leaf) (avatar == bd1 ? bd2 : bd1);
                 if (l.getLeafType() == Leaf.leafType.BOUNCY) {
                     avatar.setBouncy(true);
@@ -781,21 +788,20 @@ public class GameplayMode extends WorldController implements ContactListener {
                 fix2.getBody().getPosition().y - avatar.getHeight() / 2f <
                         fix1.getBody().getPosition().y;
         if (isCollisionBetweenPlayerAndLeaf &&
-                (isPlayerGoingUp || isPlayerBelow ||
-                        ic.didDrop())) {
+                (isPlayerGoingUp || isPlayerBelow || ic.didDrop())) {
             contact.setEnabled(false);
         }
         if (isCollisionBetweenPlayerAndNoTopTile && isPlayerGoingDown) {
             contact.setEnabled(false);
         }
-//        if (isCollisionBetweenPlayerAndLeaf) {
-//            Leaf l;
-//            if (fix1.getBody() == avatar.getBody())
-//                l = (Leaf) fix2.getBody().getUserData();
-//            else l = (Leaf) fix1.getBody().getUserData();
-//            if (l.getLeafType() == Leaf.leafType.BOUNCY &&
-//                    avatar.getY() > l.getY()) avatar.setBouncy(true);
-//        }
+        //        if (isCollisionBetweenPlayerAndLeaf) {
+        //            Leaf l;
+        //            if (fix1.getBody() == avatar.getBody())
+        //                l = (Leaf) fix2.getBody().getUserData();
+        //            else l = (Leaf) fix1.getBody().getUserData();
+        //            if (l.getLeafType() == Leaf.leafType.BOUNCY &&
+        //                    avatar.getY() > l.getY()) avatar.setBouncy(true);
+        //        }
     }
 
     /**

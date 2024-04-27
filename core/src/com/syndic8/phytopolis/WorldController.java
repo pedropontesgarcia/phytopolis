@@ -209,28 +209,6 @@ public abstract class WorldController extends FadingScreen implements Screen {
     }
 
     /**
-     * Returns true if the level is failed.
-     * <p>
-     * If true, the level will reset after a countdown
-     *
-     * @return true if the level is failed.
-     */
-    public boolean isFailure() {
-        return failed;
-    }
-
-    /**
-     * Sets whether the level is failed.
-     * <p>
-     * If true, the level will reset after a countdown
-     *
-     * @param value whether the level is failed.
-     */
-    public void setFailure(boolean value) {
-        failed = value;
-    }
-
-    /**
      * Returns true if this is the active screen
      *
      * @return true if this is the active screen
@@ -398,24 +376,24 @@ public abstract class WorldController extends FadingScreen implements Screen {
             return true;
         } else if (input.didAdvance()) {
             pause();
-            listener.exitScreen(this, ExitCode.EXIT_NEXT.ordinal());
+            listener.exitScreen(this, GDXRoot.ExitCode.EXIT_NEXT.ordinal());
             return false;
         } else if (input.didRetreat()) {
             pause();
-            listener.exitScreen(this, ExitCode.EXIT_PREV.ordinal());
+            listener.exitScreen(this, GDXRoot.ExitCode.EXIT_PREV.ordinal());
             return false;
         } else if (isComplete() && isFadeDone()) {
             pause();
-            listener.exitScreen(this, ExitCode.EXIT_VICTORY.ordinal());
+            listener.exitScreen(this, GDXRoot.ExitCode.EXIT_VICTORY.ordinal());
             return false;
         } else if (isFailure() && isFadeDone()) {
-//            reset();
+            //            reset();
             pause();
-            listener.exitScreen(this, ExitCode.EXIT_FAILURE.ordinal());
+            listener.exitScreen(this, GDXRoot.ExitCode.EXIT_FAILURE.ordinal());
             return false;
         } else if (isPaused() && isFadeDone()) {
             pause();
-            listener.exitScreen(this, ExitCode.EXIT_PAUSE.ordinal());
+            listener.exitScreen(this, GDXRoot.ExitCode.EXIT_PAUSE.ordinal());
             return false;
         }
         return true;
@@ -521,14 +499,25 @@ public abstract class WorldController extends FadingScreen implements Screen {
     }
 
     /**
-     * Sets whether the level is completed.
+     * Returns true if the level is failed.
      * <p>
-     * If true, the level will advance after a countdown
+     * If true, the level will reset after a countdown
      *
-     * @param value whether the level is completed.
+     * @return true if the level is failed.
      */
-    public void setComplete(boolean value) {
-        complete = value;
+    public boolean isFailure() {
+        return failed;
+    }
+
+    /**
+     * Sets whether the level is failed.
+     * <p>
+     * If true, the level will reset after a countdown
+     *
+     * @param value whether the level is failed.
+     */
+    public void setFailure(boolean value) {
+        failed = value;
     }
 
     /**
@@ -543,6 +532,17 @@ public abstract class WorldController extends FadingScreen implements Screen {
             ((GameObject) obj).activatePhysics(world);
         }
         objects.sort(Comparator.comparingInt(Model::getZIndex));
+    }
+
+    /**
+     * Sets whether the level is completed.
+     * <p>
+     * If true, the level will advance after a countdown
+     *
+     * @param value whether the level is completed.
+     */
+    public void setComplete(boolean value) {
+        complete = value;
     }
 
     /**
@@ -612,10 +612,6 @@ public abstract class WorldController extends FadingScreen implements Screen {
      */
     public void setScreenListener(ScreenListener listener) {
         this.listener = listener;
-    }
-
-    public enum ExitCode {
-        EXIT_QUIT, EXIT_NEXT, EXIT_PREV, EXIT_VICTORY, EXIT_PAUSE, EXIT_FAILURE, EXIT_LEVELS, EXIT_RESUME, EXIT_MAIN_MENU
     }
 
 }

@@ -18,7 +18,8 @@ import com.syndic8.phytopolis.util.menu.Menu;
 import com.syndic8.phytopolis.util.menu.MenuContainer;
 import com.syndic8.phytopolis.util.menu.MenuItem;
 import edu.cornell.gdiac.audio.AudioEngine;
-import static com.syndic8.phytopolis.WorldController.ExitCode;
+
+import static com.syndic8.phytopolis.GDXRoot.ExitCode;
 
 public class LevelSelectMode extends FadingScreen implements Screen {
 
@@ -96,14 +97,13 @@ public class LevelSelectMode extends FadingScreen implements Screen {
     public void gatherAssets(AssetDirectory directory) {
         if (!gathered) {
             background = new FilmStrip(directory.getEntry("lvlsel:background",
-                    Texture.class), 1, 4);
+                                                          Texture.class), 1, 4);
             lighting = directory.getEntry("lvlsel:lighting", Texture.class);
             rs = directory.getEntry("lvlsel:redsquare", Texture.class);
             gathered = true;
         }
         fadeIn(0.5f);
         ready = false;
-
 
         //        backgroundMusic = directory.getEntry("newgrowth", Music.class);
         //        backgroundMusic.setLooping(true);
@@ -249,6 +249,5 @@ public class LevelSelectMode extends FadingScreen implements Screen {
     public String getLevel() {
         return level;
     }
-
 
 }

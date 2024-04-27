@@ -75,16 +75,16 @@ public class UIController {
      * Updates the UIController.
      *
      * @param waterLvl level of water, in percentage between 0 and 1.
-//     * @param sunLvl   level of sun, in percentage between 0 and 1.
+     *                 //     * @param sunLvl   level of sun, in percentage between 0 and 1.
      */
-//    public void update(float dt, float waterLvl, float sunLvl) {
-//        waterdropStrip.setFrame(Math.round(
-//                (waterdropStrip.getSize() - 1) * waterLvl));
-//        sunStrip.setFrame(Math.round((sunStrip.getSize() - 1) * sunLvl));
-//        timer.updateTime(dt);
-//        label.setText(timer.toString());
-//    }
-//
+    //    public void update(float dt, float waterLvl, float sunLvl) {
+    //        waterdropStrip.setFrame(Math.round(
+    //                (waterdropStrip.getSize() - 1) * waterLvl));
+    //        sunStrip.setFrame(Math.round((sunStrip.getSize() - 1) * sunLvl));
+    //        timer.updateTime(dt);
+    //        label.setText(timer.toString());
+    //    }
+    //
     public void update(float dt, float waterLvl) {
         waterdropStrip.setFrame(Math.round(
                 (waterdropStrip.getSize() - 1) * waterLvl));
@@ -112,7 +112,14 @@ public class UIController {
         timer.eatTime(t);
     }
 
-    public boolean timerDone() { return timer.isOver(); }
+    public boolean timerDone() {
+        return timer.isOver();
+    }
+
+    public void reset(Tilemap tm) {
+        timer.setTime(tm.getTime());
+        timer.start();
+    }
 
     /**
      * Draws the UIController to the canvas.
