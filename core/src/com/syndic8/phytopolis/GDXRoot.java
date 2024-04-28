@@ -7,10 +7,13 @@ package com.syndic8.phytopolis;
 
 import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Graphics.DisplayMode;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.Cursor;
 import com.syndic8.phytopolis.assets.AssetDirectory;
 import com.syndic8.phytopolis.util.ScreenListener;
+
+import java.util.List;
 
 import static com.syndic8.phytopolis.GDXRoot.ExitCode.*;
 
@@ -19,6 +22,7 @@ import static com.syndic8.phytopolis.GDXRoot.ExitCode.*;
  */
 public class GDXRoot extends Game implements ScreenListener {
 
+    private final List<DisplayMode> displayModes;
     /**
      * Directory for game assets.
      */
@@ -36,11 +40,12 @@ public class GDXRoot extends Game implements ScreenListener {
     private PauseMode pause;
     private GameplayMode controller;
 
-    public GDXRoot() {
+    public GDXRoot(List<DisplayMode> dms) {
+        displayModes = dms;
     }
 
     public void create() {
-        canvas = new GameCanvas();
+        canvas = new GameCanvas(displayModes);
         canvas.setSize(16, 9);
         menu = new MainMenuMode("assets.json", canvas, 1);
         controller = new GameplayMode();

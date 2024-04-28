@@ -1,6 +1,7 @@
 package com.syndic8.phytopolis;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Graphics;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
@@ -16,6 +17,8 @@ import com.badlogic.gdx.physics.box2d.PolygonShape;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
+
+import java.util.List;
 
 public class GameCanvas {
 
@@ -36,6 +39,9 @@ public class GameCanvas {
     private final Viewport viewport;
     private final Viewport hudViewport;
     private final Viewport textViewport;
+    private final Vector3 cameraCache;
+    private final Vector2 sizeCache;
+    private final List<Graphics.DisplayMode> displayModes;
     /**
      * Value to cache window width (if we are currently full screen)
      */
@@ -44,6 +50,9 @@ public class GameCanvas {
      * Value to cache window height (if we are currently full screen)
      */
     int height;
+    private boolean vsync;
+    private Graphics.DisplayMode resolution;
+    private boolean windowed;
     /**
      * Drawing context to handle textures AND POLYGONS as sprites
      */
@@ -75,8 +84,6 @@ public class GameCanvas {
      * Cache object to handle raw textures
      */
     private TextureRegion holder;
-    private final Vector3 cameraCache;
-    private final Vector2 sizeCache;
 
     /**
      * Creates a new GameCanvas determined by the application configuration.
@@ -85,7 +92,7 @@ public class GameCanvas {
      * object used to start the application.  This constructor initializes all
      * of the necessary graphics objects.
      */
-    public GameCanvas() {
+    public GameCanvas(List<Graphics.DisplayMode> dm) {
         width = 16;
         height = 9;
         active = DrawPass.INACTIVE;
@@ -93,6 +100,13 @@ public class GameCanvas {
         hudBatch = new SpriteBatch();
         debugRender = new ShapeRenderer();
         shapeRenderer = new ShapeRenderer();
+
+        displayModes = dm;
+        if (displayModes.isEmpty())
+            displayModes.add(Gdx.graphics.getDisplayMode());
+        resolution = Gdx.graphics.getDisplayMode();
+        windowed = !Gdx.graphics.isFullscreen();
+        vsync = true;
 
         // Set the projection matrix (for proper scaling)
         camera = new OrthographicCamera(width, height);
@@ -1169,6 +1183,44 @@ public class GameCanvas {
         return textViewport;
     }
 
+    public void updateOption(GraphicsOption opn) {
+        switch (opn) {
+            case RESOLUTION:
+                resolution = displayModes.get(
+                        (displayModes.indexOf(resolution) + 1) %
+                                displayModes.size());
+                if (!windowed) Gdx.graphics.setFullscreenMode(resolution);
+                return;
+            case WINDOWED:
+                windowed = !windowed;
+                if (!windowed) {
+                    Gdx.graphics.setFullscreenMode(resolution);
+                } else {
+                    Gdx.graphics.setWindowedMode(1280, 720);
+                    Gdx.graphics.setResizable(false);
+                }
+                return;
+            case VSYNC:
+                vsync = !vsync;
+                Gdx.graphics.setVSync(vsync);
+        }
+    }
+
+    public String getOptionValueString(GraphicsOption opn) {
+        switch (opn) {
+            case RESOLUTION:
+                return String.format("%dx%d @ %d",
+                                     resolution.width,
+                                     resolution.height,
+                                     resolution.refreshRate);
+            case WINDOWED:
+                return (windowed ? "ON" : "OFF");
+            case VSYNC:
+                return (vsync ? "ON" : "OFF");
+        }
+        return "Unknown";
+    }
+
     /**
      * Enumeration to track which pass we are in
      */
@@ -1212,5 +1264,7 @@ public class GameCanvas {
          */
         OPAQUE
     }
+
+    public enum GraphicsOption {RESOLUTION, WINDOWED, VSYNC}
 
 }
