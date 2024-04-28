@@ -106,7 +106,7 @@ public abstract class Hazard extends Model {
                     getX(),
                     getY(),
                     0,
-                    sclX*3,
+                    sclX*2.5f,
                     sclY*4);
         }else{
 
