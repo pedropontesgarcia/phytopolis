@@ -18,6 +18,7 @@ public class InputController implements InputProcessor {
     private static InputController theController;
     private final InputMultiplexer multiplexer;
     private final IntSet keys;
+    private final IntSet assignedKeys;
     private boolean updateScheduled;
     private Binding bindingToUpdate;
     private int growBranchModKey;
@@ -87,6 +88,7 @@ public class InputController implements InputProcessor {
         multiplexer = new InputMultiplexer();
         multiplexer.addProcessor(this);
         keys = new IntSet();
+        assignedKeys = new IntSet();
 
         // Setting defaults
         setDefaults();
@@ -99,16 +101,21 @@ public class InputController implements InputProcessor {
         growBranchButton = Input.Buttons.LEFT;
         // Default: SHIFT
         growLeafModKey = Input.Keys.SHIFT_LEFT;
+        assignedKeys.add(growLeafModKey);
         // Default: MOUSE LEFT
         growLeafButton = Input.Buttons.LEFT;
         // Default: W
         jumpKey = Input.Keys.W;
+        assignedKeys.add(jumpKey);
         // Default: A
         leftKey = Input.Keys.A;
+        assignedKeys.add(leftKey);
         // Default: S
         dropKey = Input.Keys.S;
+        assignedKeys.add(dropKey);
         // Default: D
         rightKey = Input.Keys.D;
+        assignedKeys.add(rightKey);
         // Default: ESC
         exitKey = Input.Keys.ESCAPE;
     }
@@ -271,24 +278,58 @@ public class InputController implements InputProcessor {
             updateScheduled = false;
             switch (bindingToUpdate) {
                 case GROW_BRANCH_MOD_KEY:
-                    if (i == Input.Keys.ESCAPE) growBranchModKey = -1;
-                    else growBranchModKey = i;
+                    if (i == Input.Keys.ESCAPE) {
+                        assignedKeys.remove(growBranchModKey);
+                        growBranchModKey = -1;
+                    } else if ((i != growLeafModKey ||
+                            growBranchButton != growLeafButton) &&
+                            (!assignedKeys.contains(i) ||
+                                    i == growLeafModKey)) {
+                        assignedKeys.remove(growBranchModKey);
+                        growBranchModKey = i;
+                        assignedKeys.add(growBranchModKey);
+                    }
                     return true;
                 case GROW_LEAF_MOD_KEY:
-                    if (i == Input.Keys.ESCAPE) growLeafModKey = -1;
-                    else growLeafModKey = i;
+                    if (i == Input.Keys.ESCAPE) {
+                        assignedKeys.remove(growLeafModKey);
+                        growLeafModKey = -1;
+                    } else if ((i != growBranchModKey ||
+                            growBranchButton != growLeafButton) &&
+                            (!assignedKeys.contains(i) ||
+                                    i == growBranchModKey)) {
+                        assignedKeys.remove(growLeafModKey);
+                        growLeafModKey = i;
+                        assignedKeys.add(growLeafModKey);
+                    }
                     return true;
                 case JUMP_KEY:
-                    if (i != Input.Keys.ESCAPE) jumpKey = i;
+                    if (i != Input.Keys.ESCAPE && !assignedKeys.contains(i)) {
+                        assignedKeys.remove(jumpKey);
+                        jumpKey = i;
+                        assignedKeys.add(jumpKey);
+                    }
                     return true;
                 case LEFT_KEY:
-                    if (i != Input.Keys.ESCAPE) leftKey = i;
+                    if (i != Input.Keys.ESCAPE && !assignedKeys.contains(i)) {
+                        assignedKeys.remove(leftKey);
+                        leftKey = i;
+                        assignedKeys.add(leftKey);
+                    }
                     return true;
                 case DROP_KEY:
-                    if (i != Input.Keys.ESCAPE) dropKey = i;
+                    if (i != Input.Keys.ESCAPE && !assignedKeys.contains(i)) {
+                        assignedKeys.remove(dropKey);
+                        dropKey = i;
+                        assignedKeys.add(dropKey);
+                    }
                     return true;
                 case RIGHT_KEY:
-                    if (i != Input.Keys.ESCAPE) rightKey = i;
+                    if (i != Input.Keys.ESCAPE && !assignedKeys.contains(i)) {
+                        assignedKeys.remove(rightKey);
+                        rightKey = i;
+                        assignedKeys.add(rightKey);
+                    }
                     return true;
             }
         }
@@ -312,10 +353,14 @@ public class InputController implements InputProcessor {
             updateScheduled = false;
             switch (bindingToUpdate) {
                 case GROW_BRANCH_BUTTON:
-                    growBranchButton = i3;
+                    if (i3 != growLeafButton ||
+                            growLeafModKey != growBranchModKey)
+                        growBranchButton = i3;
                     return true;
                 case GROW_LEAF_BUTTON:
-                    growLeafButton = i3;
+                    if (i3 != growBranchButton ||
+                            growLeafModKey != growBranchModKey)
+                        growLeafButton = i3;
                     return true;
             }
         }
