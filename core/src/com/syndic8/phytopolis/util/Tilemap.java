@@ -32,6 +32,9 @@ public class Tilemap {
     int starTime;
     float fireRate;
     float victoryHeight;
+    private Texture sunCircle;
+    private Texture sunRay;
+    private Texture sunSwirl;
 
     /**
      * Constructs a tilemap from the world dimensions and a JSON file from
@@ -123,6 +126,12 @@ public class Tilemap {
             else if (propertyJson.getString("name").equals("victory"))
                 victoryHeight = propertyJson.getFloat("value");
         }
+        sunCircle = directory.getEntry("gameplay:sun_circle",
+                Texture.class);
+        sunSwirl = directory.getEntry("gameplay:sun_swirl",
+                Texture.class);
+        sunRay = directory.getEntry("gameplay:sun_ray",
+                Texture.class);
 
         List<Texture> resourceTextureList = new ArrayList<>();
         Texture tx = directory.getEntry("gameplay:water_filmstrip",
@@ -263,7 +272,9 @@ public class Tilemap {
                                         yMid,
                                         tileWidth * 0.5f,
                                         tileHeight * 0.5f,
-                                        sunFilmstrip,
+                                        sunCircle,
+                                        sunRay,
+                                        sunSwirl,
                                         this,
                                         1);
                         ctrl.addObject(s);

@@ -13,10 +13,13 @@ public class SunController {
     private final float xGenerationMin;
     private final float xGenerationMax;
     private final float yGeneration;
-    private FilmStrip sunFilmstrip;
+//    private FilmStrip sunFilmstrip;
     private float currentDelay;
     private float timer;
     private float xGeneration;
+    private Texture sunCircle;
+    private Texture sunRay;
+    private Texture sunSwirl;
 
     public SunController(float dMin,
                          float dMax,
@@ -43,9 +46,13 @@ public class SunController {
     }
 
     public void gatherAssets(AssetDirectory directory) {
-        Texture sunTexture = directory.getEntry("gameplay:sun_resource",
+        sunCircle = directory.getEntry("gameplay:sun_circle",
                                                 Texture.class);
-        sunFilmstrip = new FilmStrip(sunTexture, 1, 1);
+        sunSwirl = directory.getEntry("gameplay:sun_swirl",
+                Texture.class);
+        sunRay = directory.getEntry("gameplay:sun_ray",
+                Texture.class);
+        //sunFilmstrip = new FilmStrip(sunTexture, 1, 1);
     }
 
     public Sun spawnSuns(float delta, Tilemap tm) {
@@ -56,7 +63,9 @@ public class SunController {
                             yGeneration,
                             tm.getTileWidth() * 0.5f,
                             tm.getTileHeight() * 0.5f,
-                            sunFilmstrip,
+                            sunCircle,
+                            sunRay,
+                            sunSwirl,
                             tm,
                             1);
             return s;
