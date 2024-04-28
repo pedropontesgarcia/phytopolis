@@ -279,6 +279,8 @@ public class InputController implements InputProcessor {
             switch (bindingToUpdate) {
                 case GROW_BRANCH_MOD_KEY:
                     if (i == Input.Keys.ESCAPE) {
+                        if (growLeafModKey == -1 &&
+                                growBranchButton == growLeafButton) return true;
                         assignedKeys.remove(growBranchModKey);
                         growBranchModKey = -1;
                     } else if ((i != growLeafModKey ||
@@ -292,6 +294,8 @@ public class InputController implements InputProcessor {
                     return true;
                 case GROW_LEAF_MOD_KEY:
                     if (i == Input.Keys.ESCAPE) {
+                        if (growBranchModKey == -1 &&
+                                growBranchButton == growLeafButton) return true;
                         assignedKeys.remove(growLeafModKey);
                         growLeafModKey = -1;
                     } else if ((i != growBranchModKey ||
