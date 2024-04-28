@@ -1,13 +1,23 @@
 package com.syndic8.phytopolis.util.menu;
 
+import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.g2d.BitmapFont;
+import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.utils.Align;
 import com.syndic8.phytopolis.GameCanvas;
 import com.syndic8.phytopolis.InputController;
+import com.syndic8.phytopolis.util.SharedAssetContainer;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class ControlsMenu extends Menu {
 
+    private final TextButton topLabel;
+
     public ControlsMenu(GameCanvas c, MenuContainer ctr, Menu back) {
-        super(10, 0.075f, 0, 0, 0.75f, Align.left);
+        super(10, 0.075f, 0, -0.015f, 0.75f, Align.left);
+        topLabel = makeTopLabel(c);
         addItem(new ControlsMenuItem("JUMP",
                                      0,
                                      this,
@@ -59,6 +69,23 @@ public class ControlsMenu extends Menu {
         addItem(new MenuItem("< BACK", 9, back, this, ctr, c));
     }
 
+    private TextButton makeTopLabel(GameCanvas c) {
+        BitmapFont font = SharedAssetContainer.getInstance().getUIFont(0.5f);
+        TextButton.TextButtonStyle labelStyle = new TextButton.TextButtonStyle();
+        labelStyle.font = font;
+        labelStyle.fontColor = new Color(0.6f, 0.6f, 0.6f, 1);
+        String text = "PRESS ESC TO CANCEL BINDING OR REMOVE MOD KEY";
+        TextButton topLabel = new TextButton(text, labelStyle);
+        topLabel.setSize(400, topLabel.getMaxHeight());
+        topLabel.getLabel().setAlignment(Align.center);
+        float ww = c.getTextViewport().getWorldWidth();
+        float wh = c.getTextViewport().getWorldHeight();
+        float xPosHeader = ww / 2f - topLabel.getWidth() / 2f;
+        float yPos = wh * 0.925f;
+        topLabel.setPosition(xPosHeader, yPos);
+        return topLabel;
+    }
+
     /**
      * Updates the controls labels so that they reflect the current controls.
      */
@@ -68,6 +95,19 @@ public class ControlsMenu extends Menu {
                 ((ControlsMenuItem) item).updateLabel();
             }
         }
+    }
+
+    @Override
+    public List<TextButton> gatherLabels() {
+        List<TextButton> labels = new ArrayList<>();
+        for (MenuItem item : getItems()) {
+            labels.add(item.getLabel());
+            if (item instanceof ControlsMenuItem) {
+                labels.add(((ControlsMenuItem) item).getHeaderLabel());
+            }
+        }
+        labels.add(topLabel);
+        return labels;
     }
 
 }

@@ -66,7 +66,7 @@ public class MenuItem {
         buttonStyle.overFontColor = new Color(0.7f, 0.7f, 0.7f, 1);
 
         label = new TextButton(text, buttonStyle);
-        label.setSize(800, label.getMaxHeight());
+        label.setSize(400, label.getMaxHeight());
         label.getLabel().setAlignment(align);
         float ww = c.getTextViewport().getWorldWidth();
         float wh = c.getTextViewport().getWorldHeight();

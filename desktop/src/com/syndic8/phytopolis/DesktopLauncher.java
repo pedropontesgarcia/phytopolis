@@ -29,7 +29,7 @@ public class DesktopLauncher {
         }
         goodDisplayModes.sort(Comparator.comparingInt((Graphics.DisplayMode dm) -> dm.width));
         // Uncomment this line to force windowed mode
-        // goodDisplayModes.clear();
+        goodDisplayModes.clear();
         if (goodDisplayModes.isEmpty()) {
             LOGGER.warning("No valid fullscreen resolutions were detected, " +
                                    "switching to compatibility (windowed) " +

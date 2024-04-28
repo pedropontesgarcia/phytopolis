@@ -33,6 +33,9 @@ public class GameplayMode extends WorldController {
     private final Vector2 cameraVector;
     private final Vector2 projMousePosCache;
     private final InputController ic;
+    private final float lvl1LeafWidth = 1.4f;
+    private final float lvl2LeafWidth = 1.2f;
+    private final float lvl3LeafWidth = 0.9f;
     protected Texture jumpTexture;
     private PlantController plantController;
     private HazardController hazardController;
@@ -55,10 +58,6 @@ public class GameplayMode extends WorldController {
     private Music backgroundMusic;
     private String lvl;
     private CollisionController collisionController;
-    private float lvl1LeafWidth = 1.4f;
-    private float lvl2LeafWidth = 1.2f;
-    private float lvl3LeafWidth = 0.9f;
-
 
     /**
      * Creates and initialize a new instance of the game.
@@ -263,19 +262,35 @@ public class GameplayMode extends WorldController {
         // get mouse position
         projMousePosCache.set(ic.getMouseX(), ic.getMouseY());
         Vector2 unprojMousePos = canvas.unproject(projMousePosCache);
-        if (ic.didGrowBranch()) System.out.println("did grow branch");
-        if (ic.isGrowBranchModDown())
-            System.out.println("mod grow branch " + "down");
-        if (ic.didGrowBranch() && ic.isGrowBranchModDown()) {
+        boolean canGrowBranch = ic.didGrowBranch() && ic.isGrowBranchModDown();
+        boolean canGrowLeaf = ic.didGrowLeaf() && ic.isGrowLeafModDown();
+        boolean noPriority = ic.isGrowLeafModSet() == ic.isGrowBranchModSet();
+        boolean doesLeafHavePriority =
+                ic.isGrowLeafModSet() && !ic.isGrowBranchModSet();
+        boolean shouldGrowBranch = false;
+        boolean shouldGrowLeaf = false;
+        if (noPriority && canGrowBranch && canGrowLeaf) {
+            shouldGrowBranch = true;
+            shouldGrowLeaf = true;
+        } else if (((doesLeafHavePriority ||
+                (!doesLeafHavePriority && !canGrowBranch)) && canGrowLeaf)) {
+            shouldGrowLeaf = true;
+        } else if (((!doesLeafHavePriority) ||
+                (doesLeafHavePriority && !canGrowLeaf)) && canGrowBranch) {
+            shouldGrowBranch = true;
+        }
+
+        if (shouldGrowBranch) {
             Branch branch = plantController.growBranch(unprojMousePos.x,
                                                        unprojMousePos.y);
             if (branch != null) addObject(branch);
-        } else if (ic.didGrowLeaf() && ic.isGrowLeafModDown()) {
+        }
+        if (shouldGrowLeaf) {
             // don't grow if there's a fire there (prioritize fire)
             if (!hazardController.hasFire(unprojMousePos)) {
                 Leaf.leafType lt = Leaf.leafType.NORMAL;
                 float width = 0;
-                switch(lvl){
+                switch (lvl) {
                     case "gameplay:lvl1":
                         lt = Leaf.leafType.NORMAL;
                         width = lvl1LeafWidth;
@@ -293,7 +308,8 @@ public class GameplayMode extends WorldController {
                                                          unprojMousePos.y +
                                                                  0.5f *
                                                                          tilemap.getTileHeight(),
-                                                         lt, width);
+                                                         lt,
+                                                         width);
                 if (newLeaf != null) addObject(newLeaf);
             }
         }
