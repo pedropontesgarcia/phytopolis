@@ -8,6 +8,7 @@ package com.syndic8.phytopolis;
 import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
+import com.badlogic.gdx.graphics.Cursor;
 import com.syndic8.phytopolis.assets.AssetDirectory;
 import com.syndic8.phytopolis.util.ScreenListener;
 
@@ -86,10 +87,12 @@ public class GDXRoot extends Game implements ScreenListener {
             setScreen(levelSelect);
         } else if (screen == levelSelect &&
                 exitCode == EXIT_MAIN_MENU.ordinal()) {
+            Gdx.graphics.setSystemCursor(Cursor.SystemCursor.Arrow);
             menu.setScreenListener(this);
             menu.setBackgroundMusic(levelSelect.getBackgroundMusic());
             setScreen(menu);
         } else if (screen == levelSelect && exitCode == EXIT_LEVELS.ordinal()) {
+            Gdx.graphics.setSystemCursor(Cursor.SystemCursor.Arrow);
             controller.setLevel(levelSelect.getLevel());
             controller.setCanvas(canvas);
             controller.gatherAssets(directory);
@@ -98,36 +101,44 @@ public class GDXRoot extends Game implements ScreenListener {
             controller.fadeIn(0.5f);
             setScreen(controller);
         } else if (screen == levelOver) {
+            Gdx.graphics.setSystemCursor(Cursor.SystemCursor.Arrow);
             controller.setPaused(false);
             levelSelect.reset();
             levelSelect.setScreenListener(this);
             setScreen(levelSelect);
         } else if (screen == pause && exitCode == EXIT_RESUME.ordinal()) {
+            Gdx.graphics.setSystemCursor(Cursor.SystemCursor.Arrow);
             controller.setScreenListener(this);
             controller.setPaused(false);
             controller.fadeIn(0.25f);
             setScreen(controller);
         } else if (screen == pause && exitCode == EXIT_RESET.ordinal()) {
+            Gdx.graphics.setSystemCursor(Cursor.SystemCursor.Arrow);
             controller.reset();
             controller.setScreenListener(this);
             controller.setPaused(false);
             controller.fadeIn(0.5f);
             setScreen(controller);
         } else if (screen == pause && exitCode == EXIT_LEVELS.ordinal()) {
+            Gdx.graphics.setSystemCursor(Cursor.SystemCursor.Arrow);
             controller.setPaused(false);
             levelSelect.reset();
             levelSelect.setScreenListener(this);
             levelSelect.setBackgroundMusic(menu.getBackgroundMusic());
             setScreen(levelSelect);
         } else if (exitCode == EXIT_VICTORY.ordinal()) {
+            Gdx.graphics.setSystemCursor(Cursor.SystemCursor.Arrow);
             endLevel(true);
         } else if (exitCode == EXIT_FAILURE.ordinal()) {
+            Gdx.graphics.setSystemCursor(Cursor.SystemCursor.Arrow);
             endLevel(false);
         } else if (exitCode == EXIT_PAUSE.ordinal()) {
+            Gdx.graphics.setSystemCursor(Cursor.SystemCursor.Arrow);
             pause.setScreenListener(this);
             pause.setCanvas(canvas);
             setScreen(pause);
         } else if (exitCode == EXIT_QUIT.ordinal()) {
+            Gdx.graphics.setSystemCursor(Cursor.SystemCursor.Arrow);
             Gdx.app.exit();
         }
     }

@@ -26,13 +26,7 @@ import com.syndic8.phytopolis.util.FilmStrip;
 import com.syndic8.phytopolis.util.Tilemap;
 
 /**
- * Gameplay specific controller for the platformer game.
- * <p>
- * You will notice that asset loading is not done with static methods this time.
- * Instance asset loading makes it easier to process our game modes in a loop, which
- * is much more scalable. However, we still want the assets themselves to be static.
- * This is the purpose of our AssetState variable; it ensures that multiple instances
- * place nicely with the static assets.
+ * Main controller for the gameplay mode.
  */
 public class GameplayMode extends WorldController {
 
@@ -63,9 +57,7 @@ public class GameplayMode extends WorldController {
     private CollisionController collisionController;
 
     /**
-     * Creates and initialize a new instance of the platformer game
-     * <p>
-     * The game has default gravity and other settings
+     * Creates and initialize a new instance of the game.
      */
     public GameplayMode() {
         super();
@@ -207,7 +199,7 @@ public class GameplayMode extends WorldController {
         backgroundMusic.setVolume(super.getVolume());
         // Process actions in object model
         avatar.setMovement(ic.getHorizontal() * avatar.getForce());
-        avatar.setJumping(ic.didPrimary());
+        avatar.setJumping(ic.didJump());
         processPlantGrowth();
 
         avatar.applyForce();
@@ -215,8 +207,7 @@ public class GameplayMode extends WorldController {
         if (ic.didScrollReset()) {
             ic.resetScrolled();
         }
-        InputController.setHeight(
-                tilemap.getTilemapHeight() - canvas.getHeight());
+        ic.setHeight(tilemap.getTilemapHeight() - canvas.getHeight());
         cameraVector.set(canvas.getWidth() / 2f,
                          Math.max(canvas.getHeight() / 2f,
                                   Math.min(tilemap.getTilemapHeight() -
@@ -228,11 +219,12 @@ public class GameplayMode extends WorldController {
                 ((Water) m).regenerate();
             }
             if (m instanceof Sun) {
-                ((Sun) m).update(m.getY() < plantController.getMaxLeafHeight());
+                ((Sun) m).update(m.getY() < plantController.getMaxLeafHeight() -
+                        resourceController.SUN_TOLERANCE);
 
             }
-            if (m instanceof Hazard){
-                ((Hazard) m).update(dt);
+            if (m instanceof Hazard) {
+                m.update(dt);
             }
         }
         Sun s = sunController.spawnSuns(dt, tilemap);
@@ -242,7 +234,7 @@ public class GameplayMode extends WorldController {
         }
 
         if (ic.didMousePress()) {
-            projMousePosCache.set(ic.getGrowX(), ic.getGrowY());
+            projMousePosCache.set(ic.getMouseX(), ic.getMouseY());
             Vector2 unprojMousePos = canvas.unproject(projMousePosCache);
             hazardController.extinguishFire(unprojMousePos);
         }
@@ -267,27 +259,23 @@ public class GameplayMode extends WorldController {
         // get mouse position
         projMousePosCache.set(ic.getMouseX(), ic.getMouseY());
         Vector2 unprojMousePos = canvas.unproject(projMousePosCache);
-
-        if (ic.didMousePress()) {
-            // process leaf stuff
-            if (ic.didSpecial()) {
-                // don't grow if there's a fire there (prioritize fire)
-                if (!hazardController.hasFire(unprojMousePos)) {
-                    Leaf.leafType lt = Leaf.leafType.NORMAL;
-                    Model newLeaf = plantController.makeLeaf(unprojMousePos.x,
-                                                             unprojMousePos.y +
-                                                                     0.5f *
-                                                                             tilemap.getTileHeight(),
-                                                             lt);
-                    if (newLeaf != null) addObject(newLeaf);
-                }
-            }
-
-            // process branch stuff
-            else {
-                Branch branch = plantController.growBranch(unprojMousePos.x,
-                                                           unprojMousePos.y);
-                if (branch != null) addObject(branch);
+        if (ic.didGrowBranch()) System.out.println("did grow branch");
+        if (ic.isGrowBranchModDown())
+            System.out.println("mod grow branch " + "down");
+        if (ic.didGrowBranch() && ic.isGrowBranchModDown()) {
+            Branch branch = plantController.growBranch(unprojMousePos.x,
+                                                       unprojMousePos.y);
+            if (branch != null) addObject(branch);
+        } else if (ic.didGrowLeaf() && ic.isGrowLeafModDown()) {
+            // don't grow if there's a fire there (prioritize fire)
+            if (!hazardController.hasFire(unprojMousePos)) {
+                Leaf.leafType lt = Leaf.leafType.NORMAL;
+                Model newLeaf = plantController.makeLeaf(unprojMousePos.x,
+                                                         unprojMousePos.y +
+                                                                 0.5f *
+                                                                         tilemap.getTileHeight(),
+                                                         lt);
+                if (newLeaf != null) addObject(newLeaf);
             }
         }
     }
@@ -312,7 +300,9 @@ public class GameplayMode extends WorldController {
 
         super.draw(dt);
 
-        if (!ic.didSpecial()) {
+        if ((ic.isGrowBranchModSet() ||
+                (ic.isGrowLeafModSet() && !ic.isGrowLeafModDown())) &&
+                ic.isGrowBranchModDown()) {
             projMousePosCache.set(ic.getMouseX(), ic.getMouseY());
             Vector2 unprojMousePos = canvas.unproject(projMousePosCache);
             plantController.drawGhostBranch(canvas,
@@ -328,6 +318,28 @@ public class GameplayMode extends WorldController {
         uiController.draw(canvas);
         canvas.endHud();
         super.draw(canvas);
+    }
+
+    /**
+     * Called when the Screen is paused.
+     * <p>
+     * We need this method to stop all sounds when we pause.
+     * Pausing happens when we switch game modes.
+     */
+    public void pause() {
+        //jumpSound.stop(jumpId);
+        //plopSound.stop(plopId);
+        //fireSound.stop(fireId);
+    }
+
+    /**
+     * Called when this screen is no longer the current screen for a Game.
+     */
+    public void hide() {
+        // Useless if called in outside animation loop
+        super.hide();
+        backgroundMusic.pause();
+        uiController.pauseTimer();
     }
 
     /**
@@ -433,28 +445,6 @@ public class GameplayMode extends WorldController {
                                                       resourceController);
         world.setContactListener(collisionController);
         volume = constants.getFloat("volume", 1.0f);
-    }
-
-    /**
-     * Called when the Screen is paused.
-     * <p>
-     * We need this method to stop all sounds when we pause.
-     * Pausing happens when we switch game modes.
-     */
-    public void pause() {
-        //jumpSound.stop(jumpId);
-        //plopSound.stop(plopId);
-        //fireSound.stop(fireId);
-    }
-
-    /**
-     * Called when this screen is no longer the current screen for a Game.
-     */
-    public void hide() {
-        // Useless if called in outside animation loop
-        super.hide();
-        backgroundMusic.pause();
-        uiController.pauseTimer();
     }
 
     private void drawBackground() {

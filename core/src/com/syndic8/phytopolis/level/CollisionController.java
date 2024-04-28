@@ -222,7 +222,7 @@ public class CollisionController implements ContactListener {
                 fix2.getBody().getPosition().y - player.getHeight() / 2f <
                         fix1.getBody().getPosition().y;
         if (isCollisionBetweenPlayerAndLeaf &&
-                (isPlayerGoingUp || isPlayerBelow || ic.didDrop())) {
+                (isPlayerGoingUp || isPlayerBelow || ic.isDropKeyDown())) {
             contact.setEnabled(false);
         }
         if (isCollisionBetweenPlayerAndNoTopTile && isPlayerGoingDown) {

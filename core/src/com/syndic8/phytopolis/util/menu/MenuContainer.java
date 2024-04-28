@@ -54,7 +54,12 @@ public class MenuContainer extends FadingScreen {
             }
             fadeIn(0.1f);
         }
-        stage.act();
+        if (!InputController.getInstance().isUpdateScheduled()) {
+            stage.act();
+        }
+        if (menu instanceof ControlsMenu) {
+            ((ControlsMenu) menu).updateControlsLabels();
+        }
     }
 
     public void draw(GameCanvas c) {

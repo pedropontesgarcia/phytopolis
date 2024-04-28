@@ -63,7 +63,7 @@ public class LevelSelectMode extends FadingScreen implements Screen {
     }
 
     private void createMenu() {
-        Menu menu = new Menu(1, 0, 0.4f, -0.4f, Align.left);
+        Menu menu = new Menu(1, 0, 0.4f, -0.4f, 1, Align.left);
         menuContainer = new MenuContainer(menu, canvas);
         ClickListener mainMenuListener = new ClickListener() {
             @Override
@@ -74,15 +74,11 @@ public class LevelSelectMode extends FadingScreen implements Screen {
             }
         };
         menu.addItem(new MenuItem("BACK",
-                                  menu.getSeparation(),
                                   0,
-                                  menu.getLength(),
                                   mainMenuListener,
+                                  menu,
                                   menuContainer,
-                                  canvas,
-                                  menu.getXOffset(),
-                                  menu.getYOffset(),
-                                  menu.getAlignment()));
+                                  canvas));
         menuContainer.populate();
     }
 
@@ -143,9 +139,10 @@ public class LevelSelectMode extends FadingScreen implements Screen {
     }
 
     public void update(float delta) {
+        InputController ic = InputController.getInstance();
+        ic.readInput();
         super.update(delta);
         menuContainer.update(delta);
-        InputController ic = InputController.getInstance();
         projMousePosCache.set(ic.getMouseX(), ic.getMouseY());
         Vector2 unprojMousePos = canvas.unproject(projMousePosCache);
         float mouseX = unprojMousePos.x;
@@ -153,7 +150,6 @@ public class LevelSelectMode extends FadingScreen implements Screen {
         for (LevelBox lb : levelBoxes) {
             if (lb != null) lb.setSelected(lb.inBounds(mouseX, mouseY));
         }
-        InputController.getInstance().readInput(bounds, Vector2.Zero.add(1, 1));
         if (getSelectedPot() != -1 &&
                 InputController.getInstance().didMousePress() && !ready) {
             setLevel();
