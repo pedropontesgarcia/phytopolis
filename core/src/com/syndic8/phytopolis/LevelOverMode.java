@@ -50,7 +50,13 @@ public class LevelOverMode extends FadingScreen implements Screen {
     }
 
     private void createMenu() {
-        Menu menu = new Menu(1, 0, 0.3f, -0.1f, 1, Align.center);
+        Menu menu = new Menu(1,
+                             0,
+                             0.3f,
+                             -0.1f,
+                             1,
+                             Align.center,
+                             Menu.DEFAULT_WIDTH);
         menuContainer = new MenuContainer(menu, canvas);
         ClickListener exitListener = new ClickListener() {
             @Override
@@ -59,7 +65,7 @@ public class LevelOverMode extends FadingScreen implements Screen {
                 fadeOut(0.5f);
             }
         };
-        menu.addItem(new MenuItem("BACK TO\nLEVEL SELECT",
+        menu.addItem(new MenuItem("BACK TO\nLEVELS",
                                   0,
                                   exitListener,
                                   menu,

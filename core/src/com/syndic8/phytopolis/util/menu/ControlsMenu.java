@@ -2,7 +2,9 @@ package com.syndic8.phytopolis.util.menu;
 
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
+import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
+import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.utils.Align;
 import com.syndic8.phytopolis.GameCanvas;
 import com.syndic8.phytopolis.InputController;
@@ -16,7 +18,7 @@ public class ControlsMenu extends Menu {
     private final TextButton topLabel;
 
     public ControlsMenu(GameCanvas c, MenuContainer ctr, Menu back) {
-        super(10, 0.075f, 0, -0.015f, 0.75f, Align.left);
+        super(10, 0.075f, 0, -0.015f, 0.75f, Align.left, DEFAULT_WIDTH);
         topLabel = makeTopLabel(c);
         addItem(new ControlsMenuItem("JUMP",
                                      0,
@@ -66,7 +68,13 @@ public class ControlsMenu extends Menu {
                                      ctr,
                                      c,
                                      InputController.Binding.GROW_LEAF_MOD_KEY));
-        addItem(new MenuItem("< BACK", 9, back, this, ctr, c));
+        addItem(new MenuItem("RESET", 9, new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                InputController.getInstance().setDefaults();
+            }
+        }, this, ctr, c, Align.center, this.getFontScale(), 0.15f, 0, 200));
+        addItem(new BackButtonItem(back, this, ctr, c));
     }
 
     private TextButton makeTopLabel(GameCanvas c) {

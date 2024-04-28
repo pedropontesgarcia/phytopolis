@@ -1,6 +1,5 @@
 package com.syndic8.phytopolis.util.menu;
 
-import com.badlogic.gdx.utils.Align;
 import com.syndic8.phytopolis.GameCanvas;
 import com.syndic8.phytopolis.InputController;
 import com.syndic8.phytopolis.util.PooledList;
@@ -17,14 +16,7 @@ public class OptionsMenu extends Menu {
         Menu graphicsMenu = new GraphicsMenu(c, ctr, this);
         addItem(new MenuItem("CONTROLS", 0, controlsMenu, this, ctr, c));
         addItem(new MenuItem("GRAPHICS", 1, graphicsMenu, this, ctr, c));
-        addItem(new MenuItem("< BACK",
-                             2,
-                             back,
-                             this,
-                             ctr,
-                             c,
-                             Align.left,
-                             0.75f));
+        addItem(new BackButtonItem(back, this, ctr, c));
     }
 
 }

@@ -134,7 +134,7 @@ public class MainMenuMode extends FadingScreen implements Screen {
     }
 
     private void createMenu() {
-        menu = new Menu(3, 0.1f, 0, -0.2f, 1, Align.center);
+        menu = new Menu(3, 0.1f, 0, -0.2f, 1, Align.center, Menu.DEFAULT_WIDTH);
         menuContainer = new MenuContainer(menu, canvas);
         Menu optionsMenu = new OptionsMenu(canvas, menuContainer, menu);
         ClickListener lvlListener = new ClickListener() {

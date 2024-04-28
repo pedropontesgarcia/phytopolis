@@ -9,6 +9,7 @@ import java.util.List;
 
 public class Menu {
 
+    public static final float DEFAULT_WIDTH = 400f;
     private final PooledList<MenuItem> items;
     private final int length;
     private final float separation;
@@ -16,8 +17,10 @@ public class Menu {
     private final float yOffset;
     private final int alignment;
     private final float fontScale;
+    private final float width;
+
     public Menu(int len, float sep) {
-        this(len, sep, 0, 0, 1, Align.center);
+        this(len, sep, 0, 0, 1, Align.center, DEFAULT_WIDTH);
     }
 
     public Menu(int len,
@@ -25,18 +28,20 @@ public class Menu {
                 float xOff,
                 float yOff,
                 float scl,
-                int align) {
+                int align,
+                float w) {
         length = len;
         separation = sep;
         xOffset = xOff;
         yOffset = yOff;
         fontScale = scl;
         alignment = align;
+        width = w;
         items = new PooledList<>();
     }
 
     public Menu(int len, float sep, float scl) {
-        this(len, sep, 0, 0, scl, Align.center);
+        this(len, sep, 0, 0, scl, Align.center, DEFAULT_WIDTH);
     }
 
     public PooledList<MenuItem> getItems() {
@@ -77,6 +82,10 @@ public class Menu {
 
     public float getFontScale() {
         return fontScale;
+    }
+
+    public float getWidth() {
+        return width;
     }
 
 }

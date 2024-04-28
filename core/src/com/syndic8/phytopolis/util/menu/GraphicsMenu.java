@@ -11,7 +11,7 @@ import java.util.List;
 public class GraphicsMenu extends Menu {
 
     public GraphicsMenu(GameCanvas c, MenuContainer ctr, Menu back) {
-        super(5, 0.075f, 0, 0f, 0.75f, Align.left);
+        super(5, 0.075f, 0, 0f, 0.75f, Align.left, DEFAULT_WIDTH);
         addItem(new GraphicsMenuItem("RESOLUTION",
                                      0,
                                      this,
@@ -30,7 +30,7 @@ public class GraphicsMenu extends Menu {
                                      ctr,
                                      c,
                                      GraphicsOption.FPS));
-        addItem(new MenuItem("< BACK", 4, back, this, ctr, c));
+        addItem(new BackButtonItem(back, this, ctr, c));
     }
 
     /**

@@ -94,7 +94,7 @@ public class InputController implements InputProcessor {
         setDefaults();
     }
 
-    private void setDefaults() {
+    public void setDefaults() {
         // Default: NONE
         growBranchModKey = -1;
         // Default: MOUSE LEFT
@@ -418,25 +418,29 @@ public class InputController implements InputProcessor {
             case GROW_BRANCH_MOD_KEY:
                 if (growBranchModKey != -1)
                     return Input.Keys.toString(growBranchModKey);
-                break;
+                return "None";
             case GROW_BRANCH_BUTTON:
                 return getMouseButtonString(growBranchButton);
             case GROW_LEAF_MOD_KEY:
                 if (growLeafModKey != -1)
                     return Input.Keys.toString(growLeafModKey);
-                break;
+                return "None";
             case GROW_LEAF_BUTTON:
                 return getMouseButtonString(growLeafButton);
             case JUMP_KEY:
-                return Input.Keys.toString(jumpKey);
+                if (jumpKey != -1) return Input.Keys.toString(jumpKey);
+                break;
             case LEFT_KEY:
-                return Input.Keys.toString(leftKey);
+                if (leftKey != -1) return Input.Keys.toString(leftKey);
+                break;
             case DROP_KEY:
-                return Input.Keys.toString(dropKey);
+                if (dropKey != -1) return Input.Keys.toString(dropKey);
+                break;
             case RIGHT_KEY:
-                return Input.Keys.toString(rightKey);
+                if (rightKey != -1) return Input.Keys.toString(rightKey);
+                break;
         }
-        return "None";
+        return "Unassigned";
     }
 
     private String getMouseButtonString(int button) {

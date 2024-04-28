@@ -63,7 +63,13 @@ public class LevelSelectMode extends FadingScreen implements Screen {
     }
 
     private void createMenu() {
-        Menu menu = new Menu(1, 0, 0.4f, -0.4f, 1, Align.center);
+        Menu menu = new Menu(1,
+                             0,
+                             0.4f,
+                             -0.4f,
+                             1,
+                             Align.center,
+                             Menu.DEFAULT_WIDTH);
         menuContainer = new MenuContainer(menu, canvas);
         ClickListener mainMenuListener = new ClickListener() {
             @Override
