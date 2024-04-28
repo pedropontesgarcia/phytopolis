@@ -60,6 +60,9 @@ public class MenuContainer extends FadingScreen {
         if (menu instanceof ControlsMenu) {
             ((ControlsMenu) menu).updateControlsLabels();
         }
+        if (menu instanceof GraphicsMenu) {
+            ((GraphicsMenu) menu).updateGraphicssLabels();
+        }
     }
 
     public void draw(GameCanvas c) {
