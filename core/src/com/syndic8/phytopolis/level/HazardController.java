@@ -12,6 +12,7 @@ import com.syndic8.phytopolis.level.models.Drone;
 import com.syndic8.phytopolis.level.models.Fire;
 import com.syndic8.phytopolis.level.models.Hazard;
 import com.syndic8.phytopolis.level.models.Model;
+import com.syndic8.phytopolis.util.FilmStrip;
 import com.syndic8.phytopolis.util.PooledList;
 import com.syndic8.phytopolis.util.Tilemap;
 
@@ -25,7 +26,9 @@ public class HazardController {
      * The frequency at which fires are generated (probability = 1 / fireFrequency) every second.
      */
     private final int fireFrequency;
-    /**
+
+    private FilmStrip fireAnimator;
+    /**;
      * The frequency at which drones are generated (probability = 1 / droneFrequency) every second.
      */
     private final int droneFrequency;
@@ -182,6 +185,8 @@ public class HazardController {
                                   tilemap,
                                   0.5f);
                 f.setTexture(fireTexture);
+                f.setAnimator(fireAnimator);
+                f.setAnimationSpeed(0.05f);
                 hazards.add(f);
                 return f;
             case DRONE:
@@ -411,6 +416,7 @@ public class HazardController {
      */
     public void gatherAssets(AssetDirectory directory) {
         this.fireTexture = directory.getEntry("hazards:fire", Texture.class);
+        this.fireAnimator = new FilmStrip(directory.getEntry("hazards:fire_animation", Texture.class), 1, 16, 16);
         this.droneTexture = directory.getEntry("hazards:drone", Texture.class);
 //        this.bugTexture = directory.getEntry("hazards:bug", Texture.class);
         this.redWarningTexture = new TextureRegion(directory.getEntry("hazards:red-warning", Texture.class));
@@ -474,5 +480,6 @@ public class HazardController {
 
 //        }
     }
+
 
 }

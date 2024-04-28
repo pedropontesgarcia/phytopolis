@@ -17,6 +17,7 @@
     "gameplay:sun_resource": "gameplay/sun-resource.png",
     "gameplay:background": "gameplay/back2.png",
     "hazards:fire": "hazards/fire.png",
+    "hazards:fire_animation":"hazards/fire-filmstrip.png",
     "hazards:drone": "hazards/drone.png",
     "hazards:red-warning": "hazards/red_warning.png",
     "hazards:yellow-warning": "hazards/yellow_warning.png",

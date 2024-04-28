@@ -27,6 +27,10 @@ public abstract class Model {
      * The texture for the shape.
      */
     protected TextureRegion texture;
+
+    protected FilmStrip animator;
+    protected float animFrame;
+    protected float animationSpeed;
     protected int zIndex;
 
     public Model(float x, float y, Tilemap tilemap, float textureSclInTiles) {
@@ -36,6 +40,7 @@ public abstract class Model {
         // Object has yet to be deactivated
         toRemove = false;
         zIndex = 0;
+        animFrame = 0;
     }
 
     public Texture getTexture() {
@@ -47,6 +52,12 @@ public abstract class Model {
         //        radius = animator.getRegionHeight() / 2.0f;
         origin = new Vector2(texture.getWidth() / 2.0f,
                              texture.getHeight() / 2.0f);
+    }
+    public void setAnimator(FilmStrip animation){
+        animator = animation;
+    }
+    public void setAnimationSpeed(float speed){
+        animationSpeed = 0.15f;
     }
 
     /**

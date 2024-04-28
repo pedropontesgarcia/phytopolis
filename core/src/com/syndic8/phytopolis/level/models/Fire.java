@@ -44,6 +44,6 @@ public class Fire extends Hazard {
         return isBurning;
     }
 
-    public void update(float delta) {}
+    //public void update(float delta) {}
 
 }

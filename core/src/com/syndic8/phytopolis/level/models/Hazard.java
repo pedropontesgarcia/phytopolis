@@ -22,6 +22,8 @@ public abstract class Hazard extends Model {
      */
     private int timer;
 
+    private final int NUM_FIRE_FRAMES = 16;
+
     /**
      * Creates a hazard object.
      */
@@ -93,18 +95,46 @@ public abstract class Hazard extends Model {
         float height = tilemap.getTileHeight() * textureSclInTiles;
         float sclX = width / texture.getRegionWidth();
         float sclY = height / texture.getRegionHeight();
-
-        if (texture != null) {
-            canvas.draw(texture,
+        if (getType() == ModelType.FIRE){
+            animator.setFrame((int) animFrame);
+            float x = animator.getRegionWidth() / 2.0f;
+            float y = animator.getRegionHeight() / 2.0f;
+            canvas.draw(animator,
                     Color.WHITE,
-                    origin.x,
-                    origin.y,
+                    x,
+                    y,
                     getX(),
                     getY(),
                     0,
-                    sclX,
-                    sclY);
+                    sclX*3,
+                    sclY*4);
+        }else{
+
+            if (texture != null) {
+                canvas.draw(texture,
+                        Color.WHITE,
+                        origin.x,
+                        origin.y,
+                        getX(),
+                        getY(),
+                        0,
+                        sclX,
+                        sclY);
+            }
         }
+
+    }
+    public void update(float dt){
+        if ( getType() == ModelType.FIRE){
+            if (animFrame < NUM_FIRE_FRAMES) {
+                animFrame += animationSpeed;
+            }
+            if (animFrame >= NUM_FIRE_FRAMES) {
+                animFrame = 0;
+            }
+        }
+
+
     }
 
 }

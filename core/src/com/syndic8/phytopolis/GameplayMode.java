@@ -231,6 +231,9 @@ public class GameplayMode extends WorldController {
                 ((Sun) m).update(m.getY() < plantController.getMaxLeafHeight());
 
             }
+            if (m instanceof Hazard){
+                ((Hazard) m).update(dt);
+            }
         }
         Sun s = sunController.spawnSuns(dt, tilemap);
         if (s != null) addObject(s);
