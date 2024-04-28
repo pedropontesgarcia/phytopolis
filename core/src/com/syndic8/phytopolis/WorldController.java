@@ -358,15 +358,15 @@ public abstract class WorldController extends FadingScreen implements Screen {
     public boolean preUpdate(float dt) {
         super.update(dt);
         InputController input = InputController.getInstance();
-        input.readInput(bounds, scale);
+        input.readInput();
         if (listener == null) {
             return true;
         }
 
         // Handle resets
-        if (input.didReset()) {
-            reset();
-        }
+        //        if (input.didReset()) {
+        //            reset();
+        //        }
 
         // Now it is time to maybe switch screens.
         if (input.didExit() && !isPaused() && isFadeDone()) {
@@ -374,14 +374,6 @@ public abstract class WorldController extends FadingScreen implements Screen {
             setPaused(true);
             fadeOut(0.25f);
             return true;
-        } else if (input.didAdvance()) {
-            pause();
-            listener.exitScreen(this, GDXRoot.ExitCode.EXIT_NEXT.ordinal());
-            return false;
-        } else if (input.didRetreat()) {
-            pause();
-            listener.exitScreen(this, GDXRoot.ExitCode.EXIT_PREV.ordinal());
-            return false;
         } else if (isComplete() && isFadeDone()) {
             pause();
             listener.exitScreen(this, GDXRoot.ExitCode.EXIT_VICTORY.ordinal());
@@ -471,13 +463,6 @@ public abstract class WorldController extends FadingScreen implements Screen {
             obj.draw(canvas);
         }
     }
-
-    /**
-     * Resets the status of the game so that we can play again.
-     * <p>
-     * This method disposes of the world and creates a new one.
-     */
-    public abstract void reset();
 
     private boolean isPaused() {
         return paused;
@@ -604,6 +589,13 @@ public abstract class WorldController extends FadingScreen implements Screen {
         world = null;
         canvas = null;
     }
+
+    /**
+     * Resets the status of the game so that we can play again.
+     * <p>
+     * This method disposes of the world and creates a new one.
+     */
+    public abstract void reset();
 
     /**
      * Sets the ScreenListener for this mode

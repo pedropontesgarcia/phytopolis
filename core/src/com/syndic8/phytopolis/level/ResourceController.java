@@ -1,18 +1,16 @@
 package com.syndic8.phytopolis.level;
 
 import com.syndic8.phytopolis.GameCanvas;
-import com.syndic8.phytopolis.assets.AssetDirectory;
 import com.syndic8.phytopolis.util.Tilemap;
 
 public class ResourceController {
 
+    public final float SUN_TOLERANCE = 2;
     /**
      * Maximum amount of water that can be stored
      */
     private final int MAX_WATER = 100;
-
     private final int MAX_SUN = 8;
-
     private final int STARTING_SUN = 1;
     /**
      * Amount of water required to grow a leaf
@@ -51,7 +49,9 @@ public class ResourceController {
         return currWater;
     }
 
-    public float getCurrRatio() { return (float) currWater / MAX_WATER; }
+    public float getCurrRatio() {
+        return (float) currWater / MAX_WATER;
+    }
 
     public void pickupWater() {
         currWater = Math.min(MAX_WATER, currWater + WATER_ON_PICKUP);
@@ -61,14 +61,14 @@ public class ResourceController {
         return currSun;
     }
 
-//    public void pickupSun() {
-//        currSun = Math.min(MAX_SUN, currSun + SUN_ON_PICKUP);
-//        addTime(10);
-//    }
-//
-//    public void addTime(float t) {
-//        ui.addTime(t);
-//    }
+    //    public void pickupSun() {
+    //        currSun = Math.min(MAX_SUN, currSun + SUN_ON_PICKUP);
+    //        addTime(10);
+    //    }
+    //
+    //    public void addTime(float t) {
+    //        ui.addTime(t);
+    //    }
 
     public boolean fullWater() {
         return currWater == MAX_WATER;
@@ -123,9 +123,9 @@ public class ResourceController {
         currSun = STARTING_SUN;
     }
 
-//    public void update(float dt) {
-//        ui.update(dt, (float) currWater / MAX_WATER, (float) currSun / MAX_SUN);
-//
-//    }
+    //    public void update(float dt) {
+    //        ui.update(dt, (float) currWater / MAX_WATER, (float) currSun / MAX_SUN);
+    //
+    //    }
 
 }

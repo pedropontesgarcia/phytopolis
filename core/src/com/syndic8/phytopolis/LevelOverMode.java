@@ -5,7 +5,6 @@ import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.math.Rectangle;
-import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.utils.Align;
@@ -51,7 +50,7 @@ public class LevelOverMode extends FadingScreen implements Screen {
     }
 
     private void createMenu() {
-        Menu menu = new Menu(1, 0, 0.3f, -0.1f, Align.center);
+        Menu menu = new Menu(1, 0, 0.3f, -0.1f, 1, Align.center);
         menuContainer = new MenuContainer(menu, canvas);
         ClickListener exitListener = new ClickListener() {
             @Override
@@ -61,15 +60,11 @@ public class LevelOverMode extends FadingScreen implements Screen {
             }
         };
         menu.addItem(new MenuItem("NEXT",
-                                  menu.getSeparation(),
                                   0,
-                                  menu.getLength(),
                                   exitListener,
+                                  menu,
                                   menuContainer,
-                                  canvas,
-                                  menu.getXOffset(),
-                                  menu.getYOffset(),
-                                  menu.getAlignment()));
+                                  canvas));
         menuContainer.populate();
     }
 
@@ -116,11 +111,11 @@ public class LevelOverMode extends FadingScreen implements Screen {
     public void update(float delta) {
         super.update(delta);
         menuContainer.update(delta);
-        InputController.getInstance().readInput(bounds, Vector2.Zero.add(1, 1));
-        if (InputController.getInstance().didSecondary()) {
-            ready = true;
-            fadeOut(0.5f);
-        }
+        //        InputController.getInstance().readInput(bounds, Vector2.Zero.add(1, 1));
+        //        if (InputController.getInstance().didSecondary()) {
+        //            ready = true;
+        //            fadeOut(0.5f);
+        //        }
     }
 
     public void draw() {

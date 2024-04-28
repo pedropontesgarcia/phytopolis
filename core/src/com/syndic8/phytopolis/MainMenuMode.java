@@ -24,6 +24,7 @@ import com.syndic8.phytopolis.util.ScreenListener;
 import com.syndic8.phytopolis.util.menu.Menu;
 import com.syndic8.phytopolis.util.menu.MenuContainer;
 import com.syndic8.phytopolis.util.menu.MenuItem;
+import com.syndic8.phytopolis.util.menu.OptionsMenu;
 
 /**
  * Class that provides a loading screen for the state of the game.
@@ -78,7 +79,6 @@ public class MainMenuMode extends FadingScreen implements Screen {
     private Music backgroundMusic;
     private MenuContainer menuContainer;
     private Menu menu;
-    private Menu optionsMenu;
     private boolean exit;
 
     /**
@@ -134,9 +134,9 @@ public class MainMenuMode extends FadingScreen implements Screen {
     }
 
     private void createMenu() {
-        menu = new Menu(3, 0.1f, 0, -0.2f, Align.center);
-        optionsMenu = new Menu(2, 0.15f);
+        menu = new Menu(3, 0.1f, 0, -0.2f, 1, Align.center);
         menuContainer = new MenuContainer(menu, canvas);
+        Menu optionsMenu = new OptionsMenu(canvas, menuContainer, menu);
         ClickListener lvlListener = new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
@@ -150,49 +150,23 @@ public class MainMenuMode extends FadingScreen implements Screen {
             }
         };
         menu.addItem(new MenuItem("PLAY",
-                                  menu.getSeparation(),
                                   0,
-                                  menu.getLength(),
                                   lvlListener,
+                                  menu,
                                   menuContainer,
-                                  canvas,
-                                  menu.getXOffset(),
-                                  menu.getYOffset(),
-                                  menu.getAlignment()));
+                                  canvas));
         menu.addItem(new MenuItem("OPTIONS",
-                                  menu.getSeparation(),
                                   1,
-                                  menu.getLength(),
                                   optionsMenu,
+                                  menu,
                                   menuContainer,
-                                  canvas,
-                                  menu.getXOffset(),
-                                  menu.getYOffset(),
-                                  menu.getAlignment()));
+                                  canvas));
         menu.addItem(new MenuItem("QUIT",
-                                  menu.getSeparation(),
                                   2,
-                                  menu.getLength(),
                                   exitListener,
+                                  menu,
                                   menuContainer,
-                                  canvas,
-                                  menu.getXOffset(),
-                                  menu.getYOffset(),
-                                  menu.getAlignment()));
-        optionsMenu.addItem(new MenuItem("QUIT",
-                                         optionsMenu.getSeparation(),
-                                         0,
-                                         optionsMenu.getLength(),
-                                         exitListener,
-                                         menuContainer,
-                                         canvas));
-        optionsMenu.addItem(new MenuItem("BACK",
-                                         optionsMenu.getSeparation(),
-                                         1,
-                                         optionsMenu.getLength(),
-                                         menu,
-                                         menuContainer,
-                                         canvas));
+                                  canvas));
         menuContainer.populate();
     }
 
@@ -351,6 +325,7 @@ public class MainMenuMode extends FadingScreen implements Screen {
      * Draw the status of this mode.
      */
     private void draw() {
+        canvas.clear();
         if (progress == 1) {
             if (menuContainer.getMenu() == menu) {
                 canvas.begin();

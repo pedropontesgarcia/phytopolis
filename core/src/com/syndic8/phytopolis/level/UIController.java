@@ -40,7 +40,7 @@ public class UIController {
         projMousePosCache = new Vector2();
         ic = InputController.getInstance();
         stage = new Stage(c.getTextViewport());
-        BitmapFont font = SharedAssetContainer.getInstance().uiFont;
+        BitmapFont font = SharedAssetContainer.getInstance().getUIFont();
         Label.LabelStyle labelStyle = new Label.LabelStyle();
         labelStyle.font = font;
         label = new Label("00:00", labelStyle);
@@ -120,12 +120,18 @@ public class UIController {
     public void updateCursor(HazardController hazardController) {
         projMousePosCache.set(ic.getMouseX(), ic.getMouseY());
         Vector2 unprojMousePos = canvas.unproject(projMousePosCache);
-        if (ic.didSpecial()) {
-            Gdx.graphics.setCursor(leafCursor);
-        } else if (hazardController.hasFire(unprojMousePos)) {
+        if (hazardController.hasFire(unprojMousePos)) {
             Gdx.graphics.setCursor(waterCursor);
-        } else {
+        } else if ((ic.isGrowBranchModSet() ||
+                (ic.isGrowLeafModSet() && !ic.isGrowLeafModDown())) &&
+                ic.isGrowBranchModDown()) {
             Gdx.graphics.setCursor(branchCursor);
+        } else if ((ic.isGrowLeafModSet() ||
+                (ic.isGrowBranchModSet() && !ic.isGrowBranchModDown())) &&
+                ic.isGrowLeafModDown()) {
+            Gdx.graphics.setCursor(leafCursor);
+        } else {
+            Gdx.graphics.setSystemCursor(Cursor.SystemCursor.Arrow);
         }
     }
 
