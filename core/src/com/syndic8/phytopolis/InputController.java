@@ -276,36 +276,40 @@ public class InputController implements InputProcessor {
         keys.add(i);
         if (updateScheduled) {
             updateScheduled = false;
+            int key = (i == Input.Keys.ESCAPE ? -1 : i);
+            boolean conflictBetweenBranchAndLeaf;
+            boolean conflictWithOtherBindings = assignedKeys.contains(key);
             switch (bindingToUpdate) {
                 case GROW_BRANCH_MOD_KEY:
-                    if (i == Input.Keys.ESCAPE) {
-                        if (growLeafModKey == -1 &&
-                                growBranchButton == growLeafButton) return true;
-                        assignedKeys.remove(growBranchModKey);
-                        growBranchModKey = -1;
-                    } else if ((i != growLeafModKey ||
-                            growBranchButton != growLeafButton) &&
-                            (!assignedKeys.contains(i) ||
-                                    i == growLeafModKey)) {
-                        assignedKeys.remove(growBranchModKey);
-                        growBranchModKey = i;
-                        assignedKeys.add(growBranchModKey);
+                    conflictBetweenBranchAndLeaf = (
+                            growBranchButton == growLeafButton &&
+                                    key == growLeafModKey);
+                    if (conflictWithOtherBindings && !(key == growLeafModKey))
+                        return true;
+                    assignedKeys.remove(growBranchModKey);
+                    growBranchModKey = key;
+                    if (conflictBetweenBranchAndLeaf) {
+                        growLeafButton = (growLeafButton == Input.Buttons.LEFT ?
+                                Input.Buttons.RIGHT :
+                                Input.Buttons.LEFT);
                     }
+                    if (key != -1) assignedKeys.add(key);
                     return true;
                 case GROW_LEAF_MOD_KEY:
-                    if (i == Input.Keys.ESCAPE) {
-                        if (growBranchModKey == -1 &&
-                                growBranchButton == growLeafButton) return true;
-                        assignedKeys.remove(growLeafModKey);
-                        growLeafModKey = -1;
-                    } else if ((i != growBranchModKey ||
-                            growBranchButton != growLeafButton) &&
-                            (!assignedKeys.contains(i) ||
-                                    i == growBranchModKey)) {
-                        assignedKeys.remove(growLeafModKey);
-                        growLeafModKey = i;
-                        assignedKeys.add(growLeafModKey);
+                    conflictBetweenBranchAndLeaf = (
+                            growBranchButton == growLeafButton &&
+                                    key == growBranchModKey);
+                    if (conflictWithOtherBindings && !(key == growBranchModKey))
+                        return true;
+                    assignedKeys.remove(growLeafModKey);
+                    growLeafModKey = key;
+                    if (conflictBetweenBranchAndLeaf) {
+                        growBranchButton = (
+                                growBranchButton == Input.Buttons.LEFT ?
+                                        Input.Buttons.RIGHT :
+                                        Input.Buttons.LEFT);
                     }
+                    if (key != -1) assignedKeys.add(key);
                     return true;
                 case JUMP_KEY:
                     if (i != Input.Keys.ESCAPE && !assignedKeys.contains(i)) {
@@ -355,16 +359,27 @@ public class InputController implements InputProcessor {
     public boolean touchDown(int i, int i1, int i2, int i3) {
         if (updateScheduled) {
             updateScheduled = false;
+            if (i3 != Input.Buttons.LEFT && i3 != Input.Buttons.RIGHT)
+                return true;
             switch (bindingToUpdate) {
                 case GROW_BRANCH_BUTTON:
-                    if (i3 != growLeafButton ||
-                            growLeafModKey != growBranchModKey)
-                        growBranchButton = i3;
+                    growBranchButton = i3;
+                    if (growBranchButton == growLeafButton &&
+                            growBranchModKey == growLeafModKey) {
+                        growLeafButton = (growLeafButton == Input.Buttons.LEFT ?
+                                Input.Buttons.RIGHT :
+                                Input.Buttons.LEFT);
+                    }
                     return true;
                 case GROW_LEAF_BUTTON:
-                    if (i3 != growBranchButton ||
-                            growLeafModKey != growBranchModKey)
-                        growLeafButton = i3;
+                    growLeafButton = i3;
+                    if (growBranchButton == growLeafButton &&
+                            growBranchModKey == growLeafModKey) {
+                        growBranchButton = (
+                                growBranchButton == Input.Buttons.LEFT ?
+                                        Input.Buttons.RIGHT :
+                                        Input.Buttons.LEFT);
+                    }
                     return true;
             }
         }
@@ -427,8 +442,6 @@ public class InputController implements InputProcessor {
     private String getMouseButtonString(int button) {
         if (button == Input.Buttons.LEFT) return "Mouse Left";
         if (button == Input.Buttons.RIGHT) return "Mouse Right";
-        if (button == Input.Buttons.MIDDLE) return "Mouse Middle";
-        if (button == Input.Buttons.BACK) return "Mouse Back";
         return "Unknown";
     }
 
