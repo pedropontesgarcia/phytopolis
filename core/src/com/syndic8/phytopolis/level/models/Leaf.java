@@ -76,7 +76,7 @@ public class Leaf extends BoxObject {
      * @param delta Number of seconds since last animation frame
      */
     public void update(float delta) {
-        if (animFrame < getFilmStrip().getSize() - 1) {
+        if (animFrame < getFilmStrip().getSize() - 1 && animFrame <= 4) {
             animFrame += ANIMATION_SPEED;
         } else if (animFrame >= getFilmStrip().getSize()) {
             animFrame = getFilmStrip().getSize() - 1;
@@ -110,6 +110,6 @@ public class Leaf extends BoxObject {
     /**
      * enum containing possible leaf types
      */
-    public enum leafType {NORMAL, BOUNCY}
+    public enum leafType {NORMAL, BOUNCY, NORMAL1, NORMAL2}
 
 }

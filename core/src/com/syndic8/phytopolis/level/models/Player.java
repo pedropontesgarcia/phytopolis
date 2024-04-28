@@ -98,6 +98,8 @@ public class Player extends CapsuleObject {
      * whether the dude can jump extra high
      */
     private boolean bouncy = false;
+    private int bouncyTimer = 0;
+    private int bouncyTimerMax = 7;
 
     /**
      * Creates a new dude avatar with the given physics data
@@ -225,6 +227,9 @@ public class Player extends CapsuleObject {
      */
     public void setBouncy(boolean value) {
         bouncy = value;
+        if(value){
+            bouncyTimer = bouncyTimerMax;
+        }
     }
 
     /**
@@ -372,7 +377,7 @@ public class Player extends CapsuleObject {
 
         // Jump!
         if (isJumping()) {
-            if (bouncy) forceCache.set(0, jump_force * bouncyMultiplier);
+            if (bouncyTimer > 0) forceCache.set(0, jump_force * bouncyMultiplier);
             else forceCache.set(0, jump_force);
             body.applyLinearImpulse(forceCache, getPosition(), true);
         }
@@ -430,6 +435,7 @@ public class Player extends CapsuleObject {
         } else {
             animFrame2 = 0;
         }
+        if(!bouncy) bouncyTimer--;
 
         // Apply cooldowns
         if (isJumping()) {

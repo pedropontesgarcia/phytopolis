@@ -89,6 +89,8 @@ public class PlantController {
      * how many more frames until the next propagation of destruction
      */
     private int plantCoyoteTimeRemaining = 0;
+    private FilmStrip leafTextureOne;
+    private FilmStrip leafTextureTwo;
 
     /**
      * Initialize a PlantController with specified height and width
@@ -136,6 +138,18 @@ public class PlantController {
                         tilemap);
             }
         }
+    }
+
+    public Leaf.leafType getLevelLeaf(String l){
+        switch(l){
+            case "gameplay:lvl1":
+                return Leaf.leafType.NORMAL;
+            case "gameplay:lvl2":
+                return Leaf.leafType.NORMAL1;
+            case "gameplay:lvl3":
+                return Leaf.leafType.NORMAL2;
+        }
+        return null;
     }
 
     public void reset() {
@@ -347,7 +361,7 @@ public class PlantController {
      * @param lt type of Leaf to upgrade to
      * @return the new Leaf object
      */
-    public Leaf makeLeaf(float x, float y, Leaf.leafType lt) {
+    public Leaf makeLeaf(float x, float y, Leaf.leafType lt, float width) {
         int xIndex = screenCoordToIndex(x, y)[0];
         int yIndex = screenCoordToIndex(x, y)[1];
         System.out.println(xIndex + " " + yIndex);
@@ -358,13 +372,13 @@ public class PlantController {
                 resourceController.canUpgrade()) {
             plantGrid[xIndex][yIndex].unmakeLeaf();
             resourceController.decrementUpgrade();
-            Leaf l = plantGrid[xIndex][yIndex].makeLeaf(Leaf.leafType.BOUNCY);
+            Leaf l = plantGrid[xIndex][yIndex].makeLeaf(Leaf.leafType.BOUNCY, width);
             if (l != null && l.getY() > getMaxLeafHeight()) {
                 maxLeafIndex.set(xIndex, yIndex);
             }
             return l;
         } else {
-            return growLeaf(x, y, lt);
+            return growLeaf(x, y, lt, width);
         }
     }
 
@@ -387,15 +401,16 @@ public class PlantController {
      * @return the grown leaf object
      */
 
-    public Leaf growLeaf(float x, float y, Leaf.leafType type) {
+    public Leaf growLeaf(float x, float y, Leaf.leafType type, float width) {
         int xIndex = screenCoordToIndex(x, y)[0];
         int yIndex = screenCoordToIndex(x, y)[1];
         boolean lowerNode = xIndex % 2 == 0;
         if (!inBounds(xIndex, yIndex)) return null;
+
         if (!plantGrid[xIndex][yIndex].hasLeaf() &&
                 (yIndex > 0 || !lowerNode) &&
                 resourceController.canGrowLeaf()) {
-            Leaf l = plantGrid[xIndex][yIndex].makeLeaf(type);
+            Leaf l = plantGrid[xIndex][yIndex].makeLeaf(type, width);
             if (l != null && l.getY() > getMaxLeafHeight()) {
                 maxLeafIndex.set(xIndex, yIndex);
             }
@@ -643,7 +658,11 @@ public class PlantController {
                                             5);
         staticBranchTexture.setFrame(4);
         leafTexture = new FilmStrip(directory.getEntry("gameplay:leaf",
-                                                       Texture.class), 1, 5, 5);
+                                                       Texture.class), 1, 9, 9);
+        leafTextureOne = new FilmStrip(directory.getEntry("gameplay:leaf1",
+                Texture.class), 1, 9, 9);
+        leafTextureTwo = new FilmStrip(directory.getEntry("gameplay:leaf2",
+                Texture.class), 1, 9, 9);
         bouncyLeafTexture = directory.getEntry("gameplay:bouncy",
                                                Texture.class);
         enBranchTextureUp = directory.getEntry("gameplay:enbranch",
@@ -720,7 +739,7 @@ public class PlantController {
         /**
          * width of the leaf at this node
          */
-        private final float leafWidth = 1.5f;
+        private float leafWidth = 1.5f;
         /**
          * height of the leaf at this node
          */
@@ -811,15 +830,16 @@ public class PlantController {
          *
          * @param type type of leaf to create
          */
-        public Leaf makeLeaf(Leaf.leafType type) {
+        public Leaf makeLeaf(Leaf.leafType type, float width) {
             if (screenCoordToIndex(x / worldToPixelConversionRatio,
                                    y / worldToPixelConversionRatio)[1] > 0 &&
                     !hasLeaf() && hasBranch() ||
                     leafGrowableAt(x / worldToPixelConversionRatio,
                                    y / worldToPixelConversionRatio)) {
+                if(type == Leaf.leafType.BOUNCY) width = leafWidth;
                 leaf = new Leaf(x / worldToPixelConversionRatio,
                                 y / worldToPixelConversionRatio,
-                                leafWidth,
+                                width,
                                 leafHeight,
                                 type,
                                 tilemap,
@@ -830,6 +850,12 @@ public class PlantController {
                         break;
                     case BOUNCY:
                         leaf.setTexture(bouncyLeafTexture);
+                        break;
+                    case NORMAL1:
+                        leaf.setFilmStrip(leafTextureOne);
+                        break;
+                    case NORMAL2:
+                        leaf.setFilmStrip(leafTextureTwo);
                         break;
                 }
                 resourceController.decrementGrowLeaf();

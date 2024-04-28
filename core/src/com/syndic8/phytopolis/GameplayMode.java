@@ -61,6 +61,10 @@ public class GameplayMode extends WorldController {
     private Music backgroundMusic;
     private String lvl;
     private CollisionController collisionController;
+    private float lvl1LeafWidth = 1.4f;
+    private float lvl2LeafWidth = 1.2f;
+    private float lvl3LeafWidth = 0.9f;
+
 
     /**
      * Creates and initialize a new instance of the platformer game
@@ -274,11 +278,26 @@ public class GameplayMode extends WorldController {
                 // don't grow if there's a fire there (prioritize fire)
                 if (!hazardController.hasFire(unprojMousePos)) {
                     Leaf.leafType lt = Leaf.leafType.NORMAL;
+                    float width = 0;
+                    switch(lvl){
+                        case "gameplay:lvl1":
+                            lt = Leaf.leafType.NORMAL;
+                            width = lvl1LeafWidth;
+                            break;
+                        case "gameplay:lvl2":
+                            lt = Leaf.leafType.NORMAL1;
+                            width = lvl2LeafWidth;
+                            break;
+                        case "gameplay:lvl3":
+                            lt = Leaf.leafType.NORMAL2;
+                            width = lvl3LeafWidth;
+                            break;
+                    }
                     Model newLeaf = plantController.makeLeaf(unprojMousePos.x,
                                                              unprojMousePos.y +
                                                                      0.5f *
                                                                              tilemap.getTileHeight(),
-                                                             lt);
+                                                             lt, width);
                     if (newLeaf != null) addObject(newLeaf);
                 }
             }
