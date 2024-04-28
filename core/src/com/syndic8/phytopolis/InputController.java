@@ -1,10 +1,10 @@
 package com.syndic8.phytopolis;
 
-import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.Input;
-import com.badlogic.gdx.InputMultiplexer;
-import com.badlogic.gdx.InputProcessor;
+import com.badlogic.gdx.*;
 import com.badlogic.gdx.utils.IntSet;
+
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Class for reading player input.
@@ -19,16 +19,11 @@ public class InputController implements InputProcessor {
     private final InputMultiplexer multiplexer;
     private final IntSet keys;
     private final IntSet assignedKeys;
+    private final Preferences preferences;
+    private final Map<String, Integer> defaultBindings;
+    private Map<String, Integer> bindings;
     private boolean updateScheduled;
     private Binding bindingToUpdate;
-    private int growBranchModKey;
-    private int growBranchButton;
-    private int growLeafModKey;
-    private int growLeafButton;
-    private int jumpKey;
-    private int leftKey;
-    private int dropKey;
-    private int rightKey;
     private int exitKey;
     /**
      * Whether the grow branch mod key was pressed.
@@ -89,35 +84,43 @@ public class InputController implements InputProcessor {
         multiplexer.addProcessor(this);
         keys = new IntSet();
         assignedKeys = new IntSet();
+        preferences = Gdx.app.getPreferences("phytopolis_settings");
+        defaultBindings = new HashMap<>();
+        bindings = new HashMap<>();
 
-        // Setting defaults
-        setDefaults();
+        // Reading preferences and otherwise setting defaults
+        setBindings();
     }
 
-    public void setDefaults() {
-        // Default: NONE
-        growBranchModKey = -1;
-        // Default: MOUSE LEFT
-        growBranchButton = Input.Buttons.LEFT;
-        // Default: SHIFT
-        growLeafModKey = Input.Keys.SHIFT_LEFT;
-        assignedKeys.add(growLeafModKey);
-        // Default: MOUSE LEFT
-        growLeafButton = Input.Buttons.LEFT;
-        // Default: W
-        jumpKey = Input.Keys.W;
-        assignedKeys.add(jumpKey);
-        // Default: A
-        leftKey = Input.Keys.A;
-        assignedKeys.add(leftKey);
-        // Default: S
-        dropKey = Input.Keys.S;
-        assignedKeys.add(dropKey);
-        // Default: D
-        rightKey = Input.Keys.D;
-        assignedKeys.add(rightKey);
-        // Default: ESC
+    private void setBindings() {
         exitKey = Input.Keys.ESCAPE;
+        defaultBindings.put("growBranchModKey", -1);
+        defaultBindings.put("growBranchButton", Input.Buttons.LEFT);
+        defaultBindings.put("growLeafModKey", Input.Keys.SHIFT_LEFT);
+        defaultBindings.put("growLeafButton", Input.Buttons.LEFT);
+        defaultBindings.put("jumpKey", Input.Keys.W);
+        defaultBindings.put("leftKey", Input.Keys.A);
+        defaultBindings.put("dropKey", Input.Keys.S);
+        defaultBindings.put("rightKey", Input.Keys.D);
+        for (String key : defaultBindings.keySet()) {
+            int defaultVal = defaultBindings.get(key);
+            int actualVal = preferences.getInteger(key, defaultVal);
+            bindings.put(key, actualVal);
+            if (actualVal != -1) assignedKeys.add(actualVal);
+        }
+        updateAssigned();
+    }
+
+    private void updateAssigned() {
+        assignedKeys.clear();
+        if (bindings.get("growBranchModKey") != -1)
+            assignedKeys.add(bindings.get("growBranchModKey"));
+        if (bindings.get("growLeafModKey") != -1)
+            assignedKeys.add(bindings.get("growLeafModKey"));
+        assignedKeys.add(bindings.get("jumpKey"));
+        assignedKeys.add(bindings.get("leftKey"));
+        assignedKeys.add(bindings.get("dropKey"));
+        assignedKeys.add(bindings.get("rightKey"));
     }
 
     /**
@@ -130,6 +133,19 @@ public class InputController implements InputProcessor {
         return theController;
     }
 
+    public void resetBindings() {
+        bindings = new HashMap<>(defaultBindings);
+        updateAssigned();
+        updatePreferences();
+    }
+
+    private void updatePreferences() {
+        for (String key : bindings.keySet()) {
+            preferences.putInteger(key, bindings.get(key));
+        }
+        preferences.flush();
+    }
+
     public boolean didGrowBranch() {
         boolean didGrowBranchKey =
                 growBranchButtonPressed && !growBranchButtonPrevious;
@@ -137,12 +153,12 @@ public class InputController implements InputProcessor {
     }
 
     public boolean isGrowBranchModDown() {
-        if (growBranchModKey == -1) return true;
+        if (bindings.get("growBranchModKey") == -1) return true;
         return growBranchModDown;
     }
 
     public boolean isGrowBranchModSet() {
-        return growBranchModKey != -1;
+        return bindings.get("growBranchModKey") != -1;
     }
 
     public boolean didGrowLeaf() {
@@ -152,12 +168,12 @@ public class InputController implements InputProcessor {
     }
 
     public boolean isGrowLeafModDown() {
-        if (growLeafModKey == -1) return true;
+        if (bindings.get("growLeafModKey") == -1) return true;
         return growLeafModDown;
     }
 
     public boolean isGrowLeafModSet() {
-        return growLeafModKey != -1;
+        return bindings.get("growLeafModKey") != -1;
     }
 
     public boolean didJump() {
@@ -234,16 +250,20 @@ public class InputController implements InputProcessor {
         mouseY = Gdx.input.getY();
 
         // Read mouse and key input
-        if (growBranchModKey != -1)
-            growBranchModDown = Gdx.input.isKeyPressed(growBranchModKey);
-        growBranchButtonPressed = Gdx.input.isButtonPressed(growBranchButton);
-        if (growLeafModKey != -1)
-            growLeafModDown = Gdx.input.isKeyPressed(growLeafModKey);
-        growLeafButtonPressed = Gdx.input.isButtonPressed(growLeafButton);
-        jumpKeyPressed = Gdx.input.isKeyPressed(jumpKey);
-        leftKeyPressed = Gdx.input.isKeyPressed(leftKey);
-        dropKeyDown = Gdx.input.isKeyPressed(dropKey);
-        rightKeyPressed = Gdx.input.isKeyPressed(rightKey);
+        if (bindings.get("growBranchModKey") != -1)
+            growBranchModDown = Gdx.input.isKeyPressed(bindings.get(
+                    "growBranchModKey"));
+        growBranchButtonPressed = Gdx.input.isButtonPressed(bindings.get(
+                "growBranchButton"));
+        if (bindings.get("growLeafModKey") != -1)
+            growLeafModDown = Gdx.input.isKeyPressed(bindings.get(
+                    "growLeafModKey"));
+        growLeafButtonPressed = Gdx.input.isButtonPressed(bindings.get(
+                "growLeafButton"));
+        jumpKeyPressed = Gdx.input.isKeyPressed(bindings.get("jumpKey"));
+        leftKeyPressed = Gdx.input.isKeyPressed(bindings.get("leftKey"));
+        dropKeyDown = Gdx.input.isKeyPressed(bindings.get("dropKey"));
+        rightKeyPressed = Gdx.input.isKeyPressed(bindings.get("rightKey"));
         exitKeyPressed = Gdx.input.isKeyPressed(exitKey);
         mousePressed = Gdx.input.isButtonPressed(Input.Buttons.LEFT);
 
@@ -282,62 +302,75 @@ public class InputController implements InputProcessor {
             switch (bindingToUpdate) {
                 case GROW_BRANCH_MOD_KEY:
                     conflictBetweenBranchAndLeaf = (
-                            growBranchButton == growLeafButton &&
-                                    key == growLeafModKey);
-                    if (conflictWithOtherBindings && !(key == growLeafModKey))
+                            bindings.get("growBranchButton") ==
+                                    bindings.get("growLeafButton") &&
+                                    key == bindings.get("growLeafModKey"));
+                    if (conflictWithOtherBindings &&
+                            !(key == bindings.get("growLeafModKey")))
                         return true;
-                    assignedKeys.remove(growBranchModKey);
-                    growBranchModKey = key;
+                    assignedKeys.remove(bindings.get("growBranchModKey"));
+                    bindings.put("growBranchModKey", key);
                     if (conflictBetweenBranchAndLeaf) {
-                        growLeafButton = (growLeafButton == Input.Buttons.LEFT ?
-                                Input.Buttons.RIGHT :
-                                Input.Buttons.LEFT);
+                        bindings.put("growLeafButton",
+                                     bindings.get("growLeafButton") ==
+                                             Input.Buttons.LEFT ?
+                                             Input.Buttons.RIGHT :
+                                             Input.Buttons.LEFT);
                     }
                     if (key != -1) assignedKeys.add(key);
+                    updatePreferences();
                     return true;
                 case GROW_LEAF_MOD_KEY:
                     conflictBetweenBranchAndLeaf = (
-                            growBranchButton == growLeafButton &&
-                                    key == growBranchModKey);
-                    if (conflictWithOtherBindings && !(key == growBranchModKey))
+                            bindings.get("growBranchButton") ==
+                                    bindings.get("growLeafButton") &&
+                                    key == bindings.get("growBranchModKey"));
+                    if (conflictWithOtherBindings &&
+                            !(key == bindings.get("growBranchModKey")))
                         return true;
-                    assignedKeys.remove(growLeafModKey);
-                    growLeafModKey = key;
+                    assignedKeys.remove(bindings.get("growLeafModKey"));
+                    bindings.put("growLeafModKey", key);
                     if (conflictBetweenBranchAndLeaf) {
-                        growBranchButton = (
-                                growBranchButton == Input.Buttons.LEFT ?
-                                        Input.Buttons.RIGHT :
-                                        Input.Buttons.LEFT);
+                        bindings.put("growBranchButton",
+                                     bindings.get("growBranchButton") ==
+                                             Input.Buttons.LEFT ?
+                                             Input.Buttons.RIGHT :
+                                             Input.Buttons.LEFT);
                     }
                     if (key != -1) assignedKeys.add(key);
+                    updatePreferences();
                     return true;
                 case JUMP_KEY:
                     if (i != Input.Keys.ESCAPE && !assignedKeys.contains(i)) {
-                        assignedKeys.remove(jumpKey);
-                        jumpKey = i;
-                        assignedKeys.add(jumpKey);
+                        assignedKeys.remove(bindings.get("jumpKey"));
+                        bindings.put("jumpKey", i);
+                        assignedKeys.add(bindings.get("jumpKey"));
                     }
+                    updatePreferences();
                     return true;
                 case LEFT_KEY:
                     if (i != Input.Keys.ESCAPE && !assignedKeys.contains(i)) {
-                        assignedKeys.remove(leftKey);
-                        leftKey = i;
-                        assignedKeys.add(leftKey);
+                        assignedKeys.remove(bindings.get("leftKey"));
+                        bindings.put("leftKey", i);
+                        assignedKeys.add(bindings.get("leftKey"));
                     }
+                    updatePreferences();
                     return true;
                 case DROP_KEY:
                     if (i != Input.Keys.ESCAPE && !assignedKeys.contains(i)) {
-                        assignedKeys.remove(dropKey);
-                        dropKey = i;
-                        assignedKeys.add(dropKey);
+                        assignedKeys.remove(bindings.get("dropKey"));
+                        bindings.put("dropKey", i);
+                        assignedKeys.add(bindings.get("dropKey"));
                     }
+                    updatePreferences();
                     return true;
                 case RIGHT_KEY:
                     if (i != Input.Keys.ESCAPE && !assignedKeys.contains(i)) {
-                        assignedKeys.remove(rightKey);
-                        rightKey = i;
-                        assignedKeys.add(rightKey);
+                        assignedKeys.remove(bindings.get("rightKey"));
+                        bindings.put("rightKey", i);
+                        assignedKeys.add(bindings.get("rightKey"));
                     }
+                    updatePreferences();
                     return true;
             }
         }
@@ -363,23 +396,32 @@ public class InputController implements InputProcessor {
                 return true;
             switch (bindingToUpdate) {
                 case GROW_BRANCH_BUTTON:
-                    growBranchButton = i3;
-                    if (growBranchButton == growLeafButton &&
-                            growBranchModKey == growLeafModKey) {
-                        growLeafButton = (growLeafButton == Input.Buttons.LEFT ?
-                                Input.Buttons.RIGHT :
-                                Input.Buttons.LEFT);
+                    bindings.put("growBranchButton", i3);
+                    if (bindings.get("growBranchButton")
+                            .equals(bindings.get("growLeafButton")) &&
+                            bindings.get("growBranchModKey")
+                                    .equals(bindings.get("growLeafModKey"))) {
+                        bindings.put("growLeafButton",
+                                     bindings.get("growLeafButton") ==
+                                             Input.Buttons.LEFT ?
+                                             Input.Buttons.RIGHT :
+                                             Input.Buttons.LEFT);
                     }
+                    updatePreferences();
                     return true;
                 case GROW_LEAF_BUTTON:
-                    growLeafButton = i3;
-                    if (growBranchButton == growLeafButton &&
-                            growBranchModKey == growLeafModKey) {
-                        growBranchButton = (
-                                growBranchButton == Input.Buttons.LEFT ?
-                                        Input.Buttons.RIGHT :
-                                        Input.Buttons.LEFT);
+                    bindings.put("growLeafButton", i3);
+                    if (bindings.get("growBranchButton")
+                            .equals(bindings.get("growLeafButton")) &&
+                            bindings.get("growBranchModKey")
+                                    .equals(bindings.get("growLeafModKey"))) {
+                        bindings.put("growBranchButton",
+                                     bindings.get("growBranchButton") ==
+                                             Input.Buttons.LEFT ?
+                                             Input.Buttons.RIGHT :
+                                             Input.Buttons.LEFT);
                     }
+                    updatePreferences();
                     return true;
             }
         }
@@ -416,28 +458,32 @@ public class InputController implements InputProcessor {
     public String getBindingString(Binding b) {
         switch (b) {
             case GROW_BRANCH_MOD_KEY:
-                if (growBranchModKey != -1)
-                    return Input.Keys.toString(growBranchModKey);
+                if (!bindings.get("growBranchModKey").equals(-1))
+                    return Input.Keys.toString(bindings.get("growBranchModKey"));
                 return "None";
             case GROW_BRANCH_BUTTON:
-                return getMouseButtonString(growBranchButton);
+                return getMouseButtonString(bindings.get("growBranchButton"));
             case GROW_LEAF_MOD_KEY:
-                if (growLeafModKey != -1)
-                    return Input.Keys.toString(growLeafModKey);
+                if (!bindings.get("growLeafModKey").equals(-1))
+                    return Input.Keys.toString(bindings.get("growLeafModKey"));
                 return "None";
             case GROW_LEAF_BUTTON:
-                return getMouseButtonString(growLeafButton);
+                return getMouseButtonString(bindings.get("growLeafButton"));
             case JUMP_KEY:
-                if (jumpKey != -1) return Input.Keys.toString(jumpKey);
+                if (!bindings.get("jumpKey").equals(-1))
+                    return Input.Keys.toString(bindings.get("jumpKey"));
                 break;
             case LEFT_KEY:
-                if (leftKey != -1) return Input.Keys.toString(leftKey);
+                if (!bindings.get("leftKey").equals(-1))
+                    return Input.Keys.toString(bindings.get("leftKey"));
                 break;
             case DROP_KEY:
-                if (dropKey != -1) return Input.Keys.toString(dropKey);
+                if (!bindings.get("dropKey").equals(-1))
+                    return Input.Keys.toString(bindings.get("dropKey"));
                 break;
             case RIGHT_KEY:
-                if (rightKey != -1) return Input.Keys.toString(rightKey);
+                if (!bindings.get("rightKey").equals(-1))
+                    return Input.Keys.toString(bindings.get("rightKey"));
                 break;
         }
         return "Unassigned";

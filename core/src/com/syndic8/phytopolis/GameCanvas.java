@@ -2,6 +2,7 @@ package com.syndic8.phytopolis;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Graphics;
+import com.badlogic.gdx.Preferences;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
@@ -38,6 +39,7 @@ public class GameCanvas {
     private final Viewport textViewport;
     private final Vector3 cameraCache;
     private final List<Graphics.DisplayMode> displayModes;
+    private final Preferences preferences;
     private final int[] fps;
     /**
      * Value to cache window width (if we are currently full screen)
@@ -91,13 +93,22 @@ public class GameCanvas {
         hudBatch = new SpriteBatch();
         shapeRenderer = new ShapeRenderer();
 
+        preferences = Gdx.app.getPreferences("phytopolis_settings");
         displayModes = dm;
         if (displayModes.isEmpty())
             displayModes.add(Gdx.graphics.getDisplayMode());
-        resolution = Gdx.graphics.getDisplayMode();
-        windowed = !Gdx.graphics.isFullscreen();
+        int resolutionIndex = preferences.getInteger("resolutionIndex", 0);
+        resolution = displayModes.get(resolutionIndex);
+        Gdx.graphics.setFullscreenMode(resolution);
+        windowed = preferences.getBoolean("windowed", false);
+        if (!windowed) {
+            Gdx.graphics.setFullscreenMode(resolution);
+        } else {
+            Gdx.graphics.setWindowedMode(1280, 720);
+            Gdx.graphics.setResizable(false);
+        }
         fps = new int[]{0, 15, 30, 45, 60, 90, 120};
-        currentFpsIndex = 0;
+        currentFpsIndex = preferences.getInteger("fpsIndex", 0);
 
         // Set the projection matrix (for proper scaling)
         camera = new OrthographicCamera(width, height);
@@ -564,11 +575,12 @@ public class GameCanvas {
     public void updateOption(GraphicsOption opn) {
         switch (opn) {
             case RESOLUTION:
-                resolution = displayModes.get(
-                        (displayModes.indexOf(resolution) + 1) %
-                                displayModes.size());
+                int resolutionIndex = (displayModes.indexOf(resolution) + 1) %
+                        displayModes.size();
+                resolution = displayModes.get(resolutionIndex);
                 if (!windowed) Gdx.graphics.setFullscreenMode(resolution);
-                return;
+                preferences.putInteger("resolutionIndex", resolutionIndex);
+                break;
             case WINDOWED:
                 windowed = !windowed;
                 if (!windowed) {
@@ -577,13 +589,17 @@ public class GameCanvas {
                     Gdx.graphics.setWindowedMode(1280, 720);
                     Gdx.graphics.setResizable(false);
                 }
-                return;
+                preferences.putBoolean("windowed", windowed);
+                break;
             case FPS:
                 currentFpsIndex = (currentFpsIndex + 1) % fps.length;
                 int currentFps = fps[currentFpsIndex];
                 Gdx.graphics.setForegroundFPS(currentFps);
                 Gdx.graphics.setVSync(currentFps == 0);
+                preferences.putInteger("fpsIndex", currentFpsIndex);
+                break;
         }
+        preferences.flush();
     }
 
     public String getOptionValueString(GraphicsOption opn) {

@@ -71,7 +71,7 @@ public class ControlsMenu extends Menu {
         addItem(new MenuItem("RESET", 9, new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
-                InputController.getInstance().setDefaults();
+                InputController.getInstance().resetBindings();
             }
         }, this, ctr, c, Align.center, this.getFontScale(), 0.15f, 0, 200));
         addItem(new BackButtonItem(back, this, ctr, c));
