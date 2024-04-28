@@ -1,8 +1,5 @@
 package com.syndic8.phytopolis.level;
 
-import com.syndic8.phytopolis.GameCanvas;
-import com.syndic8.phytopolis.util.Tilemap;
-
 public class ResourceController {
 
     public final float SUN_TOLERANCE = 0.5f;
@@ -33,7 +30,7 @@ public class ResourceController {
      */
     private int currWater;
 
-    public ResourceController(GameCanvas c, Tilemap tm) {
+    public ResourceController() {
         currWater = MAX_WATER;
     }
 
@@ -49,20 +46,9 @@ public class ResourceController {
         currWater = Math.min(MAX_WATER, currWater + WATER_ON_PICKUP);
     }
 
-
-    //    public void pickupSun() {
-    //        currSun = Math.min(MAX_SUN, currSun + SUN_ON_PICKUP);
-    //        addTime(10);
-    //    }
-    //
-    //    public void addTime(float t) {
-    //        ui.addTime(t);
-    //    }
-
     public boolean fullWater() {
         return currWater == MAX_WATER;
     }
-
 
     public void decrementGrowLeaf() {
         if (canGrowLeaf()) {
@@ -107,10 +93,5 @@ public class ResourceController {
     public void reset() {
         currWater = MAX_WATER;
     }
-
-    //    public void update(float dt) {
-    //        ui.update(dt, (float) currWater / MAX_WATER, (float) currSun / MAX_SUN);
-    //
-    //    }
 
 }

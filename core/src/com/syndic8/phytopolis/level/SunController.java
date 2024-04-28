@@ -3,7 +3,7 @@ package com.syndic8.phytopolis.level;
 import com.badlogic.gdx.graphics.Texture;
 import com.syndic8.phytopolis.assets.AssetDirectory;
 import com.syndic8.phytopolis.level.models.Sun;
-import com.syndic8.phytopolis.util.FilmStrip;
+import com.syndic8.phytopolis.util.RandomController;
 import com.syndic8.phytopolis.util.Tilemap;
 
 public class SunController {
@@ -13,7 +13,6 @@ public class SunController {
     private final float xGenerationMin;
     private final float xGenerationMax;
     private final float yGeneration;
-//    private FilmStrip sunFilmstrip;
     private float currentDelay;
     private float timer;
     private float xGeneration;
@@ -26,6 +25,7 @@ public class SunController {
                          float xGenMin,
                          float xGenMax,
                          float yGen) {
+
         delayMin = dMin;
         delayMax = dMax;
         timer = 0;
@@ -37,38 +37,30 @@ public class SunController {
 
     private void generateDelay() {
         timer = 0;
-        currentDelay = randomBetween(delayMin, delayMax);
-        xGeneration = randomBetween(xGenerationMin, xGenerationMax);
-    }
-
-    private float randomBetween(float lower, float upper) {
-        return lower + (float) Math.random() * (upper - lower);
+        currentDelay = RandomController.rollFloat(delayMin, delayMax);
+        xGeneration = RandomController.rollFloat(xGenerationMin,
+                                                 xGenerationMax);
     }
 
     public void gatherAssets(AssetDirectory directory) {
-        sunCircle = directory.getEntry("gameplay:sun_circle",
-                                                Texture.class);
-        sunSwirl = directory.getEntry("gameplay:sun_swirl",
-                Texture.class);
-        sunRay = directory.getEntry("gameplay:sun_ray",
-                Texture.class);
-        //sunFilmstrip = new FilmStrip(sunTexture, 1, 1);
+        sunCircle = directory.getEntry("gameplay:sun_circle", Texture.class);
+        sunSwirl = directory.getEntry("gameplay:sun_swirl", Texture.class);
+        sunRay = directory.getEntry("gameplay:sun_ray", Texture.class);
     }
 
     public Sun spawnSuns(float delta, Tilemap tm) {
         timer += delta;
         if (timer >= currentDelay) {
             generateDelay();
-            Sun s = new Sun(xGeneration,
-                            yGeneration,
-                            tm.getTileWidth() * 0.5f,
-                            tm.getTileHeight() * 0.5f,
-                            sunCircle,
-                            sunRay,
-                            sunSwirl,
-                            tm,
-                            1);
-            return s;
+            return new Sun(xGeneration,
+                           yGeneration,
+                           tm.getTileWidth() * 0.5f,
+                           tm.getTileHeight() * 0.5f,
+                           sunCircle,
+                           sunRay,
+                           sunSwirl,
+                           tm,
+                           1);
         }
         return null;
     }

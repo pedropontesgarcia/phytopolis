@@ -24,12 +24,12 @@ public class GraphicsMenu extends Menu {
                                      ctr,
                                      c,
                                      GraphicsOption.WINDOWED));
-        addItem(new GraphicsMenuItem("VSYNC",
+        addItem(new GraphicsMenuItem("FRAME RATE",
                                      2,
                                      this,
                                      ctr,
                                      c,
-                                     GraphicsOption.VSYNC));
+                                     GraphicsOption.FPS));
         addItem(new MenuItem("< BACK", 4, back, this, ctr, c));
     }
 

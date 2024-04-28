@@ -13,7 +13,6 @@ package com.syndic8.phytopolis;
 import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.BodyDef;
@@ -46,13 +45,10 @@ public class GameplayMode extends WorldController {
     private Texture jogTexture;
     private FilmStrip jogAnimator;
     private boolean gathered;
-    private BitmapFont timesFont;
     private TextureRegion background;
     private TextureRegion vignette;
     private Texture avatarTexture;
     private Tilemap tilemap;
-    private Texture waterTexture;
-    private float volume;
     private JsonValue constants;
     private Player avatar;
     private Music backgroundMusic;
@@ -90,11 +86,8 @@ public class GameplayMode extends WorldController {
         tilemap.gatherAssets(directory);
         if (!gathered) {
             gathered = true;
-            avatarTexture = directory.getEntry(
-                    "gameplay:player",
-                    Texture.class);
-            waterTexture = directory.getEntry("water_nooutline", Texture.class);
-            timesFont = directory.getEntry("times", BitmapFont.class);
+            avatarTexture = directory.getEntry("gameplay:player",
+                                               Texture.class);
             background = new TextureRegion(directory.getEntry(
                     "gameplay:background",
                     Texture.class));
@@ -112,7 +105,7 @@ public class GameplayMode extends WorldController {
             constants = directory.getEntry("gameplay:constants",
                                            JsonValue.class);
 
-            resourceController = new ResourceController(canvas, tilemap);
+            resourceController = new ResourceController();
             uiController = new UIController(canvas, tilemap);
             float branchHeight = tilemap.getTileHeight();
             float plantWidth = branchHeight * (float) Math.sqrt(3) * 4 / 2;
@@ -145,7 +138,6 @@ public class GameplayMode extends WorldController {
             hazardController.gatherAssets(directory);
             uiController.gatherAssets(directory);
             sunController.gatherAssets(directory);
-            super.gatherAssets(directory);
             backgroundMusic = directory.getEntry("viridian", Music.class);
             backgroundMusic.setLooping(true);
             backgroundMusic.setVolume(0);
@@ -246,10 +238,11 @@ public class GameplayMode extends WorldController {
 
         if (timeSinceUIUpdate >= 1) {
             uiController.update(dt,
-                    resourceController.getCurrRatio(),
-                    hazardController, collisionController.getAddedWater(),
-                    resourceController.getCurrWater() < water,
-                    plantController.countTimerDeductions());
+                                resourceController.getCurrRatio(),
+                                hazardController,
+                                collisionController.getAddedWater(),
+                                resourceController.getCurrWater() < water,
+                                plantController.countTimerDeductions());
             collisionController.setAddedWater(false);
         } else {
             timeSinceUIUpdate += 0.05;
@@ -293,7 +286,7 @@ public class GameplayMode extends WorldController {
             if (shouldGrowBranch) {
 
                 Branch branch = plantController.growBranch(unprojMousePos.x,
-                        unprojMousePos.y);
+                                                           unprojMousePos.y);
                 if (branch != null) addObject(branch);
 
             }
@@ -317,11 +310,11 @@ public class GameplayMode extends WorldController {
                         break;
                 }
                 Model newLeaf = plantController.makeLeaf(unprojMousePos.x,
-                        unprojMousePos.y +
-                                0.5f *
-                                        tilemap.getTileHeight(),
-                        lt,
-                        width);
+                                                         unprojMousePos.y +
+                                                                 0.5f *
+                                                                         tilemap.getTileHeight(),
+                                                         lt,
+                                                         width);
                 if (newLeaf != null) addObject(newLeaf);
 
             }
@@ -355,8 +348,8 @@ public class GameplayMode extends WorldController {
             Vector2 unprojMousePos = canvas.unproject(projMousePosCache);
             if (!hazardController.hasFire(unprojMousePos)) {
                 plantController.drawGhostBranch(canvas,
-                        unprojMousePos.x,
-                        unprojMousePos.y);
+                                                unprojMousePos.x,
+                                                unprojMousePos.y);
             }
         }
         drawVignette();
@@ -492,10 +485,9 @@ public class GameplayMode extends WorldController {
         collisionController = new CollisionController(avatar,
                                                       uiController,
                                                       resourceController,
-                plantController,
-                hazardController);
+                                                      plantController,
+                                                      hazardController);
         world.setContactListener(collisionController);
-        volume = constants.getFloat("volume", 1.0f);
     }
 
     private void drawBackground() {
@@ -510,7 +502,7 @@ public class GameplayMode extends WorldController {
     }
 
     private void drawVignette() {
-        float backgroundY = canvas.getCameraY() - canvas.getViewPortY() / 2;
+        float backgroundY = canvas.getCameraY() - canvas.getHeight() / 2;
         canvas.draw(vignette.getTexture(),
                     Color.WHITE,
                     0,

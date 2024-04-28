@@ -6,7 +6,6 @@ import com.badlogic.gdx.utils.JsonValue;
 import com.syndic8.phytopolis.GameCanvas;
 import com.syndic8.phytopolis.WorldController;
 import com.syndic8.phytopolis.assets.AssetDirectory;
-import com.syndic8.phytopolis.level.models.Resource;
 import com.syndic8.phytopolis.level.models.Sun;
 import com.syndic8.phytopolis.level.models.Tile;
 import com.syndic8.phytopolis.level.models.Water;
@@ -26,7 +25,6 @@ public class Tilemap {
     float tileHeight;
     float tileWidth;
     Texture[] resourceTextures;
-    Resource[] resources;
     int time;
     int star;
     int starTime;
@@ -126,12 +124,9 @@ public class Tilemap {
             else if (propertyJson.getString("name").equals("victory"))
                 victoryHeight = propertyJson.getFloat("value");
         }
-        sunCircle = directory.getEntry("gameplay:sun_circle",
-                Texture.class);
-        sunSwirl = directory.getEntry("gameplay:sun_swirl",
-                Texture.class);
-        sunRay = directory.getEntry("gameplay:sun_ray",
-                Texture.class);
+        sunCircle = directory.getEntry("gameplay:sun_circle", Texture.class);
+        sunSwirl = directory.getEntry("gameplay:sun_swirl", Texture.class);
+        sunRay = directory.getEntry("gameplay:sun_ray", Texture.class);
 
         List<Texture> resourceTextureList = new ArrayList<>();
         Texture tx = directory.getEntry("gameplay:water_filmstrip",
@@ -265,9 +260,6 @@ public class Tilemap {
                             .get(0)
                             .getString("value")
                             .equals("sun")) {
-                        FilmStrip sunFilmstrip = new FilmStrip(resourceTextures[1],
-                                                               1,
-                                                               1);
                         Sun s = new Sun(xMid,
                                         yMid,
                                         tileWidth * 0.5f,

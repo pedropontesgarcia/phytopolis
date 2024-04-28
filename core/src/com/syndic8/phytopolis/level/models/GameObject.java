@@ -18,7 +18,6 @@
 package com.syndic8.phytopolis.level.models;
 
 import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.*;
 import com.badlogic.gdx.physics.box2d.BodyDef.BodyType;
@@ -188,21 +187,6 @@ public abstract class GameObject extends Model {
     }
 
     /**
-     * Sets the current position for this physics body
-     *
-     * @param x the x-coordinate for this physics body
-     * @param y the y-coordinate for this physics body
-     */
-    public void setPosition(float x, float y) {
-        if (body != null) {
-            positionCache.set(x, y);
-            body.setTransform(positionCache, body.getAngle());
-        } else {
-            bodyinfo.position.set(x, y);
-        }
-    }
-
-    /**
      * Returns the x-coordinate for this physics body
      *
      * @return the x-coordinate for this physics body
@@ -249,6 +233,59 @@ public abstract class GameObject extends Model {
     }
 
     /**
+     * Updates the object's physics state (NOT GAME LOGIC).
+     * <p>
+     * This method is called AFTER the collision resolution state. Therefore, it
+     * should not be used to process actions or any other gameplay information.  Its
+     * primary purpose is to adjust changes to the fixture, which have to take place
+     * after collision.
+     *
+     * @param delta Timing values from parent loop
+     */
+    public void update(float delta) {
+        // Recreate the fixture object if dimensions changed.
+        if (isDirty()) {
+            createFixtures();
+        }
+    }
+
+    /**
+     * Returns true if the shape information must be updated.
+     * <p>
+     * Attributes tied to the geometry (and not just forces/position) must wait for
+     * collisions to complete before they are reset.  Shapes (and their properties)
+     * are reset in the update method.
+     *
+     * @return true if the shape information must be updated.
+     */
+    public boolean isDirty() {
+        return isDirty;
+    }
+
+    /**
+     * Draws the physics object.
+     *
+     * @param canvas Drawing context
+     */
+    public void draw(GameCanvas canvas) {
+        float width = tilemap.getTileWidth() * textureSclInTiles;
+        float height = tilemap.getTileHeight() * textureSclInTiles;
+        float sclX = width / texture.getRegionWidth();
+        float sclY = height / texture.getRegionHeight();
+        if (texture != null) {
+            canvas.draw(texture,
+                        Color.WHITE,
+                        origin.x,
+                        origin.y,
+                        getX(),
+                        getY(),
+                        getAngle(),
+                        sclX,
+                        sclY);
+        }
+    }
+
+    /**
      * Returns the angle of rotation for this body (about the center).
      * <p>
      * The value returned is in radians
@@ -269,6 +306,21 @@ public abstract class GameObject extends Model {
             body.setTransform(body.getPosition(), value);
         } else {
             bodyinfo.angle = value;
+        }
+    }
+
+    /**
+     * Sets the current position for this physics body
+     *
+     * @param x the x-coordinate for this physics body
+     * @param y the y-coordinate for this physics body
+     */
+    public void setPosition(float x, float y) {
+        if (body != null) {
+            positionCache.set(x, y);
+            body.setTransform(positionCache, body.getAngle());
+        } else {
+            bodyinfo.position.set(x, y);
         }
     }
 
@@ -631,8 +683,6 @@ public abstract class GameObject extends Model {
                 bodyinfo.angularDamping);
     }
 
-    /// FixtureDef Methods
-
     /**
      * Sets the angular damping for this body.
      * <p>
@@ -652,27 +702,6 @@ public abstract class GameObject extends Model {
         } else {
             bodyinfo.angularDamping = value;
         }
-    }
-
-    /**
-     * Copies the state from the given body to the body def.
-     * <p>
-     * This is important if you want to save the state of the body before removing
-     * it from the world.
-     */
-    protected void setBodyState(Body body) {
-        bodyinfo.type = body.getType();
-        bodyinfo.angle = body.getAngle();
-        bodyinfo.active = body.isActive();
-        bodyinfo.awake = body.isAwake();
-        bodyinfo.bullet = body.isBullet();
-        bodyinfo.position.set(body.getPosition());
-        bodyinfo.linearVelocity.set(body.getLinearVelocity());
-        bodyinfo.allowSleep = body.isSleepingAllowed();
-        bodyinfo.fixedRotation = body.isFixedRotation();
-        bodyinfo.gravityScale = body.getGravityScale();
-        bodyinfo.angularDamping = body.getAngularDamping();
-        bodyinfo.linearDamping = body.getLinearDamping();
     }
 
     /**
@@ -776,6 +805,8 @@ public abstract class GameObject extends Model {
         }
     }
 
+    /// MassData Methods
+
     /**
      * Returns true if this object is a sensor.
      * <p>
@@ -807,8 +838,6 @@ public abstract class GameObject extends Model {
         }
     }
 
-    /// MassData Methods
-
     /**
      * Returns the filter data for this object (or null if there is none)
      * <p>
@@ -822,6 +851,19 @@ public abstract class GameObject extends Model {
      */
     public Filter getFilterData() {
         return fixture.filter;
+    }    /**
+     * Returns the center of mass of this body
+     * <p>
+     * This method does NOT return a reference to the centroid position. Changes to this
+     * vector will not affect the body.  However, it returns the same vector each time
+     * its is called, and so cannot be used as an allocator.
+     *
+     * @return the center of mass for this physics body
+     */
+    public Vector2 getCentroid() {
+        return (body != null ?
+                body.getLocalCenter() :
+                centroidCache.set(massdata.center));
     }
 
     /**
@@ -852,24 +894,7 @@ public abstract class GameObject extends Model {
                 f.setFilterData(value);
             }
         }
-    }
-
-    /**
-     * Returns the center of mass of this body
-     * <p>
-     * This method does NOT return a reference to the centroid position. Changes to this
-     * vector will not affect the body.  However, it returns the same vector each time
-     * its is called, and so cannot be used as an allocator.
-     *
-     * @return the center of mass for this physics body
-     */
-    public Vector2 getCentroid() {
-        return (body != null ?
-                body.getLocalCenter() :
-                centroidCache.set(massdata.center));
-    }
-
-    /**
+    }    /**
      * Sets the center of mass for this physics body
      * <p>
      * This method does not keep a reference to the parameter.
@@ -889,6 +914,14 @@ public abstract class GameObject extends Model {
     }
 
     /**
+     * Resets this body to use the mass computed from the its shape and density
+     */
+    public void resetMass() {
+        masseffect = false;
+        if (body != null) {
+            body.resetMassData();
+        }
+    }    /**
      * Returns the rotational inertia of this body
      * <p>
      * For static bodies, the mass and rotational inertia are set to zero. When
@@ -901,6 +934,17 @@ public abstract class GameObject extends Model {
     }
 
     /**
+     * Sets whether the shape information must be updated.
+     * <p>
+     * Attributes tied to the geometry (and not just forces/position) must wait for
+     * collisions to complete before they are reset.  Shapes (and their properties)
+     * are reset in the update method.
+     *
+     * @param value whether the shape information must be updated.
+     */
+    public void markDirty(boolean value) {
+        isDirty = value;
+    }    /**
      * Sets the rotational inertia of this body
      * <p>
      * For static bodies, the mass and rotational inertia are set to zero. When
@@ -921,6 +965,15 @@ public abstract class GameObject extends Model {
     }
 
     /**
+     * Returns the Box2D body for this object.
+     * <p>
+     * You use this body to add joints and apply forces.
+     *
+     * @return the Box2D body for this object.
+     */
+    public Body getBody() {
+        return body;
+    }    /**
      * Returns the mass of this body
      * <p>
      * The value is usually in kilograms.
@@ -934,6 +987,15 @@ public abstract class GameObject extends Model {
     /// Garbage Collection Methods
 
     /**
+     * Returns the physics object tag.
+     * <p>
+     * A tag is a string attached to an object, in order to identify it in debugging.
+     *
+     * @return the physics object tag.
+     */
+    public String getName() {
+        return nametag;
+    }    /**
      * Sets the mass of this body
      * <p>
      * The value is usually in kilograms.
@@ -950,122 +1012,6 @@ public abstract class GameObject extends Model {
         if (body != null) {
             body.setMassData(massdata); // Protected accessor?
         }
-    }
-
-    /**
-     * Resets this body to use the mass computed from the its shape and density
-     */
-    public void resetMass() {
-        masseffect = false;
-        if (body != null) {
-            body.resetMassData();
-        }
-    }
-
-    /**
-     * Returns true if the shape information must be updated.
-     * <p>
-     * Attributes tied to the geometry (and not just forces/position) must wait for
-     * collisions to complete before they are reset.  Shapes (and their properties)
-     * are reset in the update method.
-     *
-     * @return true if the shape information must be updated.
-     */
-    public boolean isDirty() {
-        return isDirty;
-    }
-
-    /// DRAWING METHODS
-
-    /**
-     * Sets whether the shape information must be updated.
-     * <p>
-     * Attributes tied to the geometry (and not just forces/position) must wait for
-     * collisions to complete before they are reset.  Shapes (and their properties)
-     * are reset in the update method.
-     *
-     * @param value whether the shape information must be updated.
-     */
-    public void markDirty(boolean value) {
-        isDirty = value;
-    }
-
-    /**
-     * Returns the Box2D body for this object.
-     * <p>
-     * You use this body to add joints and apply forces.
-     *
-     * @return the Box2D body for this object.
-     */
-    public Body getBody() {
-        return body;
-    }
-
-    /**
-     * Returns the drawing scale for this physics object
-     * <p>
-     * The drawing scale is the number of pixels to draw before Box2D unit. Because
-     * mass is a function of area in Box2D, we typically want the physics objects
-     * to be small.  So we decouple that scale from the physics object.  However,
-     * we must track the scale difference to communicate with the scene graph.
-     * <p>
-     * This method does NOT return a reference to the drawing scale. Changes to this
-     * vector will not affect the body.  However, it returns the same vector each time
-     * its is called, and so cannot be used as an allocator.
-     * <p>
-     * We allow for the scaling factor to be non-uniform.
-     *
-     * @return the drawing scale for this physics object
-     */
-    public Vector2 getDrawScale() {
-        scaleCache.set(drawScale);
-        return scaleCache;
-    }
-
-    /// DEBUG METHODS
-
-    /**
-     * Sets the drawing scale for this physics object
-     * <p>
-     * The drawing scale is the number of pixels to draw before Box2D unit. Because
-     * mass is a function of area in Box2D, we typically want the physics objects
-     * to be small.  So we decouple that scale from the physics object.  However,
-     * we must track the scale difference to communicate with the scene graph.
-     * <p>
-     * We allow for the scaling factor to be non-uniform.
-     *
-     * @param value the drawing scale for this physics object
-     */
-    public void setDrawScale(Vector2 value) {
-        setDrawScale(value.x, value.y);
-    }
-
-    /**
-     * Sets the drawing scale for this physics object
-     * <p>
-     * The drawing scale is the number of pixels to draw before Box2D unit. Because
-     * mass is a function of area in Box2D, we typically want the physics objects
-     * to be small.  So we decouple that scale from the physics object.  However,
-     * we must track the scale difference to communicate with the scene graph.
-     * <p>
-     * We allow for the scaling factor to be non-uniform.
-     *
-     * @param x the x-axis scale for this physics object
-     * @param y the y-axis scale for this physics object
-     */
-    public void setDrawScale(float x, float y) {
-        drawScale.set(x, y);
-    }
-
-    /**
-     * Returns the physics object tag.
-     * <p>
-     * A tag is a string attached to an object, in order to identify it in debugging.
-     *
-     * @return the physics object tag.
-     */
-    public String getName() {
-        return nametag;
     }
 
     /**
@@ -1104,6 +1050,15 @@ public abstract class GameObject extends Model {
         return false;
     }
 
+    /// DRAWING METHODS
+
+    /**
+     * Create new fixtures for this body, defining the shape
+     * <p>
+     * This is the primary method to override for custom physics objects
+     */
+    protected abstract void createFixtures();
+
     /**
      * Destroys the physics Body(s) of this object if applicable,
      * removing them from the world.
@@ -1121,14 +1076,26 @@ public abstract class GameObject extends Model {
         }
     }
 
-    /// Abstract Methods
-
     /**
-     * Create new fixtures for this body, defining the shape
+     * Copies the state from the given body to the body def.
      * <p>
-     * This is the primary method to override for custom physics objects
+     * This is important if you want to save the state of the body before removing
+     * it from the world.
      */
-    protected abstract void createFixtures();
+    protected void setBodyState(Body body) {
+        bodyinfo.type = body.getType();
+        bodyinfo.angle = body.getAngle();
+        bodyinfo.active = body.isActive();
+        bodyinfo.awake = body.isAwake();
+        bodyinfo.bullet = body.isBullet();
+        bodyinfo.position.set(body.getPosition());
+        bodyinfo.linearVelocity.set(body.getLinearVelocity());
+        bodyinfo.allowSleep = body.isSleepingAllowed();
+        bodyinfo.fixedRotation = body.isFixedRotation();
+        bodyinfo.gravityScale = body.getGravityScale();
+        bodyinfo.angularDamping = body.getAngularDamping();
+        bodyinfo.linearDamping = body.getLinearDamping();
+    }
 
     /**
      * Release the fixtures for this body, reseting the shape
@@ -1137,58 +1104,18 @@ public abstract class GameObject extends Model {
      */
     protected abstract void releaseFixtures();
 
-    /**
-     * Updates the object's physics state (NOT GAME LOGIC).
-     * <p>
-     * This method is called AFTER the collision resolution state. Therefore, it
-     * should not be used to process actions or any other gameplay information.  Its
-     * primary purpose is to adjust changes to the fixture, which have to take place
-     * after collision.
-     *
-     * @param delta Timing values from parent loop
-     */
-    public void update(float delta) {
-        // Recreate the fixture object if dimensions changed.
-        if (isDirty()) {
-            createFixtures();
-        }
-    }
 
-    /**
-     * Sets the object texture for drawing purposes.
-     * <p>
-     * In order for drawing to work properly, you MUST set the drawScale.
-     * The drawScale converts the physics units to pixels.
-     *
-     * @param value the object texture for drawing purposes.
-     */
-//    public void setTexture(TextureRegion value) {
-//        texture = value;
-//        origin.set(texture.getRegionWidth() / 2.0f,
-//                   texture.getRegionHeight() / 2.0f);
-//    }
 
-    /**
-     * Draws the physics object.
-     *
-     * @param canvas Drawing context
-     */
-    public void draw(GameCanvas canvas) {
-        float width = tilemap.getTileWidth() * textureSclInTiles;
-        float height = tilemap.getTileHeight() * textureSclInTiles;
-        float sclX = width / texture.getRegionWidth();
-        float sclY = height / texture.getRegionHeight();
-        if (texture != null) {
-            canvas.draw(texture,
-                        Color.WHITE,
-                        origin.x,
-                        origin.y,
-                        getX(),
-                        getY(),
-                        getAngle(),
-                        sclX,
-                        sclY);
-        }
-    }
+
+
+    /// Abstract Methods
+
+
+
+
+
+
+
+
 
 }

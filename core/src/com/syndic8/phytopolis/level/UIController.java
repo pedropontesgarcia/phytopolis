@@ -64,13 +64,11 @@ public class UIController {
                                        1,
                                        22);
         waterdropAdd = new FilmStrip(directory.getEntry("ui:water_add",
-                Texture.class),
-                1,
-                19);
+                                                        Texture.class), 1, 19);
         waterdropRemove = new FilmStrip(directory.getEntry("ui:water_remove",
-                Texture.class),
-                1,
-                20);
+                                                           Texture.class),
+                                        1,
+                                        20);
         current = waterdropStrip;
         TextureRegion branchCursorTexture = new TextureRegion(directory.getEntry(
                 "ui:branch-cursor",
@@ -131,25 +129,6 @@ public class UIController {
     }
 
     /**
-     * Updates the UI texture
-     */
-    public void updateTexture(float waterLvl, boolean addedWater, boolean removedWater) {
-        if (addedWater) {
-            current = waterdropAdd;
-            current.setFrame(Math.round(
-                    (current.getSize() - 1) * waterLvl));
-        } else if (removedWater) {
-            current = waterdropRemove;
-            current.setFrame(Math.round(
-                    (current.getSize() - 1) * waterLvl));
-        } else {
-            current = waterdropStrip;
-            current.setFrame(Math.round(
-                    (current.getSize() - 2) * waterLvl) + 1);
-        }
-    }
-
-    /**
      * Updates the custom cursor
      */
     public void updateCursor(HazardController hazardController) {
@@ -170,16 +149,31 @@ public class UIController {
         }
     }
 
+    /**
+     * Updates the UI texture
+     */
+    public void updateTexture(float waterLvl,
+                              boolean addedWater,
+                              boolean removedWater) {
+        if (addedWater) {
+            current = waterdropAdd;
+            current.setFrame(Math.round((current.getSize() - 1) * waterLvl));
+        } else if (removedWater) {
+            current = waterdropRemove;
+            current.setFrame(Math.round((current.getSize() - 1) * waterLvl));
+        } else {
+            current = waterdropStrip;
+            current.setFrame(
+                    Math.round((current.getSize() - 2) * waterLvl) + 1);
+        }
+    }
+
     public void pauseTimer() {
         timer.pause();
     }
 
     public void startTimer() {
         timer.start();
-    }
-
-    public void addTime(float t) {
-        timer.addTime(t);
     }
 
     public void addTime() {

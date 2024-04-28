@@ -79,6 +79,12 @@ public class GDXRoot extends Game implements ScreenListener {
         super.dispose();
     }
 
+    @Override
+    public void resume() {
+        canvas.resizeScreen(Gdx.graphics.getBackBufferWidth(),
+                            Gdx.graphics.getBackBufferHeight());
+    }
+
     public void resize(int width, int height) {
         canvas.resizeScreen(width, height);
     }
@@ -158,8 +164,6 @@ public class GDXRoot extends Game implements ScreenListener {
 
     public enum ExitCode {
         EXIT_QUIT,
-        EXIT_NEXT,
-        EXIT_PREV,
         EXIT_VICTORY,
         EXIT_PAUSE,
         EXIT_FAILURE,

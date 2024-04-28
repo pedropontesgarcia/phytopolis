@@ -21,7 +21,7 @@ public class Timer {
     /**
      * Starting time for this Timer
      */
-    private float initialTime;
+    private final float initialTime;
     /**
      * The time in seconds that this timer has left
      */
@@ -46,10 +46,6 @@ public class Timer {
         this.initialTime = initialTime;
         time = initialTime;
         this.sunTime = sunTime;
-    }
-
-    public void setTime(float t) {
-        time = t;
     }
 
     public void reset() {
@@ -108,10 +104,6 @@ public class Timer {
 
     public void addTime(float t) {
         time += t;
-    }
-
-    public void eatTime(float t) {
-        addTime(-t);
     }
 
     public String toString() {

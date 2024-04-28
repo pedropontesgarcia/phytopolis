@@ -20,12 +20,12 @@ public class DesktopLauncher {
         Lwjgl3ApplicationConfiguration config = new Lwjgl3ApplicationConfiguration();
         config.setWindowedMode(Lwjgl3ApplicationConfiguration.getDisplayMode().width,
                                Lwjgl3ApplicationConfiguration.getDisplayMode().height);
-        config.setTitle("Phytopolis");
         DisplayMode[] displayModes = Lwjgl3ApplicationConfiguration.getDisplayModes();
         List<DisplayMode> potentialDisplayModes = new ArrayList<Graphics.DisplayMode>(
                 Arrays.asList(displayModes));
         List<DisplayMode> goodDisplayModes = new ArrayList<Graphics.DisplayMode>();
         config.setWindowPosition(-1, -1);
+        config.setTitle("Phytopolis");
         config.useVsync(true);
         if (potentialDisplayModes.isEmpty()) {
             LOGGER.warning("No valid fullscreen resolutions were detected, " +
@@ -42,11 +42,8 @@ public class DesktopLauncher {
                     goodDisplayModes.add(dm);
                 }
             }
-            // Change this line to force windowed mode
-            if (true) {
-                config.setFullscreenMode(goodDisplayModes.get(
-                        goodDisplayModes.size() - 1));
-            }
+            config.setFullscreenMode(goodDisplayModes.get(
+                    goodDisplayModes.size() - 1));
         }
         new Lwjgl3Application(new GDXRoot(goodDisplayModes), config);
     }

@@ -3,16 +3,15 @@ package com.syndic8.phytopolis.level.models;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.physics.box2d.BodyDef;
 import com.syndic8.phytopolis.GameCanvas;
-import com.syndic8.phytopolis.util.FilmStrip;
 import com.syndic8.phytopolis.util.Tilemap;
 
 public class Leaf extends BoxObject {
-    private static final float ANIMATION_SPEED = 1/6.0f;
+
+    private static final float ANIMATION_SPEED = 1 / 6.0f;
     private final leafType type;
     private float health;
     private int healthMark;
     private boolean beingEaten;
-
 
     /**
      * Creates a new Leaf object with the specified position and dimensions
@@ -102,16 +101,8 @@ public class Leaf extends BoxObject {
         float sclY = height / texture.getRegionHeight();
         float x = texture.getRegionWidth() / 2.0f;
         float y = texture.getRegionHeight() / 2.0f;
-        getFilmStrip().setFrame((int)animFrame);
-        canvas.draw(texture,
-                Color.WHITE,
-                x,
-                y,
-                getX(),
-                getY(),
-                0,
-                sclX,
-                sclY);
+        getFilmStrip().setFrame((int) animFrame);
+        canvas.draw(texture, Color.WHITE, x, y, getX(), getY(), 0, sclX, sclY);
     }
 
     /**

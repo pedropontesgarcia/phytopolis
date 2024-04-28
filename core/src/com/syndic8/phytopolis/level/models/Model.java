@@ -1,7 +1,6 @@
 package com.syndic8.phytopolis.level.models;
 
 import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Vector2;
 import com.syndic8.phytopolis.GameCanvas;
 import com.syndic8.phytopolis.util.FilmStrip;
@@ -48,16 +47,18 @@ public abstract class Model {
     public void setTexture(Texture texture) {
         setFilmStrip(new FilmStrip(texture, 1, 1, 1));
     }
-    public void setFilmStrip(FilmStrip animation){
-        texture = animation;
-        origin = new Vector2(texture.getRegionWidth() / 2.0f,
-                texture.getRegionHeight() / 2.0f);
-    }
 
     public FilmStrip getFilmStrip() {
         return texture;
     }
-    public void setAnimationSpeed(float speed){
+
+    public void setFilmStrip(FilmStrip animation) {
+        texture = animation;
+        origin = new Vector2(texture.getRegionWidth() / 2.0f,
+                             texture.getRegionHeight() / 2.0f);
+    }
+
+    public void setAnimationSpeed(float speed) {
         animationSpeed = speed;
     }
 
@@ -169,15 +170,6 @@ public abstract class Model {
      * @param canvas The drawing context
      */
     public abstract void draw(GameCanvas canvas);
-
-//    /**
-//     * Draws the outline of the physics body.
-//     * <p>
-//     * This method can be helpful for understanding issues with collisions.
-//     *
-//     * @param canvas Drawing context
-//     */
-//    public abstract void drawDebug(GameCanvas canvas);
 
     public enum ModelType {
         /**
