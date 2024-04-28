@@ -27,8 +27,6 @@ public class DesktopLauncher {
         List<DisplayMode> goodDisplayModes = new ArrayList<Graphics.DisplayMode>();
         config.setWindowPosition(-1, -1);
         config.useVsync(true);
-        // Uncomment this line to force windowed mode
-        // potentialDisplayModes.clear();
         if (potentialDisplayModes.isEmpty()) {
             LOGGER.warning("No valid fullscreen resolutions were detected, " +
                                    "switching to compatibility (windowed) " +
@@ -44,8 +42,11 @@ public class DesktopLauncher {
                     goodDisplayModes.add(dm);
                 }
             }
-            config.setFullscreenMode(goodDisplayModes.get(
-                    goodDisplayModes.size() - 1));
+            // Change this line to force windowed mode
+            if (true) {
+                config.setFullscreenMode(goodDisplayModes.get(
+                        goodDisplayModes.size() - 1));
+            }
         }
         new Lwjgl3Application(new GDXRoot(goodDisplayModes), config);
     }

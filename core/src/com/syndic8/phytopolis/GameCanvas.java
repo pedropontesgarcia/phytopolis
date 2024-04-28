@@ -102,6 +102,8 @@ public class GameCanvas {
         shapeRenderer = new ShapeRenderer();
 
         displayModes = dm;
+        if (displayModes.isEmpty())
+            displayModes.add(Gdx.graphics.getDisplayMode());
         resolution = Gdx.graphics.getDisplayMode();
         windowed = !Gdx.graphics.isFullscreen();
         vsync = true;

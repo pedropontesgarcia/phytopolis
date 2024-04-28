@@ -74,7 +74,9 @@ public class UIController {
         pixmap = getPixmapFromRegion(leafCursorTexture);
         leafCursor = Gdx.graphics.newCursor(pixmap, 0, 0);
         pixmap = getPixmapFromRegion(waterCursorTexture);
-        waterCursor = Gdx.graphics.newCursor(pixmap, 0, 0);
+        waterCursor = Gdx.graphics.newCursor(pixmap,
+                                             pixmap.getWidth() / 2,
+                                             pixmap.getHeight() / 2);
         pixmap.dispose();
     }
 
