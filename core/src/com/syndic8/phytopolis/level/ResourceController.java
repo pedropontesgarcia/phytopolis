@@ -5,13 +5,11 @@ import com.syndic8.phytopolis.util.Tilemap;
 
 public class ResourceController {
 
-    public final float SUN_TOLERANCE = 2;
+    public final float SUN_TOLERANCE = 0.5f;
     /**
      * Maximum amount of water that can be stored
      */
     private final int MAX_WATER = 100;
-    private final int MAX_SUN = 8;
-    private final int STARTING_SUN = 1;
     /**
      * Amount of water required to grow a leaf
      */
@@ -27,14 +25,9 @@ public class ResourceController {
     /**
      * Amount of water required for an upgrade, IN TOTAL
      */
-    private final int UPGRADE_AMT = 50;
-    private final int SUN_ON_PICKUP = 1;
+    private final int UPGRADE_AMT = 40;
     private final int WATER_ON_PICKUP = 50;
 
-    /**
-     * Current amount of sun stored
-     */
-    private int currSun;
     /**
      * Current amount of water stored
      */
@@ -42,7 +35,6 @@ public class ResourceController {
 
     public ResourceController(GameCanvas c, Tilemap tm) {
         currWater = MAX_WATER;
-        currSun = STARTING_SUN;
     }
 
     public int getCurrWater() {
@@ -57,9 +49,6 @@ public class ResourceController {
         currWater = Math.min(MAX_WATER, currWater + WATER_ON_PICKUP);
     }
 
-    public int getCurrSun() {
-        return currSun;
-    }
 
     //    public void pickupSun() {
     //        currSun = Math.min(MAX_SUN, currSun + SUN_ON_PICKUP);
@@ -74,9 +63,6 @@ public class ResourceController {
         return currWater == MAX_WATER;
     }
 
-    public boolean fullSun() {
-        return currSun == MAX_SUN;
-    }
 
     public void decrementGrowLeaf() {
         if (canGrowLeaf()) {
@@ -120,7 +106,6 @@ public class ResourceController {
 
     public void reset() {
         currWater = MAX_WATER;
-        currSun = STARTING_SUN;
     }
 
     //    public void update(float dt) {

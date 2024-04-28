@@ -1,17 +1,11 @@
 package com.syndic8.phytopolis.level;
 
-import com.badlogic.gdx.graphics.Camera;
-import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Vector2;
 import com.syndic8.phytopolis.GameCanvas;
-import com.syndic8.phytopolis.WorldController;
 import com.syndic8.phytopolis.assets.AssetDirectory;
-import com.syndic8.phytopolis.level.models.Drone;
-import com.syndic8.phytopolis.level.models.Fire;
-import com.syndic8.phytopolis.level.models.Hazard;
-import com.syndic8.phytopolis.level.models.Model;
+import com.syndic8.phytopolis.level.models.*;
 import com.syndic8.phytopolis.util.FilmStrip;
 import com.syndic8.phytopolis.util.PooledList;
 import com.syndic8.phytopolis.util.Tilemap;
@@ -20,14 +14,14 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Random;
 
+import static com.syndic8.phytopolis.level.models.Model.ModelType.FIRE;
+
 public class HazardController {
 
     /**
      * The frequency at which fires are generated (probability = 1 / fireFrequency) every second.
      */
     private final int fireFrequency;
-
-    private FilmStrip fireAnimator;
     /**;
      * The frequency at which drones are generated (probability = 1 / droneFrequency) every second.
      */
@@ -79,7 +73,7 @@ public class HazardController {
     /**
      * Texture for fire hazard.
      */
-    protected Texture fireTexture;
+    protected FilmStrip fireTexture;
     /**
      * Texture for drone hazard.
      */
@@ -87,7 +81,7 @@ public class HazardController {
     /**
      * Texture for bug hazard
      */
-    protected Texture bugTexture;
+    protected FilmStrip bugTexture;
     /**
      * Texture for yellow warning indicator.
      */
@@ -112,6 +106,9 @@ public class HazardController {
      * List to track active hazards and their remaining time.
      */
     ArrayList<Hazard> hazards;
+    ArrayList<Integer> fireNodes;
+    ArrayList<Integer> bugNodes;
+    PooledList<Hazard> addList;
 
     /**
      * Initializes a HazardController with the given parameters.
@@ -147,6 +144,9 @@ public class HazardController {
         this.explodeTime = explodeTime;
         this.eatTime = eatTime;
         hazards = new ArrayList<>();
+        fireNodes = new ArrayList<>();
+        bugNodes = new ArrayList<>();
+        addList = new PooledList<>();
         height = plantController.getHeight();
         width = plantController.getWidth();
         tilemap = tm;
@@ -161,9 +161,26 @@ public class HazardController {
     public Hazard generateHazard(Model.ModelType type) {
         int hazardHeight = generateHazardHeight(type);
         if (hazardHeight == -1) return null;
-        int hazardWidth = generateHazardWidth(hazardHeight);
+        int hazardWidth = generateHazardWidth(hazardHeight, type);
         if (hazardWidth == -1) return null;
-        return generateHazard(type, hazardWidth, hazardHeight);
+        int x = hazardWidth;
+        int y = hazardHeight;
+        switch (type) {
+            case FIRE:
+                if (((plantController.inBounds(x - 1, y - 1) && plantController.branchExists(x - 1, y - 1, PlantController.branchDirection.RIGHT)) ||
+                     (plantController.inBounds(x + 1, y - 1) && plantController.branchExists(x + 1, y - 1, PlantController.branchDirection.LEFT)) ||
+                     (plantController.inBounds(x, y - 1) && plantController.branchExists(x, y - 1, PlantController.branchDirection.MIDDLE)) ||
+                        (plantController.inBounds(x, y) && !plantController.nodeIsEmpty(x, y))) && !plantController.hasHazard(hazardWidth, hazardHeight)) {
+                    return generateHazard(type, hazardWidth, hazardHeight);
+                }
+                break;
+            case BUG:
+                if (plantController.hasLeaf(x, y) && !plantController.hasHazard(x, y)) {
+                    return generateHazard(type, hazardWidth, hazardHeight);
+                }
+                break;
+        }
+        return null;
     }
 
     /**
@@ -184,9 +201,9 @@ public class HazardController {
                                   burnTime,
                                   tilemap,
                                   0.5f);
-                f.setTexture(fireTexture);
-                f.setAnimator(fireAnimator);
+                f.setFilmStrip(fireTexture);
                 f.setAnimationSpeed(0.05f);
+                plantController.setHazard(hazardWidth, hazardHeight, f);
                 hazards.add(f);
                 return f;
             case DRONE:
@@ -198,6 +215,18 @@ public class HazardController {
                 d.setTexture(droneTexture);
                 hazards.add(d);
                 return d;
+            case BUG:
+                Bug b = new Bug(plantController.indexToWorldCoord(hazardWidth, hazardHeight),
+                        new Vector2(hazardWidth, hazardHeight),
+                        eatTime,
+                        tilemap,
+                        0.5f);
+                System.out.println("new bug");
+                b.setFilmStrip(bugTexture);
+                b.setAnimationSpeed(0.05f);
+                plantController.setHazard(hazardWidth, hazardHeight, b);
+                hazards.add(b);
+                return b;
             default:
                 return null;
         }
@@ -219,6 +248,10 @@ public class HazardController {
                 if (random.nextDouble() < 1.0 / droneFrequency)
                     hazardHeight = random.nextInt(height);
                 break;
+            case BUG:
+                if (random.nextDouble() < 1.0 / bugFrequency)
+                    hazardHeight = random.nextInt(height);
+                break;
             default:
                 break;
         }
@@ -231,18 +264,36 @@ public class HazardController {
      *
      * @return The width at which the hazard is generated, or -1 if no plant at that height.
      */
-    private int generateHazardWidth(int hazardHeight) {
-        ArrayList<Integer> effectedNodes = new ArrayList<>();
-        // Check if the plant node exists and append to effected nodes
-        for (int w = 0; w < width; w++) {
-            if (!plantController.nodeIsEmpty(w, hazardHeight)) {
-                effectedNodes.add(w);
-            }
-        }
-        // Choose a node at random to destroy from effectedNodes
-        if (!effectedNodes.isEmpty()) {
-            int randomIndex = random.nextInt(effectedNodes.size());
-            return effectedNodes.get(randomIndex);
+    private int generateHazardWidth(int hazardHeight, Model.ModelType type) {
+        switch (type) {
+            case FIRE:
+                fireNodes.clear();
+                // Check if the plant node exists and append to effected nodes
+                for (int w = 0; w < width; w++) {
+                    if (!plantController.nodeIsEmpty(w, hazardHeight)) {
+                        fireNodes.add(w);
+                    }
+                }
+                // Choose a node at random to destroy from effectedNodes
+                if (!fireNodes.isEmpty()) {
+                    int randomIndex = random.nextInt(fireNodes.size());
+                    return fireNodes.get(randomIndex);
+                }
+                break;
+            case BUG:
+                bugNodes.clear();
+                // Check if the plant node has a leaf and append to bugNodes
+                for (int w = 0; w < width; w++) {
+                    if (plantController.hasLeaf(w, hazardHeight)) {
+                        bugNodes.add(w);
+                    }
+                }
+                // Choose a node at random to destroy from bugNodes
+                if (!bugNodes.isEmpty()) {
+                    int randomIndex = random.nextInt(bugNodes.size());
+                    return bugNodes.get(randomIndex);
+                }
+                break;
         }
         return -1;
     }
@@ -253,9 +304,9 @@ public class HazardController {
      * @return the generated fire (null if none)
      */
     public Fire generateFire() {
-        Hazard h = generateHazard(Model.ModelType.FIRE);
+        Hazard h = generateHazard(FIRE);
         if (h != null) {
-            return ((Fire) h);
+            return (Fire) h;
         }
         return null;
     }
@@ -268,7 +319,15 @@ public class HazardController {
     public Drone generateDrone() {
         Hazard h = generateHazard(Model.ModelType.DRONE);
         if (h != null) {
-            return ((Drone) h);
+            return (Drone) h;
+        }
+        return null;
+    }
+
+    public Bug generateBug() {
+        Hazard h = generateHazard(Model.ModelType.BUG);
+        if (h != null) {
+            return (Bug) h;
         }
         return null;
     }
@@ -281,12 +340,16 @@ public class HazardController {
      * @return list of new Fire objects to add
      */
     public PooledList<Hazard> updateHazards() {
-        PooledList<Hazard> list = new PooledList<>();
+        addList.clear();
+        for (Hazard h : plantController.removeDeadLeafBugs()) {
+            removeHazard(h);
+        }
         long currentTime = System.currentTimeMillis();
         if (currentTime - lastUpdateTime >= 1000) { // Check if one second has passed
             lastUpdateTime = currentTime; // Reset the last update time
-            list.add(generateFire());
-            list.add(generateDrone());
+            addList.add(generateFire());
+            addList.add(generateDrone());
+            addList.add(generateBug());
             int i = 0;
             while (i < hazards.size()) {
                 Hazard h = hazards.get(i);
@@ -297,52 +360,56 @@ public class HazardController {
                     // check if branch is still there (floating fire bug)
 
                     if (plantController.nodeIsEmpty(hx, hy)) {
-                        hazards.remove(f);
-                        f.markRemoved(true);
+                        removeHazard(h);
+                        plantController.removeHazardFromNodes(h);
                         continue; // Continue to next hazard after removing
                     }
                 }
                         // spread fire if the time is right, otherwise decrement timer
 //                        int time = f.getDuration();
                 if (h.tick()) {
-                    hazards.remove(h);
-                    h.markRemoved(true);
-                    plantController.destroyAll(hx, hy);
+                    removeHazard(h);
+                    plantController.removeHazardFromNodes(h);
                     if (h instanceof Fire) {
-                        list.addAll(spreadFire(h.getLocation()));
+                        plantController.destroyAll(hx, hy);
+                        spreadFire(h.getLocation());
                     }
                 }
                 i++;
             }
         }
-        list.removeAll(Collections.singleton(null));
-        return list;
+        addList.removeAll(Collections.singleton(null));
+        return addList;
+    }
+
+    public void removeHazard(Hazard h) {
+        hazards.remove(h);
+        h.markRemoved(true);
     }
 
     /**
      * Spreads the fire to adjacent nodes.
      */
-    private PooledList<Hazard> spreadFire(Vector2 node) {
+    private void spreadFire(Vector2 node) {
         int x = (int) node.x;
         int y = (int) node.y;
-        PooledList<Hazard> list = new PooledList<>();
         if (y + 1 <= height) {
             // check top left
             if (plantController.inBounds(x - 1, y + 1)) {
-                if (!plantController.nodeIsEmpty(x - 1, y + 1)) {
-                    list.add(generateHazard(Model.ModelType.FIRE, x - 1, y + 1));
+                if (!plantController.nodeIsEmpty(x - 1, y + 1) && !plantController.hasHazard(x - 1, y+1)) {
+                    addList.add(generateHazard(FIRE, x - 1, y + 1));
                 }
             }
             // check top right
             if (plantController.inBounds(x + 1, y + 1)) {
-                if (!plantController.nodeIsEmpty(x + 1, y + 1)) {
-                    list.add(generateHazard(Model.ModelType.FIRE, x + 1, y + 1));
+                if (!plantController.nodeIsEmpty(x + 1, y + 1) && !plantController.hasHazard(x - 1, y+1)) {
+                    addList.add(generateHazard(FIRE, x + 1, y + 1));
                 }
             }
             // check top middle
             if (plantController.inBounds(x, y + 1)) {
-                if (!plantController.nodeIsEmpty(x, y + 1)) {
-                    list.add(generateHazard(Model.ModelType.FIRE, x, y + 1));
+                if (!plantController.nodeIsEmpty(x, y + 1)  && !plantController.hasHazard(x, y+1)) {
+                    addList.add(generateHazard(FIRE, x, y + 1));
                 }
             }
         }
@@ -352,8 +419,8 @@ public class HazardController {
             if (plantController.inBounds(x - 1, y - 1)) {
                 if (plantController.branchExists(x - 1,
                                                  y - 1,
-                                                 PlantController.branchDirection.RIGHT)) {
-                    list.add(generateHazard(Model.ModelType.FIRE, x - 1, y - 1));
+                                                 PlantController.branchDirection.RIGHT)  && !plantController.hasHazard(x - 1, y+1)) {
+                    addList.add(generateHazard(FIRE, x - 1, y - 1));
                 }
             }
             // check bottom right
@@ -361,7 +428,7 @@ public class HazardController {
                 if (plantController.branchExists(x + 1,
                                                  y - 1,
                                                  PlantController.branchDirection.LEFT)) {
-                    list.add(generateHazard(Model.ModelType.FIRE, x + 1, y - 1));
+                    addList.add(generateHazard(FIRE, x + 1, y - 1));
                 }
             }
             // check bottom middle
@@ -369,11 +436,10 @@ public class HazardController {
                 if (plantController.branchExists(x,
                                                  y - 1,
                                                  PlantController.branchDirection.MIDDLE)) {
-                    list.add(generateHazard(Model.ModelType.FIRE, x, y - 1));
+                    addList.add(generateHazard(FIRE, x, y - 1));
                 }
             }
         }
-        return list;
     }
 
     /**
@@ -384,13 +450,65 @@ public class HazardController {
     public void extinguishFire(Vector2 mousePos) {
         if (!resourceController.canExtinguish()) return;
         for (Hazard h : hazards) {
-            if (h.getType().equals(Model.ModelType.FIRE)) {
+            if (h.getType().equals(FIRE)) {
                 Vector2 hazPos = plantController.indexToWorldCoord((int) h.getLocation().x, (int) h.getLocation().y);
                 if (Math.abs(mousePos.x - hazPos.x) < .5 && Math.abs(mousePos.y - hazPos.y) < .5) {
                     hazards.remove(h);
                     h.markRemoved(true);
                     resourceController.decrementExtinguish();
                     break;
+                }
+            }
+        }
+    }
+
+    private void moveBug(Vector2 node) {
+        int x = (int) node.x;
+        int y = (int) node.y;
+        if (y + 1 <= height) {
+            // check top left
+            if (plantController.inBounds(x - 1, y + 1)) {
+                if (!plantController.nodeIsEmpty(x - 1, y + 1)) {
+                    addList.add(generateHazard(FIRE, x - 1, y + 1));
+                }
+            }
+            // check top right
+            if (plantController.inBounds(x + 1, y + 1)) {
+                if (!plantController.nodeIsEmpty(x + 1, y + 1)) {
+                    addList.add(generateHazard(FIRE, x + 1, y + 1));
+                }
+            }
+            // check top middle
+            if (plantController.inBounds(x, y + 1)) {
+                if (!plantController.nodeIsEmpty(x, y + 1)) {
+                    addList.add(generateHazard(FIRE, x, y + 1));
+                }
+            }
+        }
+
+        if (y - 1 >= 0) {
+            // check bottom left
+            if (plantController.inBounds(x - 1, y - 1)) {
+                if (plantController.branchExists(x - 1,
+                        y - 1,
+                        PlantController.branchDirection.RIGHT)) {
+                    addList.add(generateHazard(FIRE, x - 1, y - 1));
+                }
+            }
+            // check bottom right
+            if (plantController.inBounds(x + 1, y - 1)) {
+                if (plantController.branchExists(x + 1,
+                        y - 1,
+                        PlantController.branchDirection.LEFT)) {
+                    addList.add(generateHazard(FIRE, x + 1, y - 1));
+                }
+            }
+            // check bottom middle
+            if (plantController.inBounds(x, y - 1)) {
+                if (plantController.branchExists(x,
+                        y - 1,
+                        PlantController.branchDirection.MIDDLE)) {
+                    addList.add(generateHazard(FIRE, x, y - 1));
                 }
             }
         }
@@ -403,7 +521,7 @@ public class HazardController {
      */
     public boolean hasFire(Vector2 mousePos) {
         for (Hazard h : hazards) {
-            if (h.getType().equals(Model.ModelType.FIRE)) {
+            if (h.getType().equals(FIRE)) {
                 Vector2 hazPos = plantController.indexToWorldCoord((int) h.getLocation().x, (int) h.getLocation().y);
                 if (Math.abs(mousePos.x - hazPos.x) < .5 && Math.abs(mousePos.y - hazPos.y) < .5) return true;
             }
@@ -415,10 +533,9 @@ public class HazardController {
      * Sets the texture of hazards.
      */
     public void gatherAssets(AssetDirectory directory) {
-        this.fireTexture = directory.getEntry("hazards:fire", Texture.class);
-        this.fireAnimator = new FilmStrip(directory.getEntry("hazards:fire_animation", Texture.class), 1, 16, 16);
+        this.fireTexture = new FilmStrip(directory.getEntry("hazards:fire", Texture.class), 1, 16, 16);
         this.droneTexture = directory.getEntry("hazards:drone", Texture.class);
-//        this.bugTexture = directory.getEntry("hazards:bug", Texture.class);
+        this.bugTexture = new FilmStrip(directory.getEntry("hazards:bug", Texture.class), 1, 9, 9);
         this.redWarningTexture = new TextureRegion(directory.getEntry("hazards:red-warning", Texture.class));
         this.yellowWarningTexture = new TextureRegion(directory.getEntry("hazards:yellow-warning", Texture.class));
         this.arrowDownTexture = new TextureRegion(directory.getEntry("hazards:arrow-down", Texture.class));
@@ -458,10 +575,17 @@ public class HazardController {
         }
     }
 
-    /**
-     * Draw each hazard.
-     */
-    public void draw(GameCanvas canvas) {
+    public void reset() {
+        hazards.clear();
+        fireNodes.clear();
+        bugNodes.clear();
+        addList.clear();
+    }
+
+//    /**
+//     * Draw each hazard.
+//     */
+//    public void draw(GameCanvas canvas) {
 //        for (Hazard h : hazards) {
 //            h.draw(canvas);
 //            switch (h.getType()) {
@@ -479,7 +603,7 @@ public class HazardController {
             // draw warning indicator
 
 //        }
-    }
+//    }
 
 
 }

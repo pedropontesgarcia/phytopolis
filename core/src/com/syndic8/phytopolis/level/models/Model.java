@@ -26,9 +26,7 @@ public abstract class Model {
     /**
      * The texture for the shape.
      */
-    protected TextureRegion texture;
-
-    protected FilmStrip animator;
+    protected FilmStrip texture;
     protected float animFrame;
     protected float animationSpeed;
     protected int zIndex;
@@ -48,16 +46,19 @@ public abstract class Model {
     }
 
     public void setTexture(Texture texture) {
-        this.texture = new FilmStrip(texture, 1, 1, 1);
-        //        radius = animator.getRegionHeight() / 2.0f;
-        origin = new Vector2(texture.getWidth() / 2.0f,
-                             texture.getHeight() / 2.0f);
+        setFilmStrip(new FilmStrip(texture, 1, 1, 1));
     }
-    public void setAnimator(FilmStrip animation){
-        animator = animation;
+    public void setFilmStrip(FilmStrip animation){
+        texture = animation;
+        origin = new Vector2(texture.getRegionWidth() / 2.0f,
+                texture.getRegionHeight() / 2.0f);
+    }
+
+    public FilmStrip getFilmStrip() {
+        return texture;
     }
     public void setAnimationSpeed(float speed){
-        animationSpeed = 0.15f;
+        animationSpeed = speed;
     }
 
     /**

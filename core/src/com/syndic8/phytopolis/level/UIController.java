@@ -25,7 +25,10 @@ public class UIController {
     private final Vector2 projMousePosCache;
     private final InputController ic;
     private final GameCanvas canvas;
+    private FilmStrip current;
     private FilmStrip waterdropStrip;
+    private FilmStrip waterdropAdd;
+    private FilmStrip waterdropRemove;
     private Cursor branchCursor;
     private Cursor leafCursor;
     private Cursor waterCursor;
@@ -56,10 +59,19 @@ public class UIController {
      * @param directory Reference to global asset manager.
      */
     public void gatherAssets(AssetDirectory directory) {
-        waterdropStrip = new FilmStrip(directory.getEntry("gameplay:water_ui",
+        waterdropStrip = new FilmStrip(directory.getEntry("ui:water_ui",
                                                           Texture.class),
                                        1,
-                                       11);
+                                       22);
+        waterdropAdd = new FilmStrip(directory.getEntry("ui:water_add",
+                Texture.class),
+                1,
+                19);
+        waterdropRemove = new FilmStrip(directory.getEntry("ui:water_remove",
+                Texture.class),
+                1,
+                20);
+        current = waterdropStrip;
         TextureRegion branchCursorTexture = new TextureRegion(directory.getEntry(
                 "ui:branch-cursor",
                 Texture.class));
@@ -106,12 +118,33 @@ public class UIController {
      */
     public void update(float dt,
                        float waterLvl,
-                       HazardController hazardController) {
+                       HazardController hazardController,
+                       boolean addedWater,
+                       boolean removedWater,
+                       int timerDeductions) {
         updateCursor(hazardController);
-        waterdropStrip.setFrame(Math.round(
-                (waterdropStrip.getSize() - 1) * waterLvl));
-        timer.updateTime(dt);
+        updateTexture(waterLvl, addedWater, removedWater);
+        timer.updateTime(dt + timerDeductions); // 1 SEC PER LEAF BITE
         label.setText(timer.toString());
+    }
+
+    /**
+     * Updates the UI texture
+     */
+    public void updateTexture(float waterLvl, boolean addedWater, boolean removedWater) {
+        if (addedWater) {
+            current = waterdropAdd;
+            current.setFrame(Math.round(
+                    (current.getSize() - 1) * waterLvl));
+        } else if (removedWater) {
+            current = waterdropRemove;
+            current.setFrame(Math.round(
+                    (current.getSize() - 1) * waterLvl));
+        } else {
+            current = waterdropStrip;
+            current.setFrame(Math.round(
+                    (current.getSize() - 2) * waterLvl) + 1);
+        }
     }
 
     /**
@@ -155,8 +188,8 @@ public class UIController {
         return timer.isOver();
     }
 
-    public void reset(Tilemap tm) {
-        timer.setTime(tm.getTime());
+    public void reset() {
+        timer.reset();
         timer.start();
     }
 
@@ -168,12 +201,12 @@ public class UIController {
     public void draw(GameCanvas c) {
         int w = c.getWidth();
         int h = c.getHeight();
-        float txWidth = waterdropStrip.getRegionWidth();
-        float txHeight = waterdropStrip.getRegionHeight();
+        float txWidth = current.getRegionWidth();
+        float txHeight = current.getRegionHeight();
         float widthRatio = txWidth / txHeight;
         float txWidthDrawn = w * 0.1f;
         float txHeightDrawn = w * 0.1f / widthRatio;
-        c.drawHud(waterdropStrip,
+        c.drawHud(current,
                   w * 0.075f - txWidthDrawn / 2f,
                   h * 0.85f,
                   txWidthDrawn,

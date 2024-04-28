@@ -10,17 +10,6 @@ import com.syndic8.phytopolis.util.Tilemap;
 public class Drone extends Hazard {
 
     /**
-     * Indicates whether the drone is still alive (has not collided with the plant).
-     * It is true if the drone hasn't collided with the plant yet, otherwise false.
-     */
-    private final boolean isAlive;
-
-    /**
-     * Time til explosion.
-     */
-    private int timer;
-
-    /**
      * Constructs a Drone object with a specified location.
      * The drone is initially alive upon creation.
      *
@@ -31,7 +20,6 @@ public class Drone extends Hazard {
                  Tilemap tm,
                  float texScl) {
         super(tm, texScl, pos, location, timeTilExplosion);
-        isAlive = true;
     }
 
     /**
@@ -42,15 +30,6 @@ public class Drone extends Hazard {
     @Override
     public ModelType getType() {
         return ModelType.DRONE;
-    }
-
-    /**
-     * Checks if the drone is still alive (has not collided with a plant).
-     *
-     * @return true if the drone is alive, false otherwise.
-     */
-    public boolean isAlive() {
-        return isAlive;
     }
 
     public void update(float delta) {

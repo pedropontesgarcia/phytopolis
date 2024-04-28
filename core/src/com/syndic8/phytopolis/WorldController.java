@@ -23,7 +23,9 @@ import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.World;
 import com.syndic8.phytopolis.assets.AssetDirectory;
+import com.syndic8.phytopolis.level.models.Fire;
 import com.syndic8.phytopolis.level.models.GameObject;
+import com.syndic8.phytopolis.level.models.Hazard;
 import com.syndic8.phytopolis.level.models.Model;
 import com.syndic8.phytopolis.util.FadingScreen;
 import com.syndic8.phytopolis.util.PooledList;
@@ -513,7 +515,7 @@ public abstract class WorldController extends FadingScreen implements Screen {
     public void addObject(Model obj) {
         assert inBounds(obj) : "Object is not in bounds";
         objects.add(obj);
-        if (obj instanceof GameObject) {
+        if (obj instanceof GameObject && !(obj instanceof Fire)) {
             ((GameObject) obj).activatePhysics(world);
         }
         objects.sort(Comparator.comparingInt(Model::getZIndex));

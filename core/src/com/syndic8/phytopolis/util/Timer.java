@@ -19,6 +19,10 @@ public class Timer {
      */
     private final float sunTime;
     /**
+     * Starting time for this Timer
+     */
+    private float initialTime;
+    /**
      * The time in seconds that this timer has left
      */
     private float time;
@@ -39,12 +43,17 @@ public class Timer {
     }
 
     public Timer(float initialTime, float sunTime) {
+        this.initialTime = initialTime;
         time = initialTime;
         this.sunTime = sunTime;
     }
 
     public void setTime(float t) {
         time = t;
+    }
+
+    public void reset() {
+        time = initialTime;
     }
 
     /**

@@ -3,11 +3,14 @@ package com.syndic8.phytopolis.level;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.World;
+import com.badlogic.gdx.utils.ObjectSet;
 import com.badlogic.gdx.utils.Queue;
 import com.syndic8.phytopolis.GameCanvas;
 import com.syndic8.phytopolis.assets.AssetDirectory;
 import com.syndic8.phytopolis.level.models.Branch;
+import com.syndic8.phytopolis.level.models.Hazard;
 import com.syndic8.phytopolis.level.models.Leaf;
+import com.syndic8.phytopolis.level.models.Model;
 import com.syndic8.phytopolis.util.FilmStrip;
 import com.syndic8.phytopolis.util.Tilemap;
 
@@ -91,6 +94,7 @@ public class PlantController {
     private int plantCoyoteTimeRemaining = 0;
     private FilmStrip leafTextureOne;
     private FilmStrip leafTextureTwo;
+    private ObjectSet<Hazard> removedHazards;
 
     /**
      * Initialize a PlantController with specified height and width
@@ -138,6 +142,7 @@ public class PlantController {
                         tilemap);
             }
         }
+        removedHazards = new ObjectSet<>();
     }
 
     public Leaf.leafType getLevelLeaf(String l){
@@ -324,7 +329,27 @@ public class PlantController {
         int xIndex = screenCoordToIndex(x, y)[0];
         int yIndex = screenCoordToIndex(x, y)[1];
         if (!inBounds(xIndex, yIndex)) return false;
+        return hasLeaf(xIndex, yIndex);
+    }
+
+    public boolean hasLeaf(int xIndex, int yIndex) {
         return plantGrid[xIndex][yIndex].hasLeaf();
+    }
+
+    public Hazard getHazard(int xIndex, int yIndex) {
+        return plantGrid[xIndex][yIndex].getHazard();
+    }
+
+    public void setHazard(int xIndex, int yIndex, Hazard h) {
+        plantGrid[xIndex][yIndex].setHazard(h);
+    }
+
+    public void removeHazard(int xIndex, int yIndex) {
+        plantGrid[xIndex][yIndex].removeHazard();
+    }
+
+    public boolean hasHazard(int xIndex, int yIndex) {
+        return plantGrid[xIndex][yIndex].hasHazard();
     }
 
     /**
@@ -514,6 +539,47 @@ public class PlantController {
         destructionQueue.addLast(new int[]{xArg, yArg});
     }
 
+    public int countTimerDeductions() {
+        int count = 0;
+        for (int x = 0; x < width; x++) {
+            for (int y = 0; y < height; y++) {
+                Leaf l = plantGrid[x][y].getLeaf();
+                if (l != null && l.healthBelowMark()) {
+                    count++;
+                }
+            }
+        }
+        return count;
+    }
+
+    public void removeHazardFromNodes(Hazard h) {
+        for (int x = 0; x < width; x++) {
+            for (int y = 0; y < height; y++) {
+                if (plantGrid[x][y].getHazard() == h) {
+                    plantGrid[x][y].removeHazard();
+                    if (plantGrid[x][y].hasLeaf() && plantGrid[x][y].getLeaf().fullyEaten()) {
+                        plantGrid[x][y].unmakeLeaf();
+                    }
+                    return;
+                }
+            }
+        }
+    }
+
+    public ObjectSet<Hazard> removeDeadLeafBugs() {
+        removedHazards.clear();
+        for (int x = 0; x < width; x++) {
+            for (int y = 0; y < height; y++) {
+                if (plantGrid[x][y].hasLeaf() && plantGrid[x][y].getLeaf().fullyEaten()) {
+                    removedHazards.add(plantGrid[x][y].getHazard());
+                    plantGrid[x][y].removeHazard();
+                    plantGrid[x][y].unmakeLeaf();
+                }
+            }
+        }
+        return removedHazards;
+    }
+
     public void calculateMaxLeafIndex() {
         for (int y = height - 1; y >= 0; y--) {
             for (int x = 1; x < width; x += 2) {
@@ -596,7 +662,7 @@ public class PlantController {
                                        Branch.branchType.NORMAL,
                                        tilemap,
                                        1);
-            branch.setFilmStrip(staticBranchTexture);
+            branch.setFilmStrip(branchTexture);
             branch.drawGhost(canvas);
         }
     }
@@ -765,6 +831,10 @@ public class PlantController {
          * the leaf for this node
          */
         private Leaf leaf;
+        /**
+         * The hazard at this node, if there is one
+         */
+        private Hazard hazard;
 
         /**
          * initialize a new PlantNode object
@@ -981,6 +1051,29 @@ public class PlantController {
             left = null;
             right = null;
             leaf = null;
+            hazard = null;
+        }
+
+        public Hazard getHazard() {
+            return hazard;
+        }
+
+        public void setHazard(Hazard h) {
+            hazard = h;
+            if (h != null && leaf != null && h.getType() == Model.ModelType.BUG) {
+                leaf.setBeingEaten(true);
+            }
+        }
+
+        public void removeHazard() {
+            hazard = null;
+            if (leaf != null) {
+                leaf.setBeingEaten(false);
+            }
+        }
+
+        public boolean hasHazard() {
+            return hazard != null;
         }
 
         /**

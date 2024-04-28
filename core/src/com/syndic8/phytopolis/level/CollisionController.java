@@ -10,18 +10,33 @@ public class CollisionController implements ContactListener {
     private final Player player;
     private final UIController uiController;
     private final ResourceController resourceController;
+    private final PlantController plantController;
+    private final HazardController hazardController;
     private final InputController ic;
     protected ObjectSet<Fixture> sensorFixtures;
+    private boolean addedWater;
 
     public CollisionController(Player p,
                                UIController ui,
-                               ResourceController rsrc) {
+                               ResourceController rsrc,
+                               PlantController plt,
+                               HazardController hzd) {
         player = p;
         sensorFixtures = new ObjectSet<>();
         uiController = ui;
         resourceController = rsrc;
+        plantController = plt;
+        hazardController = hzd;
         ic = InputController.getInstance();
 
+    }
+
+    public boolean getAddedWater() {
+        return addedWater;
+    }
+
+    public void setAddedWater(boolean value) {
+        addedWater = value;
     }
 
     @Override
@@ -90,17 +105,18 @@ public class CollisionController implements ContactListener {
             if (sensorFixtures.size == 0) {
                 player.setGrounded(false);
             }
-        }
-        try {
-            if (((Model) bd1).getType() == Model.ModelType.LEAF ||
-                    ((Model) bd2).getType() == Model.ModelType.LEAF) {
-                Leaf l = (Leaf) (player == bd1 ? bd2 : bd1);
-                if (l.getLeafType() == Leaf.leafType.BOUNCY) {
-                    player.setBouncy(false);
+
+            try {
+                if (((Model) bd1).getType() == Model.ModelType.LEAF ||
+                        ((Model) bd2).getType() == Model.ModelType.LEAF) {
+                    Leaf l = (Leaf) (player == bd1 ? bd2 : bd1);
+                    if (l.getLeafType() == Leaf.leafType.BOUNCY) {
+                        player.setBouncy(false);
+                    }
                 }
+            } catch (Exception e) {
+                e.printStackTrace();
             }
-        } catch (Exception e) {
-            e.printStackTrace();
         }
 
     }
@@ -109,6 +125,14 @@ public class CollisionController implements ContactListener {
     public void preSolve(Contact contact, Manifold manifold) {
         Fixture fix1 = contact.getFixtureA();
         Fixture fix2 = contact.getFixtureB();
+        boolean isCollisionBetweenPlayerAndBug =
+                (fix1.getBody() == player.getBody() &&
+                        ((Model) fix2.getBody().getUserData()).getType() ==
+                                Model.ModelType.BUG) ||
+                        (fix2.getBody() == player.getBody() &&
+                                ((Model) fix1.getBody()
+                                        .getUserData()).getType() ==
+                                        Model.ModelType.BUG);
         boolean isCollisionBetweenPlayerAndLeaf =
                 (fix1.getBody() == player.getBody() &&
                         ((Model) fix2.getBody().getUserData()).getType() ==
@@ -206,9 +230,10 @@ public class CollisionController implements ContactListener {
                 w = (Water) fix2.getBody().getUserData();
             }
             contact.setEnabled(false);
-            if (w.isFull()) {
+            if (w.isFull() && !resourceController.fullWater()) {
                 w.clear();
                 resourceController.pickupWater();
+                setAddedWater(true);
             }
         }
 
@@ -227,6 +252,25 @@ public class CollisionController implements ContactListener {
         }
         if (isCollisionBetweenPlayerAndNoTopTile && isPlayerGoingDown) {
             contact.setEnabled(false);
+        }
+
+        if (isCollisionBetweenPlayerAndBug) {
+            System.out.println("BUG");
+            if (isPlayerGoingDown) {
+                System.out.println("BUG DOWN");
+                Bug b;
+                if (((Model) fix1.getBody().getUserData()).getType() ==
+                        Model.ModelType.BUG) {
+                    b = (Bug) fix1.getBody().getUserData();
+                } else {
+                    b = (Bug) fix2.getBody().getUserData();
+                }
+                hazardController.removeHazard(b);
+                plantController.removeHazardFromNodes(b);
+
+            } else {
+                contact.setEnabled(false);
+            }
         }
 
     }

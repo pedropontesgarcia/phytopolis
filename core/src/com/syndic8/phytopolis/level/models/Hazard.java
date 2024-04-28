@@ -5,12 +5,7 @@ import com.badlogic.gdx.math.Vector2;
 import com.syndic8.phytopolis.GameCanvas;
 import com.syndic8.phytopolis.util.Tilemap;
 
-public abstract class Hazard extends Model {
-
-//    /**
-//     * Radius for hazard collisions
-//     */
-//    private static final int HAZARD_RADIUS = 30;
+public abstract class Hazard extends BoxObject {
 
     /**
      * The current location (index-wise) of the hazard.
@@ -22,13 +17,11 @@ public abstract class Hazard extends Model {
      */
     private int timer;
 
-    private final int NUM_FIRE_FRAMES = 16;
-
     /**
      * Creates a hazard object.
      */
     public Hazard(Tilemap tm, float texScl, Vector2 pos, Vector2 location, int timer) {
-        super(pos.x, pos.y, tm, texScl);
+        super(pos.x, pos.y, 0.2f, 0.1f, tm, texScl);
         this.location = location;
         this.timer = timer;
         zIndex = 4;
@@ -95,45 +88,21 @@ public abstract class Hazard extends Model {
         float height = tilemap.getTileHeight() * textureSclInTiles;
         float sclX = width / texture.getRegionWidth();
         float sclY = height / texture.getRegionHeight();
-        if (getType() == ModelType.FIRE){
-            animator.setFrame((int) animFrame);
-            float x = animator.getRegionWidth() / 2.0f;
-            float y = animator.getRegionHeight() / 2.0f;
-            canvas.draw(animator,
+
+        if (texture != null) {
+            canvas.draw(texture,
                     Color.WHITE,
-                    x,
-                    y,
+                    origin.x,
+                    origin.y,
                     getX(),
                     getY(),
                     0,
-                    sclX*2.5f,
-                    sclY*4);
-        }else{
-
-            if (texture != null) {
-                canvas.draw(texture,
-                        Color.WHITE,
-                        origin.x,
-                        origin.y,
-                        getX(),
-                        getY(),
-                        0,
-                        sclX,
-                        sclY);
-            }
+                    sclX,
+                    sclY);
         }
 
     }
     public void update(float dt){
-        if ( getType() == ModelType.FIRE){
-            if (animFrame < NUM_FIRE_FRAMES) {
-                animFrame += animationSpeed;
-            }
-            if (animFrame >= NUM_FIRE_FRAMES) {
-                animFrame = 0;
-            }
-        }
-
 
     }
 

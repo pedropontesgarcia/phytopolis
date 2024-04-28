@@ -49,7 +49,7 @@ public class GameplayMode extends WorldController {
     private BitmapFont timesFont;
     private TextureRegion background;
     private TextureRegion vignette;
-    private TextureRegion avatarTexture;
+    private Texture avatarTexture;
     private Tilemap tilemap;
     private Texture waterTexture;
     private float volume;
@@ -58,6 +58,7 @@ public class GameplayMode extends WorldController {
     private Music backgroundMusic;
     private String lvl;
     private CollisionController collisionController;
+    private float timeSinceUIUpdate = 0;
 
     /**
      * Creates and initialize a new instance of the game.
@@ -89,9 +90,9 @@ public class GameplayMode extends WorldController {
         tilemap.gatherAssets(directory);
         if (!gathered) {
             gathered = true;
-            avatarTexture = new TextureRegion(directory.getEntry(
+            avatarTexture = directory.getEntry(
                     "gameplay:player",
-                    Texture.class));
+                    Texture.class);
             waterTexture = directory.getEntry("water_nooutline", Texture.class);
             timesFont = directory.getEntry("times", BitmapFont.class);
             background = new TextureRegion(directory.getEntry(
@@ -131,7 +132,7 @@ public class GameplayMode extends WorldController {
                                                     6,
                                                     8,
                                                     6,
-                                                    6,
+                                                    10,
                                                     tilemap);
             sunController = new SunController(5,
                                               10,
@@ -198,7 +199,7 @@ public class GameplayMode extends WorldController {
      * @param dt Number of seconds since last animation frame
      */
     public void update(float dt) {
-
+        int water = resourceController.getCurrWater();
         backgroundMusic.setVolume(super.getVolume());
         // Process actions in object model
         avatar.setMovement(ic.getHorizontal() * avatar.getForce());
@@ -242,9 +243,17 @@ public class GameplayMode extends WorldController {
             hazardController.extinguishFire(unprojMousePos);
         }
         plantController.propagateDestruction();
-        uiController.update(dt,
-                            resourceController.getCurrRatio(),
-                            hazardController);
+
+        if (timeSinceUIUpdate >= 1) {
+            uiController.update(dt,
+                    resourceController.getCurrRatio(),
+                    hazardController, collisionController.getAddedWater(),
+                    resourceController.getCurrWater() < water,
+                    plantController.countTimerDeductions());
+            collisionController.setAddedWater(false);
+        } else {
+            timeSinceUIUpdate += 0.05;
+        }
         // Check for win condition
         if ((plantController.getMaxLeafHeight() >
                 tilemap.getVictoryHeight() * tilemap.getTileHeight()) &&
@@ -280,16 +289,17 @@ public class GameplayMode extends WorldController {
             shouldGrowBranch = true;
         }
 
-        if (shouldGrowBranch) {
-            if (!hazardController.hasFire(unprojMousePos)) {
+        if (!hazardController.hasFire(unprojMousePos)) {
+            if (shouldGrowBranch) {
+
                 Branch branch = plantController.growBranch(unprojMousePos.x,
-                                                           unprojMousePos.y);
+                        unprojMousePos.y);
                 if (branch != null) addObject(branch);
+
             }
-        }
-        if (shouldGrowLeaf) {
-            // don't grow if there's a fire there (prioritize fire)
-            if (!hazardController.hasFire(unprojMousePos)) {
+            if (shouldGrowLeaf) {
+                // don't grow if there's a fire there (prioritize fire)
+
                 Leaf.leafType lt = Leaf.leafType.NORMAL;
                 float width = 0;
                 switch (lvl) {
@@ -307,12 +317,13 @@ public class GameplayMode extends WorldController {
                         break;
                 }
                 Model newLeaf = plantController.makeLeaf(unprojMousePos.x,
-                                                         unprojMousePos.y +
-                                                                 0.5f *
-                                                                         tilemap.getTileHeight(),
-                                                         lt,
-                                                         width);
+                        unprojMousePos.y +
+                                0.5f *
+                                        tilemap.getTileHeight(),
+                        lt,
+                        width);
                 if (newLeaf != null) addObject(newLeaf);
+
             }
         }
     }
@@ -342,11 +353,12 @@ public class GameplayMode extends WorldController {
                 ic.isGrowBranchModDown()) {
             projMousePosCache.set(ic.getMouseX(), ic.getMouseY());
             Vector2 unprojMousePos = canvas.unproject(projMousePosCache);
-            plantController.drawGhostBranch(canvas,
-                                            unprojMousePos.x,
-                                            unprojMousePos.y);
+            if (!hazardController.hasFire(unprojMousePos)) {
+                plantController.drawGhostBranch(canvas,
+                        unprojMousePos.x,
+                        unprojMousePos.y);
+            }
         }
-        hazardController.draw(canvas);
         drawVignette();
         canvas.end();
 
@@ -397,7 +409,7 @@ public class GameplayMode extends WorldController {
         world.dispose();
         backgroundMusic.stop();
         backgroundMusic.play();
-        uiController.reset(tilemap);
+        uiController.reset();
 
         ic.resetScrolled();
 
@@ -479,7 +491,9 @@ public class GameplayMode extends WorldController {
         addObject(avatar);
         collisionController = new CollisionController(avatar,
                                                       uiController,
-                                                      resourceController);
+                                                      resourceController,
+                plantController,
+                hazardController);
         world.setContactListener(collisionController);
         volume = constants.getFloat("volume", 1.0f);
     }

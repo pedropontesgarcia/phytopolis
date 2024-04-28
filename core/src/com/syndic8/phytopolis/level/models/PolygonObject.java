@@ -27,6 +27,7 @@ import com.badlogic.gdx.physics.box2d.PolygonShape;
 import com.badlogic.gdx.physics.box2d.World;
 import com.badlogic.gdx.utils.ShortArray;
 import com.syndic8.phytopolis.GameCanvas;
+import com.syndic8.phytopolis.util.FilmStrip;
 import com.syndic8.phytopolis.util.Tilemap;
 
 /**
@@ -362,7 +363,7 @@ public class PolygonObject extends GameObject {
      * @param value the object texture for drawing purposes.
      */
     public void setTexture(TextureRegion value) {
-        texture = value;
+        texture = new FilmStrip(value.getTexture(), 1, 1);
         region = new PolygonRegion(texture, scaled, tridx);
     }
 

@@ -59,7 +59,7 @@ public class LevelOverMode extends FadingScreen implements Screen {
                 fadeOut(0.5f);
             }
         };
-        menu.addItem(new MenuItem("NEXT",
+        menu.addItem(new MenuItem("BACK TO\nLEVEL SELECT",
                                   0,
                                   exitListener,
                                   menu,

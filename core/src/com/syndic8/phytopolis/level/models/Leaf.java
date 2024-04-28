@@ -7,12 +7,12 @@ import com.syndic8.phytopolis.util.FilmStrip;
 import com.syndic8.phytopolis.util.Tilemap;
 
 public class Leaf extends BoxObject {
-
-    private final leafType type;
-
-    private float animFrame;
-
     private static final float ANIMATION_SPEED = 1/6.0f;
+    private final leafType type;
+    private float health;
+    private int healthMark;
+    private boolean beingEaten;
+
 
     /**
      * Creates a new Leaf object with the specified position and dimensions
@@ -34,6 +34,9 @@ public class Leaf extends BoxObject {
         bodyinfo.type = BodyDef.BodyType.StaticBody;
         this.type = type;
         zIndex = 2;
+        health = 5;
+        healthMark = 5;
+        beingEaten = false;
     }
 
     /**
@@ -50,19 +53,20 @@ public class Leaf extends BoxObject {
         return ModelType.LEAF;
     }
 
-    //    @Override
-    //    public boolean activatePhysics(World world) {
-    //        boolean success = super.activatePhysics(world);
-    //        if (success) body.setUserData(ModelType.LEAF);
-    //        return success;
-    //    }
-
-    public void setFilmStrip(FilmStrip f) {
-        this.texture = f;
+    public boolean fullyEaten() {
+        return health <= 0;
     }
 
-    public FilmStrip getFilmStrip() {
-        return (FilmStrip) this.texture;
+    public void setBeingEaten(boolean value) {
+        beingEaten = value;
+    }
+
+    public boolean healthBelowMark() {
+        if (health < healthMark) {
+            healthMark--;
+            return true;
+        }
+        return false;
     }
 
     /**
@@ -76,10 +80,13 @@ public class Leaf extends BoxObject {
      * @param delta Number of seconds since last animation frame
      */
     public void update(float delta) {
-        if (animFrame < getFilmStrip().getSize() - 1 && animFrame <= 4) {
+        if (beingEaten) {
+            health -= delta;
+        }
+        if (animFrame < 4) {
             animFrame += ANIMATION_SPEED;
-        } else if (animFrame >= getFilmStrip().getSize()) {
-            animFrame = getFilmStrip().getSize() - 1;
+        } else if (health < 5 && health > 0) {
+            animFrame = 4 + (5 - health);
         }
     }
 

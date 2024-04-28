@@ -1162,11 +1162,11 @@ public abstract class GameObject extends Model {
      *
      * @param value the object texture for drawing purposes.
      */
-    public void setTexture(TextureRegion value) {
-        texture = value;
-        origin.set(texture.getRegionWidth() / 2.0f,
-                   texture.getRegionHeight() / 2.0f);
-    }
+//    public void setTexture(TextureRegion value) {
+//        texture = value;
+//        origin.set(texture.getRegionWidth() / 2.0f,
+//                   texture.getRegionHeight() / 2.0f);
+//    }
 
     /**
      * Draws the physics object.
