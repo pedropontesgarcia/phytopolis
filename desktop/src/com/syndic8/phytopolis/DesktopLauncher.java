@@ -24,26 +24,22 @@ public class DesktopLauncher {
         List<DisplayMode> potentialDisplayModes = new ArrayList<Graphics.DisplayMode>(
                 Arrays.asList(displayModes));
         List<DisplayMode> goodDisplayModes = new ArrayList<Graphics.DisplayMode>();
-        config.setWindowPosition(-1, -1);
+        int windowWidth = (int) (
+                Lwjgl3ApplicationConfiguration.getDisplayMode().width * 0.8f);
+        int windowHeight = (int) (
+                (Lwjgl3ApplicationConfiguration.getDisplayMode().width * 0.8f *
+                        16f) / 9f);
         config.setTitle("Phytopolis");
-        config.useVsync(true);
-        if (potentialDisplayModes.isEmpty()) {
-            LOGGER.warning("No valid fullscreen resolutions were detected, " +
-                                   "switching to compatibility (windowed) " +
-                                   "mode.");
-            config.setWindowedMode(1280, 720);
-            config.setResizable(false);
-        } else {
-            potentialDisplayModes.sort(Comparator.comparingInt((DisplayMode dm) -> dm.refreshRate));
-            int highestRefreshRate = potentialDisplayModes.get(
-                    potentialDisplayModes.size() - 1).refreshRate;
-            for (DisplayMode dm : potentialDisplayModes) {
-                if (dm.refreshRate == highestRefreshRate) {
-                    goodDisplayModes.add(dm);
-                }
+        config.setWindowPosition(-1, -1);
+        config.setWindowedMode(windowWidth, windowHeight);
+        config.setResizable(false);
+        potentialDisplayModes.sort(Comparator.comparingInt((DisplayMode dm) -> dm.refreshRate));
+        int highestRefreshRate = potentialDisplayModes.get(
+                potentialDisplayModes.size() - 1).refreshRate;
+        for (DisplayMode dm : potentialDisplayModes) {
+            if (dm.refreshRate == highestRefreshRate) {
+                goodDisplayModes.add(dm);
             }
-            config.setFullscreenMode(goodDisplayModes.get(
-                    goodDisplayModes.size() - 1));
         }
         new Lwjgl3Application(new GDXRoot(goodDisplayModes), config);
     }

@@ -59,12 +59,13 @@ public class GameplayMode extends WorldController {
     /**
      * Creates and initialize a new instance of the game.
      */
-    public GameplayMode() {
+    public GameplayMode(GameCanvas c) {
         super();
         cameraVector = new Vector2();
         projMousePosCache = new Vector2();
         gathered = false;
         ic = InputController.getInstance();
+        canvas = c;
     }
 
     public void setLevel(String lvl) {
@@ -384,6 +385,27 @@ public class GameplayMode extends WorldController {
         uiController.pauseTimer();
     }
 
+    private void drawBackground() {
+        if (background != null) {
+            canvas.draw(background.getTexture(),
+                        Color.WHITE,
+                        0,
+                        0,
+                        canvas.getWidth(),
+                        canvas.getHeight() * 4);
+        }
+    }
+
+    private void drawVignette() {
+        float backgroundY = canvas.getCameraY() - canvas.getHeight() / 2;
+        canvas.draw(vignette.getTexture(),
+                    Color.WHITE,
+                    0,
+                    backgroundY,
+                    canvas.getWidth(),
+                    canvas.getHeight());
+    }
+
     /**
      * Resets the status of the game so that we can play again.
      * <p>
@@ -488,27 +510,6 @@ public class GameplayMode extends WorldController {
                                                       plantController,
                                                       hazardController);
         world.setContactListener(collisionController);
-    }
-
-    private void drawBackground() {
-        if (background != null) {
-            canvas.draw(background.getTexture(),
-                        Color.WHITE,
-                        0,
-                        0,
-                        canvas.getWidth(),
-                        canvas.getHeight() * 4);
-        }
-    }
-
-    private void drawVignette() {
-        float backgroundY = canvas.getCameraY() - canvas.getHeight() / 2;
-        canvas.draw(vignette.getTexture(),
-                    Color.WHITE,
-                    0,
-                    backgroundY,
-                    canvas.getWidth(),
-                    canvas.getHeight());
     }
 
 }

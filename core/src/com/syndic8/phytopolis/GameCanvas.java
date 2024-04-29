@@ -41,6 +41,8 @@ public class GameCanvas {
     private final List<Graphics.DisplayMode> displayModes;
     private final Preferences preferences;
     private final int[] fps;
+    private final int windowWidth;
+    private final int windowHeight;
     /**
      * Value to cache window width (if we are currently full screen)
      */
@@ -88,6 +90,10 @@ public class GameCanvas {
     public GameCanvas(List<Graphics.DisplayMode> dm) {
         width = 16;
         height = 9;
+        windowWidth = (int) (Gdx.graphics.getDisplayMode().width * 0.8f);
+        windowHeight = (int) (
+                (Gdx.graphics.getDisplayMode().width * 0.8f * height) /
+                        (float) width);
         active = DrawPass.INACTIVE;
         spriteBatch = new PolygonSpriteBatch();
         hudBatch = new SpriteBatch();
@@ -95,8 +101,6 @@ public class GameCanvas {
 
         preferences = Gdx.app.getPreferences("phytopolis_settings");
         displayModes = dm;
-        if (displayModes.isEmpty())
-            displayModes.add(Gdx.graphics.getDisplayMode());
         int resolutionIndex = preferences.getInteger("resolutionIndex", 0);
         resolution = displayModes.get(resolutionIndex);
         windowed = preferences.getBoolean("windowed", false);
@@ -133,14 +137,15 @@ public class GameCanvas {
         holder = new TextureRegion();
         local = new Affine2();
         cameraCache = new Vector3();
+
+        resizeCanvas();
     }
 
     public void applyOptions() {
         if (!windowed) {
             Gdx.graphics.setFullscreenMode(resolution);
         } else {
-            Gdx.graphics.setWindowedMode(1280, 720);
-            Gdx.graphics.setResizable(false);
+            Gdx.graphics.setWindowedMode(windowWidth, windowHeight);
         }
         int currentFps = fps[currentFpsIndex];
         Gdx.graphics.setForegroundFPS(currentFps);
@@ -150,6 +155,41 @@ public class GameCanvas {
         preferences.putBoolean("windowed", windowed);
         preferences.putInteger("fpsIndex", currentFpsIndex);
         preferences.flush();
+    }
+
+    /**
+     * Resets the SpriteBatch camera when this canvas is resized.
+     * <p>
+     * If you do not call this when the window is resized, you will get
+     * weird scaling issues.
+     */
+    public void resizeCanvas() {
+        spriteBatch.getProjectionMatrix()
+                .setToOrtho2D(0, 0, getWidth(), getHeight());
+        hudBatch.getProjectionMatrix()
+                .setToOrtho2D(0, 0, getWidth(), getHeight());
+    }
+
+    /**
+     * Returns the width of this canvas
+     * <p>
+     * This currently gets its value from Gdx.graphics.getWidth()
+     *
+     * @return the width of this canvas
+     */
+    public int getWidth() {
+        return width;
+    }
+
+    /**
+     * Returns the height of this canvas
+     * <p>
+     * This currently gets its value from Gdx.graphics.getHeight()
+     *
+     * @return the height of this canvas
+     */
+    public int getHeight() {
+        return height;
     }
 
     public ShapeRenderer getShapeRenderer() {
@@ -198,62 +238,6 @@ public class GameCanvas {
         shapeRenderer = null;
         local = null;
         holder = null;
-    }
-
-    /**
-     * Changes the width and height of this canvas
-     * <p>
-     * This method raises an IllegalStateException if called while drawing is
-     * active (e.g. in-between a begin-end pair).
-     *
-     * @param width  the canvas width
-     * @param height the canvas height
-     */
-    public void setSize(int width, int height) {
-        if (active != DrawPass.INACTIVE) {
-            Gdx.app.error("GameCanvas",
-                          "Cannot alter property while drawing active",
-                          new IllegalStateException());
-            return;
-        }
-        this.width = width;
-        this.height = height;
-        resizeCanvas();
-    }
-
-    /**
-     * Resets the SpriteBatch camera when this canvas is resized.
-     * <p>
-     * If you do not call this when the window is resized, you will get
-     * weird scaling issues.
-     */
-    public void resizeCanvas() {
-        spriteBatch.getProjectionMatrix()
-                .setToOrtho2D(0, 0, getWidth(), getHeight());
-        hudBatch.getProjectionMatrix()
-                .setToOrtho2D(0, 0, getWidth(), getHeight());
-    }
-
-    /**
-     * Returns the width of this canvas
-     * <p>
-     * This currently gets its value from Gdx.graphics.getWidth()
-     *
-     * @return the width of this canvas
-     */
-    public int getWidth() {
-        return width;
-    }
-
-    /**
-     * Returns the height of this canvas
-     * <p>
-     * This currently gets its value from Gdx.graphics.getHeight()
-     *
-     * @return the height of this canvas
-     */
-    public int getHeight() {
-        return height;
     }
 
     public void resizeScreen(int width, int height) {

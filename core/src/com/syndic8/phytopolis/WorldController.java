@@ -158,18 +158,6 @@ public abstract class WorldController extends FadingScreen implements Screen {
     }
 
     /**
-     * Sets the canvas associated with this controller
-     * <p>
-     * The canvas is shared across all controllers.  Setting this value will compute
-     * the drawing scale from the canvas size.
-     *
-     * @param canvas the canvas associated with this controller
-     */
-    public void setCanvas(GameCanvas canvas) {
-        this.canvas = canvas;
-    }
-
-    /**
      * Method to ensure that a sound asset is only played once.
      * <p>
      * Every time you play a sound asset, it makes a new instance of that sound.
