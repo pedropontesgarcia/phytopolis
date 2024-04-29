@@ -80,8 +80,7 @@ public class GDXRoot extends Game implements ScreenListener {
 
     @Override
     public void resume() {
-        resize(Gdx.graphics.getBackBufferWidth(),
-               Gdx.graphics.getBackBufferHeight());
+        resize(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
     }
 
     public void resize(int width, int height) {

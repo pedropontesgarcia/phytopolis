@@ -46,8 +46,6 @@ public class GameCanvas {
     private final FileHandle configFile;
     private final JsonValue settingsJson;
     private final int[] fps;
-    private final int windowWidth;
-    private final int windowHeight;
     /**
      * Value to cache window width (if we are currently full screen)
      */
@@ -56,6 +54,8 @@ public class GameCanvas {
      * Value to cache window height (if we are currently full screen)
      */
     int height;
+    private int windowHeight;
+    private int windowWidth;
     private int currentFpsIndex;
     private Graphics.DisplayMode resolution;
     private boolean windowed;
@@ -95,10 +95,6 @@ public class GameCanvas {
     public GameCanvas(List<Graphics.DisplayMode> dm) {
         width = 16;
         height = 9;
-        windowWidth = (int) (Gdx.graphics.getDisplayMode().width * 0.8f);
-        windowHeight = (int) (
-                (Gdx.graphics.getDisplayMode().width * 0.8f * height) /
-                        (float) width);
         active = DrawPass.INACTIVE;
         spriteBatch = new PolygonSpriteBatch();
         hudBatch = new SpriteBatch();
@@ -111,6 +107,8 @@ public class GameCanvas {
         int resolutionIndex = settingsJson.getInt("resolutionIndex");
         if (resolutionIndex == -1) resolutionIndex = displayModes.size() - 1;
         resolution = displayModes.get(resolutionIndex);
+        windowWidth = settingsJson.getInt("windowWidth");
+        windowHeight = settingsJson.getInt("windowHeight");
         windowed = settingsJson.getBoolean("windowed", false);
         fps = new int[]{0, 15, 30, 45, 60, 90, 120};
         currentFpsIndex = settingsJson.getInt("fpsIndex", 0);
@@ -172,6 +170,15 @@ public class GameCanvas {
                 .setToOrtho2D(0, 0, getWidth(), getHeight());
         hudBatch.getProjectionMatrix()
                 .setToOrtho2D(0, 0, getWidth(), getHeight());
+        shapeRenderer.getProjectionMatrix()
+                .setToOrtho2D(0, 0, getWidth(), getHeight());
+        windowWidth = Gdx.graphics.getWidth();
+        windowHeight = Gdx.graphics.getHeight();
+        settingsJson.get("windowWidth").set(windowWidth, null);
+        settingsJson.get("windowHeight").set(windowHeight, null);
+        configFile.writeString(settingsJson.prettyPrint(JsonWriter.OutputType.json,
+                                                        0), false);
+        saveOptions();
     }
 
     public void saveOptions() {
@@ -257,6 +264,7 @@ public class GameCanvas {
         viewport.update(width, height);
         hudViewport.update(width, height);
         textViewport.update(width, height);
+        resizeCanvas();
     }
 
     public float getCameraY() {

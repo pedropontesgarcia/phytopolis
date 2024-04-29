@@ -53,12 +53,8 @@ public class DesktopLauncher {
             if (resolutionIndex == -1)
                 resolutionIndex = displayModes.size() - 1;
             DisplayMode resolution = displayModes.get(resolutionIndex);
-            int windowWidth = (int) (
-                    Lwjgl3ApplicationConfiguration.getDisplayMode().width *
-                            0.8f);
-            int windowHeight = (int) (
-                    (Lwjgl3ApplicationConfiguration.getDisplayMode().width *
-                            0.8f * 16f) / 9f);
+            int windowWidth = settingsJson.getInt("windowWidth");
+            int windowHeight = settingsJson.getInt("windowHeight");
             int[] fps = new int[]{0, 15, 30, 45, 60, 90, 120};
             int fpsIndex = settingsJson.getInt("fpsIndex");
             int currentFps = fps[fpsIndex];
@@ -69,7 +65,6 @@ public class DesktopLauncher {
             config.useVsync(currentFps == 0);
             config.setTitle("Phytopolis");
             config.setWindowPosition(-1, -1);
-            config.setResizable(false);
         } catch (Exception ignored) {
             resetSettings(configFile);
             // Try again

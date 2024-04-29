@@ -171,7 +171,9 @@ public class PauseMode extends FadingScreen implements Screen {
 
     public void draw() {
         canvas.clear();
+        canvas.begin();
         menuContainer.draw(canvas);
+        canvas.end();
         super.draw(canvas);
     }
 

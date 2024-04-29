@@ -9,5 +9,7 @@
   "growLeafModKey": 59,
   "resolutionIndex": -1,
   "fpsIndex": 0,
-  "windowed": false
+  "windowed": false,
+  "windowWidth": 1280,
+  "windowHeight": 720
 }
