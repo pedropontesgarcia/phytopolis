@@ -1,6 +1,8 @@
 package com.syndic8.phytopolis.util.menu;
 
+import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
+import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.utils.Align;
 import com.syndic8.phytopolis.GameCanvas;
 import com.syndic8.phytopolis.GameCanvas.GraphicsOption;
@@ -31,6 +33,12 @@ public class GraphicsMenu extends Menu {
                                      c,
                                      GraphicsOption.FPS));
         addItem(new BackButtonItem(back, this, ctr, c));
+        addItem(new MenuItem("APPLY", 4, new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                c.applyOptions();
+            }
+        }, this, ctr, c, Align.center, this.getFontScale(), 0.15f, 0, 200));
     }
 
     /**

@@ -99,16 +99,10 @@ public class GameCanvas {
             displayModes.add(Gdx.graphics.getDisplayMode());
         int resolutionIndex = preferences.getInteger("resolutionIndex", 0);
         resolution = displayModes.get(resolutionIndex);
-        Gdx.graphics.setFullscreenMode(resolution);
         windowed = preferences.getBoolean("windowed", false);
-        if (!windowed) {
-            Gdx.graphics.setFullscreenMode(resolution);
-        } else {
-            Gdx.graphics.setWindowedMode(1280, 720);
-            Gdx.graphics.setResizable(false);
-        }
         fps = new int[]{0, 15, 30, 45, 60, 90, 120};
         currentFpsIndex = preferences.getInteger("fpsIndex", 0);
+        applyOptions();
 
         // Set the projection matrix (for proper scaling)
         camera = new OrthographicCamera(width, height);
@@ -139,6 +133,23 @@ public class GameCanvas {
         holder = new TextureRegion();
         local = new Affine2();
         cameraCache = new Vector3();
+    }
+
+    public void applyOptions() {
+        if (!windowed) {
+            Gdx.graphics.setFullscreenMode(resolution);
+        } else {
+            Gdx.graphics.setWindowedMode(1280, 720);
+            Gdx.graphics.setResizable(false);
+        }
+        int currentFps = fps[currentFpsIndex];
+        Gdx.graphics.setForegroundFPS(currentFps);
+        Gdx.graphics.setVSync(currentFps == 0);
+        preferences.putInteger("resolutionIndex",
+                               displayModes.indexOf(resolution));
+        preferences.putBoolean("windowed", windowed);
+        preferences.putInteger("fpsIndex", currentFpsIndex);
+        preferences.flush();
     }
 
     public ShapeRenderer getShapeRenderer() {
@@ -578,28 +589,14 @@ public class GameCanvas {
                 int resolutionIndex = (displayModes.indexOf(resolution) + 1) %
                         displayModes.size();
                 resolution = displayModes.get(resolutionIndex);
-                if (!windowed) Gdx.graphics.setFullscreenMode(resolution);
-                preferences.putInteger("resolutionIndex", resolutionIndex);
                 break;
             case WINDOWED:
                 windowed = !windowed;
-                if (!windowed) {
-                    Gdx.graphics.setFullscreenMode(resolution);
-                } else {
-                    Gdx.graphics.setWindowedMode(1280, 720);
-                    Gdx.graphics.setResizable(false);
-                }
-                preferences.putBoolean("windowed", windowed);
                 break;
             case FPS:
                 currentFpsIndex = (currentFpsIndex + 1) % fps.length;
-                int currentFps = fps[currentFpsIndex];
-                Gdx.graphics.setForegroundFPS(currentFps);
-                Gdx.graphics.setVSync(currentFps == 0);
-                preferences.putInteger("fpsIndex", currentFpsIndex);
                 break;
         }
-        preferences.flush();
     }
 
     public String getOptionValueString(GraphicsOption opn) {
