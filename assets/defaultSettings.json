@@ -1,0 +1,13 @@
+{
+  "jumpKey": 51,
+  "leftKey": 29,
+  "rightKey": 32,
+  "dropKey": 47,
+  "growBranchButton": 0,
+  "growBranchModKey": -1,
+  "growLeafButton": 0,
+  "growLeafModKey": 59,
+  "resolutionIndex": 9,
+  "fpsIndex": 4,
+  "windowed": true
+}

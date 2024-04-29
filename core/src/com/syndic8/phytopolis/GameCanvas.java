@@ -2,7 +2,7 @@ package com.syndic8.phytopolis;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Graphics;
-import com.badlogic.gdx.Preferences;
+import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
@@ -16,9 +16,13 @@ import com.badlogic.gdx.math.Affine2;
 import com.badlogic.gdx.math.Interpolation;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
+import com.badlogic.gdx.utils.JsonReader;
+import com.badlogic.gdx.utils.JsonValue;
+import com.badlogic.gdx.utils.JsonWriter;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
+import com.syndic8.phytopolis.util.OSUtils;
 
 import java.util.List;
 
@@ -39,7 +43,8 @@ public class GameCanvas {
     private final Viewport textViewport;
     private final Vector3 cameraCache;
     private final List<Graphics.DisplayMode> displayModes;
-    private final Preferences preferences;
+    private final FileHandle configFile;
+    private final JsonValue settingsJson;
     private final int[] fps;
     private final int windowWidth;
     private final int windowHeight;
@@ -99,13 +104,15 @@ public class GameCanvas {
         hudBatch = new SpriteBatch();
         shapeRenderer = new ShapeRenderer();
 
-        preferences = Gdx.app.getPreferences("phytopolis_settings");
         displayModes = dm;
-        int resolutionIndex = preferences.getInteger("resolutionIndex", 0);
+        configFile = Gdx.files.absolute(OSUtils.getConfigFile());
+        JsonReader settingsJsonReader = new JsonReader();
+        settingsJson = settingsJsonReader.parse(configFile);
+        int resolutionIndex = settingsJson.getInt("resolutionIndex");
         resolution = displayModes.get(resolutionIndex);
-        windowed = preferences.getBoolean("windowed", false);
+        windowed = settingsJson.getBoolean("windowed", false);
         fps = new int[]{0, 15, 30, 45, 60, 90, 120};
-        currentFpsIndex = preferences.getInteger("fpsIndex", 0);
+        currentFpsIndex = settingsJson.getInt("fpsIndex", 0);
         applyOptions();
 
         // Set the projection matrix (for proper scaling)
@@ -150,11 +157,7 @@ public class GameCanvas {
         int currentFps = fps[currentFpsIndex];
         Gdx.graphics.setForegroundFPS(currentFps);
         Gdx.graphics.setVSync(currentFps == 0);
-        preferences.putInteger("resolutionIndex",
-                               displayModes.indexOf(resolution));
-        preferences.putBoolean("windowed", windowed);
-        preferences.putInteger("fpsIndex", currentFpsIndex);
-        preferences.flush();
+        saveOptions();
     }
 
     /**
@@ -168,6 +171,15 @@ public class GameCanvas {
                 .setToOrtho2D(0, 0, getWidth(), getHeight());
         hudBatch.getProjectionMatrix()
                 .setToOrtho2D(0, 0, getWidth(), getHeight());
+    }
+
+    public void saveOptions() {
+        settingsJson.get("resolutionIndex")
+                .set(displayModes.indexOf(resolution), null);
+        settingsJson.get("fpsIndex").set(currentFpsIndex, null);
+        settingsJson.get("windowed").set(windowed);
+        configFile.writeString(settingsJson.prettyPrint(JsonWriter.OutputType.json,
+                                                        0), false);
     }
 
     /**

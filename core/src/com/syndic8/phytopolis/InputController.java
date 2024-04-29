@@ -1,7 +1,12 @@
 package com.syndic8.phytopolis;
 
 import com.badlogic.gdx.*;
+import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.utils.IntSet;
+import com.badlogic.gdx.utils.JsonReader;
+import com.badlogic.gdx.utils.JsonValue;
+import com.badlogic.gdx.utils.JsonWriter;
+import com.syndic8.phytopolis.util.OSUtils;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -21,6 +26,8 @@ public class InputController implements InputProcessor {
     private final IntSet assignedKeys;
     private final Preferences preferences;
     private final Map<String, Integer> defaultBindings;
+    private final JsonValue settingsJson;
+    private final FileHandle configFile;
     private Map<String, Integer> bindings;
     private boolean updateScheduled;
     private Binding bindingToUpdate;
@@ -87,6 +94,9 @@ public class InputController implements InputProcessor {
         preferences = Gdx.app.getPreferences("phytopolis_settings");
         defaultBindings = new HashMap<>();
         bindings = new HashMap<>();
+        configFile = Gdx.files.absolute(OSUtils.getConfigFile());
+        JsonReader settingsJsonReader = new JsonReader();
+        settingsJson = settingsJsonReader.parse(configFile);
 
         // Reading preferences and otherwise setting defaults
         setBindings();
@@ -103,8 +113,7 @@ public class InputController implements InputProcessor {
         defaultBindings.put("dropKey", Input.Keys.S);
         defaultBindings.put("rightKey", Input.Keys.D);
         for (String key : defaultBindings.keySet()) {
-            int defaultVal = defaultBindings.get(key);
-            int actualVal = preferences.getInteger(key, defaultVal);
+            int actualVal = settingsJson.getInt(key);
             bindings.put(key, actualVal);
             if (actualVal != -1) assignedKeys.add(actualVal);
         }
@@ -141,9 +150,10 @@ public class InputController implements InputProcessor {
 
     private void updatePreferences() {
         for (String key : bindings.keySet()) {
-            preferences.putInteger(key, bindings.get(key));
+            settingsJson.get(key).set(bindings.get(key), null);
         }
-        preferences.flush();
+        configFile.writeString(settingsJson.prettyPrint(JsonWriter.OutputType.json,
+                                                        0), false);
     }
 
     public boolean didGrowBranch() {
