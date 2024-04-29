@@ -109,6 +109,7 @@ public class GameCanvas {
         JsonReader settingsJsonReader = new JsonReader();
         settingsJson = settingsJsonReader.parse(configFile);
         int resolutionIndex = settingsJson.getInt("resolutionIndex");
+        if (resolutionIndex == -1) resolutionIndex = displayModes.size() - 1;
         resolution = displayModes.get(resolutionIndex);
         windowed = settingsJson.getBoolean("windowed", false);
         fps = new int[]{0, 15, 30, 45, 60, 90, 120};

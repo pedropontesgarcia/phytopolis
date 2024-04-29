@@ -50,6 +50,8 @@ public class DesktopLauncher {
             JsonValue settingsJson = settingsJsonReader.parse(configFile);
             boolean windowed = settingsJson.getBoolean("windowed");
             int resolutionIndex = settingsJson.getInt("resolutionIndex");
+            if (resolutionIndex == -1)
+                resolutionIndex = displayModes.size() - 1;
             DisplayMode resolution = displayModes.get(resolutionIndex);
             int windowWidth = (int) (
                     Lwjgl3ApplicationConfiguration.getDisplayMode().width *
