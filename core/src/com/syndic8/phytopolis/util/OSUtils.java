@@ -27,7 +27,8 @@ public class OSUtils {
                 CONFIG_HOME = System.getProperty("user.home") +
                         "/Library/Preferences";
             } else if (isWindows) {
-                if ((CONFIG_HOME = System.getenv("APPDATA")) == null) {
+                CONFIG_HOME = System.getenv("APPDATA");
+                if (CONFIG_HOME == null) {
                     CONFIG_HOME =
                             System.getProperty("user.home") + "/Local Settings";
                 }
