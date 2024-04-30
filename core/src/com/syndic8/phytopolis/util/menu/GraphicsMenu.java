@@ -44,7 +44,7 @@ public class GraphicsMenu extends Menu {
     /**
      * Updates the labels so that they reflect the current settings.
      */
-    public void updateGraphicssLabels() {
+    public void updateGraphicsLabels() {
         for (MenuItem item : getItems()) {
             if (item instanceof GraphicsMenuItem) {
                 ((GraphicsMenuItem) item).updateLabel();

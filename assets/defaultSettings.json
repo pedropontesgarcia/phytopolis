@@ -11,5 +11,8 @@
   "fpsIndex": 0,
   "windowed": false,
   "windowWidth": 1280,
-  "windowHeight": 720
+  "windowHeight": 720,
+  "masterVolumeIndex": 4,
+  "musicVolumeIndex": 4,
+  "fxVolumeIndex": 4
 }

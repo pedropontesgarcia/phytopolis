@@ -61,7 +61,10 @@ public class MenuContainer extends FadingScreen {
             ((ControlsMenu) menu).updateControlsLabels();
         }
         if (menu instanceof GraphicsMenu) {
-            ((GraphicsMenu) menu).updateGraphicssLabels();
+            ((GraphicsMenu) menu).updateGraphicsLabels();
+        }
+        if (menu instanceof SoundMenu) {
+            ((SoundMenu) menu).updateSoundLabels();
         }
     }
 

@@ -10,25 +10,23 @@ import com.badlogic.gdx.utils.JsonReader;
 import com.badlogic.gdx.utils.JsonValue;
 import com.syndic8.phytopolis.util.OSUtils;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
-import java.util.logging.Logger;
 
 // Please note that on macOS your application needs to be started with the -XstartOnFirstThread JVM argument
 public class DesktopLauncher {
-
-    private static final Logger LOGGER = Logger.getLogger(DesktopLauncher.class.getName());
 
     public static void main(String[] arg) {
         Lwjgl3ApplicationConfiguration config = new Lwjgl3ApplicationConfiguration();
         config.setWindowedMode(Lwjgl3ApplicationConfiguration.getDisplayMode().width,
                                Lwjgl3ApplicationConfiguration.getDisplayMode().height);
         DisplayMode[] displayModes = Lwjgl3ApplicationConfiguration.getDisplayModes();
-        List<DisplayMode> potentialDisplayModes = new ArrayList<DisplayMode>(
-                Arrays.asList(displayModes));
-        List<DisplayMode> goodDisplayModes = new ArrayList<DisplayMode>();
+        List<DisplayMode> potentialDisplayModes = new ArrayList<>(Arrays.asList(
+                displayModes));
+        List<DisplayMode> goodDisplayModes = new ArrayList<>();
         potentialDisplayModes.sort(Comparator.comparingInt((DisplayMode dm) -> dm.refreshRate));
         int highestRefreshRate = potentialDisplayModes.get(
                 potentialDisplayModes.size() - 1).refreshRate;
@@ -48,6 +46,7 @@ public class DesktopLauncher {
         try {
             JsonReader settingsJsonReader = new JsonReader();
             JsonValue settingsJson = settingsJsonReader.parse(configFile);
+            ensureSettingsExist(settingsJson);
             boolean windowed = settingsJson.getBoolean("windowed");
             int resolutionIndex = settingsJson.getInt("resolutionIndex");
             if (resolutionIndex == -1)
@@ -65,10 +64,30 @@ public class DesktopLauncher {
             config.useVsync(currentFps == 0);
             config.setTitle("Phytopolis");
             config.setWindowPosition(-1, -1);
+            config.setWindowIcon("ui/leaf-cursor.png");
         } catch (Exception ignored) {
             resetSettings(configFile);
             // Try again
             manageSettings(config, displayModes);
+        }
+    }
+
+    private static void ensureSettingsExist(JsonValue settingsJson)
+            throws IOException {
+        if (!(settingsJson.has("jumpKey") && settingsJson.has("leftKey") &&
+                settingsJson.has("rightKey") && settingsJson.has("dropKey") &&
+                settingsJson.has("growBranchButton") &&
+                settingsJson.has("growBranchModKey") &&
+                settingsJson.has("growLeafButton") &&
+                settingsJson.has("growLeafModKey") &&
+                settingsJson.has("resolutionIndex") &&
+                settingsJson.has("fpsIndex") && settingsJson.has("windowed") &&
+                settingsJson.has("windowWidth") &&
+                settingsJson.has("windowHeight") &&
+                settingsJson.has("masterVolumeIndex") &&
+                settingsJson.has("musicVolumeIndex") &&
+                settingsJson.has("fxVolumeIndex"))) {
+            throw new IOException();
         }
     }
 
