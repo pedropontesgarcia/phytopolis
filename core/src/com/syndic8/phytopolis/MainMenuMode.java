@@ -346,7 +346,9 @@ public class MainMenuMode extends FadingScreen implements Screen {
                             (float) canvas.getHeight() / logo.getHeight());
                 canvas.end();
             }
+            canvas.begin();
             menuContainer.draw(canvas);
+            canvas.end();
         }
         super.draw(canvas);
     }

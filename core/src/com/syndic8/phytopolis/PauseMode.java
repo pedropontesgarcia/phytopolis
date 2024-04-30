@@ -181,6 +181,4 @@ public class PauseMode extends FadingScreen implements Screen {
         listener = l;
     }
 
-    //    public enum ExitCode {EXIT_LEVELS, EXIT_RESUME}
-
 }
