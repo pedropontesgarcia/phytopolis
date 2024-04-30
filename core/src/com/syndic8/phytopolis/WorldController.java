@@ -18,11 +18,10 @@ package com.syndic8.phytopolis;
 
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.audio.Sound;
-import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.World;
-import com.syndic8.phytopolis.assets.AssetDirectory;
+import com.syndic8.phytopolis.level.models.Fire;
 import com.syndic8.phytopolis.level.models.GameObject;
 import com.syndic8.phytopolis.level.models.Model;
 import com.syndic8.phytopolis.util.FadingScreen;
@@ -49,10 +48,6 @@ import java.util.Iterator;
 public abstract class WorldController extends FadingScreen implements Screen {
 
     /**
-     * How many frames after winning/losing do we continue?
-     */
-    public static final int EXIT_COUNT = 0;
-    /**
      * The amount of time for a physics engine step.
      */
     public static final float WORLD_STEP = 1 / 60f;
@@ -77,9 +72,9 @@ public abstract class WorldController extends FadingScreen implements Screen {
      */
     protected static final float DEFAULT_GRAVITY = -4.9f;
     /**
-     * The font for giving messages to the player
+     * Whether or not debug mode is active
      */
-    protected BitmapFont displayFont;
+    private final boolean debug;
     /**
      * Reference to the game canvas
      */
@@ -121,14 +116,6 @@ public abstract class WorldController extends FadingScreen implements Screen {
      * Whether we have failed at this world (and need a reset)
      */
     private boolean failed;
-    /**
-     * Whether or not debug mode is active
-     */
-    private boolean debug;
-    /**
-     * Countdown active for winning or losing
-     */
-    private int countdown;
     private boolean paused;
 
     /**
@@ -167,148 +154,7 @@ public abstract class WorldController extends FadingScreen implements Screen {
         failed = false;
         debug = false;
         active = false;
-        countdown = -1;
         paused = false;
-    }
-
-    /**
-     * Creates a new game world
-     * <p>
-     * The game world is scaled so that the screen coordinates do not agree
-     * with the Box2d coordinates.  The bounds are in terms of the Box2d
-     * world, not the screen.
-     *
-     * @param width   The width in Box2d coordinates
-     * @param height  The height in Box2d coordinates
-     * @param gravity The downward gravity
-     */
-    protected WorldController(float width, float height, float gravity) {
-        this(new Rectangle(0, 0, width, height),
-             new Vector2(0, DEFAULT_GRAVITY));
-    }
-
-    public World getWorld() {
-        return world;
-    }
-
-    /**
-     * Returns true if debug mode is active.
-     * <p>
-     * If true, all objects will display their physics bodies.
-     *
-     * @return true if debug mode is active.
-     */
-    public boolean isDebug() {
-        return debug;
-    }
-
-    /**
-     * Sets whether debug mode is active.
-     * <p>
-     * If true, all objects will display their physics bodies.
-     *
-     * @param value whether debug mode is active.
-     */
-    public void setDebug(boolean value) {
-        debug = value;
-    }
-
-    /**
-     * Returns true if the level is failed.
-     * <p>
-     * If true, the level will reset after a countdown
-     *
-     * @return true if the level is failed.
-     */
-    public boolean isFailure() {
-        return failed;
-    }
-
-    /**
-     * Sets whether the level is failed.
-     * <p>
-     * If true, the level will reset after a countdown
-     *
-     * @param value whether the level is failed.
-     */
-    public void setFailure(boolean value) {
-        if (value) {
-            countdown = EXIT_COUNT;
-        }
-        failed = value;
-    }
-
-    /**
-     * Returns true if this is the active screen
-     *
-     * @return true if this is the active screen
-     */
-    public boolean isActive() {
-        return active;
-    }
-
-    /**
-     * Returns the canvas associated with this controller
-     * <p>
-     * The canvas is shared across all controllers
-     *
-     * @return the canvas associated with this controller
-     */
-    public GameCanvas getCanvas() {
-        return canvas;
-    }
-
-    /**
-     * Sets the canvas associated with this controller
-     * <p>
-     * The canvas is shared across all controllers.  Setting this value will compute
-     * the drawing scale from the canvas size.
-     *
-     * @param canvas the canvas associated with this controller
-     */
-    public void setCanvas(GameCanvas canvas) {
-        this.canvas = canvas;
-    }
-
-    /**
-     * Gather the assets for this controller.
-     * <p>
-     * This method extracts the asset variables from the given asset directory. It
-     * should only be called after the asset directory is completed.
-     *
-     * @param directory Reference to global asset manager.
-     */
-    public void gatherAssets(AssetDirectory directory) {
-        displayFont = directory.getEntry("shared:retro", BitmapFont.class);
-    }
-
-    /**
-     * Adds a physics object in to the insertion queue.
-     * <p>
-     * Objects on the queue are added just before collision processing.  We do this to
-     * control object creation.
-     * <p>
-     * param obj The object to add
-     */
-    public void addQueuedObject(Model obj) {
-        assert inBounds(obj) : "Object is not in bounds";
-        addQueue.add(obj);
-    }
-
-    /**
-     * Returns true if the object is in bounds.
-     * <p>
-     * This assertion is useful for debugging the physics.
-     *
-     * @param obj The object to check.
-     * @return true if the object is in bounds.
-     */
-    public boolean inBounds(Model obj) {
-        boolean horiz = (bounds.x <= obj.getX() &&
-                obj.getX() <= bounds.x + bounds.width);
-        boolean vert = (bounds.y <= obj.getY() &&
-                obj.getY() <= bounds.y + bounds.height);
-        return horiz && vert;
     }
 
     /**
@@ -388,15 +234,15 @@ public abstract class WorldController extends FadingScreen implements Screen {
     public boolean preUpdate(float dt) {
         super.update(dt);
         InputController input = InputController.getInstance();
-        input.readInput(bounds, scale);
+        input.readInput();
         if (listener == null) {
             return true;
         }
 
         // Handle resets
-        if (input.didReset()) {
-            reset();
-        }
+        //        if (input.didReset()) {
+        //            reset();
+        //        }
 
         // Now it is time to maybe switch screens.
         if (input.didExit() && !isPaused() && isFadeDone()) {
@@ -404,24 +250,19 @@ public abstract class WorldController extends FadingScreen implements Screen {
             setPaused(true);
             fadeOut(0.25f);
             return true;
-        } else if (input.didAdvance()) {
-            pause();
-            listener.exitScreen(this, ExitCode.EXIT_NEXT.ordinal());
-            return false;
-        } else if (input.didRetreat()) {
-            pause();
-            listener.exitScreen(this, ExitCode.EXIT_PREV.ordinal());
-            return false;
-        } else if (failed) {
-            reset();
-        } else if (isPaused() && isFadeDone()) {
-            listener.exitScreen(this, ExitCode.EXIT_PAUSE.ordinal());
-            return false;
         } else if (isComplete() && isFadeDone()) {
             pause();
-            listener.exitScreen(this, ExitCode.EXIT_VICTORY.ordinal());
+            listener.exitScreen(this, GDXRoot.ExitCode.EXIT_VICTORY.ordinal());
             return false;
-
+        } else if (isFailure() && isFadeDone()) {
+            //            reset();
+            pause();
+            listener.exitScreen(this, GDXRoot.ExitCode.EXIT_FAILURE.ordinal());
+            return false;
+        } else if (isPaused() && isFadeDone()) {
+            pause();
+            listener.exitScreen(this, GDXRoot.ExitCode.EXIT_PAUSE.ordinal());
+            return false;
         }
         return true;
     }
@@ -499,13 +340,6 @@ public abstract class WorldController extends FadingScreen implements Screen {
         }
     }
 
-    /**
-     * Resets the status of the game so that we can play again.
-     * <p>
-     * This method disposes of the world and creates a new one.
-     */
-    public abstract void reset();
-
     private boolean isPaused() {
         return paused;
     }
@@ -526,14 +360,25 @@ public abstract class WorldController extends FadingScreen implements Screen {
     }
 
     /**
-     * Sets whether the level is completed.
+     * Returns true if the level is failed.
      * <p>
-     * If true, the level will advance after a countdown
+     * If true, the level will reset after a countdown
      *
-     * @param value whether the level is completed.
+     * @return true if the level is failed.
      */
-    public void setComplete(boolean value) {
-        complete = value;
+    public boolean isFailure() {
+        return failed;
+    }
+
+    /**
+     * Sets whether the level is failed.
+     * <p>
+     * If true, the level will reset after a countdown
+     *
+     * @param value whether the level is failed.
+     */
+    public void setFailure(boolean value) {
+        failed = value;
     }
 
     /**
@@ -544,10 +389,37 @@ public abstract class WorldController extends FadingScreen implements Screen {
     public void addObject(Model obj) {
         assert inBounds(obj) : "Object is not in bounds";
         objects.add(obj);
-        if (obj instanceof GameObject) {
+        if (obj instanceof GameObject && !(obj instanceof Fire)) {
             ((GameObject) obj).activatePhysics(world);
         }
         objects.sort(Comparator.comparingInt(Model::getZIndex));
+    }
+
+    /**
+     * Returns true if the object is in bounds.
+     * <p>
+     * This assertion is useful for debugging the physics.
+     *
+     * @param obj The object to check.
+     * @return true if the object is in bounds.
+     */
+    public boolean inBounds(Model obj) {
+        boolean horiz = (bounds.x <= obj.getX() &&
+                obj.getX() <= bounds.x + bounds.width);
+        boolean vert = (bounds.y <= obj.getY() &&
+                obj.getY() <= bounds.y + bounds.height);
+        return horiz && vert;
+    }
+
+    /**
+     * Sets whether the level is completed.
+     * <p>
+     * If true, the level will advance after a countdown
+     *
+     * @param value whether the level is completed.
+     */
+    public void setComplete(boolean value) {
+        complete = value;
     }
 
     /**
@@ -617,10 +489,6 @@ public abstract class WorldController extends FadingScreen implements Screen {
      */
     public void setScreenListener(ScreenListener listener) {
         this.listener = listener;
-    }
-
-    public enum ExitCode {
-        EXIT_QUIT, EXIT_NEXT, EXIT_PREV, EXIT_VICTORY, EXIT_PAUSE
     }
 
 }

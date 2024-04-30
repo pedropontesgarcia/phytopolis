@@ -7,15 +7,22 @@ package com.syndic8.phytopolis;
 
 import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Graphics.DisplayMode;
 import com.badlogic.gdx.Screen;
+import com.badlogic.gdx.graphics.Cursor;
 import com.syndic8.phytopolis.assets.AssetDirectory;
 import com.syndic8.phytopolis.util.ScreenListener;
+
+import java.util.List;
+
+import static com.syndic8.phytopolis.GDXRoot.ExitCode.*;
 
 /**
  * LibGDX's root class.
  */
 public class GDXRoot extends Game implements ScreenListener {
 
+    private final List<DisplayMode> displayModes;
     /**
      * Directory for game assets.
      */
@@ -29,40 +36,35 @@ public class GDXRoot extends Game implements ScreenListener {
      */
     private MainMenuMode menu;
     private LevelSelectMode levelSelect;
-    private VictoryMode victory;
+    private LevelOverMode levelOver;
     private PauseMode pause;
-    /**
-     * Player mode for the the game proper (CONTROLLER CLASS)
-     */
-    private int current;
-    /**
-     * WorldController
-     */
     private GameplayMode controller;
 
-    public GDXRoot() {
+    public GDXRoot(List<DisplayMode> dms) {
+        displayModes = dms;
     }
 
     public void create() {
-        canvas = new GameCanvas();
-        canvas.setSize(16, 9);
-        menu = new MainMenuMode("assets.json", canvas, 1);
-        controller = new GameplayMode();
-        levelSelect = new LevelSelectMode();
-        victory = new VictoryMode();
+        canvas = new GameCanvas(displayModes);
+        menu = new MainMenuMode("assets.json", canvas, 15);
+        controller = new GameplayMode(canvas);
+        levelSelect = new LevelSelectMode(canvas);
+        levelOver = new LevelOverMode(canvas);
         pause = new PauseMode(canvas);
-        menu.setScreenListener(this);
         Gdx.input.setInputProcessor(InputController.getInstance()
                                             .getMultiplexer());
+        menu.setScreenListener(this);
         setScreen(menu);
     }
 
     public void dispose() {
         // Call dispose on our children
         setScreen(null);
+        menu.dispose();
         controller.dispose();
         levelSelect.dispose();
-        victory.dispose();
+        levelOver.dispose();
+        pause.dispose();
 
         canvas.dispose();
         canvas = null;
@@ -76,57 +78,87 @@ public class GDXRoot extends Game implements ScreenListener {
         super.dispose();
     }
 
+    @Override
+    public void resume() {
+        resize(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
+    }
+
     public void resize(int width, int height) {
         canvas.resizeScreen(width, height);
     }
 
     public void exitScreen(Screen screen, int exitCode) {
+        Gdx.graphics.setSystemCursor(Cursor.SystemCursor.Arrow);
         if (screen == menu) {
             directory = menu.getAssets();
             levelSelect.gatherAssets(directory);
             levelSelect.setScreenListener(this);
-            levelSelect.setCanvas(canvas);
             levelSelect.setBackgroundMusic(menu.getBackgroundMusic());
             setScreen(levelSelect);
-            menu.dispose();
-            menu = null;
-        } else if (screen == levelSelect) {
+        } else if (screen == levelSelect &&
+                exitCode == EXIT_MAIN_MENU.ordinal()) {
+            menu.setScreenListener(this);
+            menu.setBackgroundMusic(levelSelect.getBackgroundMusic());
+            setScreen(menu);
+        } else if (screen == levelSelect && exitCode == EXIT_LEVELS.ordinal()) {
             controller.setLevel(levelSelect.getLevel());
-            controller.setCanvas(canvas);
             controller.gatherAssets(directory);
             controller.reset();
             controller.setScreenListener(this);
             controller.fadeIn(0.5f);
             setScreen(controller);
-        } else if (screen == victory) {
-            levelSelect.reset();
-            setScreen(levelSelect);
-        } else if (screen == pause &&
-                exitCode == PauseMode.ExitCode.EXIT_RESUME.ordinal()) {
-            controller.setScreenListener(this);
+        } else if (screen == levelOver) {
             controller.setPaused(false);
+            levelSelect.reset();
+            levelSelect.setScreenListener(this);
+            setScreen(levelSelect);
+        } else if (screen == pause && exitCode == EXIT_RESUME.ordinal()) {
+            controller.setPaused(false);
+            controller.setScreenListener(this);
             controller.fadeIn(0.25f);
             setScreen(controller);
-        } else if (screen == pause &&
-                exitCode == PauseMode.ExitCode.EXIT_MAIN_MENU.ordinal()) {
+        } else if (screen == pause && exitCode == EXIT_RESET.ordinal()) {
             controller.setPaused(false);
-            menu = new MainMenuMode("assets.json", canvas, 1);
-            menu.setScreenListener(this);
-            setScreen(menu);
-        } else if (exitCode ==
-                WorldController.ExitCode.EXIT_VICTORY.ordinal()) {
-            victory.gatherAssets(directory);
-            victory.reset();
-            victory.setScreenListener(this);
-            victory.setCanvas(canvas);
-            setScreen(victory);
-        } else if (exitCode == WorldController.ExitCode.EXIT_PAUSE.ordinal()) {
+            controller.reset();
+            controller.setScreenListener(this);
+            controller.fadeIn(0.5f);
+            setScreen(controller);
+        } else if (screen == pause && exitCode == EXIT_LEVELS.ordinal()) {
+            controller.setPaused(false);
+            levelSelect.reset();
+            levelSelect.setScreenListener(this);
+            levelSelect.setBackgroundMusic(menu.getBackgroundMusic());
+            setScreen(levelSelect);
+        } else if (exitCode == EXIT_VICTORY.ordinal()) {
+            endLevel(true);
+        } else if (exitCode == EXIT_FAILURE.ordinal()) {
+            endLevel(false);
+        } else if (exitCode == EXIT_PAUSE.ordinal()) {
             pause.setScreenListener(this);
             pause.setCanvas(canvas);
             setScreen(pause);
-        } else if (exitCode == WorldController.ExitCode.EXIT_QUIT.ordinal()) {
+        } else if (exitCode == EXIT_QUIT.ordinal()) {
             Gdx.app.exit();
         }
+    }
+
+    private void endLevel(boolean won) {
+        levelOver.setWon(won);
+        levelOver.gatherAssets(directory);
+        levelOver.reset();
+        levelOver.setScreenListener(this);
+        setScreen(levelOver);
+    }
+
+    public enum ExitCode {
+        EXIT_QUIT,
+        EXIT_VICTORY,
+        EXIT_PAUSE,
+        EXIT_FAILURE,
+        EXIT_LEVELS,
+        EXIT_RESUME,
+        EXIT_RESET,
+        EXIT_MAIN_MENU
     }
 
 }

@@ -3,16 +3,15 @@ package com.syndic8.phytopolis.level.models;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.physics.box2d.BodyDef;
 import com.syndic8.phytopolis.GameCanvas;
-import com.syndic8.phytopolis.util.FilmStrip;
 import com.syndic8.phytopolis.util.Tilemap;
 
 public class Leaf extends BoxObject {
 
+    private static final float ANIMATION_SPEED = 1 / 6.0f;
     private final leafType type;
-
-    private float animFrame;
-
-    private static final float ANIMATION_SPEED = 1/6.0f;
+    private float health;
+    private int healthMark;
+    private boolean beingEaten;
 
     /**
      * Creates a new Leaf object with the specified position and dimensions
@@ -34,6 +33,9 @@ public class Leaf extends BoxObject {
         bodyinfo.type = BodyDef.BodyType.StaticBody;
         this.type = type;
         zIndex = 2;
+        health = 5;
+        healthMark = 5;
+        beingEaten = false;
     }
 
     /**
@@ -50,19 +52,20 @@ public class Leaf extends BoxObject {
         return ModelType.LEAF;
     }
 
-    //    @Override
-    //    public boolean activatePhysics(World world) {
-    //        boolean success = super.activatePhysics(world);
-    //        if (success) body.setUserData(ModelType.LEAF);
-    //        return success;
-    //    }
-
-    public void setFilmStrip(FilmStrip f) {
-        this.texture = f;
+    public boolean fullyEaten() {
+        return health <= 0;
     }
 
-    public FilmStrip getFilmStrip() {
-        return (FilmStrip) this.texture;
+    public void setBeingEaten(boolean value) {
+        beingEaten = value;
+    }
+
+    public boolean healthBelowMark() {
+        if (health < healthMark) {
+            healthMark--;
+            return true;
+        }
+        return false;
     }
 
     /**
@@ -76,10 +79,13 @@ public class Leaf extends BoxObject {
      * @param delta Number of seconds since last animation frame
      */
     public void update(float delta) {
-        if (animFrame < getFilmStrip().getSize() - 1) {
+        if (beingEaten) {
+            health -= delta;
+        }
+        if (animFrame < 4) {
             animFrame += ANIMATION_SPEED;
-        } else if (animFrame >= getFilmStrip().getSize()) {
-            animFrame = getFilmStrip().getSize() - 1;
+        } else if (health < 5 && health > 0) {
+            animFrame = 4 + (5 - health);
         }
     }
 
@@ -95,21 +101,13 @@ public class Leaf extends BoxObject {
         float sclY = height / texture.getRegionHeight();
         float x = texture.getRegionWidth() / 2.0f;
         float y = texture.getRegionHeight() / 2.0f;
-        getFilmStrip().setFrame((int)animFrame);
-        canvas.draw(texture,
-                Color.WHITE,
-                x,
-                y,
-                getX(),
-                getY(),
-                0,
-                sclX,
-                sclY);
+        getFilmStrip().setFrame((int) animFrame);
+        canvas.draw(texture, Color.WHITE, x, y, getX(), getY(), 0, sclX, sclY);
     }
 
     /**
      * enum containing possible leaf types
      */
-    public enum leafType {NORMAL, BOUNCY}
+    public enum leafType {NORMAL, BOUNCY, NORMAL1, NORMAL2}
 
 }

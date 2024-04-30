@@ -1,19 +1,12 @@
 package com.syndic8.phytopolis.level;
 
-import com.syndic8.phytopolis.GameCanvas;
-import com.syndic8.phytopolis.assets.AssetDirectory;
-import com.syndic8.phytopolis.util.Tilemap;
-
 public class ResourceController {
 
+    public final float SUN_TOLERANCE = 0.5f;
     /**
      * Maximum amount of water that can be stored
      */
     private final int MAX_WATER = 100;
-
-    private final int MAX_SUN = 8;
-
-    private final int STARTING_SUN = 1;
     /**
      * Amount of water required to grow a leaf
      */
@@ -27,57 +20,34 @@ public class ResourceController {
      */
     private final int FIRE_AMT = 20;
     /**
-     * Amount of sun required for an upgrade
+     * Amount of water required for an upgrade, IN TOTAL
      */
-    private final int UPGRADE_AMT = 1;
-    private final int SUN_ON_PICKUP = 1;
+    private final int UPGRADE_AMT = 40;
     private final int WATER_ON_PICKUP = 50;
 
-    /**
-     * Controller for UI.
-     */
-    private final UIController ui;
-    /**
-     * Current amount of sun stored
-     */
-    private int currSun;
     /**
      * Current amount of water stored
      */
     private int currWater;
 
-    public ResourceController(GameCanvas c, Tilemap tm) {
+    public ResourceController() {
         currWater = MAX_WATER;
-        currSun = STARTING_SUN;
-        ui = new UIController(c, tm);
-    }
-
-    public void gatherAssets(AssetDirectory directory) {
-        ui.gatherAssets(directory);
     }
 
     public int getCurrWater() {
         return currWater;
     }
 
+    public float getCurrRatio() {
+        return (float) currWater / MAX_WATER;
+    }
+
     public void pickupWater() {
         currWater = Math.min(MAX_WATER, currWater + WATER_ON_PICKUP);
     }
 
-    public int getCurrSun() {
-        return currSun;
-    }
-
-    public void pickupSun() {
-        currSun = Math.min(MAX_SUN, currSun + SUN_ON_PICKUP);
-    }
-
     public boolean fullWater() {
         return currWater == MAX_WATER;
-    }
-
-    public boolean fullSun() {
-        return currSun == MAX_SUN;
     }
 
     public void decrementGrowLeaf() {
@@ -111,33 +81,17 @@ public class ResourceController {
     }
 
     public void decrementUpgrade() {
-        if (!canUpgrade()) {
-
-        } else {
-            currSun -= UPGRADE_AMT;
+        if (canUpgrade()) {
+            currWater -= UPGRADE_AMT - LEAF_GROW_AMT;
         }
     }
 
     public boolean canUpgrade() {
-        return currSun >= UPGRADE_AMT;
+        return currWater >= UPGRADE_AMT;
     }
 
     public void reset() {
         currWater = MAX_WATER;
-        currSun = STARTING_SUN;
-    }
-
-    public void update(float dt) {
-        ui.update(dt, (float) currWater / MAX_WATER, (float) currSun / MAX_SUN);
-
-    }
-
-    public void drawUI(GameCanvas c) {
-        ui.draw(c);
-    }
-
-    public UIController getUIController() {
-        return ui;
     }
 
 }

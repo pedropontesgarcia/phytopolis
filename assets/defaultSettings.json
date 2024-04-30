@@ -1,0 +1,18 @@
+{
+  "jumpKey": 51,
+  "leftKey": 29,
+  "rightKey": 32,
+  "dropKey": 47,
+  "growBranchButton": 0,
+  "growBranchModKey": -1,
+  "growLeafButton": 0,
+  "growLeafModKey": 59,
+  "resolutionIndex": -1,
+  "fpsIndex": 0,
+  "windowed": false,
+  "windowWidth": 1280,
+  "windowHeight": 720,
+  "masterVolumeIndex": 4,
+  "musicVolumeIndex": 4,
+  "fxVolumeIndex": 4
+}

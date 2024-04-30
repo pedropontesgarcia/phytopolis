@@ -26,7 +26,7 @@ public class Water extends Resource {
         currDelay = 0;
         bodyinfo.type = BodyDef.BodyType.StaticBody;
         waterFilmstrip = wf;
-        setTexture(wf);
+        setFilmStrip(wf);
     }
 
     public boolean isFull() {

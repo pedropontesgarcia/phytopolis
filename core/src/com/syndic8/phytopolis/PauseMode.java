@@ -1,9 +1,6 @@
 package com.syndic8.phytopolis;
 
-import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
-import com.badlogic.gdx.math.Rectangle;
-import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.syndic8.phytopolis.util.FadingScreen;
@@ -11,69 +8,95 @@ import com.syndic8.phytopolis.util.ScreenListener;
 import com.syndic8.phytopolis.util.menu.Menu;
 import com.syndic8.phytopolis.util.menu.MenuContainer;
 import com.syndic8.phytopolis.util.menu.MenuItem;
+import com.syndic8.phytopolis.util.menu.OptionsMenu;
+
+import static com.syndic8.phytopolis.GDXRoot.ExitCode;
 
 public class PauseMode extends FadingScreen implements Screen {
 
-    private final Rectangle bounds;
     private final MenuContainer menuContainer;
+    private final Menu menu;
     private ScreenListener listener;
     private boolean ready;
+    private boolean exit;
     private boolean active;
     private GameCanvas canvas;
     private ExitCode exitCode;
 
     public PauseMode(GameCanvas c) {
+        exit = false;
         ready = false;
-        bounds = new Rectangle(0, 0, 16, 9);
         canvas = c;
-        Menu menu = new Menu(3, 150f);
+        menu = new Menu(5, 0.125f);
+        menuContainer = new MenuContainer(menu, c);
+        Menu optionsMenu = new OptionsMenu(c, menuContainer, menu);
         ClickListener resumeListener = new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
-                ready = true;
-                fadeOut(0.1f);
-                InputController.getInstance()
-                        .getMultiplexer()
-                        .removeProcessor(menuContainer.getStage());
                 exitCode = ExitCode.EXIT_RESUME;
+                exit = true;
+                fadeOut();
+            }
+        };
+        ClickListener resetListener = new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                exitCode = ExitCode.EXIT_RESET;
+                exit = true;
+                fadeOut();
             }
         };
         ClickListener mainMenuListener = new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
-                ready = true;
-                fadeOut(0.1f);
-                InputController.getInstance()
-                        .getMultiplexer()
-                        .removeProcessor(menuContainer.getStage());
-                exitCode = ExitCode.EXIT_MAIN_MENU;
+                exitCode = ExitCode.EXIT_LEVELS;
+                exit = true;
+                fadeOut(0.5f);
             }
         };
         ClickListener exitListener = new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
-                Gdx.app.exit();
+                exit = true;
+                exitCode = ExitCode.EXIT_QUIT;
             }
         };
         menu.addItem(new MenuItem("RESUME",
-                                  menu.getSeparation(),
                                   0,
-                                  menu.getLength(),
                                   resumeListener,
+                                  menu,
+                                  menuContainer,
                                   canvas));
-        menu.addItem(new MenuItem("EXIT TO MAIN MENU",
-                                  menu.getSeparation(),
+        menu.addItem(new MenuItem("OPTIONS",
                                   1,
-                                  menu.getLength(),
+                                  optionsMenu,
+                                  menu,
+                                  menuContainer,
+                                  canvas));
+        menu.addItem(new MenuItem("RESET LEVEL",
+                                  2,
+                                  resetListener,
+                                  menu,
+                                  menuContainer,
+                                  canvas));
+        menu.addItem(new MenuItem("EXIT TO LEVELS",
+                                  3,
                                   mainMenuListener,
+                                  menu,
+                                  menuContainer,
                                   canvas));
         menu.addItem(new MenuItem("QUIT",
-                                  menu.getSeparation(),
-                                  2,
-                                  menu.getLength(),
+                                  4,
                                   exitListener,
+                                  menu,
+                                  menuContainer,
                                   canvas));
-        menuContainer = new MenuContainer(menu, c);
+        menuContainer.populate();
+    }
+
+    public void fadeOut() {
+        super.fadeOut(0.1f);
+        menuContainer.deactivate();
     }
 
     public void setCanvas(GameCanvas c) {
@@ -82,12 +105,12 @@ public class PauseMode extends FadingScreen implements Screen {
 
     @Override
     public void show() {
+        exit = false;
         active = true;
         ready = false;
+        exitCode = null;
         fadeIn(0.1f);
-        InputController.getInstance()
-                .getMultiplexer()
-                .addProcessor(menuContainer.getStage());
+        menuContainer.activate();
     }
 
     @Override
@@ -95,10 +118,6 @@ public class PauseMode extends FadingScreen implements Screen {
         if (active) {
             update(delta);
             draw();
-
-            if (listener != null && ready && isFadeDone()) {
-                listener.exitScreen(this, exitCode.ordinal());
-            }
         }
 
     }
@@ -130,28 +149,36 @@ public class PauseMode extends FadingScreen implements Screen {
 
     public void update(float delta) {
         super.update(delta);
-        InputController.getInstance().readInput(bounds, Vector2.Zero.add(1, 1));
-        if (InputController.getInstance().didExit() && !ready) {
-            ready = true;
-            fadeOut(0.1f);
-            InputController.getInstance()
-                    .getMultiplexer()
-                    .removeProcessor(menuContainer.getStage());
+        menuContainer.update(delta);
+        InputController.getInstance().readInput();
+        if (InputController.getInstance().didExit() &&
+                menuContainer.getMenu() == menu) {
+            exit = true;
             exitCode = ExitCode.EXIT_RESUME;
+            fadeOut();
+
         }
-        menuContainer.update();
+        if (exit) {
+            exit = false;
+            ready = true;
+            menuContainer.deactivate();
+        }
+
+        if ((ready && isFadeDone())) {
+            listener.exitScreen(this, exitCode.ordinal());
+        }
     }
 
     public void draw() {
         canvas.clear();
-        menuContainer.draw();
+        canvas.begin();
+        menuContainer.draw(canvas);
+        canvas.end();
         super.draw(canvas);
     }
 
     public void setScreenListener(ScreenListener l) {
         listener = l;
     }
-
-    public enum ExitCode {EXIT_MAIN_MENU, EXIT_RESUME}
 
 }

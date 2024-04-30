@@ -5,12 +5,7 @@ import com.badlogic.gdx.math.Vector2;
 import com.syndic8.phytopolis.GameCanvas;
 import com.syndic8.phytopolis.util.Tilemap;
 
-public abstract class Hazard extends Model {
-
-//    /**
-//     * Radius for hazard collisions
-//     */
-//    private static final int HAZARD_RADIUS = 30;
+public abstract class Hazard extends BoxObject {
 
     /**
      * The current location (index-wise) of the hazard.
@@ -26,7 +21,7 @@ public abstract class Hazard extends Model {
      * Creates a hazard object.
      */
     public Hazard(Tilemap tm, float texScl, Vector2 pos, Vector2 location, int timer) {
-        super(pos.x, pos.y, tm, texScl);
+        super(pos.x, pos.y, 0.2f, 0.1f, tm, texScl);
         this.location = location;
         this.timer = timer;
         zIndex = 4;
@@ -105,6 +100,10 @@ public abstract class Hazard extends Model {
                     sclX,
                     sclY);
         }
+
+    }
+    public void update(float dt){
+
     }
 
 }

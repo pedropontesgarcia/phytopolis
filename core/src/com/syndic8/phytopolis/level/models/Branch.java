@@ -9,10 +9,6 @@ import com.syndic8.phytopolis.util.Tilemap;
 public class Branch extends Model {
     private static final float ANIMATION_SPEED = 1/6.0f;
     private final float angle;
-    /**
-     * Whether or not the object should be removed at next timestep.
-     */
-    protected boolean destroyed;
     private branchType type;
     private float animFrame;
 
@@ -29,40 +25,6 @@ public class Branch extends Model {
         this.type = type;
         this.animFrame = 0;
         zIndex = 1;
-    }
-
-    public void setFilmStrip(FilmStrip f) {
-        this.texture = f;
-    }
-
-    public FilmStrip getFilmStrip() {
-        return (FilmStrip) this.texture;
-    }
-
-    /**
-     * Returns true if this object is destroyed.
-     * <p>
-     * Objects are not removed immediately when destroyed.  They are garbage collected
-     * at the end of the frame.  This tells us whether the object should be garbage
-     * collected at the frame end.
-     *
-     * @return true if this object is destroyed
-     */
-    public boolean isDestroyed() {
-        return destroyed;
-    }
-
-    /**
-     * Sets whether this object is destroyed.
-     * <p>
-     * Objects are not removed immediately when destroyed.  They are garbage collected
-     * at the end of the frame.  This tells us whether the object should be garbage
-     * collected at the frame end.
-     *
-     * @param value whether this object is destroyed
-     */
-    public void setDestroyed(boolean value) {
-        destroyed = value;
     }
 
     /**
@@ -149,6 +111,7 @@ public class Branch extends Model {
         float sclY = height / texture.getRegionHeight();
         float x = texture.getRegionWidth() / 2.0f;
         float y = texture.getRegionHeight() / 2.0f;
+        texture.setFrame(4);
         canvas.draw(texture,
                 ghostColor,
                 x,
@@ -167,9 +130,9 @@ public class Branch extends Model {
      *
      * @param canvas Drawing context
      */
-    public void drawDebug(GameCanvas canvas) {
-        draw(canvas);
-    }
+//    public void drawDebug(GameCanvas canvas) {
+//        draw(canvas);
+//    }
 
     /**
      * enum containing possible branch types

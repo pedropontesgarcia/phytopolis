@@ -27,6 +27,7 @@ import com.badlogic.gdx.physics.box2d.PolygonShape;
 import com.badlogic.gdx.physics.box2d.World;
 import com.badlogic.gdx.utils.ShortArray;
 import com.syndic8.phytopolis.GameCanvas;
+import com.syndic8.phytopolis.util.FilmStrip;
 import com.syndic8.phytopolis.util.Tilemap;
 
 /**
@@ -118,104 +119,6 @@ public class PolygonObject extends GameObject {
     }
 
     /**
-     * Returns the dimensions of this box
-     * <p>
-     * This method does NOT return a reference to the dimension vector. Changes to this
-     * vector will not affect the shape.  However, it returns the same vector each time
-     * its is called, and so cannot be used as an allocator.
-     *
-     * @return the dimensions of this box
-     */
-    public Vector2 getDimension() {
-        return sizeCache.set(dimension);
-    }
-
-    /**
-     * Sets the dimensions of this box
-     * <p>
-     * This method does not keep a reference to the parameter.
-     *
-     * @param value the dimensions of this box
-     */
-    public void setDimension(Vector2 value) {
-        setDimension(value.x, value.y);
-    }
-
-    /**
-     * Sets the dimensions of this box
-     *
-     * @param width  The width of this box
-     * @param height The height of this box
-     */
-    public void setDimension(float width, float height) {
-        resize(width, height);
-        markDirty(true);
-    }
-
-    /**
-     * Returns the box width
-     *
-     * @return the box width
-     */
-    public float getWidth() {
-        return dimension.x;
-    }
-
-    /**
-     * Sets the box width
-     *
-     * @param value the box width
-     */
-    public void setWidth(float value) {
-        sizeCache.set(value, dimension.y);
-        setDimension(sizeCache);
-    }
-
-    /**
-     * Returns the box height
-     *
-     * @return the box height
-     */
-    public float getHeight() {
-        return dimension.y;
-    }
-
-    /**
-     * Sets the box height
-     *
-     * @param value the box height
-     */
-    public void setHeight(float value) {
-        sizeCache.set(dimension.x, value);
-        setDimension(sizeCache);
-    }
-
-    /**
-     * Initializes the bounding box (and drawing scale) for this polygon
-     */
-    private void initBounds() {
-        float minx = vertices[0];
-        float maxx = vertices[0];
-        float miny = vertices[1];
-        float maxy = vertices[1];
-
-        for (int ii = 2; ii < vertices.length; ii += 2) {
-            if (vertices[ii] < minx) {
-                minx = vertices[ii];
-            } else if (vertices[ii] > maxx) {
-                maxx = vertices[ii];
-            }
-            if (vertices[ii + 1] < miny) {
-                miny = vertices[ii + 1];
-            } else if (vertices[ii] > maxy) {
-                maxy = vertices[ii + 1];
-            }
-        }
-        dimension = new Vector2((maxx - minx), (maxy - miny));
-        sizeCache = new Vector2(dimension);
-    }
-
-    /**
      * Initializes the Box2d shapes for this polygon
      * <p>
      * If the texture is not null, this method also allocates the PolygonRegion
@@ -262,6 +165,31 @@ public class PolygonObject extends GameObject {
     }
 
     /**
+     * Initializes the bounding box (and drawing scale) for this polygon
+     */
+    private void initBounds() {
+        float minx = vertices[0];
+        float maxx = vertices[0];
+        float miny = vertices[1];
+        float maxy = vertices[1];
+
+        for (int ii = 2; ii < vertices.length; ii += 2) {
+            if (vertices[ii] < minx) {
+                minx = vertices[ii];
+            } else if (vertices[ii] > maxx) {
+                maxx = vertices[ii];
+            }
+            if (vertices[ii + 1] < miny) {
+                miny = vertices[ii + 1];
+            } else if (vertices[ii] > maxy) {
+                maxy = vertices[ii + 1];
+            }
+        }
+        dimension = new Vector2((maxx - minx), (maxy - miny));
+        sizeCache = new Vector2(dimension);
+    }
+
+    /**
      * Removes colinear vertices from the given triangulation.
      * <p>
      * For some reason, the LibGDX triangulator will occasionally return colinear
@@ -294,6 +222,60 @@ public class PolygonObject extends GameObject {
     }
 
     /**
+     * Returns the dimensions of this box
+     * <p>
+     * This method does NOT return a reference to the dimension vector. Changes to this
+     * vector will not affect the shape.  However, it returns the same vector each time
+     * its is called, and so cannot be used as an allocator.
+     *
+     * @return the dimensions of this box
+     */
+    public Vector2 getDimension() {
+        return sizeCache.set(dimension);
+    }
+
+    /**
+     * Sets the dimensions of this box
+     * <p>
+     * This method does not keep a reference to the parameter.
+     *
+     * @param value the dimensions of this box
+     */
+    public void setDimension(Vector2 value) {
+        setDimension(value.x, value.y);
+    }
+
+    /**
+     * Returns the box width
+     *
+     * @return the box width
+     */
+    public float getWidth() {
+        return dimension.x;
+    }
+
+    /**
+     * Sets the box width
+     *
+     * @param value the box width
+     */
+    public void setWidth(float value) {
+        sizeCache.set(value, dimension.y);
+        setDimension(sizeCache);
+    }
+
+    /**
+     * Sets the dimensions of this box
+     *
+     * @param width  The width of this box
+     * @param height The height of this box
+     */
+    public void setDimension(float width, float height) {
+        resize(width, height);
+        markDirty(true);
+    }
+
+    /**
      * Resize this polygon (stretching uniformly out from origin)
      *
      * @param width  The new width
@@ -321,36 +303,22 @@ public class PolygonObject extends GameObject {
     }
 
     /**
-     * Create new fixtures for this body, defining the shape
-     * <p>
-     * This is the primary method to override for custom physics objects
+     * Returns the box height
+     *
+     * @return the box height
      */
-    protected void createFixtures() {
-        if (body == null) {
-            return;
-        }
-
-        releaseFixtures();
-
-        // Create the fixtures
-        for (int ii = 0; ii < shapes.length; ii++) {
-            fixture.shape = shapes[ii];
-            geoms[ii] = body.createFixture(fixture);
-        }
-        markDirty(false);
+    public float getHeight() {
+        return dimension.y;
     }
 
     /**
-     * Release the fixtures for this body, reseting the shape
-     * <p>
-     * This is the primary method to override for custom physics objects
+     * Sets the box height
+     *
+     * @param value the box height
      */
-    protected void releaseFixtures() {
-        if (geoms[0] != null) {
-            for (Fixture fix : geoms) {
-                body.destroyFixture(fix);
-            }
-        }
+    public void setHeight(float value) {
+        sizeCache.set(dimension.x, value);
+        setDimension(sizeCache);
     }
 
     /**
@@ -362,7 +330,7 @@ public class PolygonObject extends GameObject {
      * @param value the object texture for drawing purposes.
      */
     public void setTexture(TextureRegion value) {
-        texture = value;
+        texture = new FilmStrip(value.getTexture(), 1, 1);
         region = new PolygonRegion(texture, scaled, tridx);
     }
 
@@ -404,9 +372,37 @@ public class PolygonObject extends GameObject {
         drawScale.set(x, y);
     }
 
-    @Override
-    public ModelType getType() {
-        return ModelType.PLATFORM;
+    /**
+     * Create new fixtures for this body, defining the shape
+     * <p>
+     * This is the primary method to override for custom physics objects
+     */
+    protected void createFixtures() {
+        if (body == null) {
+            return;
+        }
+
+        releaseFixtures();
+
+        // Create the fixtures
+        for (int ii = 0; ii < shapes.length; ii++) {
+            fixture.shape = shapes[ii];
+            geoms[ii] = body.createFixture(fixture);
+        }
+        markDirty(false);
+    }
+
+    /**
+     * Release the fixtures for this body, reseting the shape
+     * <p>
+     * This is the primary method to override for custom physics objects
+     */
+    protected void releaseFixtures() {
+        if (geoms[0] != null) {
+            for (Fixture fix : geoms) {
+                body.destroyFixture(fix);
+            }
+        }
     }
 
     /**
@@ -428,23 +424,9 @@ public class PolygonObject extends GameObject {
         }
     }
 
-    /**
-     * Draws the outline of the physics body.
-     * <p>
-     * This method can be helpful for understanding issues with collisions.
-     *
-     * @param canvas Drawing context
-     */
-    public void drawDebug(GameCanvas canvas) {
-        for (PolygonShape tri : shapes) {
-            canvas.drawPhysics(tri,
-                               Color.YELLOW,
-                               getX(),
-                               getY(),
-                               getAngle(),
-                               drawScale.x,
-                               drawScale.y);
-        }
+    @Override
+    public ModelType getType() {
+        return ModelType.PLATFORM;
     }
 
 }

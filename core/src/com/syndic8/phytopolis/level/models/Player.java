@@ -47,10 +47,6 @@ public class Player extends CapsuleObject {
      */
     private final int jumpLimit;
     /**
-     * Cooldown (in animation frames) for shooting
-     */
-    private final int shotLimit;
-    /**
      * Cache for internal force calculations
      */
     private final Vector2 forceCache = new Vector2();
@@ -60,6 +56,11 @@ public class Player extends CapsuleObject {
      * Multiplier for when standing on bouncy leaf
      */
     private final float bouncyMultiplier = 2f;
+    private final int bouncyTimerMax = 7;
+    /**
+     * How long until we can shoot again
+     */
+    private final int shootCooldown;
     private float animFrame;
     private float animFrame2;
     /**
@@ -79,17 +80,9 @@ public class Player extends CapsuleObject {
      */
     private boolean isJumping;
     /**
-     * How long until we can shoot again
-     */
-    private int shootCooldown;
-    /**
      * Whether our feet are on the ground
      */
     private boolean isGrounded;
-    /**
-     * Whether we are actively shooting
-     */
-    private boolean isShooting;
     /**
      * The physics shape of this object
      */
@@ -98,6 +91,7 @@ public class Player extends CapsuleObject {
      * whether the dude can jump extra high
      */
     private boolean bouncy = false;
+    private int bouncyTimer = 0;
 
     /**
      * Creates a new dude avatar with the given physics data
@@ -134,13 +128,11 @@ public class Player extends CapsuleObject {
         force = data.getFloat("force", 0);
         jump_force = data.getFloat("jump_force", 0);
         jumpLimit = data.getInt("jump_cool", 0);
-        shotLimit = data.getInt("shot_cool", 0);
         sensorName = "DudeGroundSensor";
         this.data = data;
 
         // Gameplay attributes
         isGrounded = false;
-        isShooting = false;
         isJumping = false;
         faceRight = true;
 
@@ -155,103 +147,15 @@ public class Player extends CapsuleObject {
     }
 
     /**
-     * Returns left/right movement of this character.
-     * <p>
-     * This is the result of input times dude force.
-     *
-     * @return left/right movement of this character.
-     */
-    public float getMovement() {
-        return movement;
-    }
-
-    /**
-     * Sets left/right movement of this character.
-     * <p>
-     * This is the result of input times dude force.
-     *
-     * @param value left/right movement of this character.
-     */
-    public void setMovement(float value) {
-        movement = value;
-        // Change facing if appropriate
-        if (movement < 0) {
-            faceRight = false;
-        } else if (movement > 0) {
-            faceRight = true;
-        }
-    }
-
-    /**
-     * Returns true if the dude is actively firing.
-     *
-     * @return true if the dude is actively firing.
-     */
-    public boolean isShooting() {
-        return isShooting && shootCooldown <= 0;
-    }
-
-    /**
-     * Sets whether the dude is actively firing.
-     *
-     * @param value whether the dude is actively firing.
-     */
-    public void setShooting(boolean value) {
-        isShooting = value;
-    }
-
-    /**
-     * Returns true if the dude is actively jumping.
-     *
-     * @return true if the dude is actively jumping.
-     */
-    public boolean isJumping() {
-        return isJumping && isGrounded && jumpCooldown <= 0;
-    }
-
-    /**
-     * Sets whether the dude is actively jumping.
-     *
-     * @param value whether the dude is actively jumping.
-     */
-    public void setJumping(boolean value) {
-        isJumping = value;
-    }
-
-    /**
      * sets whether the dude can jump extra high, for example, if the dude is standing on a bouncy leaf
      *
      * @param value whether the dude can jump extra high
      */
     public void setBouncy(boolean value) {
         bouncy = value;
-    }
-
-    /**
-     * Checks whether the player is at the bottom (for water purposes)
-     *
-     * @return whether or not the player is at the bottom of the game
-     */
-    public boolean atBottom() {
-        return Math.abs(getY()) < 2;
-    }
-
-    /**
-     * Returns true if the dude is on the ground.
-     *
-     * @return true if the dude is on the ground.
-     */
-    public boolean isGrounded() {
-        return isGrounded && Math.abs(getVY()) < 0.2;
-    }
-
-    /**
-     * Sets whether the dude is on the ground.
-     *
-     * @param value whether the dude is on the ground.
-     */
-    public void setGrounded(boolean value) {
-        isGrounded = value;
+        if (value) {
+            bouncyTimer = bouncyTimerMax;
+        }
     }
 
     /**
@@ -263,46 +167,6 @@ public class Player extends CapsuleObject {
      */
     public float getForce() {
         return force;
-    }
-
-    /**
-     * Returns ow hard the brakes are applied to get a dude to stop moving
-     *
-     * @return ow hard the brakes are applied to get a dude to stop moving
-     */
-    public float getDamping() {
-        return damping;
-    }
-
-    /**
-     * Returns the upper limit on dude left-right movement.
-     * <p>
-     * This does NOT apply to vertical movement.
-     *
-     * @return the upper limit on dude left-right movement.
-     */
-    public float getMaxSpeed() {
-        return maxspeed;
-    }
-
-    /**
-     * Returns the name of the ground sensor
-     * <p>
-     * This is used by ContactListener
-     *
-     * @return the name of the ground sensor
-     */
-    public String getSensorName() {
-        return sensorName;
-    }
-
-    /**
-     * Returns true if this character is facing right
-     *
-     * @return true if this character is facing right
-     */
-    public boolean isFacingRight() {
-        return faceRight;
     }
 
     /**
@@ -347,6 +211,205 @@ public class Player extends CapsuleObject {
     }
 
     /**
+     * Returns the name of the ground sensor
+     * <p>
+     * This is used by ContactListener
+     *
+     * @return the name of the ground sensor
+     */
+    public String getSensorName() {
+        return sensorName;
+    }
+
+    /**
+     * Updates the object's physics state (NOT GAME LOGIC).
+     * <p>
+     * We use this method to reset cooldowns.
+     *
+     * @param dt Number of seconds since last animation frame
+     */
+    public void update(float dt) {
+        if (!isGrounded()) {
+            if (getVY() > 0.1) {
+                if (animFrame < NUM_JUMP_UP_FRAMES) {
+                    animFrame += ANIMATION_SPEED;
+                }
+                if (animFrame >= NUM_JUMP_UP_FRAMES) {
+                    animFrame = NUM_JUMP_UP_FRAMES - 1;
+                }
+                //                animFrame %= NUM_JUMP_UP_FRAMES;
+                //            if (animFrame >= NUM_JUMP_FRAMES) {
+                //                animFrame -= NUM_JUMP_FRAMES;
+                //            }
+            } else if (getVY() < -0.1) {
+                if (animFrame < NUM_JUMP_UP_FRAMES) {
+                    animFrame = NUM_JUMP_UP_FRAMES;
+                } else if (animFrame <
+                        NUM_JUMP_UP_FRAMES + NUM_JUMP_DOWN_FRAMES) {
+                    animFrame += ANIMATION_SPEED;
+                    //                    animFrame = ((animFrame - NUM_JUMP_UP_FRAMES) % NUM_JUMP_DOWN_FRAMES) + NUM_JUMP_UP_FRAMES;
+                }
+                if (animFrame >= NUM_JUMP_UP_FRAMES + NUM_JUMP_DOWN_FRAMES) {
+                    animFrame = NUM_JUMP_UP_FRAMES + NUM_JUMP_DOWN_FRAMES - 1;
+                }
+            }
+        } else if (animFrame != 0) {
+            if (animFrame < 11) {
+                animFrame = 11;
+            } else {
+                animFrame += ANIMATION_SPEED;
+            }
+            if (animFrame >= jumpAnimator.getSize()) {
+                animFrame = 0;
+            }
+        }
+
+        if (Math.abs(getVX()) >= 0.1) {
+            animFrame2 += ANIMATION_SPEED2;
+            animFrame2 %= NUM_JOG_FRAMES;
+            //            if (animFrame2 >= NUM_JOG_FRAMES) {
+            //                animFrame2 -= NUM_JOG_FRAMES;
+            //            }
+
+        } else {
+            animFrame2 = 0;
+        }
+        if (!bouncy) bouncyTimer--;
+
+        // Apply cooldowns
+        if (isJumping()) {
+            jumpCooldown = jumpLimit;
+
+        } else {
+            jumpCooldown = Math.max(0, jumpCooldown - 1);
+        }
+
+        super.update(dt);
+    }
+
+    /**
+     * Returns true if the dude is on the ground.
+     *
+     * @return true if the dude is on the ground.
+     */
+    public boolean isGrounded() {
+        return isGrounded && Math.abs(getVY()) < 0.2;
+    }
+
+    /**
+     * Sets whether the dude is on the ground.
+     *
+     * @param value whether the dude is on the ground.
+     */
+    public void setGrounded(boolean value) {
+        isGrounded = value;
+    }
+
+    /**
+     * Returns true if the dude is actively jumping.
+     *
+     * @return true if the dude is actively jumping.
+     */
+    public boolean isJumping() {
+        return isJumping && isGrounded && jumpCooldown <= 0;
+    }
+
+    /**
+     * Sets whether the dude is actively jumping.
+     *
+     * @param value whether the dude is actively jumping.
+     */
+    public void setJumping(boolean value) {
+        isJumping = value;
+    }
+
+    /**
+     * Draws the physics object.
+     *
+     * @param canvas Drawing context
+     */
+    public void draw(GameCanvas canvas) {
+        //        System.out.println(getVY());
+        float effect = faceRight ? 1.0f : -1.0f;
+
+        float width = tilemap.getTileWidth() * textureSclInTiles;
+        float height = tilemap.getTileHeight() * textureSclInTiles;
+        float sclX = width / texture.getRegionWidth();
+        float sclY = height / texture.getRegionHeight();
+
+        if (!isGrounded() || animFrame != 0) {
+            jumpAnimator.setFrame((int) animFrame);
+            float x = jumpAnimator.getRegionWidth() / 2.0f;
+            float y = jumpAnimator.getRegionHeight() / 2.0f;
+            canvas.draw(jumpAnimator,
+                        Color.WHITE,
+                        x,
+                        y,
+                        getX(),
+                        getY(),
+                        getAngle(),
+                        sclX * effect,
+                        sclY);
+
+        } else if (Math.abs(getVX()) >= 0.1) {
+            //                    System.out.println("--------------------");
+            jogAnimator.setFrame((int) animFrame2);
+            float x = jogAnimator.getRegionWidth() / 2.0f;
+            float y = jogAnimator.getRegionHeight() / 2.0f;
+            canvas.draw(jogAnimator,
+                        Color.WHITE,
+                        x,
+                        y,
+                        getX(),
+                        getY(),
+                        getAngle(),
+                        sclX * effect,
+                        sclY);
+        } else {
+            canvas.draw(texture,
+                        Color.WHITE,
+                        origin.x,
+                        origin.y,
+                        getX() * drawScale.x,
+                        getY() * drawScale.y,
+                        getAngle(),
+                        sclX * effect,
+                        sclY);
+        }
+        //                System.out.println("A");
+        //        float width = 16f / 6f;
+        //        float height = (320f / 9f) / 20f;
+        //        float sclX = width / 600f;
+        //        float sclY = height / 400f;
+        //        canvas.draw(texture,
+        //                    Color.WHITE,
+        //                    origin.x,
+        //                    origin.y,
+        //                    getX(),
+        //                    getY(),
+        //                    getAngle(),
+        //                    sclX * effect,
+        //                    sclY);
+
+        //        float width = tilemap.getTileWidth() * textureSclInTiles;
+        //        float height = tilemap.getTileHeight() * textureSclInTiles;
+        //        float sclX = width / texture.getRegionWidth();
+        //        float sclY = height / texture.getRegionHeight();
+        //        if (texture != null) {
+        //            canvas.draw(texture,
+        //                        Color.WHITE,
+        //                        origin.x,
+        //                        origin.y,
+        //                        getX(),
+        //                        getY(),
+        //                        getAngle(),
+        //                        sclX * effect,
+        //                        sclY);
+        //        }
+
+    }
+
+    /**
      * Applies the force to the body of this dude
      * <p>
      * This method should be called after the force attribute is set.
@@ -372,165 +435,59 @@ public class Player extends CapsuleObject {
 
         // Jump!
         if (isJumping()) {
-            if (bouncy) forceCache.set(0, jump_force * bouncyMultiplier);
+            if (bouncyTimer > 0)
+                forceCache.set(0, jump_force * bouncyMultiplier);
             else forceCache.set(0, jump_force);
             body.applyLinearImpulse(forceCache, getPosition(), true);
         }
     }
 
     /**
-     * Updates the object's physics state (NOT GAME LOGIC).
+     * Returns left/right movement of this character.
      * <p>
-     * We use this method to reset cooldowns.
+     * This is the result of input times dude force.
      *
-     * @param dt Number of seconds since last animation frame
+     * @return left/right movement of this character.
      */
-    public void update(float dt) {
-        if (!isGrounded()) {
-            if (getVY() > 0.1) {
-                if (animFrame < NUM_JUMP_UP_FRAMES) {
-                    animFrame += ANIMATION_SPEED;
-                }
-                if (animFrame >= NUM_JUMP_UP_FRAMES) {
-                    animFrame = NUM_JUMP_UP_FRAMES - 1;
-                }
-//                animFrame %= NUM_JUMP_UP_FRAMES;
-//            if (animFrame >= NUM_JUMP_FRAMES) {
-//                animFrame -= NUM_JUMP_FRAMES;
-//            }
-            } else if (getVY() < -0.1) {
-                if (animFrame < NUM_JUMP_UP_FRAMES) {
-                    animFrame = NUM_JUMP_UP_FRAMES;
-                } else if (animFrame < NUM_JUMP_UP_FRAMES + NUM_JUMP_DOWN_FRAMES) {
-                    animFrame += ANIMATION_SPEED;
-//                    animFrame = ((animFrame - NUM_JUMP_UP_FRAMES) % NUM_JUMP_DOWN_FRAMES) + NUM_JUMP_UP_FRAMES;
-                }
-                if (animFrame >= NUM_JUMP_UP_FRAMES + NUM_JUMP_DOWN_FRAMES) {
-                    animFrame = NUM_JUMP_UP_FRAMES + NUM_JUMP_DOWN_FRAMES - 1;
-                }
-            }
-        } else if (animFrame != 0) {
-            if (animFrame < 11) {
-                animFrame = 11;
-            } else {
-                animFrame += ANIMATION_SPEED;
-            }
-            if (animFrame >= jumpAnimator.getSize()) {
-                animFrame = 0;
-            }
-        }
-
-        if (Math.abs(getVX()) >= 0.1) {
-            animFrame2 += ANIMATION_SPEED2;
-            animFrame2 %= NUM_JOG_FRAMES;
-//            if (animFrame2 >= NUM_JOG_FRAMES) {
-//                animFrame2 -= NUM_JOG_FRAMES;
-//            }
-
-        } else {
-            animFrame2 = 0;
-        }
-
-        // Apply cooldowns
-        if (isJumping()) {
-            jumpCooldown = jumpLimit;
-
-        } else {
-            jumpCooldown = Math.max(0, jumpCooldown - 1);
-        }
-
-        if (isShooting()) {
-            shootCooldown = shotLimit;
-        } else {
-            shootCooldown = Math.max(0, shootCooldown - 1);
-        }
-
-        super.update(dt);
+    public float getMovement() {
+        return movement;
     }
 
     /**
-     * Draws the physics object.
+     * Sets left/right movement of this character.
+     * <p>
+     * This is the result of input times dude force.
      *
-     * @param canvas Drawing context
+     * @param value left/right movement of this character.
      */
-    public void draw(GameCanvas canvas) {
-//        System.out.println(getVY());
-        float effect = faceRight ? 1.0f : -1.0f;
+    public void setMovement(float value) {
+        movement = value;
+        // Change facing if appropriate
+        if (movement < 0) {
+            faceRight = false;
+        } else if (movement > 0) {
+            faceRight = true;
+        }
+    }
 
-        float width = tilemap.getTileWidth() * textureSclInTiles;
-        float height = tilemap.getTileHeight() * textureSclInTiles;
-        float sclX = width / texture.getRegionWidth();
-        float sclY = height / texture.getRegionHeight();
+    /**
+     * Returns ow hard the brakes are applied to get a dude to stop moving
+     *
+     * @return ow hard the brakes are applied to get a dude to stop moving
+     */
+    public float getDamping() {
+        return damping;
+    }
 
-                if (!isGrounded() || animFrame != 0) {
-                    jumpAnimator.setFrame((int) animFrame);
-                    float x = jumpAnimator.getRegionWidth() / 2.0f;
-                    float y = jumpAnimator.getRegionHeight() / 2.0f;
-                    canvas.draw(jumpAnimator,
-                                Color.WHITE,
-                                x,
-                                y,
-                                getX(),
-                                getY(),
-                                getAngle(),
-                                sclX * effect,
-                                sclY);
-
-                } else if (Math.abs(getVX()) >= 0.1) {
-//                    System.out.println("--------------------");
-                    jogAnimator.setFrame((int) animFrame2);
-                    float x = jogAnimator.getRegionWidth() / 2.0f;
-                    float y = jogAnimator.getRegionHeight() / 2.0f;
-                    canvas.draw(jogAnimator,
-                                Color.WHITE,
-                                x,
-                                y,
-                                getX(),
-                                getY(),
-                                getAngle(),
-                                sclX * effect,
-                                sclY);
-                } else {
-                    canvas.draw(texture,
-                                Color.WHITE,
-                                origin.x,
-                                origin.y,
-                                getX() * drawScale.x,
-                                getY() * drawScale.y,
-                                getAngle(), sclX * effect,
-                                sclY);
-                }
-//                System.out.println("A");
-        //        float width = 16f / 6f;
-        //        float height = (320f / 9f) / 20f;
-        //        float sclX = width / 600f;
-        //        float sclY = height / 400f;
-        //        canvas.draw(texture,
-        //                    Color.WHITE,
-        //                    origin.x,
-        //                    origin.y,
-        //                    getX(),
-        //                    getY(),
-        //                    getAngle(),
-        //                    sclX * effect,
-        //                    sclY);
-
-//        float width = tilemap.getTileWidth() * textureSclInTiles;
-//        float height = tilemap.getTileHeight() * textureSclInTiles;
-//        float sclX = width / texture.getRegionWidth();
-//        float sclY = height / texture.getRegionHeight();
-//        if (texture != null) {
-//            canvas.draw(texture,
-//                        Color.WHITE,
-//                        origin.x,
-//                        origin.y,
-//                        getX(),
-//                        getY(),
-//                        getAngle(),
-//                        sclX * effect,
-//                        sclY);
-//        }
-
+    /**
+     * Returns the upper limit on dude left-right movement.
+     * <p>
+     * This does NOT apply to vertical movement.
+     *
+     * @return the upper limit on dude left-right movement.
+     */
+    public float getMaxSpeed() {
+        return maxspeed;
     }
 
     @Override

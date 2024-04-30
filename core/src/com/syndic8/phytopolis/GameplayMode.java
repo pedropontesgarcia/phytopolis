@@ -10,141 +10,62 @@
  */
 package com.syndic8.phytopolis;
 
-import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.audio.Music;
-import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.graphics.Cursor;
-import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Vector2;
-import com.badlogic.gdx.physics.box2d.*;
-import com.badlogic.gdx.utils.Array;
+import com.badlogic.gdx.physics.box2d.BodyDef;
+import com.badlogic.gdx.physics.box2d.World;
 import com.badlogic.gdx.utils.JsonValue;
-import com.badlogic.gdx.utils.ObjectSet;
 import com.syndic8.phytopolis.assets.AssetDirectory;
-import com.syndic8.phytopolis.level.HazardController;
-import com.syndic8.phytopolis.level.PlantController;
-import com.syndic8.phytopolis.level.ResourceController;
+import com.syndic8.phytopolis.level.*;
 import com.syndic8.phytopolis.level.models.*;
 import com.syndic8.phytopolis.util.FilmStrip;
 import com.syndic8.phytopolis.util.Tilemap;
 
-import java.util.HashMap;
-
 /**
- * Gameplay specific controller for the platformer game.
- * <p>
- * You will notice that asset loading is not done with static methods this time.
- * Instance asset loading makes it easier to process our game modes in a loop, which
- * is much more scalable. However, we still want the assets themselves to be static.
- * This is the purpose of our AssetState variable; it ensures that multiple instances
- * place nicely with the static assets.
+ * Main controller for the gameplay mode.
  */
-public class GameplayMode extends WorldController implements ContactListener {
+public class GameplayMode extends WorldController {
 
     private final Vector2 cameraVector;
-    /**
-     * Mark set to handle more sophisticated collision callbacks
-     */
-    protected ObjectSet<Fixture> sensorFixtures;
+    private final Vector2 projMousePosCache;
+    private final InputController ic;
+    private final float lvl1LeafWidth = 1.4f;
+    private final float lvl2LeafWidth = 1.2f;
+    private final float lvl3LeafWidth = 0.9f;
     protected Texture jumpTexture;
-    private TextureRegion branchCursorTexture;
-    private int starPoints;
-    private float scalex;
-    private float scaley;
-    private TextureRegion leafCursorTexture;
-    private TextureRegion waterCursorTexture;
-    private Cursor branchCursor;
-    private Cursor leafCursor;
-    private Cursor waterCursor;
     private PlantController plantController;
     private HazardController hazardController;
     private ResourceController resourceController;
+    private SunController sunController;
+    private UIController uiController;
     private FilmStrip jumpAnimator;
-
     private Texture jogTexture;
     private FilmStrip jogAnimator;
-    private int sunCollected;
-    private int waterCollected;
-    private Player player;
-    /**
-     * The font for giving messages to the player
-     */
-    private BitmapFont timesFont;
+    private boolean gathered;
     private TextureRegion background;
     private TextureRegion vignette;
-    /**
-     * Texture asset for character avatar
-     */
-    private TextureRegion avatarTexture;
+    private Texture avatarTexture;
     private Tilemap tilemap;
-    /**
-     * Texture asset for water symbol
-     */
-    private Texture waterTexture;
-    /**
-     * Texture asset for the spinning barrier
-     */
-    private TextureRegion barrierTexture;
-    /**
-     * Texture asset for the bullet
-     */
-    private TextureRegion bulletTexture;
-    /**
-     * Texture asset for the bridge plank
-     */
-    private TextureRegion bridgeTexture;
-    /**
-     * Texture asset for a node
-     */
-    private Texture nodeTexture;
-    /**
-     * The jump sound.  We only want to play once.
-     */
-    private Sound jumpSound;
-    /**
-     * The weapon fire sound.  We only want to play once.
-     */
-    private Sound fireSound;
-    /**
-     * The weapon pop sound.  We only want to play once.
-     */
-    private Sound plopSound;
-    /**
-     * The default sound volume
-     */
-    private float volume;
-    /**
-     * Physics constants for initialization
-     */
     private JsonValue constants;
-    /**
-     * Reference to the character avatar
-     */
     private Player avatar;
-    /**
-     * Reference to the goalDoor (for collision detection)
-     */
-    private BoxObject goalDoor;
-    private boolean fall;
-    private float startHeight;
-    private HashMap<Fixture, Filter> originalCollisionProperties;
     private Music backgroundMusic;
     private String lvl;
+    private CollisionController collisionController;
+    private float timeSinceUIUpdate = 0;
 
     /**
-     * Creates and initialize a new instance of the platformer game
-     * <p>
-     * The game has default gravity and other settings
+     * Creates and initialize a new instance of the game.
      */
-    public GameplayMode() {
+    public GameplayMode(GameCanvas c) {
         super();
-        world.setContactListener(this);
         cameraVector = new Vector2();
-        sensorFixtures = new ObjectSet<>();
+        projMousePosCache = new Vector2();
+        gathered = false;
+        ic = InputController.getInstance();
+        canvas = c;
     }
 
     public void setLevel(String lvl) {
@@ -160,77 +81,69 @@ public class GameplayMode extends WorldController implements ContactListener {
      * @param directory Reference to global asset manager.
      */
     public void gatherAssets(AssetDirectory directory) {
-        branchCursorTexture = new TextureRegion(directory.getEntry(
-                "ui:branch-cursor",
-                Texture.class));
-        leafCursorTexture = new TextureRegion(directory.getEntry(
-                "ui:leaf-cursor",
-                Texture.class));
-        waterCursorTexture = new TextureRegion(directory.getEntry(
-                "ui:water-cursor",
-                Texture.class));
-        Pixmap pixmap = getPixmapFromRegion(branchCursorTexture);
-        branchCursor = Gdx.graphics.newCursor(pixmap, 64 / 2, 64 / 2);
-        pixmap = getPixmapFromRegion(leafCursorTexture);
-        leafCursor = Gdx.graphics.newCursor(pixmap, 64 / 2, 64 / 2);
-        pixmap = getPixmapFromRegion(waterCursorTexture);
-        waterCursor = Gdx.graphics.newCursor(pixmap, 64 / 2, 64 / 2);
-        pixmap.dispose();
-
-        avatarTexture = new TextureRegion(directory.getEntry("gameplay:player",
-                                                             Texture.class));
-        barrierTexture = new TextureRegion(directory.getEntry("gameplay:barrier",
-                                                              Texture.class));
-        waterTexture = directory.getEntry("water_nooutline", Texture.class);
-        timesFont = directory.getEntry("times", BitmapFont.class);
-        background = new TextureRegion(directory.getEntry("gameplay:background",
-                                                          Texture.class));
-        vignette = new TextureRegion(directory.getEntry("gameplay:vignette",
-                                                        Texture.class));
-
-        background.setRegion(0, 0, 1920, 1080);
-        vignette.setRegion(0, 0, 1920, 1080);
-
-        jumpTexture = directory.getEntry("jump", Texture.class);
-        jumpAnimator = new FilmStrip(jumpTexture, 1, 13, 13);
-
-        jogTexture = directory.getEntry("jog", Texture.class);
-        jogAnimator = new FilmStrip(jogTexture, 1, 8, 8);
-
-        //jumpSound = directory.getEntry("platform:jump", Sound.class);
-        //fireSound = directory.getEntry("platform:pew", Sound.class);
-        //plopSound = directory.getEntry("platform:plop", Sound.class);
-
-        constants = directory.getEntry("gameplay:constants", JsonValue.class);
         tilemap = new Tilemap(DEFAULT_WIDTH,
                               DEFAULT_HEIGHT,
                               directory.getEntry(lvl, JsonValue.class));
         tilemap.gatherAssets(directory);
+        if (!gathered) {
+            gathered = true;
+            avatarTexture = directory.getEntry("gameplay:player",
+                                               Texture.class);
+            background = new TextureRegion(directory.getEntry(
+                    "gameplay:background",
+                    Texture.class));
+            vignette = new TextureRegion(directory.getEntry("ui:vignette",
+                                                            Texture.class));
+            background.setRegion(0, 0, 1920, 1080);
+            vignette.setRegion(0, 0, 1920, 1080);
 
-        resourceController = new ResourceController(canvas, tilemap);
-        plantController = new PlantController(8,
-                                              40,
-                                              tilemap.getTileHeight(),
-                                              tilemap.getTileWidth(),
-                                              0,
-                                              world,
-                                              scale,
-                                              resourceController,
-                                              tilemap);
-        hazardController = new HazardController(plantController,
-                                                (int) tilemap.getFireRate(),
-                                                1000000000,
-                                                8,
-                                                6,
-                                                tilemap);
-        plantController.gatherAssets(directory);
-        hazardController.gatherAssets(directory);
-        resourceController.gatherAssets(directory);
-        super.gatherAssets(directory);
-        backgroundMusic = directory.getEntry("viridian", Music.class);
-        backgroundMusic.setLooping(true);
-        backgroundMusic.setVolume(0);
-        backgroundMusic.play();
+            jumpTexture = directory.getEntry("jump", Texture.class);
+            jumpAnimator = new FilmStrip(jumpTexture, 1, 13, 13);
+
+            jogTexture = directory.getEntry("jog", Texture.class);
+            jogAnimator = new FilmStrip(jogTexture, 1, 8, 8);
+
+            constants = directory.getEntry("gameplay:constants",
+                                           JsonValue.class);
+
+            resourceController = new ResourceController();
+            uiController = new UIController(canvas, tilemap);
+            float branchHeight = tilemap.getTileHeight();
+            float plantWidth = branchHeight * (float) Math.sqrt(3) * 4 / 2;
+            float plantXOrigin = bounds.width / 2 - plantWidth / 2;
+            plantController = new PlantController(5,
+                                                  40,
+                                                  tilemap.getTileHeight(),
+                                                  plantXOrigin,
+                                                  0,
+                                                  world,
+                                                  scale,
+                                                  resourceController,
+                                                  tilemap);
+            hazardController = new HazardController(plantController,
+                                                    (int) tilemap.getFireRate(),
+                                                    1000000000,
+                                                    6,
+                                                    8,
+                                                    6,
+                                                    10,
+                                                    tilemap);
+            sunController = new SunController(5,
+                                              10,
+                                              tilemap.getTileWidth() * 1.5f,
+                                              bounds.width -
+                                                      tilemap.getTileWidth() *
+                                                              1.5f,
+                                              bounds.height);
+            plantController.gatherAssets(directory);
+            hazardController.gatherAssets(directory);
+            uiController.gatherAssets(directory);
+            sunController.gatherAssets(directory);
+            backgroundMusic = directory.getEntry("viridian", Music.class);
+            backgroundMusic.setLooping(true);
+            backgroundMusic.setVolume(0);
+            backgroundMusic.play();
+        }
     }
 
     /**
@@ -241,7 +154,7 @@ public class GameplayMode extends WorldController implements ContactListener {
         if (!backgroundMusic.isPlaying()) {
             backgroundMusic.play();
         }
-        resourceController.getUIController().startTimer();
+        uiController.startTimer();
     }
 
     /**
@@ -259,8 +172,9 @@ public class GameplayMode extends WorldController implements ContactListener {
             return false;
         }
 
-        if (!isFailure() && avatar.getY() < -1) {
+        if (!isFailure() && uiController.timerDone()) {
             setFailure(true);
+            fadeOut(1.5f);
             return false;
         }
 
@@ -278,21 +192,19 @@ public class GameplayMode extends WorldController implements ContactListener {
      * @param dt Number of seconds since last animation frame
      */
     public void update(float dt) {
+        int water = resourceController.getCurrWater();
         backgroundMusic.setVolume(super.getVolume());
         // Process actions in object model
-        avatar.setMovement(InputController.getInstance().getHorizontal() *
-                                   avatar.getForce());
-        avatar.setJumping(InputController.getInstance().didPrimary());
+        avatar.setMovement(ic.getHorizontal() * avatar.getForce());
+        avatar.setJumping(ic.didJump());
         processPlantGrowth();
 
         avatar.applyForce();
-        avatar.setBouncy(false);
-        InputController ic = InputController.getInstance();
+
         if (ic.didScrollReset()) {
             ic.resetScrolled();
         }
-        InputController.setHeight(
-                tilemap.getTilemapHeight() - canvas.getHeight());
+        ic.setHeight(tilemap.getTilemapHeight() - canvas.getHeight());
         cameraVector.set(canvas.getWidth() / 2f,
                          Math.max(canvas.getHeight() / 2f,
                                   Math.min(tilemap.getTilemapHeight() -
@@ -304,24 +216,40 @@ public class GameplayMode extends WorldController implements ContactListener {
                 ((Water) m).regenerate();
             }
             if (m instanceof Sun) {
-                if (((Sun) m).belowScreen()) {
-                    ((Sun) m).clear();
-                }
+                ((Sun) m).update(m.getY() < plantController.getMaxLeafHeight() -
+                        resourceController.SUN_TOLERANCE);
+
+            }
+            if (m instanceof Hazard) {
+                m.update(dt);
             }
         }
+        Sun s = sunController.spawnSuns(dt, tilemap);
+        if (s != null) addObject(s);
         for (Hazard h : hazardController.updateHazards()) {
             addObject(h);
         }
 
         if (ic.didMousePress()) {
-            Vector2 projMousePos = new Vector2(ic.getGrowX(), ic.getGrowY());
-            Vector2 unprojMousePos = canvas.unproject(projMousePos);
+            projMousePosCache.set(ic.getMouseX(), ic.getMouseY());
+            Vector2 unprojMousePos = canvas.unproject(projMousePosCache);
             hazardController.extinguishFire(unprojMousePos);
         }
         plantController.propagateDestruction();
-        resourceController.update(dt);
+
+        if (timeSinceUIUpdate >= 1) {
+            uiController.update(dt,
+                                resourceController.getCurrRatio(),
+                                hazardController,
+                                collisionController.getAddedWater(),
+                                resourceController.getCurrWater() < water,
+                                plantController.countTimerDeductions());
+            collisionController.setAddedWater(false);
+        } else {
+            timeSinceUIUpdate += 0.05;
+        }
         // Check for win condition
-        if ((avatar.getY() >
+        if ((plantController.getMaxLeafHeight() >
                 tilemap.getVictoryHeight() * tilemap.getTileHeight()) &&
                 !isComplete()) {
             setComplete(true);
@@ -335,30 +263,61 @@ public class GameplayMode extends WorldController implements ContactListener {
      */
     public void processPlantGrowth() {
         // get mouse position
-        InputController ic = InputController.getInstance();
-        Vector2 projMousePos = new Vector2(ic.getMouseX(), ic.getMouseY());
-        Vector2 unprojMousePos = canvas.unproject(projMousePos);
+        projMousePosCache.set(ic.getMouseX(), ic.getMouseY());
+        Vector2 unprojMousePos = canvas.unproject(projMousePosCache);
+        boolean canGrowBranch = ic.didGrowBranch() && ic.isGrowBranchModDown();
+        boolean canGrowLeaf = ic.didGrowLeaf() && ic.isGrowLeafModDown();
+        boolean noPriority = ic.isGrowLeafModSet() == ic.isGrowBranchModSet();
+        boolean doesLeafHavePriority =
+                ic.isGrowLeafModSet() && !ic.isGrowBranchModSet();
+        boolean shouldGrowBranch = false;
+        boolean shouldGrowLeaf = false;
+        if (noPriority && canGrowBranch && canGrowLeaf) {
+            shouldGrowBranch = true;
+            shouldGrowLeaf = true;
+        } else if (((doesLeafHavePriority ||
+                (!doesLeafHavePriority && !canGrowBranch)) && canGrowLeaf)) {
+            shouldGrowLeaf = true;
+        } else if (((!doesLeafHavePriority) ||
+                (doesLeafHavePriority && !canGrowLeaf)) && canGrowBranch) {
+            shouldGrowBranch = true;
+        }
 
-        if (InputController.getInstance().didMousePress()) {
-            // process leaf stuff
-            if (InputController.getInstance().didSpecial()) {
-                // don't grow if there's a fire there (prioritize fire)
-                if (!hazardController.hasFire(unprojMousePos)) {
-                    Leaf.leafType lt = Leaf.leafType.NORMAL;
-                    Model newLeaf = plantController.handleLeaf(unprojMousePos.x,
-                                                               unprojMousePos.y +
-                                                                       0.5f *
-                                                                               tilemap.getTileHeight(),
-                                                               lt);
-                    if (newLeaf != null) addObject(newLeaf);
-                }
-            }
+        if (!hazardController.hasFire(unprojMousePos)) {
+            if (shouldGrowBranch) {
 
-            // process branch stuff
-            else {
                 Branch branch = plantController.growBranch(unprojMousePos.x,
                                                            unprojMousePos.y);
                 if (branch != null) addObject(branch);
+
+            }
+            if (shouldGrowLeaf) {
+                // don't grow if there's a fire there (prioritize fire)
+
+                Leaf.leafType lt = Leaf.leafType.NORMAL;
+                float width = 0;
+                switch (lvl) {
+                    case "gameplay:lvl1":
+                        lt = Leaf.leafType.NORMAL;
+                        width = lvl1LeafWidth;
+                        break;
+                    case "gameplay:lvl2":
+                        lt = Leaf.leafType.NORMAL1;
+                        width = lvl2LeafWidth;
+                        break;
+                    case "gameplay:lvl3":
+                        lt = Leaf.leafType.NORMAL2;
+                        width = lvl3LeafWidth;
+                        break;
+                }
+                Model newLeaf = plantController.makeLeaf(unprojMousePos.x,
+                                                         unprojMousePos.y +
+                                                                 0.5f *
+                                                                         tilemap.getTileHeight(),
+                                                         lt,
+                                                         width);
+                if (newLeaf != null) addObject(newLeaf);
+
             }
         }
     }
@@ -378,30 +337,73 @@ public class GameplayMode extends WorldController implements ContactListener {
         canvas.cameraUpdate(cameraVector);
         canvas.begin();
         drawBackground();
-        drawVignette();
 
         tilemap.draw(canvas);
 
         super.draw(dt);
 
-        InputController ic = InputController.getInstance();
-        if (!ic.didSpecial()) {
-            Vector2 projMousePos = new Vector2(ic.getMouseX(), ic.getMouseY());
-            Vector2 unprojMousePos = canvas.unproject(projMousePos);
-            plantController.drawGhostBranch(canvas,
-                                            unprojMousePos.x,
-                                            unprojMousePos.y);
+        if ((ic.isGrowBranchModSet() ||
+                (ic.isGrowLeafModSet() && !ic.isGrowLeafModDown())) &&
+                ic.isGrowBranchModDown()) {
+            projMousePosCache.set(ic.getMouseX(), ic.getMouseY());
+            Vector2 unprojMousePos = canvas.unproject(projMousePosCache);
+            if (!hazardController.hasFire(unprojMousePos)) {
+                plantController.drawGhostBranch(canvas,
+                                                unprojMousePos.x,
+                                                unprojMousePos.y);
+            }
         }
-        hazardController.draw(canvas);
+        drawVignette();
         canvas.end();
-
-        updateCursor();
 
         canvas.beginHud();
         hazardController.drawWarning(canvas, cameraVector);
-        resourceController.drawUI(canvas);
+        uiController.draw(canvas);
         canvas.endHud();
         super.draw(canvas);
+    }
+
+    /**
+     * Called when the Screen is paused.
+     * <p>
+     * We need this method to stop all sounds when we pause.
+     * Pausing happens when we switch game modes.
+     */
+    public void pause() {
+        //jumpSound.stop(jumpId);
+        //plopSound.stop(plopId);
+        //fireSound.stop(fireId);
+    }
+
+    /**
+     * Called when this screen is no longer the current screen for a Game.
+     */
+    public void hide() {
+        // Useless if called in outside animation loop
+        super.hide();
+        backgroundMusic.pause();
+        uiController.pauseTimer();
+    }
+
+    private void drawBackground() {
+        if (background != null) {
+            canvas.draw(background.getTexture(),
+                        Color.WHITE,
+                        0,
+                        0,
+                        canvas.getWidth(),
+                        canvas.getHeight() * 4);
+        }
+    }
+
+    private void drawVignette() {
+        float backgroundY = canvas.getCameraY() - canvas.getHeight() / 2;
+        canvas.draw(vignette.getTexture(),
+                    Color.WHITE,
+                    0,
+                    backgroundY,
+                    canvas.getWidth(),
+                    canvas.getHeight());
     }
 
     /**
@@ -422,14 +424,14 @@ public class GameplayMode extends WorldController implements ContactListener {
         world.dispose();
         backgroundMusic.stop();
         backgroundMusic.play();
+        uiController.reset();
 
-        InputController.getInstance().resetScrolled();
+        ic.resetScrolled();
 
         resourceController.reset();
         plantController.reset();
 
         world = new World(gravity, false);
-        world.setContactListener(this);
         setComplete(false);
         setFailure(false);
         populateLevel();
@@ -502,345 +504,12 @@ public class GameplayMode extends WorldController implements ContactListener {
         avatar.setTexture(avatarTexture);
         avatar.setName("dude");
         addObject(avatar);
-        setPlayer(avatar);
-
-        originalCollisionProperties = new HashMap<>();
-
-        Array<Fixture> fixtures = avatar.getBody().getFixtureList();
-        for (Fixture fixture : fixtures) {
-            originalCollisionProperties.put(fixture, fixture.getFilterData());
-        }
-
-        volume = constants.getFloat("volume", 1.0f);
-        scalex = Gdx.graphics.getWidth() / 1129.412f;
-        scaley = Gdx.graphics.getHeight() / 635.294f;
-    }
-
-    /**
-     *
-     */
-    private void setPlayer(Player player) {
-        this.player = player;
-    }
-
-    /**
-     * Called when the Screen is paused.
-     * <p>
-     * We need this method to stop all sounds when we pause.
-     * Pausing happens when we switch game modes.
-     */
-    public void pause() {
-        //jumpSound.stop(jumpId);
-        //plopSound.stop(plopId);
-        //fireSound.stop(fireId);
-    }
-
-    /**
-     * Called when this screen is no longer the current screen for a Game.
-     */
-    public void hide() {
-        // Useless if called in outside animation loop
-        super.hide();
-        backgroundMusic.pause();
-        resourceController.getUIController().pauseTimer();
-    }
-
-    private void drawBackground() {
-        if (background != null) {
-            canvas.draw(background.getTexture(),
-                        Color.WHITE,
-                        0,
-                        0,
-                        canvas.getWidth(),
-                        canvas.getHeight() * 4);
-        }
-    }
-
-    private void drawVignette() {
-        float backgroundY = canvas.getCameraY() - canvas.getViewPortY() / 2;
-        canvas.draw(vignette.getTexture(),
-                    Color.WHITE,
-                    0,
-                    backgroundY,
-                    canvas.getWidth(),
-                    canvas.getHeight());
-    }
-
-    /**
-     * Updates the custom cursor
-     */
-    public void updateCursor() {
-        Gdx.graphics.setCursor(branchCursor);
-        if (InputController.getInstance().didSpecial()) {
-            Gdx.graphics.setCursor(leafCursor);
-        }
-        InputController ic = InputController.getInstance();
-        Vector2 projMousePos = new Vector2(ic.getMouseX(), ic.getMouseY());
-        Vector2 unprojMousePos = canvas.unproject(projMousePos);
-        if (hazardController.hasFire(unprojMousePos)) {
-            Gdx.graphics.setCursor(waterCursor);
-        }
-    }
-
-    private Pixmap getPixmapFromRegion(TextureRegion region) {
-        if (!region.getTexture().getTextureData().isPrepared()) {
-            region.getTexture().getTextureData().prepare();
-        }
-        Pixmap originalPixmap = region.getTexture()
-                .getTextureData()
-                .consumePixmap();
-        Pixmap cursorPixmap = new Pixmap(64, 64, originalPixmap.getFormat());
-        cursorPixmap.drawPixmap(originalPixmap,
-                                0,
-                                0,
-                                originalPixmap.getWidth(),
-                                originalPixmap.getHeight(),
-                                0,
-                                0,
-                                cursorPixmap.getWidth(),
-                                cursorPixmap.getHeight());
-        originalPixmap.dispose(); // Avoid memory leaks
-        return cursorPixmap;
-    }
-
-    /**
-     * @param categoryBits the collision category for the
-     *                     player character when falling through the platform
-     *                     What  the player is.
-     * @param maskBits     Categories the player can collide
-     *                     with
-     * @param collide      whether fixtures wit the same
-     *                     category should collide or not
-     * @return Filter that will allow the player to pass
-     * through a platform without collision
-     */
-    private Filter createFilterData(short categoryBits,
-                                    short maskBits,
-                                    boolean collide) {
-        Filter filter = new Filter();
-        filter.categoryBits = categoryBits;
-        filter.maskBits = maskBits;
-        filter.groupIndex = 0; // Default group index, modify if necessary
-        return filter;
-    }
-
-    /**
-     * Callback method for the start of a collision
-     * <p>
-     * This method is called when we first get a collision between two objects.  We use
-     * this method to test if it is the "right" kind of collision.  In particular, we
-     * use it to test if we made it to the win door.
-     *
-     * @param contact The two bodies that collided
-     */
-    public void beginContact(Contact contact) {
-        Fixture fix1 = contact.getFixtureA();
-        Fixture fix2 = contact.getFixtureB();
-
-        Body body1 = fix1.getBody();
-        Body body2 = fix2.getBody();
-
-        Object fd1 = fix1.getUserData();
-        Object fd2 = fix2.getUserData();
-
-        try {
-            Model bd1 = (Model) body1.getUserData();
-            Model bd2 = (Model) body2.getUserData();
-
-            // See if we have landed on the ground.
-            if ((avatar.getSensorName().equals(fd2) && avatar != bd1 &&
-                    (bd1.getType() == Model.ModelType.LEAF ||
-                            bd1.getType() == Model.ModelType.PLATFORM ||
-                            bd1.getType() == Model.ModelType.TILE_FULL)) ||
-                    (avatar.getSensorName().equals(fd1) && avatar != bd2) &&
-                            (bd2.getType() == Model.ModelType.LEAF ||
-                                    bd2.getType() == Model.ModelType.PLATFORM ||
-                                    bd2.getType() ==
-                                            Model.ModelType.TILE_FULL)) {
-                avatar.setGrounded(true);
-                sensorFixtures.add(avatar == bd1 ?
-                                           fix2 :
-                                           fix1); // Could have more than one ground
-            }
-
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-    }
-
-    /**
-     * Callback method for the end of a collision
-     * <p>
-     * This method is called when two objects cease to touch.  The main use of this method
-     * is to determine when the characer is NOT on the ground.  This is how we prevent
-     * double jumping.
-     */
-    public void endContact(Contact contact) {
-        contact.setEnabled(true);
-        Fixture fix1 = contact.getFixtureA();
-        Fixture fix2 = contact.getFixtureB();
-
-        Body body1 = fix1.getBody();
-        Body body2 = fix2.getBody();
-
-        Object fd1 = fix1.getUserData();
-        Object fd2 = fix2.getUserData();
-
-        Object bd1 = body1.getUserData();
-        Object bd2 = body2.getUserData();
-
-        if ((avatar.getSensorName().equals(fd2) && avatar != bd1) ||
-                (avatar.getSensorName().equals(fd1) && avatar != bd2)) {
-            sensorFixtures.remove(avatar == bd1 ? fix2 : fix1);
-            if (sensorFixtures.size == 0) {
-                avatar.setGrounded(false);
-            }
-        }
-    }
-
-    /**
-     * Unused ContactListener method
-     */
-    public void preSolve(Contact contact, Manifold oldManifold) {
-        sunCollected = 0;
-        waterCollected = 0;
-        Fixture fix1 = contact.getFixtureA();
-        Fixture fix2 = contact.getFixtureB();
-        boolean isCollisionBetweenPlayerAndLeaf =
-                (fix1.getBody() == avatar.getBody() &&
-                        ((Model) fix2.getBody().getUserData()).getType() ==
-                                Model.ModelType.LEAF) ||
-                        (fix2.getBody() == avatar.getBody() &&
-                                ((Model) fix1.getBody()
-                                        .getUserData()).getType() ==
-                                        Model.ModelType.LEAF);
-        boolean isCollisionBetweenPlayerAndNoTopTile =
-                (fix1.getBody() == avatar.getBody() &&
-                        ((Model) fix2.getBody().getUserData()).getType() ==
-                                Model.ModelType.TILE_NOTOP) ||
-                        (fix2.getBody() == avatar.getBody() &&
-                                ((Model) fix1.getBody()
-                                        .getUserData()).getType() ==
-                                        Model.ModelType.TILE_NOTOP);
-        boolean isCollisionBetweenPlayerAndWater =
-                (fix1.getBody() == avatar.getBody() &&
-                        ((Model) fix2.getBody().getUserData()).getType() ==
-                                Model.ModelType.WATER) ||
-                        (fix2.getBody() == avatar.getBody() &&
-                                ((Model) fix1.getBody()
-                                        .getUserData()).getType() ==
-                                        Model.ModelType.WATER);
-        boolean isCollisionBetweenPlayerAndSun =
-                (fix1.getBody() == avatar.getBody() &&
-                        ((Model) fix2.getBody().getUserData()).getType() ==
-                                Model.ModelType.SUN) ||
-                        (fix2.getBody() == avatar.getBody() &&
-                                ((Model) fix1.getBody()
-                                        .getUserData()).getType() ==
-                                        Model.ModelType.SUN);
-        boolean isCollisionBetweenLeafAndSun =
-                (((Model) fix1.getBody().getUserData()).getType() ==
-                        Model.ModelType.LEAF &&
-                        ((Model) fix2.getBody().getUserData()).getType() ==
-                                Model.ModelType.SUN) ||
-                        (((Model) fix2.getBody().getUserData()).getType() ==
-                                Model.ModelType.LEAF && ((Model) fix1.getBody()
-                                .getUserData()).getType() ==
-                                Model.ModelType.SUN);
-        boolean isCollisionBetweenPlatformAndSun =
-                (((Model) fix1.getBody().getUserData()).getType() ==
-                        Model.ModelType.PLATFORM &&
-                        ((Model) fix2.getBody().getUserData()).getType() ==
-                                Model.ModelType.SUN) ||
-                        (((Model) fix2.getBody().getUserData()).getType() ==
-                                Model.ModelType.PLATFORM &&
-                                ((Model) fix1.getBody()
-                                        .getUserData()).getType() ==
-                                        Model.ModelType.SUN);
-        boolean isCollisionBetweenTileAndSun =
-                (((Model) fix1.getBody().getUserData()).getType() ==
-                        Model.ModelType.TILE_NOTOP &&
-                        ((Model) fix2.getBody().getUserData()).getType() ==
-                                Model.ModelType.SUN) ||
-                        (((Model) fix2.getBody().getUserData()).getType() ==
-                                Model.ModelType.TILE_NOTOP &&
-                                ((Model) fix1.getBody()
-                                        .getUserData()).getType() ==
-                                        Model.ModelType.SUN) ||
-                        (((Model) fix1.getBody().getUserData()).getType() ==
-                                Model.ModelType.TILE_FULL &&
-                                ((Model) fix2.getBody()
-                                        .getUserData()).getType() ==
-                                        Model.ModelType.SUN) ||
-                        (((Model) fix2.getBody().getUserData()).getType() ==
-                                Model.ModelType.TILE_FULL &&
-                                ((Model) fix1.getBody()
-                                        .getUserData()).getType() ==
-                                        Model.ModelType.SUN);
-        if (isCollisionBetweenPlayerAndSun ||
-                isCollisionBetweenPlatformAndSun ||
-                isCollisionBetweenTileAndSun) {
-            contact.setEnabled(false);
-        }
-        if (isCollisionBetweenLeafAndSun) {
-            Sun s;
-            if (((Model) fix1.getBody().getUserData()).getType() ==
-                    Model.ModelType.SUN) {
-                s = (Sun) fix1.getBody().getUserData();
-            } else {
-                s = (Sun) fix2.getBody().getUserData();
-            }
-            contact.setEnabled(false);
-            s.clear();
-            resourceController.pickupSun();
-        }
-        if (isCollisionBetweenPlayerAndWater) {
-            Water w;
-            if (((Model) fix1.getBody().getUserData()).getType() ==
-                    Model.ModelType.WATER) {
-                w = (Water) fix1.getBody().getUserData();
-            } else {
-                w = (Water) fix2.getBody().getUserData();
-            }
-            contact.setEnabled(false);
-            if (w.isFull()) {
-                w.clear();
-                resourceController.pickupWater();
-            }
-        }
-
-        boolean isPlayerGoingUp = avatar.getVY() >= 0;
-        boolean isPlayerGoingDown = avatar.getVY() <= 0;
-        boolean isPlayerBelow = false;
-        if (fix1.getBody() == avatar.getBody()) isPlayerBelow =
-                fix1.getBody().getPosition().y - avatar.getHeight() / 2f <
-                        fix2.getBody().getPosition().y;
-        else if (fix2.getBody() == avatar.getBody()) isPlayerBelow =
-                fix2.getBody().getPosition().y - avatar.getHeight() / 2f <
-                        fix1.getBody().getPosition().y;
-        if (isCollisionBetweenPlayerAndLeaf &&
-                (isPlayerGoingUp || isPlayerBelow ||
-                        InputController.getInstance().didDrop())) {
-            contact.setEnabled(false);
-        }
-        if (isCollisionBetweenPlayerAndNoTopTile && isPlayerGoingDown) {
-            contact.setEnabled(false);
-        }
-        if (isCollisionBetweenPlayerAndLeaf) {
-            Leaf l;
-            if (fix1.getBody() == avatar.getBody())
-                l = (Leaf) fix2.getBody().getUserData();
-            else l = (Leaf) fix1.getBody().getUserData();
-            if (l.getLeafType() == Leaf.leafType.BOUNCY &&
-                    avatar.getY() > l.getY()) avatar.setBouncy(true);
-        }
-    }
-
-    /**
-     * Unused ContactListener method
-     */
-    public void postSolve(Contact contact, ContactImpulse impulse) {
+        collisionController = new CollisionController(avatar,
+                                                      uiController,
+                                                      resourceController,
+                                                      plantController,
+                                                      hazardController);
+        world.setContactListener(collisionController);
     }
 
 }

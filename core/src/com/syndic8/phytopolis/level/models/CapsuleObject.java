@@ -13,13 +13,11 @@ package com.syndic8.phytopolis.level.models;
  * LibGDX version, 2/6/2015
  */
 
-import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.CircleShape;
 import com.badlogic.gdx.physics.box2d.Fixture;
 import com.badlogic.gdx.physics.box2d.PolygonShape;
-import com.syndic8.phytopolis.GameCanvas;
 import com.syndic8.phytopolis.util.Tilemap;
 
 /**
@@ -38,6 +36,18 @@ public abstract class CapsuleObject extends GameObject {
      */
     private final Vector2 posCache = new Vector2();
     /**
+     * The width and height of the box
+     */
+    private final Vector2 dimension;
+    /**
+     * A cache value for when the user wants to access the dimensions
+     */
+    private final Vector2 sizeCache;
+    /**
+     * Cache of the polygon vertices (for resizing)
+     */
+    private final float[] vertices;
+    /**
      * Shape information for this box
      */
     protected PolygonShape shape;
@@ -53,14 +63,6 @@ public abstract class CapsuleObject extends GameObject {
      * Rectangle representation of capsule core for fast computation
      */
     protected Rectangle center;
-    /**
-     * The width and height of the box
-     */
-    private final Vector2 dimension;
-    /**
-     * A cache value for when the user wants to access the dimensions
-     */
-    private final Vector2 sizeCache;
     /**
      * A cache value for the center fixture (for resizing)
      */
@@ -78,37 +80,9 @@ public abstract class CapsuleObject extends GameObject {
      */
     private Orientation orient;
     /**
-     * Cache of the polygon vertices (for resizing)
-     */
-    private final float[] vertices;
-    /**
      * The seam offset of the core rectangle
      */
-    private float seamEpsilon;
-
-    /**
-     * Creates a new box at the origin.
-     * <p>
-     * The orientation of the capsule will be a full capsule along the
-     * major axis.  If width == height, it will default to a vertical
-     * orientation.
-     * <p>
-     * The size is expressed in physics units NOT pixels.  In order for
-     * drawing to work properly, you MUST set the drawScale. The drawScale
-     * converts the physics units to pixels.
-     *
-     * @param width  The object width in physics units
-     * @param height The object width in physics units
-     */
-    public CapsuleObject(float width, float height, Tilemap tm, float texScl) {
-        this(0,
-             0,
-             width,
-             height,
-             (width > height ? Orientation.HORIZONTAL : Orientation.VERTICAL),
-             tm,
-             texScl);
-    }
+    private final float seamEpsilon;
 
     /**
      * Creates a new capsule object.
@@ -177,148 +151,6 @@ public abstract class CapsuleObject extends GameObject {
 
         // Initialize
         resize(width, height);
-    }
-
-    /**
-     * Returns the dimensions of this box
-     * <p>
-     * This method does NOT return a reference to the dimension vector. Changes to this
-     * vector will not affect the shape.  However, it returns the same vector each time
-     * its is called, and so cannot be used as an allocator.
-     *
-     * @return the dimensions of this box
-     */
-    public Vector2 getDimension() {
-        return sizeCache.set(dimension);
-    }
-
-    /**
-     * Sets the dimensions of this box
-     * <p>
-     * This method does not keep a reference to the parameter.
-     *
-     * @param value the dimensions of this box
-     */
-    public void setDimension(Vector2 value) {
-        setDimension(value.x, value.y);
-    }
-
-    /**
-     * Sets the dimensions of this box
-     *
-     * @param width  The width of this box
-     * @param height The height of this box
-     */
-    public void setDimension(float width, float height) {
-        dimension.set(width, height);
-        markDirty(true);
-        resize(width, height);
-    }
-
-    /**
-     * Returns the box width
-     *
-     * @return the box width
-     */
-    public float getWidth() {
-        return dimension.x;
-    }
-
-    /**
-     * Sets the box width
-     *
-     * @param value the box width
-     */
-    public void setWidth(float value) {
-        sizeCache.set(value, dimension.y);
-        setDimension(sizeCache);
-    }
-
-    /**
-     * Returns the box height
-     *
-     * @return the box height
-     */
-    public float getHeight() {
-        return dimension.y;
-    }
-
-    /**
-     * Sets the box height
-     *
-     * @param value the box height
-     */
-    public void setHeight(float value) {
-        sizeCache.set(dimension.x, value);
-        setDimension(sizeCache);
-    }
-
-    /**
-     * Returns the orientation of this capsule
-     *
-     * @return the orientation of this capsule
-     */
-    public Orientation getOrientation() {
-        return orient;
-    }
-
-    /**
-     * Sets the orientation of this capsule, if valid.
-     * <p>
-     * If the orientation is not valid, then nothing happens and the method
-     * return false.
-     *
-     * @param value the orientation of this capsule
-     * @return true if the orientation was successfully changed.
-     */
-    public boolean setOrientation(Orientation value) {
-        if (dimension.x < dimension.y && isHorizontal(value)) {
-            return false;
-        }
-
-        orient = value;
-        resize(dimension.x, dimension.y);
-        return true;
-    }
-
-    /**
-     * Returns true if the orientation is a horizontal full or half capsule.
-     *
-     * @param value the orientation to check
-     * @return true if the orientation is a horizontal full or half capsule.
-     */
-    private boolean isHorizontal(Orientation value) {
-        return (value == Orientation.LEFT || value == Orientation.RIGHT ||
-                value == Orientation.HORIZONTAL);
-    }
-
-    /**
-     * Returns the seam offset of the core rectangle
-     * <p>
-     * If the center rectangle is exactly the same size as the circle radius,
-     * you may get catching at the seems.  To prevent this, you should make
-     * the center rectangle epsilon narrower so that everything rolls off the
-     * round shape. This parameter is that epsilon value
-     *
-     * @return the seam offset of the core rectangle
-     */
-    public float getSeamOffset() {
-        return seamEpsilon;
-    }
-
-    /**
-     * Sets the seam offset of the core rectangle
-     * <p>
-     * If the center rectangle is exactly the same size as the circle radius,
-     * you may get catching at the seems.  To prevent this, you should make
-     * the center rectangle epsilon narrower so that everything rolls off the
-     * round shape. This parameter is that epsilon value
-     *
-     * @parm value the seam offset of the core rectangle
-     */
-    public void setSeamOffset(float value) {
-        seamEpsilon = value;
-        markDirty(true);
     }
 
     /**
@@ -393,6 +225,58 @@ public abstract class CapsuleObject extends GameObject {
         shape.set(vertices);
         end1.setRadius(r);
         end2.setRadius(r);
+    }
+
+    /**
+     * Returns true if the orientation is a horizontal full or half capsule.
+     *
+     * @param value the orientation to check
+     * @return true if the orientation is a horizontal full or half capsule.
+     */
+    private boolean isHorizontal(Orientation value) {
+        return (value == Orientation.LEFT || value == Orientation.RIGHT ||
+                value == Orientation.HORIZONTAL);
+    }
+
+    /**
+     * Sets the dimensions of this box
+     * <p>
+     * This method does not keep a reference to the parameter.
+     *
+     * @param value the dimensions of this box
+     */
+    public void setDimension(Vector2 value) {
+        setDimension(value.x, value.y);
+    }
+
+    /**
+     * Sets the dimensions of this box
+     *
+     * @param width  The width of this box
+     * @param height The height of this box
+     */
+    public void setDimension(float width, float height) {
+        dimension.set(width, height);
+        markDirty(true);
+        resize(width, height);
+    }
+
+    /**
+     * Returns the box width
+     *
+     * @return the box width
+     */
+    public float getWidth() {
+        return dimension.x;
+    }
+
+    /**
+     * Returns the box height
+     *
+     * @return the box height
+     */
+    public float getHeight() {
+        return dimension.y;
     }
 
     /**
@@ -505,63 +389,6 @@ public abstract class CapsuleObject extends GameObject {
         if (cap2 != null) {
             body.destroyFixture(cap2);
             cap2 = null;
-        }
-    }
-
-    /**
-     * Draws the outline of the physics body.
-     * <p>
-     * This method can be helpful for understanding issues with collisions.
-     *
-     * @param canvas Drawing context
-     */
-    public void drawDebug(GameCanvas canvas) {
-        canvas.drawPhysics(shape,
-                           Color.YELLOW,
-                           getX(),
-                           getY(),
-                           getAngle(),
-                           drawScale.x,
-                           drawScale.y);
-        if (cap1 != null) {
-            // Need to manually rotate caps off axis
-            float dx;
-            float dy;
-            if (isHorizontal(orient)) {
-                float r = -center.x;
-                dx = (float) (r * Math.cos(Math.PI + getAngle()));
-                dy = (float) (r * Math.sin(Math.PI + getAngle()));
-            } else {
-                float r = center.y + center.height;
-                dx = (float) (r * Math.cos(Math.PI / 2.0f + getAngle()));
-                dy = (float) (r * Math.sin(Math.PI / 2.0f + getAngle()));
-            }
-            canvas.drawPhysics(end1,
-                               Color.YELLOW,
-                               getX() + dx,
-                               getY() + dy,
-                               drawScale.x,
-                               drawScale.y);
-        }
-        if (cap2 != null) {
-            // Need to manually rotate caps off axis
-            float dx;
-            float dy;
-            if (isHorizontal(orient)) {
-                float r = center.x + center.width;
-                dx = (float) (r * Math.cos(getAngle()));
-                dy = (float) (r * Math.sin(getAngle()));
-            } else {
-                float r = -center.y;
-                dx = (float) (r * Math.cos(-Math.PI / 2.0f + getAngle()));
-                dy = (float) (r * Math.sin(-Math.PI / 2.0f + getAngle()));
-            }
-            canvas.drawPhysics(end2,
-                               Color.YELLOW,
-                               getX() + dx,
-                               getY() + dy,
-                               drawScale.x,
-                               drawScale.y);
         }
     }
 

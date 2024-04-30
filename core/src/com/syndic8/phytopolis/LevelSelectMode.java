@@ -6,26 +6,35 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.scenes.scene2d.InputEvent;
+import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
+import com.badlogic.gdx.utils.Align;
 import com.syndic8.phytopolis.assets.AssetDirectory;
 import com.syndic8.phytopolis.levelselect.LevelBox;
 import com.syndic8.phytopolis.util.FadingScreen;
 import com.syndic8.phytopolis.util.FilmStrip;
 import com.syndic8.phytopolis.util.ScreenListener;
+import com.syndic8.phytopolis.util.menu.Menu;
+import com.syndic8.phytopolis.util.menu.MenuContainer;
+import com.syndic8.phytopolis.util.menu.MenuItem;
 import edu.cornell.gdiac.audio.AudioEngine;
+
+import static com.syndic8.phytopolis.GDXRoot.ExitCode;
 
 public class LevelSelectMode extends FadingScreen implements Screen {
 
     private final Rectangle bounds;
     private final int numLevels = 6;
     private final LevelBox[] levelBoxes;
+    private final Vector2 projMousePosCache;
+    /**
+     * Reference to GameCanvas created by the root
+     */
+    private final GameCanvas canvas;
     /**
      * Whether or not this screen is active
      */
     private boolean active;
-    /**
-     * Reference to GameCanvas created by the root
-     */
-    private GameCanvas canvas;
     /**
      * Listener that will update the player mode when we are done
      */
@@ -33,38 +42,83 @@ public class LevelSelectMode extends FadingScreen implements Screen {
     private FilmStrip background;
     private Texture lighting;
     private boolean ready;
+    private boolean gathered;
     private Music backgroundMusic;
     private AudioEngine audioEngine;
     private Texture rs;
     private String level;
+    private ExitCode exitCode;
+    private MenuContainer menuContainer;
 
-    public LevelSelectMode() {
-        this.ready = false;
-        this.bounds = new Rectangle(0, 0, 16, 9);
+    public LevelSelectMode(GameCanvas c) {
+        canvas = c;
+        ready = false;
+        bounds = new Rectangle(0, 0, 16, 9);
 
         //Setup levelboxes
-        this.levelBoxes = new LevelBox[numLevels];
+        levelBoxes = new LevelBox[numLevels];
+        projMousePosCache = new Vector2();
+        createMenu();
+        gathered = false;
     }
 
-    public void gatherAssets(AssetDirectory directory) {
-        background = new FilmStrip(directory.getEntry("lvlsel:background",
-                                                      Texture.class), 1, 4);
-        lighting = directory.getEntry("lvlsel:lighting", Texture.class);
-        rs = directory.getEntry("lvlsel:redsquare", Texture.class);
-        fadeIn(0.5f);
-        ready = false;
-        //        backgroundMusic = directory.getEntry("newgrowth", Music.class);
-        //        backgroundMusic.setLooping(true);
-        //        backgroundMusic.play();
+    private void createMenu() {
+        Menu menu = new Menu(1,
+                             0,
+                             0.4f,
+                             -0.4f,
+                             1,
+                             Align.center,
+                             Menu.DEFAULT_WIDTH);
+        menuContainer = new MenuContainer(menu, canvas);
+        ClickListener mainMenuListener = new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                ready = true;
+                exitCode = ExitCode.EXIT_MAIN_MENU;
+                fadeOut(0.5f);
+            }
+        };
+        menu.addItem(new MenuItem("BACK",
+                                  0,
+                                  mainMenuListener,
+                                  menu,
+                                  menuContainer,
+                                  canvas));
+        menuContainer.populate();
+    }
+
+    public Music getBackgroundMusic() {
+        return backgroundMusic;
     }
 
     public void setBackgroundMusic(Music m) {
         backgroundMusic = m;
     }
 
-    public void setCanvas(GameCanvas canvas) {
-        this.canvas = canvas;
-        //Setup levelboxes
+    public void gatherAssets(AssetDirectory directory) {
+        if (!gathered) {
+            background = new FilmStrip(directory.getEntry("lvlsel:background",
+                                                          Texture.class), 1, 4);
+            lighting = directory.getEntry("lvlsel:lighting", Texture.class);
+            rs = directory.getEntry("lvlsel:redsquare", Texture.class);
+            gathered = true;
+        }
+        fadeIn(0.5f);
+        ready = false;
+
+        //        backgroundMusic = directory.getEntry("newgrowth", Music.class);
+        //        backgroundMusic.setLooping(true);
+        //        backgroundMusic.play();
+    }
+
+    @Override
+    public void show() {
+        active = true;
+        exitCode = null;
+        ready = false;
+        menuContainer.activate();
+        // Set up levelboxes
         levelBoxes[0] = new LevelBox(canvas.getWidth() / 5f,
                                      canvas.getHeight() / 3.3f);
         levelBoxes[1] = new LevelBox(canvas.getWidth() / 2.3f,
@@ -72,11 +126,6 @@ public class LevelSelectMode extends FadingScreen implements Screen {
         levelBoxes[2] = new LevelBox(canvas.getWidth() / 1.47f,
                                      canvas.getHeight() / 3.3f);
         for (LevelBox lb : levelBoxes) if (lb != null) lb.setTexture(rs);
-    }
-
-    @Override
-    public void show() {
-        active = true;
         if (backgroundMusic != null) {
             backgroundMusic.setVolume(1);
             backgroundMusic.play();
@@ -89,32 +138,33 @@ public class LevelSelectMode extends FadingScreen implements Screen {
             update(delta);
             draw();
 
-            if (listener != null && ready && isFadeDone()) {
-                listener.exitScreen(this, 0);
+            if (ready && isFadeDone()) {
+                listener.exitScreen(this, exitCode.ordinal());
             }
         }
     }
 
     public void update(float delta) {
-        super.update(delta);
-        //        float mouseX = InputController.getInstance().getMouseX();
-        //        float mouseY = InputController.getInstance().getMouseY();
         InputController ic = InputController.getInstance();
-        Vector2 projMousePos = new Vector2(ic.getMouseX(), ic.getMouseY());
-        Vector2 unprojMousePos = canvas.unproject(projMousePos);
+        ic.readInput();
+        super.update(delta);
+        menuContainer.update(delta);
+        projMousePosCache.set(ic.getMouseX(), ic.getMouseY());
+        Vector2 unprojMousePos = canvas.unproject(projMousePosCache);
         float mouseX = unprojMousePos.x;
         float mouseY = unprojMousePos.y;
         for (LevelBox lb : levelBoxes) {
             if (lb != null) lb.setSelected(lb.inBounds(mouseX, mouseY));
         }
-        InputController.getInstance().readInput(bounds, Vector2.Zero.add(1, 1));
         if (getSelectedPot() != -1 &&
-                InputController.getInstance().didMousePress()) {
+                InputController.getInstance().didMousePress() && !ready) {
             setLevel();
             fadeOut(1);
             ready = true;
+            exitCode = ExitCode.EXIT_LEVELS;
         }
-        if (ready) backgroundMusic.setVolume(super.getVolume());
+        if (ready && exitCode == ExitCode.EXIT_LEVELS)
+            backgroundMusic.setVolume(super.getVolume());
     }
 
     public void draw() {
@@ -136,6 +186,7 @@ public class LevelSelectMode extends FadingScreen implements Screen {
                     canvas.getHeight());
         canvas.setBlendState(GameCanvas.BlendState.NO_PREMULT);
         for (LevelBox lb : levelBoxes) if (lb != null) lb.draw(canvas);
+        menuContainer.draw(canvas);
         canvas.end();
         super.draw(canvas);
     }
@@ -145,6 +196,20 @@ public class LevelSelectMode extends FadingScreen implements Screen {
             if (levelBoxes[i] != null && levelBoxes[i].getSelected()) return i;
         }
         return -1;
+    }
+
+    public void setLevel() {
+        switch (getSelectedPot()) {
+            case 0:
+                level = "gameplay:lvl1";
+                break;
+            case 1:
+                level = "gameplay:lvl2";
+                break;
+            case 2:
+                level = "gameplay:lvl3";
+                break;
+        }
     }
 
     @Override
@@ -165,12 +230,13 @@ public class LevelSelectMode extends FadingScreen implements Screen {
     @Override
     public void hide() {
         active = false;
-        backgroundMusic.stop();
+        menuContainer.deactivate();
+        if (exitCode == ExitCode.EXIT_LEVELS) backgroundMusic.stop();
     }
 
     @Override
     public void dispose() {
-        backgroundMusic.dispose();
+        if (backgroundMusic != null) backgroundMusic.dispose();
     }
 
     public void reset() {
@@ -182,21 +248,8 @@ public class LevelSelectMode extends FadingScreen implements Screen {
         this.listener = listener;
     }
 
-    public void setLevel() {
-        switch (getSelectedPot()) {
-            case 0:
-                level = "gameplay:lvl1";
-                break;
-            case 1:
-                level = "gameplay:lvl2";
-                break;
-            case 2:
-                level = "gameplay:lvl3";
-                break;
-        }
-    }
-
     public String getLevel() {
         return level;
     }
+
 }

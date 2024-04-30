@@ -15,6 +15,14 @@ public class Timer {
     //     */
     //    public int starTime;
     /**
+     * The time in seconds granted by collecting sun
+     */
+    private final float sunTime;
+    /**
+     * Starting time for this Timer
+     */
+    private final float initialTime;
+    /**
      * The time in seconds that this timer has left
      */
     private float time;
@@ -31,6 +39,16 @@ public class Timer {
      * @param initialTime The initial time represented in seconds
      */
     public Timer(float initialTime) {
+        this(initialTime, 10);
+    }
+
+    public Timer(float initialTime, float sunTime) {
+        this.initialTime = initialTime;
+        time = initialTime;
+        this.sunTime = sunTime;
+    }
+
+    public void reset() {
         time = initialTime;
     }
 
@@ -80,6 +98,14 @@ public class Timer {
 
     }
 
+    public void addTime() {
+        addTime(sunTime);
+    }
+
+    public void addTime(float t) {
+        time += t;
+    }
+
     public String toString() {
         return String.format("%02d:%02d", getMinutes(), getSeconds());
     }
@@ -92,8 +118,8 @@ public class Timer {
         return (int) (time % 60);
     }
 
-    public boolean isRunning() {
-        return running;
+    public boolean isOver() {
+        return !running;
     }
 
     public void pause() {

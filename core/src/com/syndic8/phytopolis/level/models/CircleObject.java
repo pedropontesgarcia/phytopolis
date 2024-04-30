@@ -1,9 +1,7 @@
 package com.syndic8.phytopolis.level.models;
 
-import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.physics.box2d.CircleShape;
 import com.badlogic.gdx.physics.box2d.Fixture;
-import com.syndic8.phytopolis.GameCanvas;
 import com.syndic8.phytopolis.util.Tilemap;
 
 public abstract class CircleObject extends GameObject {
@@ -16,19 +14,6 @@ public abstract class CircleObject extends GameObject {
      * A cache value for the fixture (for resizing)
      */
     private Fixture geometry;
-
-    /**
-     * Creates a new circle at the origin.
-     * <p>
-     * The size is expressed in physics units NOT pixels.  In order for
-     * drawing to work properly, you MUST set the drawScale. The drawScale
-     * converts the physics units to pixels.
-     *
-     * @param radius The wheel radius
-     */
-    public CircleObject(float radius, Tilemap tm, float texScl) {
-        this(0, 0, radius, tm, texScl);
-    }
 
     /**
      * Creates a new circle object.
@@ -61,16 +46,6 @@ public abstract class CircleObject extends GameObject {
     }
 
     /**
-     * Sets the radius of this circle
-     *
-     * @param value the radius of this circle
-     */
-    public void setRadius(float value) {
-        shape.setRadius(value);
-        markDirty(true);
-    }
-
-    /**
      * Create new fixtures for this body, defining the shape
      * <p>
      * This is the primary method to override for custom physics objects
@@ -98,22 +73,6 @@ public abstract class CircleObject extends GameObject {
             body.destroyFixture(geometry);
             geometry = null;
         }
-    }
-
-    /**
-     * Draws the outline of the physics body.
-     * <p>
-     * This method can be helpful for understanding issues with collisions.
-     *
-     * @param canvas Drawing context
-     */
-    public void drawDebug(GameCanvas canvas) {
-        canvas.drawPhysics(shape,
-                           Color.YELLOW,
-                           getX(),
-                           getY(),
-                           drawScale.x,
-                           drawScale.y);
     }
 
 }

@@ -1,7 +1,6 @@
 package com.syndic8.phytopolis.level.models;
 
 import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Vector2;
 import com.syndic8.phytopolis.GameCanvas;
 import com.syndic8.phytopolis.util.FilmStrip;
@@ -26,7 +25,9 @@ public abstract class Model {
     /**
      * The texture for the shape.
      */
-    protected TextureRegion texture;
+    protected FilmStrip texture;
+    protected float animFrame;
+    protected float animationSpeed;
     protected int zIndex;
 
     public Model(float x, float y, Tilemap tilemap, float textureSclInTiles) {
@@ -36,6 +37,7 @@ public abstract class Model {
         // Object has yet to be deactivated
         toRemove = false;
         zIndex = 0;
+        animFrame = 0;
     }
 
     public Texture getTexture() {
@@ -43,10 +45,21 @@ public abstract class Model {
     }
 
     public void setTexture(Texture texture) {
-        this.texture = new FilmStrip(texture, 1, 1, 1);
-        //        radius = animator.getRegionHeight() / 2.0f;
-        origin = new Vector2(texture.getWidth() / 2.0f,
-                             texture.getHeight() / 2.0f);
+        setFilmStrip(new FilmStrip(texture, 1, 1, 1));
+    }
+
+    public FilmStrip getFilmStrip() {
+        return texture;
+    }
+
+    public void setFilmStrip(FilmStrip animation) {
+        texture = animation;
+        origin = new Vector2(texture.getRegionWidth() / 2.0f,
+                             texture.getRegionHeight() / 2.0f);
+    }
+
+    public void setAnimationSpeed(float speed) {
+        animationSpeed = speed;
     }
 
     /**
@@ -158,15 +171,6 @@ public abstract class Model {
      */
     public abstract void draw(GameCanvas canvas);
 
-//    /**
-//     * Draws the outline of the physics body.
-//     * <p>
-//     * This method can be helpful for understanding issues with collisions.
-//     *
-//     * @param canvas Drawing context
-//     */
-//    public abstract void drawDebug(GameCanvas canvas);
-
     public enum ModelType {
         /**
          * The player
@@ -207,7 +211,11 @@ public abstract class Model {
         /**
          * Tile without a top
          */
-        TILE_NOTOP
+        TILE_NOTOP,
+        /**
+         * Bug hazard
+         */
+        BUG
     }
 
 }

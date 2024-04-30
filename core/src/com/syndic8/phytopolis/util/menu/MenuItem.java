@@ -1,73 +1,148 @@
 package com.syndic8.phytopolis.util.menu;
 
-import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
-import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
+import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.syndic8.phytopolis.GameCanvas;
-
-import java.util.ArrayList;
-import java.util.List;
+import com.syndic8.phytopolis.util.SharedAssetContainer;
 
 public class MenuItem {
 
     private final TextButton label;
-    private final Menu submenu;
 
+    /**
+     * Initializes a MenuItem with a submenu.
+     *
+     * @param text  Text for the label.
+     * @param index Index of this item in the menu.
+     * @param sm    Submenu to switch to on click.
+     * @param m     Menu containing this item.
+     * @param ctr   Container containing the menu.
+     * @param c     Game canvas.
+     */
     public MenuItem(String text,
-                    float sep,
                     int index,
-                    int len,
-                    ClickListener l,
+                    Menu sm,
+                    Menu m,
+                    MenuContainer ctr,
                     GameCanvas c) {
-        this(text, sep, index, len, l, null, c);
+        this(text, index, new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                ctr.setMenu(sm);
+            }
+        }, m, ctr, c);
     }
 
+    /**
+     * Initializes a MenuItem with a submenu.
+     *
+     * @param text  Text for the label.
+     * @param index Index of this item in the menu.
+     * @param l     Listener to run on click.
+     * @param m     Menu containing this item.
+     * @param ctr   Container containing the menu.
+     * @param c     Game canvas.
+     */
     public MenuItem(String text,
-                    float sep,
                     int index,
-                    int len,
                     ClickListener l,
-                    Menu sm,
+                    Menu m,
+                    MenuContainer ctr,
                     GameCanvas c) {
-        submenu = sm;
-        FreeTypeFontGenerator generator = new FreeTypeFontGenerator(Gdx.files.internal(
-                "fonts/Krungthep.ttf"));
-        FreeTypeFontGenerator.setMaxTextureSize(4096);
-        FreeTypeFontGenerator.FreeTypeFontParameter parameter = new FreeTypeFontGenerator.FreeTypeFontParameter();
-        parameter.size = 256;
-        parameter.color = Color.WHITE;
-        parameter.shadowColor = new Color(0, 0.6f, 0.6f, 1);
-        parameter.shadowOffsetX = 15;
-        parameter.shadowOffsetY = 15;
-        BitmapFont font = generator.generateFont(parameter);
-        font.getRegion()
-                .getTexture()
-                .setFilter(Texture.TextureFilter.Linear,
-                           Texture.TextureFilter.Linear);
-        font.getData().setScale(0.2f);
-        generator.dispose();
+        this(text,
+             index,
+             l,
+             m,
+             ctr,
+             c,
+             m.getAlignment(),
+             m.getFontScale(),
+             m.getXOffset(),
+             m.getYOffset(),
+             m.getWidth());
+    }
+
+    /**
+     * Initializes a MenuItem with a submenu.
+     *
+     * @param text  Text for the label.
+     * @param index Index of this item in the menu.
+     * @param l     Listener to run on click.
+     * @param m     Menu containing this item.
+     * @param ctr   Container containing the menu.
+     * @param c     Game canvas.
+     * @param align Alignment for this item.
+     * @param scl   Font scale for this item.
+     */
+    public MenuItem(String text,
+                    int index,
+                    ClickListener l,
+                    Menu m,
+                    MenuContainer ctr,
+                    GameCanvas c,
+                    int align,
+                    float scl,
+                    float xOffset,
+                    float yOffset,
+                    float width) {
+        BitmapFont font = SharedAssetContainer.getInstance().getUIFont(scl);
         TextButton.TextButtonStyle buttonStyle = new TextButton.TextButtonStyle();
         buttonStyle.font = font;
         buttonStyle.overFontColor = new Color(0.7f, 0.7f, 0.7f, 1);
 
         label = new TextButton(text, buttonStyle);
-        float xPos = c.getTextViewport().getWorldWidth() / 2f -
-                label.getWidth() / 2f;
-        float yPos = c.getTextViewport().getWorldHeight() / 2f +
-                (len - 1f) * sep / 2f - index * sep - label.getHeight() / 2f;
+        label.setSize(width, label.getMaxHeight());
+        label.getLabel().setAlignment(align);
+        float ww = c.getTextViewport().getWorldWidth();
+        float wh = c.getTextViewport().getWorldHeight();
+        float xPos = ww / 2f - label.getWidth() / 2f + ww * xOffset;
+        float yPos =
+                wh / 2f + (m.getLength() - 1f) * m.getSeparation() * wh / 2f -
+                        index * m.getSeparation() * wh -
+                        label.getHeight() / 2f + wh * yOffset;
         label.setPosition(xPos, yPos);
         label.addListener(l);
     }
 
-    public List<TextButton> gatherLabels() {
-        List<TextButton> labels = new ArrayList<>();
-        labels.add(label);
-        if (submenu != null) labels.addAll(submenu.gatherLabels());
-        return labels;
+    /**
+     * Initializes a MenuItem with a submenu.
+     *
+     * @param text  Text for the label.
+     * @param index Index of this item in the menu.
+     * @param sm    Submenu to switch to on click.
+     * @param m     Menu containing this item.
+     * @param ctr   Container containing the menu.
+     * @param c     Game canvas.
+     * @param align Alignment for this item.
+     * @param scl   Font scale for this item.
+     */
+    public MenuItem(String text,
+                    int index,
+                    Menu sm,
+                    Menu m,
+                    MenuContainer ctr,
+                    GameCanvas c,
+                    int align,
+                    float scl,
+                    float xOffset,
+                    float yOffset,
+                    float width) {
+        this(text, index, new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                ctr.setMenu(sm);
+            }
+        }, m, ctr, c, align, scl, xOffset, yOffset, width);
+    }
+
+    /**
+     * Returns this item's label.
+     */
+    public TextButton getLabel() {
+        return label;
     }
 
 }
