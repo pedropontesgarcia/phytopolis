@@ -16,17 +16,25 @@ public class PauseMode extends FadingScreen implements Screen {
 
     private final MenuContainer menuContainer;
     private final Menu menu;
+    private final GameplayMode gameplayMode;
+    private final float BLACK_BACKGROUND_ALPHA = 0.6f;
+    private final float TRANSITION_DURATION = 0.1f;
+    private float alpha;
     private ScreenListener listener;
     private boolean ready;
     private boolean exit;
     private boolean active;
     private GameCanvas canvas;
     private ExitCode exitCode;
+    private float tmr;
 
-    public PauseMode(GameCanvas c) {
+    public PauseMode(GameCanvas c, GameplayMode gm) {
         exit = false;
         ready = false;
         canvas = c;
+        gameplayMode = gm;
+        alpha = 0;
+        tmr = 0;
         menu = new Menu(5, 0.125f);
         menuContainer = new MenuContainer(menu, c);
         Menu optionsMenu = new OptionsMenu(c, menuContainer, menu);
@@ -35,7 +43,6 @@ public class PauseMode extends FadingScreen implements Screen {
             public void clicked(InputEvent event, float x, float y) {
                 exitCode = ExitCode.EXIT_RESUME;
                 exit = true;
-                fadeOut();
             }
         };
         ClickListener resetListener = new ClickListener() {
@@ -43,7 +50,7 @@ public class PauseMode extends FadingScreen implements Screen {
             public void clicked(InputEvent event, float x, float y) {
                 exitCode = ExitCode.EXIT_RESET;
                 exit = true;
-                fadeOut();
+                fadeOut(0.5f);
             }
         };
         ClickListener mainMenuListener = new ClickListener() {
@@ -57,8 +64,8 @@ public class PauseMode extends FadingScreen implements Screen {
         ClickListener exitListener = new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
-                exit = true;
                 exitCode = ExitCode.EXIT_QUIT;
+                exit = true;
             }
         };
         menu.addItem(new MenuItem("RESUME",
@@ -94,11 +101,6 @@ public class PauseMode extends FadingScreen implements Screen {
         menuContainer.populate();
     }
 
-    public void fadeOut() {
-        super.fadeOut(0.1f);
-        menuContainer.deactivate();
-    }
-
     public void setCanvas(GameCanvas c) {
         canvas = c;
     }
@@ -109,7 +111,7 @@ public class PauseMode extends FadingScreen implements Screen {
         active = true;
         ready = false;
         exitCode = null;
-        fadeIn(0.1f);
+        tmr = 0;
         menuContainer.activate();
     }
 
@@ -148,29 +150,47 @@ public class PauseMode extends FadingScreen implements Screen {
     }
 
     public void update(float delta) {
-        super.update(delta);
-        menuContainer.update(delta);
         InputController.getInstance().readInput();
         if (InputController.getInstance().didExit() &&
                 menuContainer.getMenu() == menu) {
             exit = true;
             exitCode = ExitCode.EXIT_RESUME;
-            fadeOut();
-
         }
+        super.update(delta);
+        tmr += delta;
+        if (exit && exitCode == ExitCode.EXIT_RESUME) {
+            tmr = 0;
+        }
+        if (tmr >= TRANSITION_DURATION) {
+            tmr = TRANSITION_DURATION;
+        }
+        alpha = (exitCode == ExitCode.EXIT_RESUME ?
+                1 - tmr / TRANSITION_DURATION :
+                tmr / TRANSITION_DURATION);
+        menuContainer.update(delta);
+        menuContainer.setAlpha(alpha);
         if (exit) {
             exit = false;
             ready = true;
             menuContainer.deactivate();
         }
-
-        if ((ready && isFadeDone())) {
+        if (ready && ((exitCode == ExitCode.EXIT_RESUME &&
+                tmr == TRANSITION_DURATION) ||
+                (exitCode != ExitCode.EXIT_RESUME && isFadeDone()) ||
+                exitCode == ExitCode.EXIT_QUIT)) {
             listener.exitScreen(this, exitCode.ordinal());
         }
     }
 
     public void draw() {
         canvas.clear();
+        if (menuContainer.getMenu() == menu) gameplayMode.draw();
+        canvas.beginShape();
+        canvas.getShapeRenderer()
+                .setColor(0, 0, 0, alpha * BLACK_BACKGROUND_ALPHA);
+        canvas.getShapeRenderer()
+                .rect(0, 0, canvas.getWidth(), canvas.getHeight());
+        canvas.endShape();
         canvas.begin();
         menuContainer.draw(canvas);
         canvas.end();

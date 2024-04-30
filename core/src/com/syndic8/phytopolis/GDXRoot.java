@@ -50,7 +50,7 @@ public class GDXRoot extends Game implements ScreenListener {
         controller = new GameplayMode(canvas);
         levelSelect = new LevelSelectMode(canvas);
         levelOver = new LevelOverMode(canvas);
-        pause = new PauseMode(canvas);
+        pause = new PauseMode(canvas, controller);
         Gdx.input.setInputProcessor(InputController.getInstance()
                                             .getMultiplexer());
         menu.setScreenListener(this);
@@ -115,7 +115,7 @@ public class GDXRoot extends Game implements ScreenListener {
         } else if (screen == pause && exitCode == EXIT_RESUME.ordinal()) {
             controller.setPaused(false);
             controller.setScreenListener(this);
-            controller.fadeIn(0.25f);
+            //controller.fadeIn(0.25f);
             setScreen(controller);
         } else if (screen == pause && exitCode == EXIT_RESET.ordinal()) {
             controller.setPaused(false);

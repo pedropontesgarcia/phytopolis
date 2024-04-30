@@ -64,6 +64,7 @@ public class PlantController {
     private final ResourceController resourceController;
     private final Tilemap tilemap;
     private final Vector2 maxLeafIndex;
+    private final ObjectSet<Hazard> removedHazards;
     /**
      * node texture
      */
@@ -94,7 +95,6 @@ public class PlantController {
     private int plantCoyoteTimeRemaining = 0;
     private FilmStrip leafTextureOne;
     private FilmStrip leafTextureTwo;
-    private ObjectSet<Hazard> removedHazards;
 
     /**
      * Initialize a PlantController with specified height and width
@@ -133,7 +133,6 @@ public class PlantController {
         for (int x = 0; x < width; x++) {
             for (int y = 0; y < height; y++) {
                 float yOffset = 0;
-                //set the yOffset
                 if (x % 2 == 1) yOffset = this.gridSpacing / 2f;
                 plantGrid[x][y] = new PlantNode(
                         (x * this.xSpacing) + this.xOrigin,
@@ -145,8 +144,8 @@ public class PlantController {
         removedHazards = new ObjectSet<>();
     }
 
-    public Leaf.leafType getLevelLeaf(String l){
-        switch(l){
+    public Leaf.leafType getLevelLeaf(String l) {
+        switch (l) {
             case "gameplay:lvl1":
                 return Leaf.leafType.NORMAL;
             case "gameplay:lvl2":
@@ -175,8 +174,11 @@ public class PlantController {
         int xIndex = worldCoordToIndex(x, y)[0];
         int yIndex = worldCoordToIndex(x, y)[1];
         branchDirection direction = worldToBranch(x, y);
-        if (direction == null || !resourceController.canGrowBranch())
-            return null;
+        boolean isAtEnds = (xIndex == 0 && direction == branchDirection.LEFT) ||
+                (xIndex == plantGrid.length - 1 &&
+                        direction == branchDirection.RIGHT);
+        if (direction == null || !resourceController.canGrowBranch() ||
+                isAtEnds) return null;
         return plantGrid[xIndex][yIndex].makeBranch(direction,
                                                     Branch.branchType.NORMAL,
                                                     world);
@@ -397,7 +399,8 @@ public class PlantController {
                 resourceController.canUpgrade()) {
             plantGrid[xIndex][yIndex].unmakeLeaf();
             resourceController.decrementUpgrade();
-            Leaf l = plantGrid[xIndex][yIndex].makeLeaf(Leaf.leafType.BOUNCY, width);
+            Leaf l = plantGrid[xIndex][yIndex].makeLeaf(Leaf.leafType.BOUNCY,
+                                                        width);
             if (l != null && l.getY() > getMaxLeafHeight()) {
                 maxLeafIndex.set(xIndex, yIndex);
             }
@@ -473,9 +476,7 @@ public class PlantController {
      */
     public void propagateDestruction() {
         if (plantCoyoteTimeRemaining == 0 && !destructionQueue.isEmpty()) {
-            //System.out.println("Destruction propagation hit");
             int[] currentNode = destructionQueue.removeFirst();
-            //System.out.println("CurrentNode: " + currentNode[0] + ", " + currentNode[1]);
 
             int xIndex = currentNode[0];
             int yIndex = currentNode[1];
@@ -483,22 +484,13 @@ public class PlantController {
             for (int i = -1; i < 2; i++) {
                 int yOff = 0;
                 if (!lowerNode || i == 0) yOff = 1;
-                //System.out.println("Checking node x: " + (xIndex + i) + " y: " + (yIndex + yOff));
-                //System.out.println("i = " + i);
-                //System.out.println("yIndex < height: " + (yIndex+ yOff < height));
-                //System.out.println("xIndex + i >= 0: " + (xIndex + i >= 0));
-                //System.out.println("xIndex + i < width: " + (xIndex + i < width));
-                //System.out.println("Can't grow at node: " + (!canGrowAtIndex(xIndex + i, yIndex+ yOff)));
-                //System.out.println("Target node not empty: " + (plantGrid[xIndex + i][yIndex+ yOff].hasBranch() || plantGrid[xIndex + i][yIndex+ yOff].hasLeaf()));
                 if (yIndex + yOff < height && xIndex + i >= 0 &&
                         xIndex + i < width &&
                         !canGrowAtIndex(xIndex + i, yIndex + yOff) &&
                         (plantGrid[xIndex + i][yIndex + yOff].hasBranch() ||
                                 plantGrid[xIndex + i][yIndex +
                                         yOff].hasLeaf())) {
-                    //System.out.println("Floating branch found, i = " + i);
                     destroyAll(xIndex + i, yIndex + yOff);
-                    //destructionQueue.addLast(new int[]{xIndex + i, yIndex});
                 }
             }
             plantCoyoteTimeRemaining = plantCoyoteTime;
@@ -539,6 +531,24 @@ public class PlantController {
         destructionQueue.addLast(new int[]{xArg, yArg});
     }
 
+    public void calculateMaxLeafIndex() {
+        for (int y = height - 1; y >= 0; y--) {
+            for (int x = 1; x < width; x += 2) {
+                if (plantGrid[x][y].hasLeaf()) {
+                    maxLeafIndex.set(x, y);
+                    return;
+                }
+            }
+            for (int x = 0; x < width; x += 2) {
+                if (plantGrid[x][y].hasLeaf()) {
+                    maxLeafIndex.set(x, y);
+                    return;
+                }
+            }
+        }
+        maxLeafIndex.set(-1, -1);
+    }
+
     public int countTimerDeductions() {
         int count = 0;
         for (int x = 0; x < width; x++) {
@@ -557,7 +567,8 @@ public class PlantController {
             for (int y = 0; y < height; y++) {
                 if (plantGrid[x][y].getHazard() == h) {
                     plantGrid[x][y].removeHazard();
-                    if (plantGrid[x][y].hasLeaf() && plantGrid[x][y].getLeaf().fullyEaten()) {
+                    if (plantGrid[x][y].hasLeaf() &&
+                            plantGrid[x][y].getLeaf().fullyEaten()) {
                         plantGrid[x][y].unmakeLeaf();
                     }
                     return;
@@ -570,7 +581,8 @@ public class PlantController {
         removedHazards.clear();
         for (int x = 0; x < width; x++) {
             for (int y = 0; y < height; y++) {
-                if (plantGrid[x][y].hasLeaf() && plantGrid[x][y].getLeaf().fullyEaten()) {
+                if (plantGrid[x][y].hasLeaf() &&
+                        plantGrid[x][y].getLeaf().fullyEaten()) {
                     removedHazards.add(plantGrid[x][y].getHazard());
                     plantGrid[x][y].removeHazard();
                     plantGrid[x][y].unmakeLeaf();
@@ -578,24 +590,6 @@ public class PlantController {
             }
         }
         return removedHazards;
-    }
-
-    public void calculateMaxLeafIndex() {
-        for (int y = height - 1; y >= 0; y--) {
-            for (int x = 1; x < width; x += 2) {
-                if (plantGrid[x][y].hasLeaf()) {
-                    maxLeafIndex.set(x, y);
-                    return;
-                }
-            }
-            for (int x = 0; x < width; x += 2) {
-                if (plantGrid[x][y].hasLeaf()) {
-                    maxLeafIndex.set(x, y);
-                    return;
-                }
-            }
-        }
-        maxLeafIndex.set(-1, -1);
     }
 
     public boolean leafGrowableAt(float xArg, float yArg) {
@@ -615,23 +609,6 @@ public class PlantController {
         return canGrowAtIndex(xIndex, yIndex);
     }
 
-    public boolean branchGrowableAt(float xArg,
-                                    float yArg,
-                                    branchDirection dir) {
-        int xIndex = worldCoordToIndex(xArg, yArg)[0];
-        int yIndex = worldCoordToIndex(xArg, yArg)[1];
-        if (!inBounds(xIndex, yIndex)) return false;
-        if (xIndex == 0 && dir != branchDirection.RIGHT) return false;
-        if (xIndex == plantGrid.length - 1 && dir != branchDirection.LEFT)
-            return false;
-        return branchGrowableAt(xArg, yArg) &&
-                !plantGrid[xIndex][yIndex].hasBranchInDirection(dir);
-    }
-
-    public boolean branchGrowableAt(float xArg, float yArg) {
-        return canGrowAt(xArg, yArg) && resourceController.canGrowBranch();
-    }
-
     /**
      * draws the branch that the mouse hovers over
      *
@@ -641,7 +618,10 @@ public class PlantController {
         int xIndex = worldCoordToIndex(x, y)[0];
         int yIndex = worldCoordToIndex(x, y)[1];
         branchDirection direction = worldToBranch(x, y);
-        if (direction != null) {
+        boolean isAtEnds = (xIndex == 0 && direction == branchDirection.LEFT) ||
+                (xIndex == plantGrid.length - 1 &&
+                        direction == branchDirection.RIGHT);
+        if (direction != null && !isAtEnds) {
             float angle;
             switch (direction) {
                 case MIDDLE:
@@ -726,9 +706,15 @@ public class PlantController {
         leafTexture = new FilmStrip(directory.getEntry("gameplay:leaf",
                                                        Texture.class), 1, 9, 9);
         leafTextureOne = new FilmStrip(directory.getEntry("gameplay:leaf1",
-                Texture.class), 1, 9, 9);
+                                                          Texture.class),
+                                       1,
+                                       9,
+                                       9);
         leafTextureTwo = new FilmStrip(directory.getEntry("gameplay:leaf2",
-                Texture.class), 1, 9, 9);
+                                                          Texture.class),
+                                       1,
+                                       9,
+                                       9);
         bouncyLeafTexture = directory.getEntry("gameplay:bouncy",
                                                Texture.class);
         enBranchTextureUp = directory.getEntry("gameplay:enbranch",
@@ -803,10 +789,6 @@ public class PlantController {
          */
         private final float y;
         /**
-         * width of the leaf at this node
-         */
-        private float leafWidth = 1.5f;
-        /**
          * height of the leaf at this node
          */
         private final float leafHeight = 0.05f;
@@ -815,6 +797,10 @@ public class PlantController {
          */
         private final float worldToPixelConversionRatio;
         private final Tilemap tilemap;
+        /**
+         * width of the leaf at this node
+         */
+        private final float leafWidth = 1.5f;
         /**
          * whether there is a branch in the leftmost slot of this node
          */
@@ -906,7 +892,7 @@ public class PlantController {
                     !hasLeaf() && hasBranch() ||
                     leafGrowableAt(x / worldToPixelConversionRatio,
                                    y / worldToPixelConversionRatio)) {
-                if(type == Leaf.leafType.BOUNCY) width = leafWidth;
+                if (type == Leaf.leafType.BOUNCY) width = leafWidth;
                 leaf = new Leaf(x / worldToPixelConversionRatio,
                                 y / worldToPixelConversionRatio,
                                 width,
@@ -1060,7 +1046,8 @@ public class PlantController {
 
         public void setHazard(Hazard h) {
             hazard = h;
-            if (h != null && leaf != null && h.getType() == Model.ModelType.BUG) {
+            if (h != null && leaf != null &&
+                    h.getType() == Model.ModelType.BUG) {
                 leaf.setBeingEaten(true);
             }
         }

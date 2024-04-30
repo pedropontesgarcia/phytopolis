@@ -62,6 +62,7 @@ public class LevelOverMode extends FadingScreen implements Screen {
             @Override
             public void clicked(InputEvent event, float x, float y) {
                 ready = true;
+                menuContainer.deactivate();
                 fadeOut(0.5f);
             }
         };
@@ -117,11 +118,6 @@ public class LevelOverMode extends FadingScreen implements Screen {
     public void update(float delta) {
         super.update(delta);
         menuContainer.update(delta);
-        //        InputController.getInstance().readInput(bounds, Vector2.Zero.add(1, 1));
-        //        if (InputController.getInstance().didSecondary()) {
-        //            ready = true;
-        //            fadeOut(0.5f);
-        //        }
     }
 
     public void draw() {

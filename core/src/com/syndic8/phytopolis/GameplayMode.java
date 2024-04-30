@@ -17,6 +17,7 @@ import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.BodyDef;
 import com.badlogic.gdx.physics.box2d.World;
+import com.badlogic.gdx.utils.Json;
 import com.badlogic.gdx.utils.JsonValue;
 import com.syndic8.phytopolis.assets.AssetDirectory;
 import com.syndic8.phytopolis.level.*;
@@ -109,9 +110,11 @@ public class GameplayMode extends WorldController {
             resourceController = new ResourceController();
             uiController = new UIController(canvas, tilemap);
             float branchHeight = tilemap.getTileHeight();
-            float plantWidth = branchHeight * (float) Math.sqrt(3) * 4 / 2;
+            int plantNodesPerRow = 7;
+            float plantWidth = branchHeight * (float) Math.sqrt(3) *
+                    (plantNodesPerRow - 1) / 2;
             float plantXOrigin = bounds.width / 2 - plantWidth / 2;
-            plantController = new PlantController(5,
+            plantController = new PlantController(plantNodesPerRow,
                                                   40,
                                                   tilemap.getTileHeight(),
                                                   plantXOrigin,
@@ -155,6 +158,7 @@ public class GameplayMode extends WorldController {
             backgroundMusic.play();
         }
         uiController.startTimer();
+        setPaused(false);
     }
 
     /**
@@ -332,7 +336,7 @@ public class GameplayMode extends WorldController {
      *
      * @param dt Number of seconds since last animation frame
      */
-    public void draw(float dt) {
+    public void draw() {
         canvas.clear();
         canvas.cameraUpdate(cameraVector);
         canvas.begin();
@@ -340,17 +344,19 @@ public class GameplayMode extends WorldController {
 
         tilemap.draw(canvas);
 
-        super.draw(dt);
+        super.draw();
 
-        if ((ic.isGrowBranchModSet() ||
-                (ic.isGrowLeafModSet() && !ic.isGrowLeafModDown())) &&
-                ic.isGrowBranchModDown()) {
-            projMousePosCache.set(ic.getMouseX(), ic.getMouseY());
-            Vector2 unprojMousePos = canvas.unproject(projMousePosCache);
-            if (!hazardController.hasFire(unprojMousePos)) {
-                plantController.drawGhostBranch(canvas,
-                                                unprojMousePos.x,
-                                                unprojMousePos.y);
+        if (!isPaused()) {
+            if ((ic.isGrowBranchModSet() ||
+                    (ic.isGrowLeafModSet() && !ic.isGrowLeafModDown())) &&
+                    ic.isGrowBranchModDown()) {
+                projMousePosCache.set(ic.getMouseX(), ic.getMouseY());
+                Vector2 unprojMousePos = canvas.unproject(projMousePosCache);
+                if (!hazardController.hasFire(unprojMousePos)) {
+                    plantController.drawGhostBranch(canvas,
+                                                    unprojMousePos.x,
+                                                    unprojMousePos.y);
+                }
             }
         }
         drawVignette();
@@ -373,6 +379,7 @@ public class GameplayMode extends WorldController {
         //jumpSound.stop(jumpId);
         //plopSound.stop(plopId);
         //fireSound.stop(fireId);
+        setPaused(true);
     }
 
     /**
@@ -412,6 +419,8 @@ public class GameplayMode extends WorldController {
      * This method disposes of the world and creates a new one.
      */
     public void reset() {
+        Json json = new Json();
+        //System.out.println(json.toJson(this));
         Vector2 gravity = new Vector2(world.getGravity());
 
         for (Model obj : objects) {

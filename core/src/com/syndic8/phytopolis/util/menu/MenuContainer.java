@@ -1,5 +1,6 @@
 package com.syndic8.phytopolis.util.menu;
 
+import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.syndic8.phytopolis.GameCanvas;
@@ -71,6 +72,12 @@ public class MenuContainer extends FadingScreen {
     public void draw(GameCanvas c) {
         stage.draw();
         super.draw(c);
+    }
+
+    public void setAlpha(float alpha) {
+        for (Actor a : stage.getActors()) {
+            a.getColor().a = alpha;
+        }
     }
 
 }

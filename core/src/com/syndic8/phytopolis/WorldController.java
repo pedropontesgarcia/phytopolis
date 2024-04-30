@@ -217,7 +217,7 @@ public abstract class WorldController extends FadingScreen implements Screen {
                 update(delta); // This is the one that must be defined.
                 postUpdate(delta);
             }
-            draw(delta);
+            draw();
         }
     }
 
@@ -239,29 +239,19 @@ public abstract class WorldController extends FadingScreen implements Screen {
             return true;
         }
 
-        // Handle resets
-        //        if (input.didReset()) {
-        //            reset();
-        //        }
-
         // Now it is time to maybe switch screens.
-        if (input.didExit() && !isPaused() && isFadeDone()) {
+        if (input.didExit()) {
             pause();
             setPaused(true);
-            fadeOut(0.25f);
-            return true;
+            listener.exitScreen(this, GDXRoot.ExitCode.EXIT_PAUSE.ordinal());
+            return false;
         } else if (isComplete() && isFadeDone()) {
             pause();
             listener.exitScreen(this, GDXRoot.ExitCode.EXIT_VICTORY.ordinal());
             return false;
         } else if (isFailure() && isFadeDone()) {
-            //            reset();
             pause();
             listener.exitScreen(this, GDXRoot.ExitCode.EXIT_FAILURE.ordinal());
-            return false;
-        } else if (isPaused() && isFadeDone()) {
-            pause();
-            listener.exitScreen(this, GDXRoot.ExitCode.EXIT_PAUSE.ordinal());
             return false;
         }
         return true;
@@ -334,18 +324,10 @@ public abstract class WorldController extends FadingScreen implements Screen {
      *
      * @param dt Number of seconds since last animation frame
      */
-    public void draw(float dt) {
+    public void draw() {
         for (Model obj : objects) {
             obj.draw(canvas);
         }
-    }
-
-    private boolean isPaused() {
-        return paused;
-    }
-
-    public void setPaused(boolean p) {
-        paused = p;
     }
 
     /**
@@ -480,6 +462,14 @@ public abstract class WorldController extends FadingScreen implements Screen {
         scale = null;
         world = null;
         canvas = null;
+    }
+
+    protected boolean isPaused() {
+        return paused;
+    }
+
+    public void setPaused(boolean p) {
+        paused = p;
     }
 
     /**

@@ -174,10 +174,6 @@ public class GameCanvas {
                 .setToOrtho2D(0, 0, getWidth(), getHeight());
         windowWidth = Gdx.graphics.getWidth();
         windowHeight = Gdx.graphics.getHeight();
-        settingsJson.get("windowWidth").set(windowWidth, null);
-        settingsJson.get("windowHeight").set(windowHeight, null);
-        configFile.writeString(settingsJson.prettyPrint(JsonWriter.OutputType.json,
-                                                        0), false);
         saveOptions();
     }
 
@@ -186,6 +182,10 @@ public class GameCanvas {
                 .set(displayModes.indexOf(resolution), null);
         settingsJson.get("fpsIndex").set(currentFpsIndex, null);
         settingsJson.get("windowed").set(windowed);
+        if (windowed) {
+            settingsJson.get("windowWidth").set(windowWidth, null);
+            settingsJson.get("windowHeight").set(windowHeight, null);
+        }
         configFile.writeString(settingsJson.prettyPrint(JsonWriter.OutputType.json,
                                                         0), false);
     }
@@ -228,10 +228,6 @@ public class GameCanvas {
         Gdx.gl.glDisable(GL20.GL_BLEND);
     }
 
-    public Vector2 unproject(Vector2 proj) {
-        return viewport.unproject(proj);
-    }
-
     public void cameraUpdate(Vector2 pos) {
         cameraCache.set(pos.x, pos.y, 0);
         camera.position.interpolate(cameraCache, 0.75f, Interpolation.fade);
@@ -260,11 +256,15 @@ public class GameCanvas {
         holder = null;
     }
 
-    public void resizeScreen(int width, int height) {
-        viewport.update(width, height);
-        hudViewport.update(width, height);
-        textViewport.update(width, height);
+    public void resizeScreen(int w, int h) {
+        viewport.update(w, h);
+        hudViewport.update(w, h);
+        textViewport.update(w, h);
         resizeCanvas();
+    }
+
+    public Vector2 unproject(Vector2 proj) {
+        return viewport.unproject(proj);
     }
 
     public float getCameraY() {
