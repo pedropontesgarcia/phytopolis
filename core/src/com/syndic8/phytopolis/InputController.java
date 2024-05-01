@@ -16,7 +16,7 @@ import java.util.Map;
  */
 public class InputController implements InputProcessor {
 
-    private static int height;
+    private static float height;
     /**
      * The singleton instance of the input controller.
      */
@@ -198,7 +198,7 @@ public class InputController implements InputProcessor {
         return multiplexer;
     }
 
-    public void setHeight(int h) {
+    public void setHeight(float h) {
         height = h;
     }
 

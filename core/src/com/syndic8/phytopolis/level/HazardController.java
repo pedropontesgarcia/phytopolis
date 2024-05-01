@@ -591,8 +591,8 @@ public class HazardController {
      * @param cameraVector camera position
      */
     public void drawWarning(GameCanvas canvas, Vector2 cameraVector) {
-        int w = canvas.getWidth();
-        int hi = canvas.getHeight();
+        float w = canvas.getWidth();
+        float hi = canvas.getHeight();
 
         for (Hazard h : hazards) {
             Vector2 hazardLoc = plantController.indexToWorldCoord((int) h.getLocation().x,

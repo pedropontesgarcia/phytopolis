@@ -115,7 +115,6 @@ public class GDXRoot extends Game implements ScreenListener {
         } else if (screen == pause && exitCode == EXIT_RESUME.ordinal()) {
             controller.setPaused(false);
             controller.setScreenListener(this);
-            //controller.fadeIn(0.25f);
             setScreen(controller);
         } else if (screen == pause && exitCode == EXIT_RESET.ordinal()) {
             controller.setPaused(false);

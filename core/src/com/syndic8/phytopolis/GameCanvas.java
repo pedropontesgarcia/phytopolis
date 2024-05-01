@@ -28,17 +28,12 @@ import java.util.List;
 
 public class GameCanvas {
 
-    /**
-     * Camera for the underlying SpriteBatch
-     */
     private final OrthographicCamera camera;
-    /**
-     * Camera for the underlying SpriteBatch
-     */
+    private final OrthographicCamera gameCamera;
     private final OrthographicCamera hudCamera;
-
     private final OrthographicCamera textCamera;
     private final Viewport viewport;
+    private final Viewport gameViewport;
     private final Viewport hudViewport;
     private final Viewport textViewport;
     private final Vector3 cameraCache;
@@ -49,11 +44,11 @@ public class GameCanvas {
     /**
      * Value to cache window width (if we are currently full screen)
      */
-    int width;
+    float width;
     /**
      * Value to cache window height (if we are currently full screen)
      */
-    int height;
+    float height;
     private int windowHeight;
     private int windowWidth;
     private int currentFpsIndex;
@@ -93,8 +88,8 @@ public class GameCanvas {
      * of the necessary graphics objects.
      */
     public GameCanvas(List<Graphics.DisplayMode> dm) {
-        width = 16;
-        height = 9;
+        width = 16f;
+        height = 9f;
         active = DrawPass.INACTIVE;
         spriteBatch = new PolygonSpriteBatch();
         hudBatch = new SpriteBatch();
@@ -116,23 +111,28 @@ public class GameCanvas {
 
         // Set the projection matrix (for proper scaling)
         camera = new OrthographicCamera(width, height);
+        gameCamera = new OrthographicCamera(width, height);
         hudCamera = new OrthographicCamera(width, height);
         textCamera = new OrthographicCamera(width * 100f, height * 100f);
 
         viewport = new FitViewport(width, height, camera);
+        gameViewport = new FitViewport(width, height, gameCamera);
         hudViewport = new FitViewport(width, height, hudCamera);
         textViewport = new FitViewport(width * 100f, height * 100f, textCamera);
 
         int screenWidth = Gdx.graphics.getDisplayMode().width;
         int screenHeight = Gdx.graphics.getDisplayMode().height;
         viewport.setScreenSize(screenWidth, screenHeight);
+        gameViewport.setScreenSize(screenWidth, screenHeight);
         hudViewport.setScreenSize(screenWidth, screenHeight);
         textViewport.setScreenSize(screenWidth, screenHeight);
         camera.position.set(width / 2f, height / 2f, 0);
+        gameCamera.position.set(width / 2f, height / 2f, 0);
         hudCamera.position.set(width / 2f, height / 2f, 0);
         textCamera.position.set(width * 100f / 2f, height * 100f / 2f, 0);
 
         camera.update();
+        gameCamera.update();
         hudCamera.update();
         textCamera.update();
         spriteBatch.setProjectionMatrix(camera.combined);
@@ -197,7 +197,7 @@ public class GameCanvas {
      *
      * @return the width of this canvas
      */
-    public int getWidth() {
+    public float getWidth() {
         return width;
     }
 
@@ -208,8 +208,15 @@ public class GameCanvas {
      *
      * @return the height of this canvas
      */
-    public int getHeight() {
+    public float getHeight() {
         return height;
+    }
+
+    public void setWorldSize(float w) {
+        float h = w * height / width;
+        gameViewport.setWorldSize(w, h);
+        gameCamera.position.set(w / 2f, h / 2f, 0);
+        gameCamera.update();
     }
 
     public ShapeRenderer getShapeRenderer() {
@@ -230,10 +237,8 @@ public class GameCanvas {
 
     public void cameraUpdate(Vector2 pos) {
         cameraCache.set(pos.x, pos.y, 0);
-        camera.position.interpolate(cameraCache, 0.75f, Interpolation.fade);
-        spriteBatch.setProjectionMatrix(camera.combined);
-        camera.update();
-
+        gameCamera.position.interpolate(cameraCache, 0.75f, Interpolation.fade);
+        gameCamera.update();
     }
 
     /**
@@ -258,9 +263,14 @@ public class GameCanvas {
 
     public void resizeScreen(int w, int h) {
         viewport.update(w, h);
+        gameViewport.update(w, h);
         hudViewport.update(w, h);
         textViewport.update(w, h);
         resizeCanvas();
+    }
+
+    public Vector2 unprojectGame(Vector2 proj) {
+        return gameViewport.unproject(proj);
     }
 
     public Vector2 unproject(Vector2 proj) {
@@ -313,8 +323,10 @@ public class GameCanvas {
     }
 
     public void beginHud() {
+        hudViewport.apply();
         hudBatch.setProjectionMatrix(hudCamera.combined);
         hudBatch.begin();
+        active = DrawPass.STANDARD;
     }
 
     /**
@@ -325,6 +337,18 @@ public class GameCanvas {
     public void begin() {
         viewport.apply();
         spriteBatch.setProjectionMatrix(camera.combined);
+        spriteBatch.begin();
+        active = DrawPass.STANDARD;
+    }
+
+    /**
+     * Start a standard drawing sequence.
+     * <p>
+     * Nothing is flushed to the graphics card until the method end() is called.
+     */
+    public void beginGame() {
+        gameViewport.apply();
+        spriteBatch.setProjectionMatrix(gameCamera.combined);
         spriteBatch.begin();
         active = DrawPass.STANDARD;
     }

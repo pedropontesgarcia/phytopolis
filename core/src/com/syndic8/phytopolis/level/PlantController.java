@@ -48,7 +48,6 @@ public class PlantController {
      * world used for storing physics objects
      */
     private final World world;
-    private final Vector2 scale;
     /**
      * conversion ratio from world units to pixels
      */
@@ -112,13 +111,11 @@ public class PlantController {
                            float xOrigin,
                            float yOrigin,
                            World world,
-                           Vector2 scale,
                            ResourceController rc,
                            Tilemap tm) {
         plantGrid = new PlantNode[width][height];
         this.world = world;
         worldToPixelConversionRatio = 1;
-        this.scale = scale;
         this.xOrigin = xOrigin * worldToPixelConversionRatio;
         this.yOrigin = yOrigin * worldToPixelConversionRatio;
         this.width = width;

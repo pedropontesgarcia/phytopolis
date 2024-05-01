@@ -15,6 +15,7 @@ import java.util.List;
 
 public class Tilemap {
 
+    private final GameCanvas canvas;
     PooledList<Tile> tiles;
     AssetDirectory directory;
     JsonValue tilemap;
@@ -38,14 +39,11 @@ public class Tilemap {
      * Constructs a tilemap from the world dimensions and a JSON file from
      * Tiled.
      *
-     * @param w  The world width, in world units.
-     * @param h  The world height, in world units.
      * @param tm The JSON tilemap file from Tiled.
      */
-    public Tilemap(float w, float h, JsonValue tm) {
-        worldWidth = w;
-        worldHeight = h;
+    public Tilemap(JsonValue tm, GameCanvas c) {
         tilemap = tm;
+        canvas = c;
     }
 
     public float getWorldWidth() {
@@ -107,6 +105,9 @@ public class Tilemap {
         assert physicsLayer != null;
         tilemapHeight = physicsLayer.getInt("height");
         tilemapWidth = physicsLayer.getInt("width");
+        worldWidth = canvas.getWidth() / 6f * tilemapWidth;
+        worldHeight = worldWidth / (tilemapWidth * 3f / 2f) *
+                tilemap.getFloat("height");
         tileHeight = worldHeight / tilemapHeight;
         tileWidth = worldWidth / tilemapWidth;
         directory = dir;
