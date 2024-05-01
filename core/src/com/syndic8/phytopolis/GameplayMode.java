@@ -104,7 +104,8 @@ public class GameplayMode extends WorldController {
             resourceController = new ResourceController();
             uiController = new UIController(canvas, tilemap);
             float branchHeight = tilemap.getTileHeight();
-            int plantNodesPerRow = 7;
+            int plantNodesPerRow = Math.round(
+                    (tilemap.getTilemapWidth() - 2) * (float) Math.sqrt(3));
             float plantWidth = branchHeight * (float) Math.sqrt(3) *
                     (plantNodesPerRow - 1) / 2;
             float plantXOrigin = bounds.width / 2 - plantWidth / 2;
