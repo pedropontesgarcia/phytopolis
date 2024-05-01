@@ -17,38 +17,6 @@ import com.syndic8.phytopolis.util.Tilemap;
 public class PlantController {
 
     /**
-     * the grid containing all possible nodes for a branch to grow from
-     */
-    private final PlantNode[][] plantGrid;
-    /**
-     * width of the plant grid
-     */
-    private final int width;
-    /**
-     * height of the plant grid
-     */
-    private final int height;
-    /**
-     * how far apart to space each node on screen
-     */
-    private final float gridSpacing;
-    /**
-     * how far apart each node is on the x axis
-     */
-    private final float xSpacing;
-    /**
-     * x coordinate of the origin of this plant
-     */
-    private final float xOrigin;
-    /**
-     * y coordinate of the origin of this plant
-     */
-    private final float yOrigin;
-    /**
-     * world used for storing physics objects
-     */
-    private final World world;
-    /**
      * conversion ratio from world units to pixels
      */
     private final float worldToPixelConversionRatio;
@@ -61,9 +29,6 @@ public class PlantController {
      * Reference to the ResourceController
      */
     private final ResourceController resourceController;
-    private final Tilemap tilemap;
-    private final Vector2 maxLeafIndex;
-    private final ObjectSet<Hazard> removedHazards;
     /**
      * node texture
      */
@@ -88,6 +53,41 @@ public class PlantController {
      * bouncy leaf texture
      */
     protected Texture bouncyLeafTexture;
+    /**
+     * the grid containing all possible nodes for a branch to grow from
+     */
+    private PlantNode[][] plantGrid;
+    /**
+     * width of the plant grid
+     */
+    private int width;
+    /**
+     * height of the plant grid
+     */
+    private int height;
+    /**
+     * how far apart to space each node on screen
+     */
+    private float gridSpacing;
+    /**
+     * how far apart each node is on the x axis
+     */
+    private float xSpacing;
+    /**
+     * x coordinate of the origin of this plant
+     */
+    private float xOrigin;
+    /**
+     * y coordinate of the origin of this plant
+     */
+    private float yOrigin;
+    /**
+     * world used for storing physics objects
+     */
+    private World world;
+    private Tilemap tilemap;
+    private Vector2 maxLeafIndex;
+    private ObjectSet<Hazard> removedHazards;
     /**
      * how many more frames until the next propagation of destruction
      */
@@ -153,12 +153,36 @@ public class PlantController {
         return null;
     }
 
-    public void reset() {
+    public void reset(int width,
+                      int height,
+                      float gridSpacing,
+                      float xOrigin,
+                      float yOrigin,
+                      Tilemap tm) {
+        plantGrid = new PlantNode[width][height];
+        this.world = world;
+        this.xOrigin = xOrigin * worldToPixelConversionRatio;
+        this.yOrigin = yOrigin * worldToPixelConversionRatio;
+        this.width = width;
+        this.height = height;
+        maxLeafIndex = new Vector2(-1, -1);
+        this.gridSpacing = gridSpacing * worldToPixelConversionRatio;
+        this.xSpacing = (float) (Math.sqrt(
+                (this.gridSpacing * this.gridSpacing) -
+                        ((this.gridSpacing / 2f) * (this.gridSpacing / 2f))));
+        tilemap = tm;
         for (int x = 0; x < width; x++) {
             for (int y = 0; y < height; y++) {
-                plantGrid[x][y].reset();
+                float yOffset = 0;
+                if (x % 2 == 1) yOffset = this.gridSpacing / 2f;
+                plantGrid[x][y] = new PlantNode(
+                        (x * this.xSpacing) + this.xOrigin,
+                        this.yOrigin + yOffset + (y * this.gridSpacing),
+                        this.worldToPixelConversionRatio,
+                        tilemap);
             }
         }
+        removedHazards = new ObjectSet<>();
     }
 
     /**
@@ -388,7 +412,7 @@ public class PlantController {
     public Leaf makeLeaf(float x, float y, Leaf.leafType lt, float width) {
         int xIndex = screenCoordToIndex(x, y)[0];
         int yIndex = screenCoordToIndex(x, y)[1];
-        System.out.println(xIndex + " " + yIndex);
+        //        System.out.println(xIndex + " " + yIndex);
         if (!inBounds(xIndex, yIndex)) return null;
         if (plantGrid[xIndex][yIndex].hasLeaf() &&
                 plantGrid[xIndex][yIndex].getLeafType() !=

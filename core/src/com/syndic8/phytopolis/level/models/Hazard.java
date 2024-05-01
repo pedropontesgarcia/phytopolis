@@ -7,11 +7,11 @@ import com.syndic8.phytopolis.util.Tilemap;
 
 public abstract class Hazard extends BoxObject {
 
+    private final int maxTimer;
     /**
      * The current location (index-wise) of the hazard.
      */
     protected Vector2 location;
-
     /**
      * Time until trigger event
      */
@@ -20,10 +20,15 @@ public abstract class Hazard extends BoxObject {
     /**
      * Creates a hazard object.
      */
-    public Hazard(Tilemap tm, float texScl, Vector2 pos, Vector2 location, int timer) {
+    public Hazard(Tilemap tm,
+                  float texScl,
+                  Vector2 pos,
+                  Vector2 location,
+                  int timer) {
         super(pos.x, pos.y, 0.2f, 0.1f, tm, texScl);
         this.location = location;
         this.timer = timer;
+        maxTimer = timer;
         zIndex = 4;
     }
 
@@ -43,6 +48,10 @@ public abstract class Hazard extends BoxObject {
      */
     public void setLocation(Vector2 location) {
         this.location = location;
+    }
+
+    public int getMaxTimer() {
+        return maxTimer;
     }
 
     /**
@@ -76,12 +85,16 @@ public abstract class Hazard extends BoxObject {
         return timer == 0;
     }
 
+    public void update(float dt) {
+
+    }
+
     /**
      * Draws the hazard on the provided GameCanvas.
      *
      * @param canvas The GameCanvas on which to draw.
-//     * @param x      The x position at which to draw.
-//     * @param y      The y position at which to draw.
+     *               //     * @param x      The x position at which to draw.
+     *               //     * @param y      The y position at which to draw.
      */
     public void draw(GameCanvas canvas) {
         float width = tilemap.getTileWidth() * textureSclInTiles;
@@ -91,18 +104,15 @@ public abstract class Hazard extends BoxObject {
 
         if (texture != null) {
             canvas.draw(texture,
-                    Color.WHITE,
-                    origin.x,
-                    origin.y,
-                    getX(),
-                    getY(),
-                    0,
-                    sclX,
-                    sclY);
+                        Color.WHITE,
+                        origin.x,
+                        origin.y,
+                        getX(),
+                        getY(),
+                        0,
+                        sclX,
+                        sclY);
         }
-
-    }
-    public void update(float dt){
 
     }
 
