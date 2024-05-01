@@ -172,8 +172,10 @@ public class GameCanvas {
                 .setToOrtho2D(0, 0, getWidth(), getHeight());
         shapeRenderer.getProjectionMatrix()
                 .setToOrtho2D(0, 0, getWidth(), getHeight());
-        windowWidth = Gdx.graphics.getWidth();
-        windowHeight = Gdx.graphics.getHeight();
+        if (windowed) {
+            windowWidth = Gdx.graphics.getWidth();
+            windowHeight = Gdx.graphics.getHeight();
+        }
         saveOptions();
     }
 
