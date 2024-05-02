@@ -52,7 +52,7 @@ public class PlantController {
     /**
      * bouncy leaf texture
      */
-    protected Texture bouncyLeafTexture;
+    protected FilmStrip bouncyLeafTexture;
     /**
      * the grid containing all possible nodes for a branch to grow from
      */
@@ -364,6 +364,7 @@ public class PlantController {
     }
 
     public void setHazard(int xIndex, int yIndex, Hazard h) {
+
         plantGrid[xIndex][yIndex].setHazard(h);
     }
 
@@ -736,8 +737,9 @@ public class PlantController {
                                        1,
                                        9,
                                        9);
-        bouncyLeafTexture = directory.getEntry("gameplay:bouncy",
-                                               Texture.class);
+        bouncyLeafTexture = new FilmStrip(directory.getEntry(
+                "gameplay:bouncy",
+                                               Texture.class), 1, 6);
         enBranchTextureUp = directory.getEntry("gameplay:enbranch",
                                                Texture.class);
     }
@@ -926,7 +928,7 @@ public class PlantController {
                         leaf.setFilmStrip(leafTexture);
                         break;
                     case BOUNCY:
-                        leaf.setTexture(bouncyLeafTexture);
+                        leaf.setFilmStrip(bouncyLeafTexture);
                         break;
                     case NORMAL1:
                         leaf.setFilmStrip(leafTextureOne);
@@ -1068,7 +1070,7 @@ public class PlantController {
         public void setHazard(Hazard h) {
             hazard = h;
             if (h != null && leaf != null &&
-                    h.getType() == Model.ModelType.BUG) {
+                    h.getType() == Model.ModelType.BUG && leaf.getLeafType() != Leaf.leafType.BOUNCY) {
                 leaf.setBeingEaten(true);
             }
         }

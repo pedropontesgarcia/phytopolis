@@ -7,7 +7,7 @@
     "gameplay:leaf": "gameplay/level1leaf.png",
     "gameplay:leaf1": "gameplay/level2leaf.png",
     "gameplay:leaf2": "gameplay/level3leaf.png",
-    "gameplay:bouncy": "gameplay/bounce.png",
+    "gameplay:bouncy": "gameplay/modified_bounce_strip.png",
     "gameplay:node": "gameplay/node.png",
     "gameplay:branch": "gameplay/branch-filmstrip.png",
     "gameplay:enbranch": "gameplay/enbranchup.png",
