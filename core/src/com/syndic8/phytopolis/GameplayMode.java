@@ -35,7 +35,6 @@ public class GameplayMode extends WorldController {
     private final float lvl2LeafWidth = 1.2f;
     private final float lvl3LeafWidth = 0.9f;
     protected Texture jumpTexture;
-    private float scale;
     private PlantController plantController;
     private HazardController hazardController;
     private ResourceController resourceController;
@@ -82,7 +81,6 @@ public class GameplayMode extends WorldController {
     public void gatherAssets(AssetDirectory directory) {
         tilemap = new Tilemap(directory.getEntry(lvl, JsonValue.class), canvas);
         tilemap.gatherAssets(directory);
-        scale = canvas.getWidth() / tilemap.getWorldWidth();
         canvas.setWorldSize(tilemap.getWorldWidth());
 
         setBounds(tilemap.getWorldWidth(), tilemap.getWorldHeight());
@@ -353,9 +351,9 @@ public class GameplayMode extends WorldController {
                 }
             }
         }
+        hazardController.drawWarning(canvas, cameraVector);
         canvas.end();
         canvas.beginHud();
-        hazardController.drawWarning(canvas, cameraVector);
         uiController.draw(canvas);
         canvas.endHud();
         super.draw(canvas);
@@ -418,8 +416,28 @@ public class GameplayMode extends WorldController {
         ic.resetScrolled();
 
         resourceController.reset();
-        plantController.reset();
 
+        float branchHeight = tilemap.getTileHeight();
+        int plantNodesPerRow = Math.round(
+                (tilemap.getTilemapWidth() - 2) * (float) Math.sqrt(3));
+        float plantWidth =
+                branchHeight * (float) Math.sqrt(3) * (plantNodesPerRow - 1) /
+                        2;
+        float plantXOrigin = bounds.width / 2 - plantWidth / 2;
+        plantController.reset(plantNodesPerRow,
+                              40,
+                              tilemap.getTileHeight(),
+                              plantXOrigin,
+                              0,
+                              tilemap);
+
+        hazardController.reset((int) tilemap.getFireRate(),
+                               1000000000,
+                               6,
+                               8,
+                               6,
+                               10,
+                               tilemap);
         world = new World(gravity, false);
         setComplete(false);
         setFailure(false);

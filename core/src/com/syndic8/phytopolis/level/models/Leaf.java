@@ -7,11 +7,14 @@ import com.syndic8.phytopolis.util.Tilemap;
 
 public class Leaf extends BoxObject {
 
-    private static final float ANIMATION_SPEED = 1 / 6.0f;
+    private static final float ANIMATION_SPEED = 1/7.0f;
     private final leafType type;
     private float health;
     private int healthMark;
     private boolean beingEaten;
+    private static final int NUM_BOUNCY_FRAMES = 6;
+
+    private float bounceFrame;
 
     /**
      * Creates a new Leaf object with the specified position and dimensions
@@ -36,6 +39,7 @@ public class Leaf extends BoxObject {
         health = 5;
         healthMark = 5;
         beingEaten = false;
+        bounceFrame = 0;
     }
 
     /**
@@ -79,14 +83,24 @@ public class Leaf extends BoxObject {
      * @param delta Number of seconds since last animation frame
      */
     public void update(float delta) {
-        if (beingEaten) {
-            health -= delta;
+        if (getLeafType() != leafType.BOUNCY){
+            if (beingEaten) {
+                health -= delta;
+            }
+            if (animFrame < 4) {
+                animFrame += ANIMATION_SPEED;
+            } else if (health < 5 && health > 0) {
+                animFrame = 4 + (5 - health);
+            }
+        }else{
+            if (bounceFrame < NUM_BOUNCY_FRAMES) {
+                bounceFrame +=ANIMATION_SPEED;
+            }
+            if (bounceFrame >= NUM_BOUNCY_FRAMES) {
+                bounceFrame -=1;
+            }
         }
-        if (animFrame < 4) {
-            animFrame += ANIMATION_SPEED;
-        } else if (health < 5 && health > 0) {
-            animFrame = 4 + (5 - health);
-        }
+
     }
 
     /**
@@ -101,7 +115,11 @@ public class Leaf extends BoxObject {
         float sclY = height / texture.getRegionHeight();
         float x = texture.getRegionWidth() / 2.0f;
         float y = texture.getRegionHeight() / 2.0f;
-        getFilmStrip().setFrame((int) animFrame);
+        if (getLeafType() == leafType.BOUNCY){
+            getFilmStrip().setFrame((int) bounceFrame);
+        }else{
+            getFilmStrip().setFrame((int) animFrame);
+        }
         canvas.draw(texture, Color.WHITE, x, y, getX(), getY(), 0, sclX, sclY);
     }
 

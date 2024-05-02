@@ -255,9 +255,9 @@ public class CollisionController implements ContactListener {
         }
 
         if (isCollisionBetweenPlayerAndBug) {
-            System.out.println("BUG");
+            //            System.out.println("BUG");
             if (isPlayerGoingDown) {
-                System.out.println("BUG DOWN");
+                //                System.out.println("BUG DOWN");
                 Bug b;
                 if (((Model) fix1.getBody().getUserData()).getType() ==
                         Model.ModelType.BUG) {
