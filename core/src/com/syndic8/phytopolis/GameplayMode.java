@@ -35,7 +35,6 @@ public class GameplayMode extends WorldController {
     private final float lvl2LeafWidth = 1.2f;
     private final float lvl3LeafWidth = 0.9f;
     protected Texture jumpTexture;
-    private float scale;
     private PlantController plantController;
     private HazardController hazardController;
     private ResourceController resourceController;
@@ -82,7 +81,6 @@ public class GameplayMode extends WorldController {
     public void gatherAssets(AssetDirectory directory) {
         tilemap = new Tilemap(directory.getEntry(lvl, JsonValue.class), canvas);
         tilemap.gatherAssets(directory);
-        scale = canvas.getWidth() / tilemap.getWorldWidth();
         canvas.setWorldSize(tilemap.getWorldWidth());
 
         setBounds(tilemap.getWorldWidth(), tilemap.getWorldHeight());

@@ -14,7 +14,6 @@ import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.Texture.TextureFilter;
-import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.utils.Align;
@@ -58,7 +57,6 @@ public class MainMenuMode extends FadingScreen implements Screen {
      * Reference to GameCanvas
      */
     private final GameCanvas canvas;
-    private final Rectangle bounds;
     private boolean ready;
     /**
      * Listener that will update the player mode when we are done
@@ -106,7 +104,6 @@ public class MainMenuMode extends FadingScreen implements Screen {
     public MainMenuMode(String file, GameCanvas c, int millis) {
         canvas = c;
         budget = millis;
-        bounds = new Rectangle(0, 0, 16, 9);
 
         // We need these files loaded immediately
         internal = new AssetDirectory("mainmenu.json");
@@ -342,8 +339,8 @@ public class MainMenuMode extends FadingScreen implements Screen {
                             canvas.getWidth() / 2.0f,
                             canvas.getHeight() * 2.0f / 3.0f,
                             0,
-                            (float) canvas.getWidth() / logo.getWidth(),
-                            (float) canvas.getHeight() / logo.getHeight());
+                            canvas.getWidth() / logo.getWidth(),
+                            canvas.getHeight() / logo.getHeight());
                 canvas.end();
             }
             canvas.begin();
