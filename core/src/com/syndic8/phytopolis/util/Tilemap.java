@@ -105,7 +105,17 @@ public class Tilemap {
         assert physicsLayer != null;
         tilemapHeight = physicsLayer.getInt("height");
         tilemapWidth = physicsLayer.getInt("width");
-        worldWidth = canvas.getWidth() / 6f * tilemapWidth;
+        // I believe this 6f is correlated to the fact that
+        // world coordinates and canvas size have a 1-to-1
+        // correspondence when the tilemap is 6 tiles wide.
+        // Our physics parameters are tuned to that, so changing
+        // it will mess with the physics. It won't mess with the
+        // scaling because that is taken care of automatically
+        // by the viewport.
+        worldWidth = canvas.getWidth() * tilemapWidth / 6f;
+        // This 3f / 2f reflects the aspect ratio of our tiles,
+        // which are 600px wide by 400px tall. In theory, any
+        // tileset with that same aspect ratio should work.
         worldHeight = worldWidth / (tilemapWidth * 3f / 2f) *
                 tilemap.getFloat("height");
         tileHeight = worldHeight / tilemapHeight;

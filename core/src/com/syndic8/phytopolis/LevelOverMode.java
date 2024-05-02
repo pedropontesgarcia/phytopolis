@@ -4,7 +4,6 @@ import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.utils.Align;
@@ -18,7 +17,6 @@ import edu.cornell.gdiac.audio.AudioEngine;
 
 public class LevelOverMode extends FadingScreen implements Screen {
 
-    private final Rectangle bounds;
     /**
      * Reference to GameCanvas created by the root
      */
@@ -42,8 +40,7 @@ public class LevelOverMode extends FadingScreen implements Screen {
     private MenuContainer menuContainer;
 
     public LevelOverMode(GameCanvas c) {
-        this.ready = false;
-        this.bounds = new Rectangle(0, 0, 16, 9);
+        ready = false;
         gathered = false;
         canvas = c;
         createMenu();
