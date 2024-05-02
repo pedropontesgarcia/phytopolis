@@ -158,6 +158,10 @@ public class Player extends CapsuleObject {
         }
     }
 
+    public boolean getBounce(){
+        return bouncyTimer > 0;
+    }
+
     /**
      * Returns how much force to apply to get the dude moving
      * <p>

@@ -3,6 +3,7 @@ package com.syndic8.phytopolis.level.models;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.physics.box2d.BodyDef;
 import com.syndic8.phytopolis.GameCanvas;
+import com.syndic8.phytopolis.InputController;
 import com.syndic8.phytopolis.util.Tilemap;
 
 public class Leaf extends BoxObject {
@@ -15,6 +16,13 @@ public class Leaf extends BoxObject {
     private static final int NUM_BOUNCY_FRAMES = 6;
 
     private float bounceFrame;
+    private final int bouncyTimerMax = 35;
+    private  int bouncyTimer = 0;
+
+    private boolean bouncy;
+    private boolean playerJump;
+
+    private InputController ic;
 
     /**
      * Creates a new Leaf object with the specified position and dimensions
@@ -40,7 +48,11 @@ public class Leaf extends BoxObject {
         healthMark = 5;
         beingEaten = false;
         bounceFrame = 0;
+        bouncy = false;
+        playerJump = false;
+        ic = InputController.getInstance();
     }
+
 
     /**
      * returns the type of this leaf
@@ -56,6 +68,8 @@ public class Leaf extends BoxObject {
         return ModelType.LEAF;
     }
 
+
+
     public boolean fullyEaten() {
         return health <= 0;
     }
@@ -70,6 +84,13 @@ public class Leaf extends BoxObject {
             return true;
         }
         return false;
+    }
+
+
+
+    public void setBouncy(boolean bounce){
+        bouncy = bounce;
+
     }
 
     /**
@@ -93,12 +114,29 @@ public class Leaf extends BoxObject {
                 animFrame = 4 + (5 - health);
             }
         }else{
-            if (bounceFrame < NUM_BOUNCY_FRAMES) {
-                bounceFrame +=ANIMATION_SPEED;
+            if (bouncy && ic.didJump()) {
+                bouncyTimer = bouncyTimerMax;
             }
-            if (bounceFrame >= NUM_BOUNCY_FRAMES) {
-                bounceFrame -=1;
+            if (bouncyTimer > 0){
+                if (bounceFrame >= NUM_BOUNCY_FRAMES) {
+                    bounceFrame -= NUM_BOUNCY_FRAMES;
+                }
+                if (bounceFrame < NUM_BOUNCY_FRAMES) {
+                    bounceFrame +=ANIMATION_SPEED;
+                }
+            }else{
+                if (bounceFrame < NUM_BOUNCY_FRAMES) {
+                    bounceFrame +=ANIMATION_SPEED;
+                }
+                if (bounceFrame >= NUM_BOUNCY_FRAMES) {
+                    bounceFrame -=1;
+                }
             }
+            if (!bouncy){
+                bouncyTimer = Math.max (bouncyTimer-1, 0);
+            }
+
+
         }
 
     }
