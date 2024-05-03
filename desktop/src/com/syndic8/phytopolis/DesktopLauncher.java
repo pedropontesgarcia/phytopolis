@@ -2,13 +2,14 @@ package com.syndic8.phytopolis;
 
 import com.badlogic.gdx.Files;
 import com.badlogic.gdx.Graphics.DisplayMode;
-import com.badlogic.gdx.backends.lwjgl3.Lwjgl3Application;
-import com.badlogic.gdx.backends.lwjgl3.Lwjgl3ApplicationConfiguration;
 import com.badlogic.gdx.backends.lwjgl3.Lwjgl3FileHandle;
 import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.utils.JsonReader;
 import com.badlogic.gdx.utils.JsonValue;
 import com.syndic8.phytopolis.util.OSUtils;
+import edu.cornell.gdiac.backend.GDXApp;
+import edu.cornell.gdiac.backend.GDXAppSettings;
+import lwjgl3.Lwjgl3ApplicationConfiguration;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -20,9 +21,12 @@ import java.util.List;
 public class DesktopLauncher {
 
     public static void main(String[] arg) {
-        Lwjgl3ApplicationConfiguration config = new Lwjgl3ApplicationConfiguration();
-        config.setWindowedMode(Lwjgl3ApplicationConfiguration.getDisplayMode().width,
-                               Lwjgl3ApplicationConfiguration.getDisplayMode().height);
+        GDXAppSettings config = new GDXAppSettings();
+        config.width = Lwjgl3ApplicationConfiguration.getDisplayMode().width;
+        config.height = Lwjgl3ApplicationConfiguration.getDisplayMode().height;
+        config.getLwjgl3Configuration()
+                .setWindowedMode(Lwjgl3ApplicationConfiguration.getDisplayMode().width,
+                                 Lwjgl3ApplicationConfiguration.getDisplayMode().height);
         DisplayMode[] displayModes = Lwjgl3ApplicationConfiguration.getDisplayModes();
         List<DisplayMode> potentialDisplayModes = new ArrayList<>(Arrays.asList(
                 displayModes));
@@ -35,11 +39,11 @@ public class DesktopLauncher {
                 goodDisplayModes.add(dm);
             }
         }
-        manageSettings(config, goodDisplayModes);
-        new Lwjgl3Application(new GDXRoot(goodDisplayModes), config);
+        manageSettings(config.getLwjgl3Configuration(), goodDisplayModes);
+        new GDXApp(new GDXRoot(goodDisplayModes), config);
     }
 
-    private static void manageSettings(Lwjgl3ApplicationConfiguration config,
+    private static void manageSettings(lwjgl3.Lwjgl3ApplicationConfiguration config,
                                        List<DisplayMode> displayModes) {
         FileHandle configFile = new Lwjgl3FileHandle(OSUtils.getConfigFile(),
                                                      Files.FileType.Absolute);
@@ -58,6 +62,7 @@ public class DesktopLauncher {
             int fpsIndex = settingsJson.getInt("fpsIndex");
             int currentFps = fps[fpsIndex];
 
+            //            if (!windowed) config.setFullscreenMode(resolution);
             if (!windowed) config.setFullscreenMode(resolution);
             else config.setWindowedMode(windowWidth, windowHeight);
             config.setForegroundFPS(currentFps);
@@ -65,7 +70,7 @@ public class DesktopLauncher {
             config.setTitle("Phytopolis");
             config.setWindowPosition(-1, -1);
             config.setWindowIcon("ui/leaf-cursor.png");
-        } catch (Exception ignored) {
+        } catch (IOException ignored) {
             resetSettings(configFile);
             // Try again
             manageSettings(config, displayModes);
