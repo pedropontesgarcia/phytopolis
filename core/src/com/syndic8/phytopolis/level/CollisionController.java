@@ -113,7 +113,9 @@ public class CollisionController implements ContactListener {
                     Leaf l = (Leaf) (player == bd1 ? bd2 : bd1);
                     if (l.getLeafType() == Leaf.leafType.BOUNCY) {
                         player.setBouncy(false);
-                        l.setBouncy(false);
+                        if (!ic.didJump()){
+                            l.setBouncy(false);
+                        }
                     }
                 }
             } catch (Exception e) {
