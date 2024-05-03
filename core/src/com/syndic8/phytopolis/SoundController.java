@@ -37,6 +37,7 @@ public class SoundController {
 
         AudioEngine engine = (AudioEngine) Gdx.audio;
         music = engine.newMusicBuffer(false, 44100);
+        music.setVolume(volumes[musicVolumeIndex]);
     }
 
     public static SoundController getInstance() {
@@ -122,6 +123,7 @@ public class SoundController {
                 break;
             case MUSIC_VOLUME:
                 musicVolumeIndex = (musicVolumeIndex + 1) % volumes.length;
+                music.setVolume(volumes[musicVolumeIndex]);
                 saveOptions();
                 break;
             case FX_VOLUME:
