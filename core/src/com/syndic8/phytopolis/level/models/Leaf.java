@@ -3,6 +3,7 @@ package com.syndic8.phytopolis.level.models;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.physics.box2d.BodyDef;
 import com.syndic8.phytopolis.GameCanvas;
+import com.syndic8.phytopolis.InputController;
 import com.syndic8.phytopolis.util.Tilemap;
 
 public class Leaf extends BoxObject {
@@ -15,6 +16,13 @@ public class Leaf extends BoxObject {
     private static final int NUM_BOUNCY_FRAMES = 6;
 
     private float bounceFrame;
+    private final int bouncyTimerMax = 10;
+    private  int bouncyTimer = 0;
+
+    private boolean bouncy;
+    private boolean sun;
+
+    private InputController ic;
 
     /**
      * Creates a new Leaf object with the specified position and dimensions
@@ -40,7 +48,11 @@ public class Leaf extends BoxObject {
         healthMark = 5;
         beingEaten = false;
         bounceFrame = 0;
+        bouncy = false;
+        sun = false;
+        ic = InputController.getInstance();
     }
+
 
     /**
      * returns the type of this leaf
@@ -55,6 +67,8 @@ public class Leaf extends BoxObject {
     public ModelType getType() {
         return ModelType.LEAF;
     }
+
+
 
     public boolean fullyEaten() {
         return health <= 0;
@@ -72,6 +86,15 @@ public class Leaf extends BoxObject {
         return false;
     }
 
+    public void setBouncy(boolean bounce){
+        bouncy = bounce;
+
+    }
+    public void setSun(boolean value){
+        sun = value;
+        animFrame = 2;
+    }
+
     /**
      * Updates the state of this object.
      * <p>
@@ -84,21 +107,48 @@ public class Leaf extends BoxObject {
      */
     public void update(float delta) {
         if (getLeafType() != leafType.BOUNCY){
-            if (beingEaten) {
-                health -= delta;
-            }
-            if (animFrame < 4) {
-                animFrame += ANIMATION_SPEED;
-            } else if (health < 5 && health > 0) {
-                animFrame = 4 + (5 - health);
+            if (!sun){
+                if (beingEaten) {
+                    health -= delta;
+                }
+                if (animFrame < 4) {
+                    animFrame += ANIMATION_SPEED;
+                } else if (health < 5 && health > 0) {
+                    animFrame = 4 + (5 - health);
+                }
+            }else{
+                if (animFrame >= 4){
+                    health = 5;
+                    sun = false;
+                }else if (animFrame < 4){
+                    animFrame += ANIMATION_SPEED;
+                }
             }
         }else{
-            if (bounceFrame < NUM_BOUNCY_FRAMES) {
-                bounceFrame +=ANIMATION_SPEED;
+            if (bouncy && ic.didJump()) {
+                bouncyTimer = bouncyTimerMax;
+                bouncy = false;
             }
-            if (bounceFrame >= NUM_BOUNCY_FRAMES) {
-                bounceFrame -=1;
+            if (bouncyTimer > 0){
+                if (bounceFrame >= NUM_BOUNCY_FRAMES) {
+                    bounceFrame -= NUM_BOUNCY_FRAMES;
+                }
+                if (bounceFrame < NUM_BOUNCY_FRAMES) {
+                    bounceFrame +=ANIMATION_SPEED*2;
+                }
+            }else{
+                if (bounceFrame < NUM_BOUNCY_FRAMES) {
+                    bounceFrame +=ANIMATION_SPEED;
+                }
+                if (bounceFrame >= NUM_BOUNCY_FRAMES) {
+                    bounceFrame -=1;
+                }
             }
+            if (!bouncy){
+                bouncyTimer = Math.max (bouncyTimer-1, 0);
+            }
+
+
         }
 
     }
