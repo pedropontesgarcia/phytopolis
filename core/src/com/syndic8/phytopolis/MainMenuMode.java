@@ -8,9 +8,11 @@ package com.syndic8.phytopolis;
  * Updated asset version, 2/6/2021
  */
 
+import com.badlogic.gdx.Audio;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.audio.Music;
+import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.Texture.TextureFilter;
@@ -24,6 +26,7 @@ import com.syndic8.phytopolis.util.menu.Menu;
 import com.syndic8.phytopolis.util.menu.MenuContainer;
 import com.syndic8.phytopolis.util.menu.MenuItem;
 import com.syndic8.phytopolis.util.menu.OptionsMenu;
+import edu.cornell.gdiac.audio.AudioSource;
 
 /**
  * Class that provides a loading screen for the state of the game.
@@ -74,10 +77,11 @@ public class MainMenuMode extends FadingScreen implements Screen {
      * Whether or not this player mode is still active
      */
     private boolean active;
-    private Music backgroundMusic;
+    private AudioSource backgroundMusic;
     private MenuContainer menuContainer;
     private Menu menu;
     private boolean exit;
+    private SoundController soundController;
 
     /**
      * Creates a MainMenuMode with the default budget, size and position.
@@ -98,7 +102,7 @@ public class MainMenuMode extends FadingScreen implements Screen {
      * do something else.  This is how game companies animate their loading screens.
      *
      * @param file   The asset directory to load in the background
-     * @param canvas The game canvas to draw to
+     * @param c The game canvas to draw to
      * @param millis The loading budget in milliseconds
      */
     public MainMenuMode(String file, GameCanvas c, int millis) {
@@ -128,6 +132,11 @@ public class MainMenuMode extends FadingScreen implements Screen {
         active = true;
         ready = false;
         exit = false;
+
+        // Load SoundController singleton
+        soundController = SoundController.getInstance();
+//        // Load background music
+//        backgroundMusic = internal.getEntry("newgrowth", AudioSource.class);
     }
 
     private void createMenu() {
@@ -208,11 +217,11 @@ public class MainMenuMode extends FadingScreen implements Screen {
         return assets;
     }
 
-    public Music getBackgroundMusic() {
+    public AudioSource getBackgroundMusic() {
         return backgroundMusic;
     }
 
-    public void setBackgroundMusic(Music m) {
+    public void setBackgroundMusic(AudioSource m) {
         backgroundMusic = m;
     }
 
@@ -301,10 +310,17 @@ public class MainMenuMode extends FadingScreen implements Screen {
             if (progress >= 1) {
                 progress = 1;
                 fadeIn(0.5f);
-                if (backgroundMusic == null) {
-                    backgroundMusic = assets.getEntry("newgrowth", Music.class);
-                    backgroundMusic.setLooping(true);
-                    backgroundMusic.play();
+                if (false) {
+                    if (backgroundMusic == null) {
+                        backgroundMusic = assets.getEntry("newgrowth", AudioSource.class);
+                        int i = soundController.addMusic(backgroundMusic);
+                        soundController.setMusic(i);
+                        soundController.setLooping(true);
+                        soundController.playMusic();
+
+    //                    backgroundMusic.setLooping(true);
+    //                    backgroundMusic.play();
+                    }
                 }
             }
         }

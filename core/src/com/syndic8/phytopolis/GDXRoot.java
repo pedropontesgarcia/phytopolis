@@ -93,12 +93,12 @@ public class GDXRoot extends Game implements ScreenListener {
             directory = menu.getAssets();
             levelSelect.gatherAssets(directory);
             levelSelect.setScreenListener(this);
-            levelSelect.setBackgroundMusic(menu.getBackgroundMusic());
+            //levelSelect.setBackgroundMusic(menu.getBackgroundMusic());
             setScreen(levelSelect);
         } else if (screen == levelSelect &&
                 exitCode == EXIT_MAIN_MENU.ordinal()) {
             menu.setScreenListener(this);
-            menu.setBackgroundMusic(levelSelect.getBackgroundMusic());
+            //menu.setBackgroundMusic(levelSelect.getBackgroundMusic());
             setScreen(menu);
         } else if (screen == levelSelect && exitCode == EXIT_LEVELS.ordinal()) {
             controller.setLevel(levelSelect.getLevel());
@@ -126,7 +126,7 @@ public class GDXRoot extends Game implements ScreenListener {
             controller.setPaused(false);
             levelSelect.reset();
             levelSelect.setScreenListener(this);
-            levelSelect.setBackgroundMusic(menu.getBackgroundMusic());
+            //levelSelect.setBackgroundMusic(menu.getBackgroundMusic());
             setScreen(levelSelect);
         } else if (exitCode == EXIT_VICTORY.ordinal()) {
             endLevel(true);
