@@ -100,6 +100,10 @@ public class SoundController {
         music.stop();
     }
 
+    public AudioSource getPlayingMusic(){
+        return music.getCurrent();
+    }
+
 
 
     public void stopAll(){
