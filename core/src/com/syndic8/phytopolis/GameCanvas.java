@@ -41,14 +41,8 @@ public class GameCanvas {
     private final FileHandle configFile;
     private final JsonValue settingsJson;
     private final int[] fps;
-    /**
-     * Value to cache window width (if we are currently full screen)
-     */
-    float width;
-    /**
-     * Value to cache window height (if we are currently full screen)
-     */
-    float height;
+    private final float width;
+    private final float height;
     private int windowHeight;
     private int windowWidth;
     private int currentFpsIndex;

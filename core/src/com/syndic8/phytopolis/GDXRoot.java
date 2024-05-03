@@ -23,17 +23,8 @@ import static com.syndic8.phytopolis.GDXRoot.ExitCode.*;
 public class GDXRoot extends Game implements ScreenListener {
 
     private final List<DisplayMode> displayModes;
-    /**
-     * Directory for game assets.
-     */
     AssetDirectory directory;
-    /**
-     * Drawing context to display graphics (view).
-     */
     private GameCanvas canvas;
-    /**
-     * Player mode for the asset loading screen (CONTROLLER CLASS)
-     */
     private MainMenuMode menu;
     private LevelSelectMode levelSelect;
     private LevelOverMode levelOver;
@@ -65,7 +56,6 @@ public class GDXRoot extends Game implements ScreenListener {
         levelSelect.dispose();
         levelOver.dispose();
         pause.dispose();
-
         canvas.dispose();
         canvas = null;
 
@@ -87,6 +77,12 @@ public class GDXRoot extends Game implements ScreenListener {
         canvas.resizeScreen(width, height);
     }
 
+    /**
+     * Exits the current screen and transfers control to the next one.
+     *
+     * @param screen   the screen requesting to exit.
+     * @param exitCode the state of the screen upon exit.
+     */
     public void exitScreen(Screen screen, int exitCode) {
         Gdx.graphics.setSystemCursor(Cursor.SystemCursor.Arrow);
         if (screen == menu) {
@@ -149,6 +145,9 @@ public class GDXRoot extends Game implements ScreenListener {
         setScreen(levelOver);
     }
 
+    /**
+     * Exit codes for the screen listener.
+     */
     public enum ExitCode {
         EXIT_QUIT,
         EXIT_VICTORY,

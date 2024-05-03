@@ -39,7 +39,8 @@ public class Tilemap {
      * Constructs a tilemap from the world dimensions and a JSON file from
      * Tiled.
      *
-     * @param tm The JSON tilemap file from Tiled.
+     * @param tm the JSON tilemap file from Tiled.
+     * @param c  the game canvas.
      */
     public Tilemap(JsonValue tm, GameCanvas c) {
         tilemap = tm;

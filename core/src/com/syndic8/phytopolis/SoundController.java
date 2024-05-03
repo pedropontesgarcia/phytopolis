@@ -20,11 +20,11 @@ public class SoundController {
     private final float[] volumes;
     private final FileHandle configFile;
     private final JsonValue settingsJson;
+    MusicQueue music;
+    ArrayList<SoundEffect> sounds;
     private int masterVolumeIndex;
     private int musicVolumeIndex;
     private int fxVolumeIndex;
-    MusicQueue music;
-    ArrayList<SoundEffect> sounds;
 
     public SoundController() {
         volumes = new float[]{0, 0.25f, 0.50f, 0.75f, 1.0f};
@@ -35,8 +35,8 @@ public class SoundController {
         musicVolumeIndex = settingsJson.getInt("musicVolumeIndex");
         fxVolumeIndex = settingsJson.getInt("fxVolumeIndex");
 
-        AudioEngine engine = (AudioEngine)Gdx.audio;
-        music = engine.newMusicBuffer( false, 48000 );
+        AudioEngine engine = (AudioEngine) Gdx.audio;
+        music = engine.newMusicBuffer(false, 44100);
     }
 
     public static SoundController getInstance() {
@@ -48,33 +48,36 @@ public class SoundController {
 
     /**
      * Adds music to the MusicQueue
+     *
      * @param a the music to add
-     * return the position of the added music
+     *          return the position of the added music
      */
-    public int addMusic(AudioSource a){
+    public int addMusic(AudioSource a) {
         music.addSource(a);
         return music.getNumberOfSources() - 1;
     }
 
     /**
      * Add a sound effect to the list of sounds
+     *
      * @param s the sound effect to be added
      * @return the position of the sound effect in the sounds list
      */
-    public int addSoundEffect(SoundEffect s){
+    public int addSoundEffect(SoundEffect s) {
         sounds.add(s);
         return sounds.size() - 1;
     }
 
-    public void setLooping(boolean b){
+    public void setLooping(boolean b) {
         music.setLooping(b);
     }
 
     /**
      * Plays the music at the given index
+     *
      * @param i the index of the song to be played
      */
-    public void setMusic(int i){
+    public void setMusic(int i) {
         music.stop();
         music.jumpToSource(i);
         music.play();
@@ -82,32 +85,31 @@ public class SoundController {
 
     /**
      * Plays the sound at the given index
+     *
      * @param i the index of the sound to be played
      */
-    public void playSound(int i){
+    public void playSound(int i) {
         sounds.get(i).play();
     }
 
-    public void stopSound(int i){
+    public void stopSound(int i) {
         sounds.get(i).stop();
     }
 
-    public void playMusic(){
+    public void playMusic() {
         music.play();
     }
 
-    public void stopMusic(){
+    public void stopMusic() {
         music.stop();
     }
 
-    public AudioSource getPlayingMusic(){
+    public AudioSource getPlayingMusic() {
         return music.getCurrent();
     }
 
-
-
-    public void stopAll(){
-        for (SoundEffect s : sounds){
+    public void stopAll() {
+        for (SoundEffect s : sounds) {
             s.stop();
         }
     }

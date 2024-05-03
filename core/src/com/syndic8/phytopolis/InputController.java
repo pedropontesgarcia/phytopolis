@@ -77,8 +77,14 @@ public class InputController implements InputProcessor {
      */
     private boolean mousePressed;
     private boolean mousePrevious;
+    /**
+     * Mouse screen coordinates.
+     */
     private float mouseX;
     private float mouseY;
+    /**
+     * Scroll input.
+     */
     private boolean scrollReset;
     private float horizontal;
     private float scrolled;

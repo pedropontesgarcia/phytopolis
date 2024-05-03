@@ -18,6 +18,10 @@ import java.util.Comparator;
 import java.util.List;
 
 // Please note that on macOS your application needs to be started with the -XstartOnFirstThread JVM argument
+
+/**
+ * Launcher class for desktop mode.
+ */
 public class DesktopLauncher {
 
     public static void main(String[] arg) {

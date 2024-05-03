@@ -4,12 +4,18 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
+import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator.FreeTypeFontParameter;
+import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * Singleton class containing assets that are shared across modes and that
+ * are not loaded through the AssetDirectory due to technical limitations.
+ */
 public class SharedAssetContainer {
 
     private static SharedAssetContainer sharedAssetContainerInstance;
@@ -17,6 +23,7 @@ public class SharedAssetContainer {
     private final float BASE_FONT_SCALE = 0.2f;
     private final FreeTypeFontGenerator uiFontGenerator;
     private final FreeTypeFontParameter uiFontParameter;
+    private final Skin progressBarSkin;
 
     public SharedAssetContainer() {
         uiFontMap = new HashMap<Float, BitmapFont>();
@@ -36,8 +43,19 @@ public class SharedAssetContainer {
                            Texture.TextureFilter.Linear);
         uiFont.getData().setScale(BASE_FONT_SCALE);
         uiFontMap.put(1f, uiFont);
+
+        TextureAtlas atlas = new TextureAtlas(Gdx.files.internal(
+                "ui/skins/prog.atlas"));
+        //        TextureAtlas.AtlasRegion region = atlas.findRegion("barfill.9");
+        progressBarSkin = new Skin(Gdx.files.internal("ui/skins/prog.json"));
     }
 
+    /**
+     * Gets the singleton instance of this class, or creates one if there are
+     * none.
+     *
+     * @return the singleton instance of this class.
+     */
     public static SharedAssetContainer getInstance() {
         if (sharedAssetContainerInstance == null) {
             sharedAssetContainerInstance = new SharedAssetContainer();
@@ -45,10 +63,23 @@ public class SharedAssetContainer {
         return sharedAssetContainerInstance;
     }
 
+    /**
+     * Gets the UI font with the default scale.
+     *
+     * @return the UI font.
+     */
     public BitmapFont getUIFont() {
         return uiFontMap.get(1f);
     }
 
+    /**
+     * Gets the UI font with a custom scale. Caches fonts so that if a
+     * previous instance with the requested scale exists, it is returned
+     * instead of creating a new one.
+     *
+     * @param scl the font scale, as a multiplier to the default scale.
+     * @return the UI font with the requested scale.
+     */
     public BitmapFont getUIFont(float scl) {
         if (uiFontMap.containsKey(scl)) {
             return uiFontMap.get(scl);
@@ -58,6 +89,15 @@ public class SharedAssetContainer {
             uiFontMap.put(scl, font);
             return font;
         }
+    }
+
+    /**
+     * Gets the skin for the fire progress bar.
+     *
+     * @return the skin for the fire progress bar.
+     */
+    public Skin getProgressBarSkin() {
+        return progressBarSkin;
     }
 
 }

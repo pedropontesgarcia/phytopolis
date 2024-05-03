@@ -46,12 +46,12 @@
   "jsons": {
     "gameplay:lvl1": "gameplay/levels/fucked.json",
     "gameplay:lvl2": "gameplay/levels/lvl2.json",
-    "gameplay:lvl3": "gameplay/levels/lvl3.json",
+    "gameplay:lvl3": "gameplay/levels/fucked2.json",
     "gameplay:constants": "gameplay/constants.json",
     "tileset.tsx": "gameplay/tileset.json",
     "rsrc.tsx": "gameplay/rsrc.json"
   },
-  "music": {
+  "samples": {
     "viridian": "gameplay/ViridianEXP1OGG.ogg",
     "newgrowth": "gameplay/NewGrowthEXP3SOGG.ogg"
   },
