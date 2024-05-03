@@ -326,22 +326,12 @@ public class MainMenuMode extends FadingScreen implements Screen {
             loaded = true;
             fadeIn(1.5f);
             if (backgroundMusic == null) {
-                //                backgroundMusic = assets.getEntry("newgrowth", Music.class);
-                //                backgroundMusic.setLooping(true);
-                //                backgroundMusic.play();
-            }
-            if (true) {
-                if (backgroundMusic == null) {
-                    backgroundMusic = assets.getEntry("newgrowth",
-                                                      AudioSource.class);
-                    int i = soundController.addMusic(backgroundMusic);
-                    soundController.setMusic(i);
-                    soundController.setLooping(true);
-                    soundController.playMusic();
-
-                    //                    backgroundMusic.setLooping(true);
-                    //                    backgroundMusic.play();
-                }
+                backgroundMusic = assets.getEntry("newgrowth",
+                                                  AudioSource.class);
+                int i = soundController.addMusic(backgroundMusic);
+                soundController.setMusic(i);
+                soundController.setLooping(true);
+                soundController.playMusic();
             }
         }
 
