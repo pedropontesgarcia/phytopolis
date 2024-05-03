@@ -16,7 +16,7 @@ public class Leaf extends BoxObject {
     private static final int NUM_BOUNCY_FRAMES = 6;
 
     private float bounceFrame;
-    private final int bouncyTimerMax = 35;
+    private final int bouncyTimerMax = 10;
     private  int bouncyTimer = 0;
 
     private boolean bouncy;
@@ -127,13 +127,14 @@ public class Leaf extends BoxObject {
         }else{
             if (bouncy && ic.didJump()) {
                 bouncyTimer = bouncyTimerMax;
+                bouncy = false;
             }
             if (bouncyTimer > 0){
                 if (bounceFrame >= NUM_BOUNCY_FRAMES) {
                     bounceFrame -= NUM_BOUNCY_FRAMES;
                 }
                 if (bounceFrame < NUM_BOUNCY_FRAMES) {
-                    bounceFrame +=ANIMATION_SPEED;
+                    bounceFrame +=ANIMATION_SPEED*2;
                 }
             }else{
                 if (bounceFrame < NUM_BOUNCY_FRAMES) {
