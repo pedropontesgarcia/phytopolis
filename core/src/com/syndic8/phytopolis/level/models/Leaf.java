@@ -20,7 +20,7 @@ public class Leaf extends BoxObject {
     private  int bouncyTimer = 0;
 
     private boolean bouncy;
-    private boolean playerJump;
+    private boolean sun;
 
     private InputController ic;
 
@@ -49,7 +49,7 @@ public class Leaf extends BoxObject {
         beingEaten = false;
         bounceFrame = 0;
         bouncy = false;
-        playerJump = false;
+        sun = false;
         ic = InputController.getInstance();
     }
 
@@ -86,11 +86,13 @@ public class Leaf extends BoxObject {
         return false;
     }
 
-
-
     public void setBouncy(boolean bounce){
         bouncy = bounce;
 
+    }
+    public void setSun(boolean value){
+        sun = value;
+        animFrame = 2;
     }
 
     /**
@@ -105,13 +107,22 @@ public class Leaf extends BoxObject {
      */
     public void update(float delta) {
         if (getLeafType() != leafType.BOUNCY){
-            if (beingEaten) {
-                health -= delta;
-            }
-            if (animFrame < 4) {
-                animFrame += ANIMATION_SPEED;
-            } else if (health < 5 && health > 0) {
-                animFrame = 4 + (5 - health);
+            if (!sun){
+                if (beingEaten) {
+                    health -= delta;
+                }
+                if (animFrame < 4) {
+                    animFrame += ANIMATION_SPEED;
+                } else if (health < 5 && health > 0) {
+                    animFrame = 4 + (5 - health);
+                }
+            }else{
+                if (animFrame >= 4){
+                    health = 5;
+                    sun = false;
+                }else if (animFrame < 4){
+                    animFrame += ANIMATION_SPEED;
+                }
             }
         }else{
             if (bouncy && ic.didJump()) {

@@ -206,19 +206,46 @@ public class CollisionController implements ContactListener {
                                 ((Model) fix1.getBody()
                                         .getUserData()).getType() ==
                                         Model.ModelType.SUN);
+//        boolean isCollisionBetweenBugAndBouncy =
+//                (((Model) fix1.getBody().getUserData()).getType() ==
+//                        Model.ModelType.LEAF &&
+//                        ((Model) fix2.getBody().getUserData()).getType() ==
+//                        Model.ModelType.BUG) ||
+//                (((Model) fix1.getBody().getUserData()).getType() ==
+//                        Model.ModelType.LEAF &&
+//                        ((Model) fix1.getBody()
+//                                .getUserData()).getType() ==
+//                                Model.ModelType.BUG);
+
         if (isCollisionBetweenPlayerAndSun ||
                 isCollisionBetweenPlatformAndSun ||
                 isCollisionBetweenTileAndSun) {
             contact.setEnabled(false);
         }
+//        if (isCollisionBetweenBugAndBouncy){
+//            Bug b;
+//            if (((Model) fix1.getBody().getUserData()).getType() ==
+//                    Model.ModelType.BUG) {
+//                b = (Bug) fix1.getBody().getUserData();
+//            } else {
+//                b = (Bug) fix2.getBody().getUserData();
+//            }
+//            hazardController.removeHazard(b);
+//            plantController.removeHazardFromNodes(b);
+//        }
         if (isCollisionBetweenLeafAndSun) {
             Sun s;
+            Leaf l;
             if (((Model) fix1.getBody().getUserData()).getType() ==
                     Model.ModelType.SUN) {
                 s = (Sun) fix1.getBody().getUserData();
+                l = (Leaf) fix2.getBody().getUserData();
             } else {
                 s = (Sun) fix2.getBody().getUserData();
+                l = (Leaf) fix1.getBody().getUserData();
             }
+
+            l.setSun(true);
             contact.setEnabled(false);
             s.clear();
             uiController.addTime();
