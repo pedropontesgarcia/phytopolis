@@ -13,7 +13,6 @@ package com.syndic8.phytopolis;
 import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.BodyDef;
 import com.badlogic.gdx.physics.box2d.World;
@@ -45,8 +44,7 @@ public class GameplayMode extends WorldController {
     private Texture jogTexture;
     private FilmStrip jogAnimator;
     private boolean gathered;
-    private TextureRegion background;
-    private TextureRegion vignette;
+    private Texture background;
     private Texture avatarTexture;
     private Tilemap tilemap;
     private JsonValue constants;
@@ -81,22 +79,17 @@ public class GameplayMode extends WorldController {
      * @param directory Reference to global asset manager.
      */
     public void gatherAssets(AssetDirectory directory) {
-        tilemap = new Tilemap(DEFAULT_WIDTH,
-                              DEFAULT_HEIGHT,
-                              directory.getEntry(lvl, JsonValue.class));
+        tilemap = new Tilemap(directory.getEntry(lvl, JsonValue.class), canvas);
         tilemap.gatherAssets(directory);
+        canvas.setWorldSize(tilemap.getWorldWidth());
+
+        setBounds(tilemap.getWorldWidth(), tilemap.getWorldHeight());
         if (!gathered) {
             gathered = true;
             avatarTexture = directory.getEntry("gameplay:player",
                                                Texture.class);
-            background = new TextureRegion(directory.getEntry(
-                    "gameplay:background",
-                    Texture.class));
-            vignette = new TextureRegion(directory.getEntry("ui:vignette",
-                                                            Texture.class));
-            background.setRegion(0, 0, 1920, 1080);
-            vignette.setRegion(0, 0, 1920, 1080);
-
+            background = directory.getEntry("gameplay:background",
+                                            Texture.class);
             jumpTexture = directory.getEntry("jump", Texture.class);
             jumpAnimator = new FilmStrip(jumpTexture, 1, 13, 13);
 
@@ -109,15 +102,17 @@ public class GameplayMode extends WorldController {
             resourceController = new ResourceController();
             uiController = new UIController(canvas, tilemap);
             float branchHeight = tilemap.getTileHeight();
-            float plantWidth = branchHeight * (float) Math.sqrt(3) * 4 / 2;
+            int plantNodesPerRow = Math.round(
+                    (tilemap.getTilemapWidth() - 2) * (float) Math.sqrt(3));
+            float plantWidth = branchHeight * (float) Math.sqrt(3) *
+                    (plantNodesPerRow - 1) / 2;
             float plantXOrigin = bounds.width / 2 - plantWidth / 2;
-            plantController = new PlantController(5,
+            plantController = new PlantController(plantNodesPerRow,
                                                   40,
                                                   tilemap.getTileHeight(),
                                                   plantXOrigin,
                                                   0,
                                                   world,
-                                                  scale,
                                                   resourceController,
                                                   tilemap);
             hazardController = new HazardController(plantController,
@@ -155,6 +150,7 @@ public class GameplayMode extends WorldController {
             backgroundMusic.play();
         }
         uiController.startTimer();
+        setPaused(false);
     }
 
     /**
@@ -205,10 +201,13 @@ public class GameplayMode extends WorldController {
             ic.resetScrolled();
         }
         ic.setHeight(tilemap.getTilemapHeight() - canvas.getHeight());
-        cameraVector.set(canvas.getWidth() / 2f,
-                         Math.max(canvas.getHeight() / 2f,
-                                  Math.min(tilemap.getTilemapHeight() -
-                                                   canvas.getHeight() / 2f,
+        float aspectRatio = canvas.getWidth() / canvas.getHeight();
+        float cameraHeight = tilemap.getWorldWidth() / aspectRatio;
+        cameraVector.set(tilemap.getWorldWidth() / 2f,
+                         Math.max(cameraHeight / 2f,
+                                  Math.min(tilemap.getTilemapHeight() *
+                                                   tilemap.getTileHeight() -
+                                                   cameraHeight / 2f,
                                            avatar.getY()) + ic.getScrolled()));
         // generate hazards please
         for (Model m : objects) {
@@ -232,7 +231,7 @@ public class GameplayMode extends WorldController {
 
         if (ic.didMousePress()) {
             projMousePosCache.set(ic.getMouseX(), ic.getMouseY());
-            Vector2 unprojMousePos = canvas.unproject(projMousePosCache);
+            Vector2 unprojMousePos = canvas.unprojectGame(projMousePosCache);
             hazardController.extinguishFire(unprojMousePos);
         }
         plantController.propagateDestruction();
@@ -264,7 +263,7 @@ public class GameplayMode extends WorldController {
     public void processPlantGrowth() {
         // get mouse position
         projMousePosCache.set(ic.getMouseX(), ic.getMouseY());
-        Vector2 unprojMousePos = canvas.unproject(projMousePosCache);
+        Vector2 unprojMousePos = canvas.unprojectGame(projMousePosCache);
         boolean canGrowBranch = ic.didGrowBranch() && ic.isGrowBranchModDown();
         boolean canGrowLeaf = ic.didGrowLeaf() && ic.isGrowLeafModDown();
         boolean noPriority = ic.isGrowLeafModSet() == ic.isGrowBranchModSet();
@@ -332,32 +331,29 @@ public class GameplayMode extends WorldController {
      *
      * @param dt Number of seconds since last animation frame
      */
-    public void draw(float dt) {
+    public void draw() {
         canvas.clear();
         canvas.cameraUpdate(cameraVector);
-        canvas.begin();
+        canvas.beginGame();
         drawBackground();
-
         tilemap.draw(canvas);
-
-        super.draw(dt);
-
-        if ((ic.isGrowBranchModSet() ||
-                (ic.isGrowLeafModSet() && !ic.isGrowLeafModDown())) &&
-                ic.isGrowBranchModDown()) {
-            projMousePosCache.set(ic.getMouseX(), ic.getMouseY());
-            Vector2 unprojMousePos = canvas.unproject(projMousePosCache);
-            if (!hazardController.hasFire(unprojMousePos)) {
-                plantController.drawGhostBranch(canvas,
-                                                unprojMousePos.x,
-                                                unprojMousePos.y);
+        super.draw();
+        if (!isPaused()) {
+            if ((ic.isGrowBranchModSet() ||
+                    (ic.isGrowLeafModSet() && !ic.isGrowLeafModDown())) &&
+                    ic.isGrowBranchModDown()) {
+                projMousePosCache.set(ic.getMouseX(), ic.getMouseY());
+                Vector2 unprojMousePos = canvas.unprojectGame(projMousePosCache);
+                if (!hazardController.hasFire(unprojMousePos)) {
+                    plantController.drawGhostBranch(canvas,
+                                                    unprojMousePos.x,
+                                                    unprojMousePos.y);
+                }
             }
         }
-        drawVignette();
-        canvas.end();
-
-        canvas.beginHud();
         hazardController.drawWarning(canvas, cameraVector);
+        canvas.end();
+        canvas.beginHud();
         uiController.draw(canvas);
         canvas.endHud();
         super.draw(canvas);
@@ -373,6 +369,7 @@ public class GameplayMode extends WorldController {
         //jumpSound.stop(jumpId);
         //plopSound.stop(plopId);
         //fireSound.stop(fireId);
+        setPaused(true);
     }
 
     /**
@@ -387,23 +384,14 @@ public class GameplayMode extends WorldController {
 
     private void drawBackground() {
         if (background != null) {
-            canvas.draw(background.getTexture(),
+            canvas.draw(background,
                         Color.WHITE,
-                        0,
-                        0,
-                        canvas.getWidth(),
-                        canvas.getHeight() * 4);
+                        -0.1f,
+                        -0.1f,
+                        tilemap.getWorldWidth(),
+                        tilemap.getWorldWidth() * background.getHeight() /
+                                background.getWidth());
         }
-    }
-
-    private void drawVignette() {
-        float backgroundY = canvas.getCameraY() - canvas.getHeight() / 2;
-        canvas.draw(vignette.getTexture(),
-                    Color.WHITE,
-                    0,
-                    backgroundY,
-                    canvas.getWidth(),
-                    canvas.getHeight());
     }
 
     /**
@@ -413,7 +401,6 @@ public class GameplayMode extends WorldController {
      */
     public void reset() {
         Vector2 gravity = new Vector2(world.getGravity());
-
         for (Model obj : objects) {
             if (obj instanceof GameObject) {
                 ((GameObject) obj).deactivatePhysics(world);
@@ -429,8 +416,28 @@ public class GameplayMode extends WorldController {
         ic.resetScrolled();
 
         resourceController.reset();
-        plantController.reset();
 
+        float branchHeight = tilemap.getTileHeight();
+        int plantNodesPerRow = Math.round(
+                (tilemap.getTilemapWidth() - 2) * (float) Math.sqrt(3));
+        float plantWidth =
+                branchHeight * (float) Math.sqrt(3) * (plantNodesPerRow - 1) /
+                        2;
+        float plantXOrigin = bounds.width / 2 - plantWidth / 2;
+        plantController.reset(plantNodesPerRow,
+                              40,
+                              tilemap.getTileHeight(),
+                              plantXOrigin,
+                              0,
+                              tilemap);
+
+        hazardController.reset((int) tilemap.getFireRate(),
+                               1000000000,
+                               6,
+                               8,
+                               6,
+                               10,
+                               tilemap);
         world = new World(gravity, false);
         setComplete(false);
         setFailure(false);
@@ -448,9 +455,9 @@ public class GameplayMode extends WorldController {
         PolygonObject obj;
         obj = new PolygonObject(new float[]{0,
                 0,
-                DEFAULT_WIDTH,
+                tilemap.getWorldWidth(),
                 0,
-                DEFAULT_WIDTH,
+                tilemap.getWorldWidth(),
                 -1,
                 0,
                 -1}, 0, 0, tilemap, 1);
@@ -463,9 +470,9 @@ public class GameplayMode extends WorldController {
 
         // Add left wall
         obj = new PolygonObject(new float[]{-1,
-                DEFAULT_HEIGHT,
+                tilemap.getWorldHeight(),
                 0,
-                DEFAULT_HEIGHT,
+                tilemap.getWorldHeight(),
                 0,
                 0,
                 -1,
@@ -478,13 +485,13 @@ public class GameplayMode extends WorldController {
         addObject(obj);
 
         // Add right wall
-        obj = new PolygonObject(new float[]{DEFAULT_WIDTH,
-                DEFAULT_HEIGHT,
-                DEFAULT_WIDTH + 1,
-                DEFAULT_HEIGHT,
-                DEFAULT_WIDTH + 1,
+        obj = new PolygonObject(new float[]{tilemap.getWorldWidth(),
+                tilemap.getWorldHeight(),
+                tilemap.getWorldWidth() + 1,
+                tilemap.getWorldHeight(),
+                tilemap.getWorldWidth() + 1,
                 0,
-                DEFAULT_WIDTH,
+                tilemap.getWorldWidth(),
                 0}, 0, 0, tilemap, 1);
         obj.setBodyType(BodyDef.BodyType.StaticBody);
         obj.setDensity(0);

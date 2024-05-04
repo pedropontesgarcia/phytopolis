@@ -20,15 +20,16 @@ import com.syndic8.phytopolis.util.Timer;
 public class UIController {
 
     private final Stage stage;
-    private final Timer timer;
     private final Label label;
     private final Vector2 projMousePosCache;
     private final InputController ic;
+    private final Timer timer;
     private final GameCanvas canvas;
     private FilmStrip current;
     private FilmStrip waterdropStrip;
     private FilmStrip waterdropAdd;
     private FilmStrip waterdropRemove;
+    private TextureRegion vignette;
     private Cursor branchCursor;
     private Cursor leafCursor;
     private Cursor waterCursor;
@@ -36,9 +37,9 @@ public class UIController {
     /**
      * Initializes a UIController.
      */
-    public UIController(GameCanvas c, Tilemap tm) {
+    public UIController(GameCanvas c, Tilemap tilemap) {
         canvas = c;
-        timer = new Timer(tm.getTime());
+        timer = new Timer(tilemap.getTime());
         timer.start();
         projMousePosCache = new Vector2();
         ic = InputController.getInstance();
@@ -51,6 +52,10 @@ public class UIController {
                                   label.getWidth() / 2f,
                           c.getTextViewport().getWorldHeight() * 0.875f);
         stage.addActor(label);
+        initialize();
+    }
+
+    private void initialize() {
     }
 
     /**
@@ -70,6 +75,8 @@ public class UIController {
                                         1,
                                         20);
         current = waterdropStrip;
+        vignette = new TextureRegion(directory.getEntry("ui:vignette",
+                                                        Texture.class));
         TextureRegion branchCursorTexture = new TextureRegion(directory.getEntry(
                 "ui:branch-cursor",
                 Texture.class));
@@ -133,7 +140,7 @@ public class UIController {
      */
     public void updateCursor(HazardController hazardController) {
         projMousePosCache.set(ic.getMouseX(), ic.getMouseY());
-        Vector2 unprojMousePos = canvas.unproject(projMousePosCache);
+        Vector2 unprojMousePos = canvas.unprojectGame(projMousePosCache);
         if (hazardController.hasFire(unprojMousePos)) {
             Gdx.graphics.setCursor(waterCursor);
         } else if ((ic.isGrowBranchModSet() ||
@@ -195,13 +202,14 @@ public class UIController {
      * @param c the canvas to draw on.
      */
     public void draw(GameCanvas c) {
-        int w = c.getWidth();
-        int h = c.getHeight();
+        float w = c.getWidth();
+        float h = c.getHeight();
         float txWidth = current.getRegionWidth();
         float txHeight = current.getRegionHeight();
         float widthRatio = txWidth / txHeight;
         float txWidthDrawn = w * 0.1f;
         float txHeightDrawn = w * 0.1f / widthRatio;
+        c.drawHud(vignette, 0, 0, canvas.getWidth(), canvas.getHeight());
         c.drawHud(current,
                   w * 0.075f - txWidthDrawn / 2f,
                   h * 0.85f,

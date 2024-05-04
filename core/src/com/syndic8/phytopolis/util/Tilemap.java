@@ -15,6 +15,7 @@ import java.util.List;
 
 public class Tilemap {
 
+    private final GameCanvas canvas;
     PooledList<Tile> tiles;
     AssetDirectory directory;
     JsonValue tilemap;
@@ -38,14 +39,12 @@ public class Tilemap {
      * Constructs a tilemap from the world dimensions and a JSON file from
      * Tiled.
      *
-     * @param w  The world width, in world units.
-     * @param h  The world height, in world units.
-     * @param tm The JSON tilemap file from Tiled.
+     * @param tm the JSON tilemap file from Tiled.
+     * @param c  the game canvas.
      */
-    public Tilemap(float w, float h, JsonValue tm) {
-        worldWidth = w;
-        worldHeight = h;
+    public Tilemap(JsonValue tm, GameCanvas c) {
         tilemap = tm;
+        canvas = c;
     }
 
     public float getWorldWidth() {
@@ -107,6 +106,19 @@ public class Tilemap {
         assert physicsLayer != null;
         tilemapHeight = physicsLayer.getInt("height");
         tilemapWidth = physicsLayer.getInt("width");
+        // I believe this 6f is correlated to the fact that
+        // world coordinates and canvas size have a 1-to-1
+        // correspondence when the tilemap is 6 tiles wide.
+        // Our physics parameters are tuned to that, so changing
+        // it will mess with the physics. It won't mess with the
+        // scaling because that is taken care of automatically
+        // by the viewport.
+        worldWidth = canvas.getWidth() * tilemapWidth / 6f;
+        // This 3f / 2f reflects the aspect ratio of our tiles,
+        // which are 600px wide by 400px tall. In theory, any
+        // tileset with that same aspect ratio should work.
+        worldHeight = worldWidth / (tilemapWidth * 3f / 2f) *
+                tilemap.getFloat("height");
         tileHeight = worldHeight / tilemapHeight;
         tileWidth = worldWidth / tilemapWidth;
         directory = dir;

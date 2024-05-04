@@ -1,5 +1,6 @@
 package com.syndic8.phytopolis.util.menu;
 
+import com.badlogic.gdx.scenes.scene2d.ui.Slider;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.utils.Align;
 import com.syndic8.phytopolis.GameCanvas;
@@ -33,27 +34,38 @@ public class SoundMenu extends Menu {
         addItem(new BackButtonItem(back, this, ctr, c));
     }
 
-    /**
-     * Updates the labels so that they reflect the current settings.
-     */
-    public void updateSoundLabels() {
-        for (MenuItem item : getItems()) {
-            if (item instanceof SoundMenuItem) {
-                ((SoundMenuItem) item).updateLabel();
-            }
-        }
-    }
+    //    /**
+    //     * Updates the labels so that they reflect the current settings.
+    //     */
+    //    public void updateSoundLabels() {
+    //        for (MenuItem item : getItems()) {
+    //            if (item instanceof SoundMenuItem) {
+    //                ((SoundMenuItem) item).updateLabel();
+    //            }
+    //        }
+    //    }
 
     @Override
     public List<TextButton> gatherLabels() {
         List<TextButton> labels = new ArrayList<>();
         for (MenuItem item : getItems()) {
-            labels.add(item.getLabel());
             if (item instanceof SoundMenuItem) {
                 labels.add(((SoundMenuItem) item).getHeaderLabel());
+            } else {
+                labels.add(item.getLabel());
             }
         }
         return labels;
+    }
+
+    public List<Slider> gatherSliders() {
+        List<Slider> sliders = new ArrayList<>();
+        for (MenuItem item : getItems()) {
+            if (item instanceof SoundMenuItem) {
+                sliders.add(((SoundMenuItem) item).getSlider());
+            }
+        }
+        return sliders;
     }
 
 }

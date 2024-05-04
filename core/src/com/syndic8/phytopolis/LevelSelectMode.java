@@ -4,7 +4,6 @@ import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
@@ -23,7 +22,6 @@ import static com.syndic8.phytopolis.GDXRoot.ExitCode;
 
 public class LevelSelectMode extends FadingScreen implements Screen {
 
-    private final Rectangle bounds;
     private final int numLevels = 6;
     private final LevelBox[] levelBoxes;
     private final Vector2 projMousePosCache;
@@ -53,7 +51,6 @@ public class LevelSelectMode extends FadingScreen implements Screen {
     public LevelSelectMode(GameCanvas c) {
         canvas = c;
         ready = false;
-        bounds = new Rectangle(0, 0, 16, 9);
 
         //Setup levelboxes
         levelBoxes = new LevelBox[numLevels];

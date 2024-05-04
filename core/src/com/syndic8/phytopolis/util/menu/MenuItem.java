@@ -8,6 +8,9 @@ import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.syndic8.phytopolis.GameCanvas;
 import com.syndic8.phytopolis.util.SharedAssetContainer;
 
+/**
+ * Generic menu item. To be used with a MenuContainer and Menus.
+ */
 public class MenuItem {
 
     private final TextButton label;
@@ -68,14 +71,17 @@ public class MenuItem {
     /**
      * Initializes a MenuItem with a submenu.
      *
-     * @param text  Text for the label.
-     * @param index Index of this item in the menu.
-     * @param l     Listener to run on click.
-     * @param m     Menu containing this item.
-     * @param ctr   Container containing the menu.
-     * @param c     Game canvas.
-     * @param align Alignment for this item.
-     * @param scl   Font scale for this item.
+     * @param text    Text for the label.
+     * @param index   Index of this item in the menu.
+     * @param l       Listener to run on click.
+     * @param m       Menu containing this item.
+     * @param ctr     Container containing the menu.
+     * @param c       Game canvas.
+     * @param align   Alignment for this item.
+     * @param scl     Font scale for this item.
+     * @param xOffset x offset.
+     * @param yOffset y offset.
+     * @param width   width.
      */
     public MenuItem(String text,
                     int index,
@@ -110,14 +116,17 @@ public class MenuItem {
     /**
      * Initializes a MenuItem with a submenu.
      *
-     * @param text  Text for the label.
-     * @param index Index of this item in the menu.
-     * @param sm    Submenu to switch to on click.
-     * @param m     Menu containing this item.
-     * @param ctr   Container containing the menu.
-     * @param c     Game canvas.
-     * @param align Alignment for this item.
-     * @param scl   Font scale for this item.
+     * @param text    Text for the label.
+     * @param index   Index of this item in the menu.
+     * @param sm      Submenu to switch to on click.
+     * @param m       Menu containing this item.
+     * @param ctr     Container containing the menu.
+     * @param c       Game canvas.
+     * @param align   Alignment for this item.
+     * @param scl     Font scale for this item.
+     * @param xOffset x offset.
+     * @param yOffset y offset.
+     * @param width   width.
      */
     public MenuItem(String text,
                     int index,

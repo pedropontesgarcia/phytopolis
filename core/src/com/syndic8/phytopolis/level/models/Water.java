@@ -7,12 +7,12 @@ import com.syndic8.phytopolis.util.FilmStrip;
 import com.syndic8.phytopolis.util.Tilemap;
 
 public class Water extends Resource {
+
     private static final int REGEN_DELAY = 15;
     private static final int MAX_REGEN = 100;
+    private final FilmStrip waterFilmstrip;
     private int currRegen;
     private int currDelay;
-
-    private final FilmStrip waterFilmstrip;
 
     public Water(float x,
                  float y,
@@ -33,10 +33,6 @@ public class Water extends Resource {
         return currRegen == MAX_REGEN;
     }
 
-    public float getRegenRatio() {
-        return (float) currRegen / MAX_REGEN;
-    }
-
     public void clear() {
         currRegen = 0;
         currDelay = 0;
@@ -45,12 +41,8 @@ public class Water extends Resource {
     public void regenerate() {
         if (currRegen < MAX_REGEN) {
             currDelay++;
-            //System.out.println(framesOnGround);
-            //System.out.println(currWater);
             if (currDelay >= REGEN_DELAY) {
-                //System.out.println("IN IF");
                 currDelay -= REGEN_DELAY;
-                //System.out.println("NOT MAX");
                 currRegen++;
 
             }
@@ -76,6 +68,10 @@ public class Water extends Resource {
                     getAngle(),
                     sclX,
                     sclY);
+    }
+
+    public float getRegenRatio() {
+        return (float) currRegen / MAX_REGEN;
     }
 
 }

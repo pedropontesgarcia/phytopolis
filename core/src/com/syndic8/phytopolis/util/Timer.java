@@ -15,21 +15,21 @@ public class Timer {
     //     */
     //    public int starTime;
     /**
-     * The time in seconds granted by collecting sun
-     */
-    private final float sunTime;
-    /**
      * Starting time for this Timer
      */
     private final float initialTime;
     /**
+     * The time in seconds granted by collecting sun
+     */
+    public float sunTime;
+    /**
      * The time in seconds that this timer has left
      */
-    private float time;
+    public float time;
     /**
      * Whether the timer is running
      */
-    private boolean running;
+    public boolean running;
 
     /**
      * Creates a new timer representing the amount of

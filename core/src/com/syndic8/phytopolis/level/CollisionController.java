@@ -76,6 +76,7 @@ public class CollisionController implements ContactListener {
                 Leaf l = (Leaf) (player == bd1 ? bd2 : bd1);
                 if (l.getLeafType() == Leaf.leafType.BOUNCY) {
                     player.setBouncy(true);
+                    l.setBouncy(true);
                 }
             }
 
@@ -112,6 +113,9 @@ public class CollisionController implements ContactListener {
                     Leaf l = (Leaf) (player == bd1 ? bd2 : bd1);
                     if (l.getLeafType() == Leaf.leafType.BOUNCY) {
                         player.setBouncy(false);
+                        if (!ic.didJump()){
+                            l.setBouncy(false);
+                        }
                     }
                 }
             } catch (Exception e) {
@@ -204,19 +208,52 @@ public class CollisionController implements ContactListener {
                                 ((Model) fix1.getBody()
                                         .getUserData()).getType() ==
                                         Model.ModelType.SUN);
+        boolean isCollisionBetweenBugAndBouncy =
+                (((Model) fix1.getBody().getUserData()).getType() ==
+                        Model.ModelType.LEAF &&
+                        ((Model) fix2.getBody().getUserData()).getType() ==
+                        Model.ModelType.BUG) ||
+                (((Model) fix1.getBody().getUserData()).getType() ==
+                        Model.ModelType.BUG &&
+                        ((Model) fix2.getBody()
+                                .getUserData()).getType() ==
+                                Model.ModelType.LEAF);
+
         if (isCollisionBetweenPlayerAndSun ||
                 isCollisionBetweenPlatformAndSun ||
                 isCollisionBetweenTileAndSun) {
             contact.setEnabled(false);
         }
+        if (isCollisionBetweenBugAndBouncy){
+            Bug b;
+            Leaf l;
+            if (((Model) fix1.getBody().getUserData()).getType() ==
+                    Model.ModelType.BUG) {
+                b = (Bug) fix1.getBody().getUserData();
+                l = (Leaf) fix2.getBody().getUserData();
+            } else {
+                b = (Bug) fix2.getBody().getUserData();
+                l = (Leaf) fix1.getBody().getUserData();
+            }
+
+            if (l.getLeafType() == Leaf.leafType.BOUNCY){
+                hazardController.removeHazard(b);
+                plantController.removeHazardFromNodes(b);
+            }
+        }
         if (isCollisionBetweenLeafAndSun) {
             Sun s;
+            Leaf l;
             if (((Model) fix1.getBody().getUserData()).getType() ==
                     Model.ModelType.SUN) {
                 s = (Sun) fix1.getBody().getUserData();
+                l = (Leaf) fix2.getBody().getUserData();
             } else {
                 s = (Sun) fix2.getBody().getUserData();
+                l = (Leaf) fix1.getBody().getUserData();
             }
+
+            l.setSun(true);
             contact.setEnabled(false);
             s.clear();
             uiController.addTime();
@@ -255,9 +292,9 @@ public class CollisionController implements ContactListener {
         }
 
         if (isCollisionBetweenPlayerAndBug) {
-            System.out.println("BUG");
+            //            System.out.println("BUG");
             if (isPlayerGoingDown) {
-                System.out.println("BUG DOWN");
+                //                System.out.println("BUG DOWN");
                 Bug b;
                 if (((Model) fix1.getBody().getUserData()).getType() ==
                         Model.ModelType.BUG) {

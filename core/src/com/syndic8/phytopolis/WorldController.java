@@ -60,21 +60,9 @@ public abstract class WorldController extends FadingScreen implements Screen {
      */
     public static final int WORLD_POSIT = 2;
     /**
-     * Width of the game world in Box2d units
-     */
-    protected static final float DEFAULT_WIDTH = 16f;
-    /**
-     * Height of the game world in Box2d units
-     */
-    protected static final float DEFAULT_HEIGHT = 16f / 9f * 40f;
-    /**
      * The default value of gravity (going down)
      */
     protected static final float DEFAULT_GRAVITY = -4.9f;
-    /**
-     * Whether or not debug mode is active
-     */
-    private final boolean debug;
     /**
      * Reference to the game canvas
      */
@@ -119,42 +107,22 @@ public abstract class WorldController extends FadingScreen implements Screen {
     private boolean paused;
 
     /**
-     * Creates a new game world with the default values.
+     * Creates a new game world
      * <p>
      * The game world is scaled so that the screen coordinates do not agree
      * with the Box2d coordinates.  The bounds are in terms of the Box2d
      * world, not the screen.
      */
     protected WorldController() {
-        this(new Rectangle(0, 0, DEFAULT_WIDTH, DEFAULT_HEIGHT),
-             new Vector2(0, DEFAULT_GRAVITY));
-    }
-
-    /**
-     * Creates a new game world
-     * <p>
-     * The game world is scaled so that the screen coordinates do not agree
-     * with the Box2d coordinates.  The bounds are in terms of the Box2d
-     * world, not the screen.
-     *
-     * @param bounds  The game bounds in Box2d coordinates
-     * @param gravity The gravitational force on this Box2d world
-     */
-    protected WorldController(Rectangle bounds, Vector2 gravity) {
-        world = new World(gravity, false);
-        this.bounds = new Rectangle(bounds);
-
-        // Calculate scale factors
-        float scaleX = 1;
-        float scaleY = 1;
-
-        this.scale = new Vector2(scaleX, scaleY);
-
+        world = new World(new Vector2(0, DEFAULT_GRAVITY), false);
         complete = false;
         failed = false;
-        debug = false;
         active = false;
         paused = false;
+    }
+
+    protected void setBounds(float width, float height) {
+        bounds = new Rectangle(0, 0, width, height);
     }
 
     /**
@@ -217,7 +185,7 @@ public abstract class WorldController extends FadingScreen implements Screen {
                 update(delta); // This is the one that must be defined.
                 postUpdate(delta);
             }
-            draw(delta);
+            draw();
         }
     }
 
@@ -239,29 +207,19 @@ public abstract class WorldController extends FadingScreen implements Screen {
             return true;
         }
 
-        // Handle resets
-        //        if (input.didReset()) {
-        //            reset();
-        //        }
-
         // Now it is time to maybe switch screens.
-        if (input.didExit() && !isPaused() && isFadeDone()) {
+        if (input.didExit()) {
             pause();
             setPaused(true);
-            fadeOut(0.25f);
-            return true;
+            listener.exitScreen(this, GDXRoot.ExitCode.EXIT_PAUSE.ordinal());
+            return false;
         } else if (isComplete() && isFadeDone()) {
             pause();
             listener.exitScreen(this, GDXRoot.ExitCode.EXIT_VICTORY.ordinal());
             return false;
         } else if (isFailure() && isFadeDone()) {
-            //            reset();
             pause();
             listener.exitScreen(this, GDXRoot.ExitCode.EXIT_FAILURE.ordinal());
-            return false;
-        } else if (isPaused() && isFadeDone()) {
-            pause();
-            listener.exitScreen(this, GDXRoot.ExitCode.EXIT_PAUSE.ordinal());
             return false;
         }
         return true;
@@ -334,18 +292,10 @@ public abstract class WorldController extends FadingScreen implements Screen {
      *
      * @param dt Number of seconds since last animation frame
      */
-    public void draw(float dt) {
+    public void draw() {
         for (Model obj : objects) {
             obj.draw(canvas);
         }
-    }
-
-    private boolean isPaused() {
-        return paused;
-    }
-
-    public void setPaused(boolean p) {
-        paused = p;
     }
 
     /**
@@ -480,6 +430,14 @@ public abstract class WorldController extends FadingScreen implements Screen {
         scale = null;
         world = null;
         canvas = null;
+    }
+
+    protected boolean isPaused() {
+        return paused;
+    }
+
+    public void setPaused(boolean p) {
+        paused = p;
     }
 
     /**

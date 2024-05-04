@@ -23,17 +23,8 @@ import static com.syndic8.phytopolis.GDXRoot.ExitCode.*;
 public class GDXRoot extends Game implements ScreenListener {
 
     private final List<DisplayMode> displayModes;
-    /**
-     * Directory for game assets.
-     */
     AssetDirectory directory;
-    /**
-     * Drawing context to display graphics (view).
-     */
     private GameCanvas canvas;
-    /**
-     * Player mode for the asset loading screen (CONTROLLER CLASS)
-     */
     private MainMenuMode menu;
     private LevelSelectMode levelSelect;
     private LevelOverMode levelOver;
@@ -50,7 +41,7 @@ public class GDXRoot extends Game implements ScreenListener {
         controller = new GameplayMode(canvas);
         levelSelect = new LevelSelectMode(canvas);
         levelOver = new LevelOverMode(canvas);
-        pause = new PauseMode(canvas);
+        pause = new PauseMode(canvas, controller);
         Gdx.input.setInputProcessor(InputController.getInstance()
                                             .getMultiplexer());
         menu.setScreenListener(this);
@@ -65,7 +56,6 @@ public class GDXRoot extends Game implements ScreenListener {
         levelSelect.dispose();
         levelOver.dispose();
         pause.dispose();
-
         canvas.dispose();
         canvas = null;
 
@@ -87,18 +77,24 @@ public class GDXRoot extends Game implements ScreenListener {
         canvas.resizeScreen(width, height);
     }
 
+    /**
+     * Exits the current screen and transfers control to the next one.
+     *
+     * @param screen   the screen requesting to exit.
+     * @param exitCode the state of the screen upon exit.
+     */
     public void exitScreen(Screen screen, int exitCode) {
         Gdx.graphics.setSystemCursor(Cursor.SystemCursor.Arrow);
         if (screen == menu) {
             directory = menu.getAssets();
             levelSelect.gatherAssets(directory);
             levelSelect.setScreenListener(this);
-            levelSelect.setBackgroundMusic(menu.getBackgroundMusic());
+            //levelSelect.setBackgroundMusic(menu.getBackgroundMusic());
             setScreen(levelSelect);
         } else if (screen == levelSelect &&
                 exitCode == EXIT_MAIN_MENU.ordinal()) {
             menu.setScreenListener(this);
-            menu.setBackgroundMusic(levelSelect.getBackgroundMusic());
+            //menu.setBackgroundMusic(levelSelect.getBackgroundMusic());
             setScreen(menu);
         } else if (screen == levelSelect && exitCode == EXIT_LEVELS.ordinal()) {
             controller.setLevel(levelSelect.getLevel());
@@ -115,7 +111,6 @@ public class GDXRoot extends Game implements ScreenListener {
         } else if (screen == pause && exitCode == EXIT_RESUME.ordinal()) {
             controller.setPaused(false);
             controller.setScreenListener(this);
-            controller.fadeIn(0.25f);
             setScreen(controller);
         } else if (screen == pause && exitCode == EXIT_RESET.ordinal()) {
             controller.setPaused(false);
@@ -127,7 +122,7 @@ public class GDXRoot extends Game implements ScreenListener {
             controller.setPaused(false);
             levelSelect.reset();
             levelSelect.setScreenListener(this);
-            levelSelect.setBackgroundMusic(menu.getBackgroundMusic());
+            //levelSelect.setBackgroundMusic(menu.getBackgroundMusic());
             setScreen(levelSelect);
         } else if (exitCode == EXIT_VICTORY.ordinal()) {
             endLevel(true);
@@ -150,6 +145,9 @@ public class GDXRoot extends Game implements ScreenListener {
         setScreen(levelOver);
     }
 
+    /**
+     * Exit codes for the screen listener.
+     */
     public enum ExitCode {
         EXIT_QUIT,
         EXIT_VICTORY,
