@@ -1,0 +1,62 @@
+{
+    com.ray3k.tenpatch.TenPatchDrawable: {
+        barfill-10: {
+            region: barfill.9
+            horizontalStretchAreas: [
+                32,
+                95
+            ]
+            verticalStretchAreas: [
+                0,
+                63
+            ]
+            tiling: false
+            minWidth: 128
+            minHeight: 64
+            rightWidth: 1
+            leftWidth: 1
+            bottomHeight: 1
+            topHeight: 1
+            offsetX: 0
+            offsetY: 0
+            offsetXspeed: 0
+            offsetYspeed: 0
+            frameDuration: 0.03
+            regions: []
+            playMode: 2
+            crushMode: 3
+        }
+        prog-10p: {
+            region: prog.9
+            horizontalStretchAreas: [
+                32,
+                95
+            ]
+            verticalStretchAreas: [
+                0,
+                63
+            ]
+            tiling: false
+            minWidth: 128
+            minHeight: 64
+            rightWidth: 1
+            leftWidth: 1
+            bottomHeight: 1
+            topHeight: 1
+            offsetX: 0
+            offsetY: 0
+            offsetXspeed: 0
+            offsetYspeed: 0
+            frameDuration: 0.03
+            regions: []
+            playMode: 2
+            crushMode: 3
+        }
+    }
+    ProgressBarStyle: {
+        default-horizontal: {
+            background: barfill-10
+            knobBefore: prog-10p
+        }
+    }
+}
