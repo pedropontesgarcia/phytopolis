@@ -61,6 +61,7 @@ public class MainMenuMode extends FadingScreen implements Screen {
      */
     private final GameCanvas canvas;
     private final SoundController soundController;
+    private State state;
     private float timer;
     private boolean ready;
     /**
@@ -83,8 +84,7 @@ public class MainMenuMode extends FadingScreen implements Screen {
     private MenuContainer menuContainer;
     private Menu menu;
     private boolean exit;
-    private boolean loaded;
-
+    
     /**
      * Creates a MainMenuMode with the default budget, size and position.
      *
@@ -111,7 +111,6 @@ public class MainMenuMode extends FadingScreen implements Screen {
         canvas = c;
         budget = millis;
         timer = 0;
-        loaded = false;
 
         // We need these files loaded immediately
         internal = new AssetDirectory("mainmenu.json");
@@ -138,6 +137,7 @@ public class MainMenuMode extends FadingScreen implements Screen {
         active = true;
         ready = false;
         exit = false;
+        state = State.LOADING;
 
         // Load SoundController singleton
         soundController = SoundController.getInstance();
@@ -238,7 +238,6 @@ public class MainMenuMode extends FadingScreen implements Screen {
         active = true;
         ready = false;
         exit = false;
-        loaded = false;
         timer = 0;
         if (getFadeState() != Fade.SHOWN) {
             fadeIn(0.5f);
@@ -313,28 +312,27 @@ public class MainMenuMode extends FadingScreen implements Screen {
      */
     protected void update(float delta) {
         timer += delta;
+        if (state == State.LOADING_FADEOUT && isFadeDone()) {
+            state = State.MAIN_FADEIN;
+            fadeIn(1);
+            playMusic();
+        }
+        if (state == State.MAIN_FADEIN && isFadeDone()) {
+            state = State.MAIN;
+        }
         if (progress < 1) {
             assets.update(budget);
             progress = assets.getProgress();
         }
-        if (!loaded) {
+        if (progress >= 1 && timer >= LOAD_DELAY && state == State.LOADING) {
+            progress = 1;
+            state = State.LOADING_FADEOUT;
+            fadeOut(0.5f);
+        }
+        if (state == State.LOADING || state == State.LOADING_FADEOUT) {
             sprothFilmstrip.setFrame(
                     (int) (timer / 0.1f) % sprothFilmstrip.getSize());
         }
-        if (progress >= 1 && timer >= LOAD_DELAY && !loaded) {
-            progress = 1;
-            loaded = true;
-            fadeIn(1.5f);
-            if (backgroundMusic == null) {
-                backgroundMusic = assets.getEntry("newgrowth",
-                                                  AudioSource.class);
-                int i = soundController.addMusic(backgroundMusic);
-                soundController.setMusic(i);
-                soundController.setLooping(true);
-                soundController.playMusic();
-            }
-        }
-
         if (exit) {
             exit = false;
             ready = true;
@@ -350,7 +348,7 @@ public class MainMenuMode extends FadingScreen implements Screen {
      */
     private void draw() {
         canvas.clear();
-        if (loaded) {
+        if (state == State.MAIN_FADEIN || state == State.MAIN) {
             if (menuContainer.getMenu() == menu) {
                 canvas.begin();
                 canvas.draw(background,
@@ -374,12 +372,22 @@ public class MainMenuMode extends FadingScreen implements Screen {
             menuContainer.draw(canvas);
             canvas.end();
         }
-        super.draw(canvas);
-        canvas.begin();
-        if (!loaded) {
+        if (state == State.LOADING || state == State.LOADING_FADEOUT) {
+            canvas.begin();
             canvas.draw(sprothFilmstrip, Color.WHITE, 7, 3.5f, 2, 2);
+            canvas.end();
         }
-        canvas.end();
+        super.draw(canvas);
+    }
+
+    private void playMusic() {
+        if (backgroundMusic == null) {
+            backgroundMusic = assets.getEntry("newgrowth", AudioSource.class);
+            int i = soundController.addMusic(backgroundMusic);
+            soundController.setMusic(i);
+            soundController.setLooping(true);
+            soundController.playMusic();
+        }
     }
 
     /**
@@ -390,5 +398,7 @@ public class MainMenuMode extends FadingScreen implements Screen {
     public void setScreenListener(ScreenListener l) {
         listener = l;
     }
+
+    public enum State {LOADING, LOADING_FADEOUT, MAIN_FADEIN, MAIN}
 
 }
