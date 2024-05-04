@@ -24,6 +24,7 @@ public class SharedAssetContainer {
     private final FreeTypeFontGenerator uiFontGenerator;
     private final FreeTypeFontParameter uiFontParameter;
     private final Skin progressBarSkin;
+    private final Skin sliderSkin;
 
     public SharedAssetContainer() {
         uiFontMap = new HashMap<Float, BitmapFont>();
@@ -48,6 +49,7 @@ public class SharedAssetContainer {
                 "ui/skins/prog.atlas"));
         //        TextureAtlas.AtlasRegion region = atlas.findRegion("barfill.9");
         progressBarSkin = new Skin(Gdx.files.internal("ui/skins/prog.json"));
+        sliderSkin = new Skin(Gdx.files.internal("ui/skins/slider.json"));
     }
 
     /**
@@ -98,6 +100,10 @@ public class SharedAssetContainer {
      */
     public Skin getProgressBarSkin() {
         return progressBarSkin;
+    }
+
+    public Skin getSliderSkin() {
+        return sliderSkin;
     }
 
 }

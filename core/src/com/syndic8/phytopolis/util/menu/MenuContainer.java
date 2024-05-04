@@ -2,6 +2,7 @@ package com.syndic8.phytopolis.util.menu;
 
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.badlogic.gdx.scenes.scene2d.ui.Slider;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.syndic8.phytopolis.GameCanvas;
 import com.syndic8.phytopolis.InputController;
@@ -84,6 +85,11 @@ public class MenuContainer extends FadingScreen {
             for (TextButton b : menu.gatherLabels()) {
                 stage.addActor(b);
             }
+            if (menu instanceof SoundMenu) {
+                for (Slider s : ((SoundMenu) menu).gatherSliders()) {
+                    stage.addActor(s);
+                }
+            }
             fadeIn(0.1f);
         }
         if (!InputController.getInstance().isUpdateScheduled()) {
@@ -95,9 +101,9 @@ public class MenuContainer extends FadingScreen {
         if (menu instanceof GraphicsMenu) {
             ((GraphicsMenu) menu).updateGraphicsLabels();
         }
-        if (menu instanceof SoundMenu) {
-            ((SoundMenu) menu).updateSoundLabels();
-        }
+        //        if (menu instanceof SoundMenu) {
+        //            ((SoundMenu) menu).updateSoundLabels();
+        //        }
     }
 
     /**

@@ -93,9 +93,9 @@ public class DesktopLauncher {
                 settingsJson.has("fpsIndex") && settingsJson.has("windowed") &&
                 settingsJson.has("windowWidth") &&
                 settingsJson.has("windowHeight") &&
-                settingsJson.has("masterVolumeIndex") &&
-                settingsJson.has("musicVolumeIndex") &&
-                settingsJson.has("fxVolumeIndex"))) {
+                settingsJson.has("masterVolume") &&
+                settingsJson.has("musicVolume") &&
+                settingsJson.has("fxVolume"))) {
             throw new IOException();
         }
     }

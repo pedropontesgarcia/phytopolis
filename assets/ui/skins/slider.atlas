@@ -1,0 +1,20 @@
+
+slider.png
+size: 256, 256
+format: RGBA8888
+filter: Linear, Linear
+repeat: none
+barbarbar
+  rotate: false
+  xy: 1, 222
+  size: 247, 24
+  orig: 247, 24
+  offset: 0, 0
+  index: -1
+dot
+  rotate: false
+  xy: 1, 188
+  size: 32, 32
+  orig: 32, 32
+  offset: 0, 0
+  index: -1

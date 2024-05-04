@@ -11,33 +11,32 @@ import edu.cornell.gdiac.audio.AudioSource;
 import edu.cornell.gdiac.audio.MusicQueue;
 import edu.cornell.gdiac.audio.SoundEffect;
 
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 
 public class SoundController {
 
     private static SoundController soundControllerInstance;
 
-    private final float[] volumes;
     private final FileHandle configFile;
     private final JsonValue settingsJson;
+    private final float fxVolume;
     MusicQueue music;
     ArrayList<SoundEffect> sounds;
-    private int masterVolumeIndex;
-    private int musicVolumeIndex;
-    private int fxVolumeIndex;
+    private float masterVolume;
+    private float musicVolume;
 
     public SoundController() {
-        volumes = new float[]{0, 0.25f, 0.50f, 0.75f, 1.0f};
         configFile = Gdx.files.absolute(OSUtils.getConfigFile());
         JsonReader settingsJsonReader = new JsonReader();
         settingsJson = settingsJsonReader.parse(configFile);
-        masterVolumeIndex = settingsJson.getInt("masterVolumeIndex");
-        musicVolumeIndex = settingsJson.getInt("musicVolumeIndex");
-        fxVolumeIndex = settingsJson.getInt("fxVolumeIndex");
+        masterVolume = settingsJson.getFloat("masterVolume");
+        musicVolume = settingsJson.getFloat("musicVolume");
+        fxVolume = settingsJson.getInt("fxVolume");
 
         AudioEngine engine = (AudioEngine) Gdx.audio;
         music = engine.newMusicBuffer(false, 44100);
-        music.setVolume(volumes[musicVolumeIndex]);
+        music.setVolume(musicVolume);
     }
 
     public static SoundController getInstance() {
@@ -115,43 +114,58 @@ public class SoundController {
         }
     }
 
-    public void updateOption(SoundOption opn) {
+    public void updateOption(SoundOption opn, float val) {
         switch (opn) {
             case MASTER_VOLUME:
-                masterVolumeIndex = (masterVolumeIndex + 1) % volumes.length;
+                masterVolume = val;
                 saveOptions();
                 break;
             case MUSIC_VOLUME:
-                musicVolumeIndex = (musicVolumeIndex + 1) % volumes.length;
-                music.setVolume(volumes[musicVolumeIndex]);
+                musicVolume = val;
+                music.setVolume(val);
                 saveOptions();
                 break;
             case FX_VOLUME:
-                fxVolumeIndex = (fxVolumeIndex + 1) % volumes.length;
                 saveOptions();
                 break;
         }
     }
 
     private void saveOptions() {
-        settingsJson.get("masterVolumeIndex").set(masterVolumeIndex, null);
-        settingsJson.get("musicVolumeIndex").set(musicVolumeIndex, null);
-        settingsJson.get("fxVolumeIndex").set(fxVolumeIndex, null);
+        DecimalFormat df = new DecimalFormat("#.000");
+        settingsJson.get("masterVolume")
+                .set(Double.parseDouble(df.format(masterVolume)), null);
+        settingsJson.get("musicVolume")
+                .set(Double.parseDouble(df.format(musicVolume)), null);
+        settingsJson.get("fxVolume")
+                .set(Double.parseDouble(df.format(fxVolume)), null);
         configFile.writeString(settingsJson.prettyPrint(JsonWriter.OutputType.json,
                                                         0), false);
     }
 
-    public String getOptionValueString(SoundOption opn) {
+    public float getOptionValue(SoundOption opn) {
         switch (opn) {
             case MASTER_VOLUME:
-                return (int) (volumes[masterVolumeIndex] * 100) + " %";
+                return masterVolume;
             case MUSIC_VOLUME:
-                return (int) (volumes[musicVolumeIndex] * 100) + " %";
+                return musicVolume;
             case FX_VOLUME:
-                return (int) (volumes[fxVolumeIndex] * 100) + " %";
+                return fxVolume;
         }
-        return "ERROR";
+        return 0;
     }
+
+    //    public String getOptionValueString(SoundOption opn) {
+    //        switch (opn) {
+    //            case MASTER_VOLUME:
+    //                return (int) (volumes[masterVolumeIndex] * 100) + " %";
+    //            case MUSIC_VOLUME:
+    //                return (int) (volumes[musicVolumeIndex] * 100) + " %";
+    //            case FX_VOLUME:
+    //                return (int) (volumes[fxVolumeIndex] * 100) + " %";
+    //        }
+    //        return "ERROR";
+    //    }
 
     public enum SoundOption {
         MASTER_VOLUME, MUSIC_VOLUME, FX_VOLUME

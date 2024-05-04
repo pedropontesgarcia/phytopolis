@@ -1,9 +1,10 @@
 package com.syndic8.phytopolis.util.menu;
 
-import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
-import com.badlogic.gdx.scenes.scene2d.InputEvent;
+import com.badlogic.gdx.scenes.scene2d.Actor;
+import com.badlogic.gdx.scenes.scene2d.ui.Slider;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
+import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.utils.Align;
 import com.syndic8.phytopolis.GameCanvas;
@@ -15,6 +16,7 @@ public class SoundMenuItem extends MenuItem {
 
     private final SoundOption option;
     private final TextButton headerLabel;
+    private final Slider slider;
 
     public SoundMenuItem(String text,
                          int index,
@@ -22,44 +24,59 @@ public class SoundMenuItem extends MenuItem {
                          MenuContainer ctr,
                          GameCanvas c,
                          SoundOption opn) {
-        super(text, index, new ClickListener() {
-            @Override
-            public void clicked(InputEvent event, float x, float y) {
-                SoundController.getInstance().updateOption(opn);
-            }
-        }, m, ctr, c);
+        super(text, index, new ClickListener(), m, ctr, c);
         option = opn;
         BitmapFont font = SharedAssetContainer.getInstance()
                 .getUIFont(m.getFontScale());
         TextButton.TextButtonStyle labelStyle = new TextButton.TextButtonStyle();
         labelStyle.font = font;
-
         headerLabel = new TextButton(text, labelStyle);
         headerLabel.setSize(400, headerLabel.getMaxHeight());
         headerLabel.getLabel().setAlignment(Align.right);
         float ww = c.getTextViewport().getWorldWidth();
         float wh = c.getTextViewport().getWorldHeight();
         float xPosHeader = ww / 2f - headerLabel.getWidth() - 0.015f * ww;
-        float xPosButton = ww / 2f + 0.015f * ww;
-        float yPos =
+        float yPosHeader =
                 wh / 2f + (m.getLength() - 1f) * m.getSeparation() * wh / 2f -
                         index * m.getSeparation() * wh -
                         headerLabel.getHeight() / 2f + wh * m.getYOffset();
-        headerLabel.setPosition(xPosHeader, yPos);
-        getLabel().setPosition(xPosButton, yPos);
-        TextButton.TextButtonStyle style = getLabel().getStyle();
-        style.fontColor = new Color(0.6f, 0.6f, 0.6f, 1);
-        style.overFontColor = Color.WHITE;
-        getLabel().setStyle(style);
+        headerLabel.setPosition(xPosHeader, yPosHeader);
+
+        slider = new Slider(0,
+                            20,
+                            0.1f,
+                            false,
+                            SharedAssetContainer.getInstance().getSliderSkin());
+        float xPosSlider = ww / 2f + 0.015f * ww;
+        float yPosSlider =
+                wh / 2f + (m.getLength() - 1f) * m.getSeparation() * wh / 2f -
+                        index * m.getSeparation() * wh -
+                        slider.getHeight() / 2f + wh * m.getYOffset();
+        slider.setPosition(xPosSlider, yPosSlider);
+        slider.setWidth(m.getWidth());
+        slider.addListener(new ChangeListener() {
+            @Override
+            public void changed(ChangeEvent event, Actor actor) {
+                SoundController.getInstance()
+                        .updateOption(option,
+                                      slider.getValue() / slider.getMaxValue());
+            }
+        });
+        slider.setValue(SoundController.getInstance().getOptionValue(opn) *
+                                slider.getMaxValue());
     }
 
-    public void updateLabel() {
-        getLabel().setText(SoundController.getInstance()
-                                   .getOptionValueString(option));
-    }
+    //    public void updateLabel() {
+    //        getLabel().setText(SoundController.getInstance()
+    //                                   .getOptionValueString(option));
+    //    }
 
     public TextButton getHeaderLabel() {
         return headerLabel;
+    }
+
+    public Slider getSlider() {
+        return slider;
     }
 
 }
