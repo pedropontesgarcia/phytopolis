@@ -316,7 +316,7 @@ public class MainMenuMode extends FadingScreen implements Screen {
         if (state == State.LOADING_FADEOUT && isFadeDone()) {
             state = State.MAIN_FADEIN;
             fadeIn(1);
-            playMusic();
+            //playMusic();
         }
         if (state == State.MAIN_FADEIN && isFadeDone()) {
             state = State.MAIN;
