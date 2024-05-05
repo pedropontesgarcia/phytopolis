@@ -200,9 +200,9 @@ public class GameplayMode extends WorldController {
     public void update(float dt) {
         int water = resourceController.getCurrWater();
         soundController.setMusicVolume(super.getVolume());
-        System.out.println("Music playing? " + soundController.isMusicPlaying());
-        System.out.println("What music? " + soundController.getPlayingMusic());
-        System.out.println("Is it looping? " + soundController.getIsLooping());
+//        System.out.println("Music playing? " + soundController.isMusicPlaying());
+//        System.out.println("What music? " + soundController.getPlayingMusic());
+//        System.out.println("Is it looping? " + soundController.getIsLooping());
         // Process actions in object model
         avatar.setMovement(ic.getHorizontal() * avatar.getForce());
         avatar.setJumping(ic.didJump());
