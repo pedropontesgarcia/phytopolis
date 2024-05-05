@@ -210,7 +210,6 @@ public abstract class WorldController extends FadingScreen implements Screen {
         // Now it is time to maybe switch screens.
         if (input.didExit()) {
             pause();
-            setPaused(true);
             listener.exitScreen(this, GDXRoot.ExitCode.EXIT_PAUSE.ordinal());
             return false;
         } else if (isComplete() && isFadeDone()) {

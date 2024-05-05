@@ -39,7 +39,7 @@
     "ui:branch-cursor": "ui/branch-cursor.png",
     "ui:leaf-cursor": "ui/leaf-cursor.png",
     "ui:water-cursor": "ui/water-cursor.png",
-    "ui:vignette": "ui/vignette.png",
+    "ui:vignette": "ui/vignette2.png",
     "over:victory": "gameplay/victory_text.png",
     "over:failure": "gameplay/failure.png"
   },

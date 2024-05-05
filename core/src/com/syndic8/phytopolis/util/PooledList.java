@@ -36,6 +36,14 @@
       */
      private final Pool<Entry> memory;
      /**
+      * Cached reference to the value iterator
+      */
+     private final ValueIterator values = new ValueIterator();
+     /**
+      * Cached reference to the entry iterator
+      */
+     private final EntryIterator entries = new EntryIterator();
+     /**
       * The queue head
       */
      private Entry head;
@@ -47,14 +55,6 @@
       * The number of elements in the queue
       */
      private int size;
-     /**
-      * Cached reference to the value iterator
-      */
-     private final ValueIterator values = new ValueIterator();
-     /**
-      * Cached reference to the entry iterator
-      */
-     private final EntryIterator entries = new EntryIterator();
 
      /**
       * Creates a new empty PooledList
@@ -85,51 +85,6 @@
      }
 
      /**
-      * Removes the last element of the list.
-      *
-      * @return the element removed
-      */
-     public E pop() {
-         return removeTail();
-     }
-
-     /**
-      * Adds an element to the end of the list
-      *
-      * @param e the element to add
-      * @return whether the addition succeeeded
-      */
-     public boolean push(E e) {
-         return add(e);
-     }
-
-     /**
-      * Returns the first element of the list.
-      *
-      * @return the first element of the list.
-      */
-     public E getHead() {
-         if (size == 0) {
-             throw new IndexOutOfBoundsException();
-         }
-
-         return head.value;
-     }
-
-     /**
-      * Returns the last element of the list.
-      *
-      * @return the last element of the list.
-      */
-     public E getTail() {
-         if (size == 0) {
-             throw new IndexOutOfBoundsException();
-         }
-
-         return tail.value;
-     }
-
-     /**
       * Removes the first element of the list.
       *
       * @return the element removed
@@ -148,6 +103,15 @@
          size--;
          memory.free(last);
          return value;
+     }
+
+     /**
+      * Removes the last element of the list.
+      *
+      * @return the element removed
+      */
+     public E pop() {
+         return removeTail();
      }
 
      /**
@@ -177,6 +141,16 @@
       * @param e the element to add
       * @return whether the addition succeeeded
       */
+     public boolean push(E e) {
+         return add(e);
+     }
+
+     /**
+      * Adds an element to the end of the list
+      *
+      * @param e the element to add
+      * @return whether the addition succeeeded
+      */
      public boolean add(E e) {
          Entry entry = memory.obtain();
          if (entry == null) {
@@ -192,6 +166,82 @@
          tail = entry;
          size++;
          return true;
+     }
+
+     /**
+      * Returns the first element of the list.
+      *
+      * @return the first element of the list.
+      */
+     public E getHead() {
+         if (size == 0) {
+             throw new IndexOutOfBoundsException();
+         }
+
+         return head.value;
+     }
+
+     /**
+      * Returns the last element of the list.
+      *
+      * @return the last element of the list.
+      */
+     public E getTail() {
+         if (size == 0) {
+             throw new IndexOutOfBoundsException();
+         }
+
+         return tail.value;
+     }
+
+     /**
+      * Returns the element at the specified position
+      *
+      * @param index the position to access
+      * @return the element at the specified position
+      */
+     public E get(int index) {
+         if (index == 0) {
+             return head.value;
+         } else if (index == size - 1) {
+             return tail.value;
+         } else {
+             Entry curr = head;
+             for (int ii = 1; ii < index; ii++) {
+                 curr = curr.next;
+             }
+             return curr.value;
+         }
+     }
+
+     /**
+      * Replaces the element at the specified position
+      *
+      * @param index   the position to replace the element
+      * @param element the element to replace with
+      * @return the original element
+      */
+     public E set(int index, E element) {
+         if (index >= size) {
+             throw new IndexOutOfBoundsException();
+         }
+
+         E value;
+         if (index == 0) {
+             value = head.value;
+             head.value = element;
+         } else if (index == size) {
+             value = tail.value;
+             tail.value = element;
+         } else {
+             Entry curr = head;
+             for (int ii = 1; ii < index; ii++) {
+                 curr = curr.next;
+             }
+             value = curr.value;
+             curr.value = element;
+         }
+         return value;
      }
 
      /**
@@ -246,26 +296,6 @@
      }
 
      /**
-      * Returns the element at the specified position
-      *
-      * @param index the position to access
-      * @return the element at the specified position
-      */
-     public E get(int index) {
-         if (index == 0) {
-             return head.value;
-         } else if (index == size - 1) {
-             return tail.value;
-         } else {
-             Entry curr = head;
-             for (int ii = 1; ii < index; ii++) {
-                 curr = curr.next;
-             }
-             return curr.value;
-         }
-     }
-
-     /**
       * Removes the element at the specified position
       *
       * @param index the position to access
@@ -304,36 +334,6 @@
          }
          size--;
          memory.free(last);
-         return value;
-     }
-
-     /**
-      * Replaces the element at the specified position
-      *
-      * @param index   the position to replace the element
-      * @param element the element to replace with
-      * @return the original element
-      */
-     public E set(int index, E element) {
-         if (index >= size) {
-             throw new IndexOutOfBoundsException();
-         }
-
-         E value;
-         if (index == 0) {
-             value = head.value;
-             head.value = element;
-         } else if (index == size) {
-             value = tail.value;
-             tail.value = element;
-         } else {
-             Entry curr = head;
-             for (int ii = 1; ii < index; ii++) {
-                 curr = curr.next;
-             }
-             value = curr.value;
-             curr.value = element;
-         }
          return value;
      }
 
@@ -393,6 +393,15 @@
          }
 
          /**
+          * Resets this entry to an empty object for reuse later.
+          */
+         public void reset() {
+             value = null;
+             next = null;
+             prev = null;
+         }
+
+         /**
           * Returns the value for this entry
           *
           * @return the value for this entry
@@ -419,15 +428,6 @@
              }
              size--;
              memory.free(this);
-         }
-
-         /**
-          * Resets this entry to an empty object for reuse later.
-          */
-         public void reset() {
-             value = null;
-             next = null;
-             prev = null;
          }
 
      }

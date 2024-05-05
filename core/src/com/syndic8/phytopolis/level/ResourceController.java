@@ -18,7 +18,7 @@ public class ResourceController {
     /**
      * Amount of water required to extinguish a fire
      */
-    private final int FIRE_AMT = 20;
+    private final int FIRE_AMT = 0;
     /**
      * Amount of water required for an upgrade, IN TOTAL
      */

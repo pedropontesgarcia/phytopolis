@@ -9,6 +9,7 @@ import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
+import com.badlogic.gdx.scenes.scene2d.ui.ProgressBar;
 import com.syndic8.phytopolis.GameCanvas;
 import com.syndic8.phytopolis.InputController;
 import com.syndic8.phytopolis.assets.AssetDirectory;
@@ -25,6 +26,7 @@ public class UIController {
     private final InputController ic;
     private final Timer timer;
     private final GameCanvas canvas;
+    private final ProgressBar progressBar;
     private FilmStrip current;
     private FilmStrip waterdropStrip;
     private FilmStrip waterdropAdd;
@@ -52,6 +54,18 @@ public class UIController {
                                   label.getWidth() / 2f,
                           c.getTextViewport().getWorldHeight() * 0.875f);
         stage.addActor(label);
+        progressBar = new ProgressBar(0,
+                                      100,
+                                      0.5f,
+                                      false,
+                                      SharedAssetContainer.getInstance()
+                                              .getProgressBarSkin());
+        progressBar.setSize(progressBar.getWidth() * 2,
+                            progressBar.getHeight());
+        progressBar.setPosition(c.getTextViewport().getWorldWidth() / 2f -
+                                        progressBar.getWidth() / 2f,
+                                c.getTextViewport().getWorldHeight() * 0.9f);
+        stage.addActor(progressBar);
         initialize();
     }
 
@@ -123,22 +137,32 @@ public class UIController {
      *
      * @param waterLvl level of water, in percentage between 0 and 1.
      */
+
+    /**
+     * Updates the UIController.
+     *
+     * @param dt               delta time.
+     * @param waterLvl         level of water, in percentage between 0 and 1.
+     * @param hazardController hazard controller.
+     * @param addedWater       whether water needs to be added.
+     * @param removedWater     whether water needs to be removed.
+     * @param timerDeduction   deduction to apply to the timer.
+     */
     public void update(float dt,
                        float waterLvl,
                        HazardController hazardController,
                        boolean addedWater,
                        boolean removedWater,
-                       int timerDeductions) {
+                       float timerDeduction,
+                       float fireProgress) {
         updateCursor(hazardController);
         updateTexture(waterLvl, addedWater, removedWater);
-        timer.updateTime(dt + timerDeductions); // 1 SEC PER LEAF BITE
+        progressBar.setValue(fireProgress);
+        timer.updateTime(dt + timerDeduction); // 1 SEC PER LEAF BITE
         label.setText(timer.toString());
     }
 
-    /**
-     * Updates the custom cursor
-     */
-    public void updateCursor(HazardController hazardController) {
+    private void updateCursor(HazardController hazardController) {
         projMousePosCache.set(ic.getMouseX(), ic.getMouseY());
         Vector2 unprojMousePos = canvas.unprojectGame(projMousePosCache);
         if (hazardController.hasFire(unprojMousePos)) {
@@ -156,12 +180,9 @@ public class UIController {
         }
     }
 
-    /**
-     * Updates the UI texture
-     */
-    public void updateTexture(float waterLvl,
-                              boolean addedWater,
-                              boolean removedWater) {
+    private void updateTexture(float waterLvl,
+                               boolean addedWater,
+                               boolean removedWater) {
         if (addedWater) {
             current = waterdropAdd;
             current.setFrame(Math.round((current.getSize() - 1) * waterLvl));

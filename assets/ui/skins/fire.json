@@ -1,0 +1,30 @@
+{
+  com.ray3k.tenpatch.TenPatchDrawable: {
+    redbarten: {
+      region: redbarnine
+      horizontalStretchAreas: [15, 231]
+      verticalStretchAreas: [11, 12]
+      tiling: false
+      minWidth: 247
+      minHeight: 24
+      rightWidth: 1
+      leftWidth: 1
+      bottomHeight: 1
+      topHeight: 1
+      offsetX: 0
+      offsetY: 0
+      offsetXspeed: 0
+      offsetYspeed: 0
+      frameDuration: 0.03
+      regions: []
+      playMode: 2
+      crushMode: 3
+    }
+  }
+  com.badlogic.gdx.scenes.scene2d.ui.ProgressBar$ProgressBarStyle: {
+    default-horizontal: {
+      background: darkredbarnine
+      knobBefore: redbarten
+    }
+  }
+}
