@@ -22,6 +22,7 @@ import com.syndic8.phytopolis.level.*;
 import com.syndic8.phytopolis.level.models.*;
 import com.syndic8.phytopolis.util.FilmStrip;
 import com.syndic8.phytopolis.util.Tilemap;
+import edu.cornell.gdiac.audio.AudioSource;
 
 /**
  * Main controller for the gameplay mode.
@@ -49,10 +50,11 @@ public class GameplayMode extends WorldController {
     private Tilemap tilemap;
     private JsonValue constants;
     private Player avatar;
-    private Music backgroundMusic;
+    private int backgroundMusic;
     private String lvl;
     private CollisionController collisionController;
     private float timeSinceUIUpdate = 0;
+    private SoundController soundController;
 
     /**
      * Creates and initialize a new instance of the game.
@@ -64,6 +66,8 @@ public class GameplayMode extends WorldController {
         gathered = false;
         ic = InputController.getInstance();
         canvas = c;
+        this.soundController = SoundController.getInstance();
+        this.backgroundMusic = -1;
     }
 
     public void setLevel(String lvl) {
@@ -84,6 +88,13 @@ public class GameplayMode extends WorldController {
         canvas.setWorldSize(tilemap.getWorldWidth());
 
         setBounds(tilemap.getWorldWidth(), tilemap.getWorldHeight());
+
+        AudioSource bgm = directory.getEntry("viridian", AudioSource.class);
+        backgroundMusic = soundController.addMusic(bgm);
+        soundController.setMusic(backgroundMusic);
+        soundController.setLooping(true);
+        soundController.playMusic();
+
         if (!gathered) {
             gathered = true;
             avatarTexture = directory.getEntry("gameplay:player",
@@ -134,10 +145,6 @@ public class GameplayMode extends WorldController {
             hazardController.gatherAssets(directory);
             uiController.gatherAssets(directory);
             sunController.gatherAssets(directory);
-            backgroundMusic = directory.getEntry("viridian", Music.class);
-            backgroundMusic.setLooping(true);
-            backgroundMusic.setVolume(0);
-            backgroundMusic.play();
         }
     }
 
@@ -146,8 +153,11 @@ public class GameplayMode extends WorldController {
      */
     public void show() {
         super.show();
-        if (!backgroundMusic.isPlaying()) {
-            backgroundMusic.play();
+        if(soundController.getMusicQueuePos() != backgroundMusic){
+            soundController.setMusic(backgroundMusic);
+        }
+        if (!soundController.isMusicPlaying()) {
+            soundController.playMusic();
         }
         uiController.startTimer();
         setPaused(false);
@@ -189,7 +199,10 @@ public class GameplayMode extends WorldController {
      */
     public void update(float dt) {
         int water = resourceController.getCurrWater();
-        backgroundMusic.setVolume(super.getVolume());
+        soundController.setMusicVolume(super.getVolume());
+//        System.out.println("Music playing? " + soundController.isMusicPlaying());
+//        System.out.println("What music? " + soundController.getPlayingMusic());
+//        System.out.println("Is it looping? " + soundController.getIsLooping());
         // Process actions in object model
         avatar.setMovement(ic.getHorizontal() * avatar.getForce());
         avatar.setJumping(ic.didJump());
@@ -329,7 +342,6 @@ public class GameplayMode extends WorldController {
      * <p>
      * The method draws all objects in the order that they were added.
      *
-     * @param dt Number of seconds since last animation frame
      */
     public void draw() {
         canvas.clear();
@@ -378,7 +390,7 @@ public class GameplayMode extends WorldController {
     public void hide() {
         // Useless if called in outside animation loop
         super.hide();
-        backgroundMusic.pause();
+        //soundController.stopMusic();
         uiController.pauseTimer();
     }
 
@@ -409,13 +421,15 @@ public class GameplayMode extends WorldController {
         objects.clear();
         addQueue.clear();
         world.dispose();
-        backgroundMusic.stop();
-        backgroundMusic.play();
+//        soundController.stopMusic();
+//        soundController.playMusic();
         uiController.reset();
 
         ic.resetScrolled();
 
         resourceController.reset();
+
+        soundController.rewindMusic();
 
         float branchHeight = tilemap.getTileHeight();
         int plantNodesPerRow = Math.round(

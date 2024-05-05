@@ -25,6 +25,7 @@ public class SoundController {
     ArrayList<SoundEffect> sounds;
     private float masterVolume;
     private float musicVolume;
+    private int musicQueuePos;
 
     public SoundController() {
         configFile = Gdx.files.absolute(OSUtils.getConfigFile());
@@ -70,6 +71,7 @@ public class SoundController {
 
     public void setLooping(boolean b) {
         music.setLooping(b);
+        music.setLoopBehavior(true);
     }
 
     /**
@@ -78,9 +80,8 @@ public class SoundController {
      * @param i the index of the song to be played
      */
     public void setMusic(int i) {
-        music.stop();
         music.jumpToSource(i);
-        music.play();
+        musicQueuePos = i;
     }
 
     /**
@@ -112,6 +113,24 @@ public class SoundController {
         for (SoundEffect s : sounds) {
             s.stop();
         }
+    }
+
+    public void setMusicVolume(float value){
+        music.setVolume(value);
+    }
+
+    public int getMusicQueuePos(){
+        return musicQueuePos;
+    }
+
+    public boolean isMusicPlaying(){
+        return music.isPlaying();
+    }
+
+    public void rewindMusic(){
+        music.reset();
+        setMusic(musicQueuePos);
+        setLooping(true);
     }
 
     public void updateOption(SoundOption opn, float val) {
@@ -153,6 +172,10 @@ public class SoundController {
                 return fxVolume;
         }
         return 0;
+    }
+
+    public boolean getIsLooping() {
+        return music.isLooping();
     }
 
     //    public String getOptionValueString(SoundOption opn) {
