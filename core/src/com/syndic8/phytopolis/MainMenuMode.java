@@ -387,7 +387,6 @@ public class MainMenuMode extends FadingScreen implements Screen {
             canvas.end();
         }
         super.draw(canvas);
-        System.out.println(state);
     }
 /*
     private void playMusic() {

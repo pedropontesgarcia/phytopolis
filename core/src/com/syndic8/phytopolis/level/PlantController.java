@@ -635,6 +635,8 @@ public class PlantController {
      * draws the branch that the mouse hovers over
      *
      * @param canvas the canvas to draw to
+     * @param x mouse x position
+     * @param y mouse y position
      */
     public void drawGhostBranch(GameCanvas canvas, float x, float y) {
         int xIndex = worldCoordToIndex(x, y)[0];
@@ -666,6 +668,55 @@ public class PlantController {
                                        1);
             branch.setFilmStrip(branchTexture);
             branch.drawGhost(canvas);
+        }
+    }
+
+    /**
+     * draws the leaf that the mouse hovers over
+     *
+     * @param canvas the canvas to draw to
+     * @param x mouse x position
+     * @param y mouse y position
+     */
+    public void drawGhostLeaf(GameCanvas canvas, Leaf.leafType type, float leafWidth, float x, float y) {
+        int xIndex = screenCoordToIndex(x, y)[0];
+        int yIndex = screenCoordToIndex(x, y)[1];
+        boolean lowerNode = xIndex % 2 == 0;
+        if (!inBounds(xIndex, yIndex)) return;
+
+        if (!plantGrid[xIndex][yIndex].hasLeaf() && (yIndex > 0 || !lowerNode)) {
+            float xl = plantGrid[xIndex][yIndex].getX();
+            float yl = plantGrid[xIndex][yIndex].getY();
+            if (screenCoordToIndex(xl / worldToPixelConversionRatio, yl / worldToPixelConversionRatio)[1] > 0
+                    && plantGrid[xIndex][yIndex].hasBranch()
+                    || leafGrowableAt(xl / worldToPixelConversionRatio, yl / worldToPixelConversionRatio)) {
+
+
+                Leaf leaf = new Leaf(xl / worldToPixelConversionRatio,
+                        yl / worldToPixelConversionRatio,
+                        leafWidth,
+                        plantGrid[xIndex][yIndex].leafHeight,
+                        type,
+                        tilemap,
+                        0.75f);
+
+                switch (type) {
+                    case NORMAL:
+                        leaf.setFilmStrip(leafTexture);
+                        break;
+                    case BOUNCY:
+                        leaf.setFilmStrip(bouncyLeafTexture);
+                        break;
+                    case NORMAL1:
+                        leaf.setFilmStrip(leafTextureOne);
+                        break;
+                    case NORMAL2:
+                        leaf.setFilmStrip(leafTextureTwo);
+                        break;
+                }
+                leaf.drawGhost(canvas);
+            }
+
         }
     }
 
@@ -814,7 +865,7 @@ public class PlantController {
         /**
          * height of the leaf at this node
          */
-        private final float leafHeight = 0.05f;
+        public final float leafHeight = 0.05f;
         /**
          * conversion ration for converting between world coords and pixels
          */
@@ -823,7 +874,7 @@ public class PlantController {
         /**
          * width of the leaf at this node
          */
-        private final float leafWidth = 1.5f;
+        public final float leafWidth = 1.5f;
         /**
          * whether there is a branch in the leftmost slot of this node
          */

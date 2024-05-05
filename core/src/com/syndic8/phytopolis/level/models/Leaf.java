@@ -24,6 +24,8 @@ public class Leaf extends BoxObject {
 
     private InputController ic;
 
+    private final Color ghostColor = new Color(1, 1, 1, .5f);
+
     /**
      * Creates a new Leaf object with the specified position and dimensions
      *
@@ -171,6 +173,30 @@ public class Leaf extends BoxObject {
             getFilmStrip().setFrame((int) animFrame);
         }
         canvas.draw(texture, Color.WHITE, x, y, getX(), getY(), 0, sclX, sclY);
+    }
+
+    /**
+     * Draws this object to the canvas
+     *
+     * @param canvas The drawing context
+     */
+    public void drawGhost(GameCanvas canvas) {
+        float width = tilemap.getTileWidth() * textureSclInTiles;
+        float height = tilemap.getTileHeight() * textureSclInTiles;
+        float sclX = width / texture.getRegionWidth();
+        float sclY = height / texture.getRegionHeight();
+        float x = texture.getRegionWidth() / 2.0f;
+        float y = texture.getRegionHeight() / 2.0f;
+        texture.setFrame(4);
+        canvas.draw(texture,
+                ghostColor,
+                x,
+                y,
+                getX(),
+                getY(),
+                0,
+                sclX,
+                sclY);
     }
 
     /**
