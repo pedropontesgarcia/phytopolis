@@ -231,7 +231,7 @@ public class GameplayMode extends WorldController {
                 ((Water) m).regenerate();
             }
             if (m instanceof Sun) {
-                ((Sun) m).update(m.getY() < plantController.getMaxLeafHeight() -
+                ((Sun) m).update(dt, m.getY() < plantController.getMaxLeafHeight() -
                         resourceController.SUN_TOLERANCE);
 
             }
