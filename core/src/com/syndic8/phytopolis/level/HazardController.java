@@ -390,23 +390,25 @@ public class HazardController {
             lastUpdateTime = currentTime; // Reset the last update time
             addList.add(generateDrone());
             addList.add(generateBug());
-            int i = 0;
-            while (i < hazards.size()) {
-                Hazard h = hazards.get(i);
-                int hx = (int) h.getLocation().x;
-                int hy = (int) h.getLocation().y;
-                if (h instanceof Fire) {
-                    Fire f = (Fire) h;
-                    // check if branch is still there (floating fire bug)
+        }
+        int i = 0;
+        while (i < hazards.size()) {
+            Hazard h = hazards.get(i);
+            int hx = (int) h.getLocation().x;
+            int hy = (int) h.getLocation().y;
+            if (h instanceof Fire) {
+                Fire f = (Fire) h;
+                // check if branch is still there (floating fire bug)
 
-                    if (plantController.nodeIsEmpty(hx, hy)) {
-                        removeHazard(h);
-                        plantController.removeHazardFromNodes(h);
-                        continue; // Continue to next hazard after removing
-                    }
+                if (plantController.nodeIsEmpty(hx, hy)) {
+                    removeHazard(h);
+                    plantController.removeHazardFromNodes(h);
+                    continue; // Continue to next hazard after removing
                 }
+            }
+            if (currentTime - lastUpdateTime >=
+                    1000) {
                 // spread fire if the time is right, otherwise decrement timer
-                //                        int time = f.getDuration();
                 if (h.tick()) {
                     removeHazard(h);
                     plantController.removeHazardFromNodes(h);
@@ -415,8 +417,9 @@ public class HazardController {
                         spreadFire(h.getLocation());
                     }
                 }
-                i++;
             }
+
+            i++;
         }
         addList.removeAll(Collections.singleton(null));
         return addList;
