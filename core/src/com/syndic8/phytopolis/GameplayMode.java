@@ -21,6 +21,7 @@ import com.syndic8.phytopolis.assets.AssetDirectory;
 import com.syndic8.phytopolis.level.*;
 import com.syndic8.phytopolis.level.models.*;
 import com.syndic8.phytopolis.util.FilmStrip;
+import com.syndic8.phytopolis.util.PooledList;
 import com.syndic8.phytopolis.util.Tilemap;
 import edu.cornell.gdiac.audio.AudioSource;
 
@@ -133,6 +134,7 @@ public class GameplayMode extends WorldController {
                                                     8,
                                                     6,
                                                     10,
+                                                    new PooledList<>(), // REPLACE THIS!!
                                                     tilemap);
             sunController = new SunController(5,
                                               10,
@@ -199,6 +201,7 @@ public class GameplayMode extends WorldController {
      */
     public void update(float dt) {
         int water = resourceController.getCurrWater();
+        hazardController.update(dt);
         soundController.setMusicVolume(super.getVolume());
 //        System.out.println("Music playing? " + soundController.isMusicPlaying());
 //        System.out.println("What music? " + soundController.getPlayingMusic());
@@ -228,7 +231,7 @@ public class GameplayMode extends WorldController {
                 ((Water) m).regenerate();
             }
             if (m instanceof Sun) {
-                ((Sun) m).update(m.getY() < plantController.getMaxLeafHeight() -
+                ((Sun) m).update(dt, m.getY() < plantController.getMaxLeafHeight() -
                         resourceController.SUN_TOLERANCE);
 
             }

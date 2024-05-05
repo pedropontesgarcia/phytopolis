@@ -9,7 +9,7 @@ import com.syndic8.phytopolis.util.Tilemap;
 
 public class Sun extends Resource {
 
-    private static final float SPIN_RATE = 0.025f;
+    private static final float SPIN_RATE = 2f;
     //private final FilmStrip sunFilmstrip;
     private Color color;
     private float maxLeafHeight = -1;
@@ -56,13 +56,14 @@ public class Sun extends Resource {
         return ModelType.SUN;
     }
 
-    public void update(boolean belowLeaf) {
+    public void update(float dt, boolean belowLeaf) {
         if (maxLeafHeight == -1 && belowLeaf) {
             startFade(getY());
         }
         if (belowScreen() || maxLeafHeight - getY() >= 1) {
             clear();
         }
+        angle += dt * SPIN_RATE;
     }
 
     public void draw(GameCanvas canvas) {
@@ -73,7 +74,6 @@ public class Sun extends Resource {
         if (maxLeafHeight != -1) {
             color.set(1.0f, 1.0f, 1.0f, 1.0f - Math.max(0, maxLeafHeight - getY()));
         }
-        angle += SPIN_RATE;
         canvas.draw(sunCircle,
                     color,
                     origin.x,

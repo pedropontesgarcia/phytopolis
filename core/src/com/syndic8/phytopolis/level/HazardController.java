@@ -115,15 +115,19 @@ public class HazardController {
     private TextureRegion greenWarningFlashTexture;
     private TextureRegion greenArrowDownTexture;
     private TextureRegion greenArrowUpTexture;
+    private PooledList<Float> powerlineHeights;
+    private PooledList<Vector2> validFireLocs;
+    private float FIRE_BUFFER = 5;
+    private float fireProgress;
 
-    /**
-     * Initializes a HazardController with the given parameters.
-     *
-     * @param plantController The PlantController instance associated with this HazardController.
-     */
-    public HazardController(PlantController plantController, Tilemap tm) {
-        this(plantController, 8, 100000000, 6, 8, 6, 6, tm);
-    }
+//    /**
+//     * Initializes a HazardController with the given parameters.
+//     *
+//     * @param plantController The PlantController instance associated with this HazardController.
+//     */
+//    public HazardController(PlantController plantController, Tilemap tm) {
+//        this(plantController, 8, 100000000, 6, 8, 6, 6, tm);
+//    }
 
     /**
      * Initializes a HazardController with the given parameters.
@@ -140,6 +144,7 @@ public class HazardController {
                             int burnTime,
                             int explodeTime,
                             int eatTime,
+                            PooledList<Float> powerlineHeights,
                             Tilemap tm) {
         this.fireFrequency = fireFrequency;
         this.droneFrequency = droneFrequency;
@@ -149,13 +154,16 @@ public class HazardController {
         this.burnTime = burnTime;
         this.explodeTime = explodeTime;
         this.eatTime = eatTime;
+        this.powerlineHeights = powerlineHeights;
         hazards = new ArrayList<>();
         fireNodes = new ArrayList<>();
         bugNodes = new ArrayList<>();
         addList = new PooledList<>();
+        validFireLocs = new PooledList<>();
         height = plantController.getHeight();
         width = plantController.getWidth();
         tilemap = tm;
+        fireProgress = 0;
     }
 
     public void reset(int fireFrequency,
@@ -180,47 +188,53 @@ public class HazardController {
         tilemap = tm;
     }
 
+    public Hazard generateHazard(Model.ModelType type) {
+        int hazardHeight = generateHazardHeight(type);
+        if (hazardHeight == -1) return null;
+        int hazardWidth = generateHazardWidth(hazardHeight, type);
+        if (hazardWidth == -1) return null;
+        return generateHazard(type, hazardWidth, hazardHeight);
+    }
+
     /**
      * Generates a hazard at random node at a generated height if the time is right.
      *
      * @param type The type of hazard.
      * @return the generated hazard (null if none)
      */
-    public Hazard generateHazard(Model.ModelType type) {
-        int hazardHeight = generateHazardHeight(type);
-        if (hazardHeight == -1) return null;
-        int hazardWidth = generateHazardWidth(hazardHeight, type);
-        if (hazardWidth == -1) return null;
-        int x = hazardWidth;
-        int y = hazardHeight;
+    public Hazard generateHazard(Model.ModelType type, int x, int y) {
         switch (type) {
             case FIRE:
-                if (((plantController.inBounds(x - 1, y - 1) &&
-                        plantController.branchExists(x - 1,
-                                                     y - 1,
-                                                     PlantController.branchDirection.RIGHT)) ||
-                        (plantController.inBounds(x + 1, y - 1) &&
-                                plantController.branchExists(x + 1,
-                                                             y - 1,
-                                                             PlantController.branchDirection.LEFT)) ||
-                        (plantController.inBounds(x, y - 1) &&
-                                plantController.branchExists(x,
-                                                             y - 1,
-                                                             PlantController.branchDirection.MIDDLE)) ||
-                        (plantController.inBounds(x, y) &&
-                                !plantController.nodeIsEmpty(x, y))) &&
-                        !plantController.hasHazard(hazardWidth, hazardHeight)) {
-                    return generateHazard(type, hazardWidth, hazardHeight);
+                if (isValidFireLocation(x, y)) {
+                    return generateHazardAt(type, x, y);
                 }
                 break;
             case BUG:
                 if (plantController.hasLeaf(x, y) &&
                         !plantController.hasHazard(x, y)) {
-                    return generateHazard(type, hazardWidth, hazardHeight);
+                    return generateHazardAt(type, x, y);
                 }
                 break;
         }
         return null;
+    }
+
+    public boolean isValidFireLocation(int x, int y) {
+        return !plantController.hasHazard(x, y) &&
+                ((plantController.inBounds(x - 1, y - 1) &&
+                plantController.branchExists(x - 1,
+                        y - 1,
+                        PlantController.branchDirection.RIGHT)) ||
+                (plantController.inBounds(x + 1, y - 1) &&
+                        plantController.branchExists(x + 1,
+                                y - 1,
+                                PlantController.branchDirection.LEFT)) ||
+                (plantController.inBounds(x, y - 1) &&
+                        plantController.branchExists(x,
+                                y - 1,
+                                PlantController.branchDirection.MIDDLE)) ||
+                (plantController.inBounds(x, y) &&
+                        !plantController.nodeIsEmpty(x, y)));
     }
 
     /**
@@ -295,11 +309,29 @@ public class HazardController {
      * @return the generated fire (null if none)
      */
     public Fire generateFire() {
-        Hazard h = generateHazard(FIRE);
+        Vector2 fireLoc = validFireLocs.get(random.nextInt(validFireLocs.size()));
+        Hazard h = generateHazard(FIRE, (int)fireLoc.x, (int)fireLoc.y);
         if (h != null) {
             return (Fire) h;
         }
         return null;
+    }
+
+    public void findValidFireLocs() {
+        validFireLocs.clear();
+        for (float height : powerlineHeights) {
+            if (plantController.getMaxLeafHeight() >= height) {
+                int max = plantController.screenCoordToIndex(0, height + FIRE_BUFFER)[1];
+                int min = plantController.screenCoordToIndex(0, height - FIRE_BUFFER)[1];
+                for (int i = min; i <= max; i++) {
+                    for (int width = 0; width < plantController.getWidth(); width++) {
+                        if (isValidFireLocation(i, width)) {
+                            validFireLocs.add(new Vector2(i, width));
+                        }
+                    }
+                }
+            }
+        }
     }
 
     /**
@@ -339,7 +371,11 @@ public class HazardController {
         if (currentTime - lastUpdateTime >=
                 1000) { // Check if one second has passed
             lastUpdateTime = currentTime; // Reset the last update time
-            addList.add(generateFire());
+            if (fireProgress >= 100) {
+                findValidFireLocs();
+                addList.add(generateFire());
+                fireProgress = 0;
+            }
             addList.add(generateDrone());
             addList.add(generateBug());
             int i = 0;
@@ -347,6 +383,16 @@ public class HazardController {
                 Hazard h = hazards.get(i);
                 int hx = (int) h.getLocation().x;
                 int hy = (int) h.getLocation().y;
+                if (h instanceof Fire) {
+                    Fire f = (Fire) h;
+                    // check if branch is still there (floating fire bug)
+
+                    if (plantController.nodeIsEmpty(hx, hy)) {
+                        removeHazard(h);
+                        plantController.removeHazardFromNodes(h);
+                        continue; // Continue to next hazard after removing
+                    }
+                }
                 // spread fire if the time is right, otherwise decrement timer
                 //                        int time = f.getDuration();
                 if (h.tick()) {
@@ -359,21 +405,6 @@ public class HazardController {
                 }
                 i++;
             }
-        }
-        int i = 0;
-        while (i < hazards.size()) {
-            Hazard h = hazards.get(i);
-            int hx = (int) h.getLocation().x;
-            int hy = (int) h.getLocation().y;
-            if (h instanceof Fire) {
-                // check if branch is still there (floating fire bug)
-                if (plantController.nodeIsEmpty(hx, hy)) {
-                    removeHazard(h);
-                    plantController.removeHazardFromNodes(h);
-                    continue; // Continue to next hazard after removing
-                }
-            }
-            i++;
         }
         addList.removeAll(Collections.singleton(null));
         return addList;
@@ -394,22 +425,22 @@ public class HazardController {
             // check top left
             if (plantController.inBounds(x - 1, y + 1)) {
                 if (!plantController.nodeIsEmpty(x - 1, y + 1) &&
-                        !plantController.hasHazard(x - 1, y + 1) && !hasFire(new Vector2(x, y))) {
-                    addList.add(generateHazard(FIRE, x - 1, y + 1));
+                        !plantController.hasHazard(x - 1, y + 1)) {
+                    addList.add(generateHazardAt(FIRE, x - 1, y + 1));
                 }
             }
             // check top right
             if (plantController.inBounds(x + 1, y + 1)) {
                 if (!plantController.nodeIsEmpty(x + 1, y + 1) &&
-                        !plantController.hasHazard(x + 1, y + 1) && !hasFire(new Vector2(x, y))) {
-                    addList.add(generateHazard(FIRE, x + 1, y + 1));
+                        !plantController.hasHazard(x + 1, y + 1)) {
+                    addList.add(generateHazardAt(FIRE, x + 1, y + 1));
                 }
             }
             // check top middle
             if (plantController.inBounds(x, y + 1)) {
                 if (!plantController.nodeIsEmpty(x, y + 1) &&
-                        !plantController.hasHazard(x, y + 1) && !hasFire(new Vector2(x, y))) {
-                    addList.add(generateHazard(FIRE, x, y + 1));
+                        !plantController.hasHazard(x, y + 1)) {
+                    addList.add(generateHazardAt(FIRE, x, y + 1));
                 }
             }
         }
@@ -418,28 +449,26 @@ public class HazardController {
             // check bottom left
             if (plantController.inBounds(x - 1, y - 1)) {
                 if (plantController.branchExists(x - 1,
-                        y - 1,
-                        PlantController.branchDirection.RIGHT) &&
-                        !plantController.hasHazard(x - 1, y + 1) && !hasFire(new Vector2(x, y))) {
-                    addList.add(generateHazard(FIRE, x - 1, y - 1));
+                                                 y - 1,
+                                                 PlantController.branchDirection.RIGHT) &&
+                        !plantController.hasHazard(x - 1, y + 1)) {
+                    addList.add(generateHazardAt(FIRE, x - 1, y - 1));
                 }
             }
             // check bottom right
             if (plantController.inBounds(x + 1, y - 1)) {
                 if (plantController.branchExists(x + 1,
-                        y - 1,
-                        PlantController.branchDirection.LEFT) &&
-                        !plantController.hasHazard(x + 1, y + 1) && !hasFire(new Vector2(x, y))) {
-                    addList.add(generateHazard(FIRE, x + 1, y - 1));
+                                                 y - 1,
+                                                 PlantController.branchDirection.LEFT)) {
+                    addList.add(generateHazardAt(FIRE, x + 1, y - 1));
                 }
             }
             // check bottom middle
             if (plantController.inBounds(x, y - 1)) {
                 if (plantController.branchExists(x,
-                        y - 1,
-                        PlantController.branchDirection.MIDDLE) &&
-                        !plantController.hasHazard(x, y + 1) && !hasFire(new Vector2(x, y))) {
-                    addList.add(generateHazard(FIRE, x, y - 1));
+                                                 y - 1,
+                                                 PlantController.branchDirection.MIDDLE)) {
+                    addList.add(generateHazardAt(FIRE, x, y - 1));
                 }
             }
         }
@@ -474,19 +503,19 @@ public class HazardController {
             // check top left
             if (plantController.inBounds(x - 1, y + 1)) {
                 if (!plantController.nodeIsEmpty(x - 1, y + 1)) {
-                    addList.add(generateHazard(FIRE, x - 1, y + 1));
+                    addList.add(generateHazardAt(FIRE, x - 1, y + 1));
                 }
             }
             // check top right
             if (plantController.inBounds(x + 1, y + 1)) {
                 if (!plantController.nodeIsEmpty(x + 1, y + 1)) {
-                    addList.add(generateHazard(FIRE, x + 1, y + 1));
+                    addList.add(generateHazardAt(FIRE, x + 1, y + 1));
                 }
             }
             // check top middle
             if (plantController.inBounds(x, y + 1)) {
                 if (!plantController.nodeIsEmpty(x, y + 1)) {
-                    addList.add(generateHazard(FIRE, x, y + 1));
+                    addList.add(generateHazardAt(FIRE, x, y + 1));
                 }
             }
         }
@@ -497,7 +526,7 @@ public class HazardController {
                 if (plantController.branchExists(x - 1,
                                                  y - 1,
                                                  PlantController.branchDirection.RIGHT)) {
-                    addList.add(generateHazard(FIRE, x - 1, y - 1));
+                    addList.add(generateHazardAt(FIRE, x - 1, y - 1));
                 }
             }
             // check bottom right
@@ -505,7 +534,7 @@ public class HazardController {
                 if (plantController.branchExists(x + 1,
                                                  y - 1,
                                                  PlantController.branchDirection.LEFT)) {
-                    addList.add(generateHazard(FIRE, x + 1, y - 1));
+                    addList.add(generateHazardAt(FIRE, x + 1, y - 1));
                 }
             }
             // check bottom middle
@@ -513,7 +542,7 @@ public class HazardController {
                 if (plantController.branchExists(x,
                                                  y - 1,
                                                  PlantController.branchDirection.MIDDLE)) {
-                    addList.add(generateHazard(FIRE, x, y - 1));
+                    addList.add(generateHazardAt(FIRE, x, y - 1));
                 }
             }
         }
@@ -527,9 +556,9 @@ public class HazardController {
      * @param hazardHeight y coordinate
      * @return the generated hazard (null if none)
      */
-    public Hazard generateHazard(Model.ModelType type,
-                                 int hazardWidth,
-                                 int hazardHeight) {
+    public Hazard generateHazardAt(Model.ModelType type,
+                                   int hazardWidth,
+                                   int hazardHeight) {
         switch (type) {
             case FIRE:
                 Fire f = new Fire(plantController.indexToWorldCoord(hazardWidth,
@@ -694,6 +723,20 @@ public class HazardController {
                             arrowScale);
             }
         }
+    }
+
+    public void update(float dt) {
+        fireProgress += dt * 10 * powerlinesTouching();
+    }
+
+    public int powerlinesTouching() {
+        int count = 0;
+        for (float f : powerlineHeights) {
+            if (plantController.getMaxLeafHeight() >= f) {
+                count++;
+            }
+        }
+        return count;
     }
 
     public void reset() {
