@@ -404,8 +404,7 @@ public class HazardController {
                     continue; // Continue to next hazard after removing
                 }
             }
-            if (currentTime - lastUpdateTime >=
-                    1000) {
+            if (lastUpdateTime == currentTime) {
                 // spread fire if the time is right, otherwise decrement timer
                 if (h.tick()) {
                     removeHazard(h);
