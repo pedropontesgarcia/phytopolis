@@ -347,16 +347,6 @@ public class HazardController {
                 Hazard h = hazards.get(i);
                 int hx = (int) h.getLocation().x;
                 int hy = (int) h.getLocation().y;
-                if (h instanceof Fire) {
-                    Fire f = (Fire) h;
-                    // check if branch is still there (floating fire bug)
-
-                    if (plantController.nodeIsEmpty(hx, hy)) {
-                        removeHazard(h);
-                        plantController.removeHazardFromNodes(h);
-                        continue; // Continue to next hazard after removing
-                    }
-                }
                 // spread fire if the time is right, otherwise decrement timer
                 //                        int time = f.getDuration();
                 if (h.tick()) {
@@ -369,6 +359,21 @@ public class HazardController {
                 }
                 i++;
             }
+        }
+        int i = 0;
+        while (i < hazards.size()) {
+            Hazard h = hazards.get(i);
+            int hx = (int) h.getLocation().x;
+            int hy = (int) h.getLocation().y;
+            if (h instanceof Fire) {
+                // check if branch is still there (floating fire bug)
+                if (plantController.nodeIsEmpty(hx, hy)) {
+                    removeHazard(h);
+                    plantController.removeHazardFromNodes(h);
+                    continue; // Continue to next hazard after removing
+                }
+            }
+            i++;
         }
         addList.removeAll(Collections.singleton(null));
         return addList;
@@ -389,21 +394,21 @@ public class HazardController {
             // check top left
             if (plantController.inBounds(x - 1, y + 1)) {
                 if (!plantController.nodeIsEmpty(x - 1, y + 1) &&
-                        !plantController.hasHazard(x - 1, y + 1)) {
+                        !plantController.hasHazard(x - 1, y + 1) && !hasFire(new Vector2(x, y))) {
                     addList.add(generateHazard(FIRE, x - 1, y + 1));
                 }
             }
             // check top right
             if (plantController.inBounds(x + 1, y + 1)) {
                 if (!plantController.nodeIsEmpty(x + 1, y + 1) &&
-                        !plantController.hasHazard(x + 1, y + 1)) {
+                        !plantController.hasHazard(x + 1, y + 1) && !hasFire(new Vector2(x, y))) {
                     addList.add(generateHazard(FIRE, x + 1, y + 1));
                 }
             }
             // check top middle
             if (plantController.inBounds(x, y + 1)) {
                 if (!plantController.nodeIsEmpty(x, y + 1) &&
-                        !plantController.hasHazard(x, y + 1)) {
+                        !plantController.hasHazard(x, y + 1) && !hasFire(new Vector2(x, y))) {
                     addList.add(generateHazard(FIRE, x, y + 1));
                 }
             }
@@ -413,25 +418,27 @@ public class HazardController {
             // check bottom left
             if (plantController.inBounds(x - 1, y - 1)) {
                 if (plantController.branchExists(x - 1,
-                                                 y - 1,
-                                                 PlantController.branchDirection.RIGHT) &&
-                        !plantController.hasHazard(x - 1, y + 1)) {
+                        y - 1,
+                        PlantController.branchDirection.RIGHT) &&
+                        !plantController.hasHazard(x - 1, y + 1) && !hasFire(new Vector2(x, y))) {
                     addList.add(generateHazard(FIRE, x - 1, y - 1));
                 }
             }
             // check bottom right
             if (plantController.inBounds(x + 1, y - 1)) {
                 if (plantController.branchExists(x + 1,
-                                                 y - 1,
-                                                 PlantController.branchDirection.LEFT)) {
+                        y - 1,
+                        PlantController.branchDirection.LEFT) &&
+                        !plantController.hasHazard(x + 1, y + 1) && !hasFire(new Vector2(x, y))) {
                     addList.add(generateHazard(FIRE, x + 1, y - 1));
                 }
             }
             // check bottom middle
             if (plantController.inBounds(x, y - 1)) {
                 if (plantController.branchExists(x,
-                                                 y - 1,
-                                                 PlantController.branchDirection.MIDDLE)) {
+                        y - 1,
+                        PlantController.branchDirection.MIDDLE) &&
+                        !plantController.hasHazard(x, y + 1) && !hasFire(new Vector2(x, y))) {
                     addList.add(generateHazard(FIRE, x, y - 1));
                 }
             }

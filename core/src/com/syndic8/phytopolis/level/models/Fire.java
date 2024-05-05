@@ -12,6 +12,7 @@ public class Fire extends Hazard {
 
     private final int NUM_FRAMES = 16;
 
+
     /**
      * Constructs a Fire object with a specified location and duration.
      *
@@ -32,6 +33,10 @@ public class Fire extends Hazard {
         return ModelType.FIRE;
     }
 
+    private float size = .2f; // Initial size
+    private float growthRate = 0.00005f; // Growth rate per second
+    private float elapsedTime = 0.0f; // Elapsed time since last update
+
     public void draw(GameCanvas canvas) {
         float width = tilemap.getTileWidth() * textureSclInTiles;
         float height = tilemap.getTileHeight() * textureSclInTiles;
@@ -45,11 +50,11 @@ public class Fire extends Hazard {
                 Color.WHITE,
                 x,
                 y,
-                getX(),
+                getX()+.1f,
                 getY(),
                 0,
-                sclX,
-                sclY);
+                sclX * size,
+                sclY * size);
     }
 
     public void update(float delta) {
@@ -59,6 +64,12 @@ public class Fire extends Hazard {
         if (animFrame >= NUM_FRAMES) {
             animFrame = 0;
         }
+        // Update elapsed time
+        elapsedTime += delta;
+        // Calculate size increment based on growth rate and elapsed time
+        float sizeIncrement = growthRate * elapsedTime;
+        // Limit size to maximum of 1f
+        size = Math.min(size + sizeIncrement, 1f);
     }
 
 }
