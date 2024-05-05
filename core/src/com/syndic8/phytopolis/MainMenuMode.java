@@ -79,7 +79,7 @@ public class MainMenuMode extends FadingScreen implements Screen {
      * Whether or not this player mode is still active
      */
     private boolean active;
-    private AudioSource backgroundMusic;
+    private int backgroundMusic;
     private MenuContainer menuContainer;
     private Menu menu;
     private boolean exit;
@@ -143,6 +143,7 @@ public class MainMenuMode extends FadingScreen implements Screen {
         soundController = SoundController.getInstance();
         //        // Load background music
         //        backgroundMusic = internal.getEntry("newgrowth", AudioSource.class);
+        this.backgroundMusic = -1;
     }
 
     private void createMenu() {
@@ -223,11 +224,11 @@ public class MainMenuMode extends FadingScreen implements Screen {
         return assets;
     }
 
-    public AudioSource getBackgroundMusic() {
+    public int getBackgroundMusic() {
         return backgroundMusic;
     }
 
-    public void setBackgroundMusic(AudioSource m) {
+    public void setBackgroundMusic(int m) {
         backgroundMusic = m;
     }
 
@@ -325,11 +326,11 @@ public class MainMenuMode extends FadingScreen implements Screen {
             progress = 1;
             loaded = true;
             fadeIn(1.5f);
-            if (backgroundMusic == null) {
-                backgroundMusic = assets.getEntry("newgrowth",
+            if (backgroundMusic == -1) {
+                AudioSource bgm = assets.getEntry("newgrowth",
                                                   AudioSource.class);
-                int i = soundController.addMusic(backgroundMusic);
-                soundController.setMusic(i);
+                backgroundMusic = soundController.addMusic(bgm);
+                soundController.setMusic(backgroundMusic);
                 soundController.setLooping(true);
                 soundController.playMusic();
             }

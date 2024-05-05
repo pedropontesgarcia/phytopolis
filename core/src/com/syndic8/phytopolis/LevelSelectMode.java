@@ -17,6 +17,7 @@ import com.syndic8.phytopolis.util.menu.Menu;
 import com.syndic8.phytopolis.util.menu.MenuContainer;
 import com.syndic8.phytopolis.util.menu.MenuItem;
 import edu.cornell.gdiac.audio.AudioEngine;
+import edu.cornell.gdiac.audio.AudioSource;
 
 import static com.syndic8.phytopolis.GDXRoot.ExitCode;
 
@@ -41,12 +42,13 @@ public class LevelSelectMode extends FadingScreen implements Screen {
     private Texture lighting;
     private boolean ready;
     private boolean gathered;
-    private Music backgroundMusic;
+    private int backgroundMusic;
     private AudioEngine audioEngine;
     private Texture rs;
     private String level;
     private ExitCode exitCode;
     private MenuContainer menuContainer;
+    private SoundController soundController;
 
     public LevelSelectMode(GameCanvas c) {
         canvas = c;
@@ -57,6 +59,7 @@ public class LevelSelectMode extends FadingScreen implements Screen {
         projMousePosCache = new Vector2();
         createMenu();
         gathered = false;
+        this.soundController = SoundController.getInstance();
     }
 
     private void createMenu() {
@@ -85,12 +88,13 @@ public class LevelSelectMode extends FadingScreen implements Screen {
         menuContainer.populate();
     }
 
-    public Music getBackgroundMusic() {
+    public int getBackgroundMusic() {
         return backgroundMusic;
     }
 
-    public void setBackgroundMusic(Music m) {
-        backgroundMusic = m;
+    public void setBackgroundMusic(int i) {
+        backgroundMusic = i;
+        if(i != soundController.getMusicQueuePos()) soundController.setMusic(i);
     }
 
     public void gatherAssets(AssetDirectory directory) {
@@ -123,9 +127,14 @@ public class LevelSelectMode extends FadingScreen implements Screen {
         levelBoxes[2] = new LevelBox(canvas.getWidth() / 1.47f,
                                      canvas.getHeight() / 3.3f);
         for (LevelBox lb : levelBoxes) if (lb != null) lb.setTexture(rs);
-        if (backgroundMusic != null) {
-            backgroundMusic.setVolume(1);
-            backgroundMusic.play();
+//        if (backgroundMusic != null) {
+//            backgroundMusic.setVolume(1);
+//            backgroundMusic.play();
+//        }
+        if (backgroundMusic != soundController.getMusicQueuePos()) {
+            soundController.setMusic(backgroundMusic);
+            soundController.setLooping(true);
+            soundController.playMusic();
         }
     }
 
@@ -161,7 +170,7 @@ public class LevelSelectMode extends FadingScreen implements Screen {
             exitCode = ExitCode.EXIT_LEVELS;
         }
         if (ready && exitCode == ExitCode.EXIT_LEVELS)
-            backgroundMusic.setVolume(super.getVolume());
+            soundController.setMusicVolume(super.getVolume());
     }
 
     public void draw() {
@@ -228,12 +237,12 @@ public class LevelSelectMode extends FadingScreen implements Screen {
     public void hide() {
         active = false;
         menuContainer.deactivate();
-        if (exitCode == ExitCode.EXIT_LEVELS) backgroundMusic.stop();
+        //if (exitCode == ExitCode.EXIT_LEVELS) soundController.stopMusic();
     }
 
     @Override
     public void dispose() {
-        if (backgroundMusic != null) backgroundMusic.dispose();
+//        if (backgroundMusic != null) backgroundMusic.dispose();
     }
 
     public void reset() {
