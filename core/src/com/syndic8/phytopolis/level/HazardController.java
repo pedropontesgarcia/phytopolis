@@ -118,7 +118,7 @@ public class HazardController {
     private PooledList<Float> powerlineHeights;
     private PooledList<Vector2> validFireLocs;
     private float FIRE_BUFFER = 5;
-    private int fireBar;
+    private float fireProgress;
 
 //    /**
 //     * Initializes a HazardController with the given parameters.
@@ -163,7 +163,7 @@ public class HazardController {
         height = plantController.getHeight();
         width = plantController.getWidth();
         tilemap = tm;
-        fireBar = 0;
+        fireProgress = 0;
     }
 
     public void reset(int fireFrequency,
@@ -371,10 +371,10 @@ public class HazardController {
         if (currentTime - lastUpdateTime >=
                 1000) { // Check if one second has passed
             lastUpdateTime = currentTime; // Reset the last update time
-            if (fireBar >= 100) {
+            if (fireProgress >= 100) {
                 findValidFireLocs();
                 addList.add(generateFire());
-                fireBar = 0;
+                fireProgress = 0;
             }
             addList.add(generateDrone());
             addList.add(generateBug());
@@ -726,7 +726,7 @@ public class HazardController {
     }
 
     public void update(float delta) {
-        if (shouldFireBarUpdate()) fireBar += delta * 10;
+        if (shouldFireBarUpdate()) fireProgress += delta * 10;
     }
 
     public boolean shouldFireBarUpdate() {
