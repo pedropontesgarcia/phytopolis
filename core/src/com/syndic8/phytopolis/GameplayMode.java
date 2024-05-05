@@ -132,8 +132,6 @@ public class GameplayMode extends WorldController {
                                                     8,
                                                     6,
                                                     10,
-                                                    tilemap.getPowerlineYVals(),
-                                                    // REPLACE THIS!!
                                                     tilemap);
             sunController = new SunController(5,
                                               10,
@@ -230,8 +228,9 @@ public class GameplayMode extends WorldController {
                 ((Water) m).regenerate();
             }
             if (m instanceof Sun) {
-                ((Sun) m).update(dt, m.getY() < plantController.getMaxLeafHeight() -
-                        resourceController.SUN_TOLERANCE);
+                ((Sun) m).update(dt,
+                                 m.getY() < plantController.getMaxLeafHeight() -
+                                         resourceController.SUN_TOLERANCE);
 
             }
             if (m instanceof Hazard) {
@@ -455,6 +454,8 @@ public class GameplayMode extends WorldController {
 
         soundController.rewindMusic();
 
+        world = new World(gravity, false);
+        tilemap.populateLevel(this);
         float branchHeight = tilemap.getTileHeight();
         int plantNodesPerRow = Math.round(
                 (tilemap.getTilemapWidth() - 2) * (float) Math.sqrt(3));
@@ -476,7 +477,6 @@ public class GameplayMode extends WorldController {
                                6,
                                10,
                                tilemap);
-        world = new World(gravity, false);
         setComplete(false);
         setFailure(false);
         populateLevel();

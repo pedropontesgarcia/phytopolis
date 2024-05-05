@@ -16,6 +16,7 @@ import java.util.List;
 public class Tilemap {
 
     private final GameCanvas canvas;
+    private final PooledList<Float> powerlineYVals;
     PooledList<Tile> tiles;
     AssetDirectory directory;
     JsonValue tilemap;
@@ -45,6 +46,7 @@ public class Tilemap {
     public Tilemap(JsonValue tm, GameCanvas c) {
         tilemap = tm;
         canvas = c;
+        powerlineYVals = new PooledList<>();
     }
 
     public float getWorldWidth() {
@@ -159,6 +161,7 @@ public class Tilemap {
     public void populateLevel(WorldController ctrl) {
         populatePhysics(ctrl);
         populateResources(ctrl);
+        populateHazards();
     }
 
     private void populatePhysics(WorldController ctrl) {
@@ -289,6 +292,40 @@ public class Tilemap {
         }
     }
 
+    private void populateHazards() {
+        JsonValue layersJson = tilemap.get("layers");
+        JsonValue hazardsLayer = null;
+        for (JsonValue layerJson : layersJson) {
+            if (layerJson.getString("name").equals("hazards"))
+                hazardsLayer = layerJson;
+        }
+        assert hazardsLayer != null;
+        String tilesetName = tilemap.get("tilesets").get(2).getString("source");
+        JsonValue tilesetJson = directory.getEntry(tilesetName,
+                                                   JsonValue.class);
+        JsonValue tilesJson = tilesetJson.get("tiles");
+
+        for (int row = 0; row < tilemapHeight; row++) {
+            for (int col = 0; col < tilemapWidth; col++) {
+                int tileValue = hazardsLayer.get("data").asIntArray()[
+                        row * tilemapWidth + col];
+                if (tileValue != 0) {
+                    float x0 = col * tileWidth;
+                    float x1 = (col + 1) * tileWidth;
+                    float y0 = worldHeight - (row + 1) * tileHeight;
+                    float y1 = worldHeight - row * tileHeight;
+                    JsonValue tileJson = tilesJson.get(tileValue - tilemap.get(
+                            "tilesets").get(2).getInt("firstgid"));
+                    Texture tx = new Texture(
+                            "gameplay/tiles/" + tileJson.getString("image"));
+                    Tile tile = new Tile(this, new Vector2(x0, y0), false, tx);
+                    if (!powerlineYVals.contains(y0)) powerlineYVals.add(y0);
+                    tiles.add(tile);
+                }
+            }
+        }
+    }
+
     /**
      * Draws the visual layer of the tilemap to the canvas.
      *
@@ -299,10 +336,8 @@ public class Tilemap {
     }
 
     public PooledList<Float> getPowerlineYVals() {
-        PooledList<Float> l = new PooledList<>();
-        l.push(6f);
-        l.push(12f);
-        return l;
+        System.out.println(powerlineYVals);
+        return powerlineYVals;
     }
 
 }

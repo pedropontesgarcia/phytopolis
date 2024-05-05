@@ -37,7 +37,11 @@ public class HazardController {
      */
     private final ResourceController resourceController;
     private final PooledList<Vector2> validFireLocs;
-    private final int FIRE_BUFFER = 1;
+    private final int FIRE_BUFFER_ABOVE = 1;
+    // Since the power line is at the middle of a tile, but the plant nodes
+    // are at the ends, the power line y value is actually at the node right
+    // under the powerline. So we need one more tile of buffer above.
+    private final int FIRE_BUFFER_BELOW = FIRE_BUFFER_ABOVE - 1;
     /**
      * Texture for fire hazard.
      */
@@ -145,7 +149,6 @@ public class HazardController {
                             int burnTime,
                             int explodeTime,
                             int eatTime,
-                            PooledList<Float> powerlineHeights,
                             Tilemap tm) {
         this.fireFrequency = fireFrequency;
         this.droneFrequency = droneFrequency;
@@ -155,7 +158,6 @@ public class HazardController {
         this.burnTime = burnTime;
         this.explodeTime = explodeTime;
         this.eatTime = eatTime;
-        this.powerlineHeights = powerlineHeights;
         hazards = new ArrayList<>();
         fireNodes = new ArrayList<>();
         bugNodes = new ArrayList<>();
@@ -328,9 +330,9 @@ public class HazardController {
         for (float height : powerlineHeights) {
             if (plantController.getMaxLeafHeight() >= height) {
                 int max = plantController.screenCoordToIndex(0, height)[1] +
-                        FIRE_BUFFER;
+                        FIRE_BUFFER_ABOVE;
                 int min = plantController.screenCoordToIndex(0, height)[1] -
-                        FIRE_BUFFER;
+                        FIRE_BUFFER_BELOW;
                 for (int i = min; i <= max; i++) {
                     for (int width = 0;
                          width < plantController.getWidth();
@@ -736,7 +738,7 @@ public class HazardController {
     }
 
     public void update(float dt) {
-        fireProgress += dt * 50 * powerlinesTouching();
+        fireProgress += dt * 10 * powerlinesTouching();
     }
 
     public int powerlinesTouching() {

@@ -46,10 +46,11 @@
   "jsons": {
     "gameplay:lvl1": "gameplay/levels/fucked.json",
     "gameplay:lvl2": "gameplay/levels/lvl2.json",
-    "gameplay:lvl3": "gameplay/levels/fucked2.json",
+    "gameplay:lvl3": "gameplay/levels/lvl3.json",
     "gameplay:constants": "gameplay/constants.json",
     "tileset.tsx": "gameplay/tileset.json",
-    "rsrc.tsx": "gameplay/rsrc.json"
+    "rsrc.tsx": "gameplay/rsrc.json",
+    "hazards.tsx": "gameplay/hazards.json"
   },
   "samples": {
     "viridian": "gameplay/ViridianEXP1OGG.ogg",
