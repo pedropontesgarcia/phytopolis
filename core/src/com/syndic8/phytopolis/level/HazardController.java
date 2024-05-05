@@ -725,12 +725,18 @@ public class HazardController {
         }
     }
 
-    public void update(float delta) {
-        if (shouldFireBarUpdate()) fireProgress += delta * 10;
+    public void update(float dt) {
+        fireProgress += dt * 10 * powerlinesTouching();
     }
 
-    public boolean shouldFireBarUpdate() {
-        return Collections.min(powerlineHeights) <= plantController.getMaxLeafHeight();
+    public int powerlinesTouching() {
+        int count = 0;
+        for (float f : powerlineHeights) {
+            if (plantController.getMaxLeafHeight() >= f) {
+                count++;
+            }
+        }
+        return count;
     }
 
     public void reset() {

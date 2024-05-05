@@ -201,6 +201,7 @@ public class GameplayMode extends WorldController {
      */
     public void update(float dt) {
         int water = resourceController.getCurrWater();
+        hazardController.update(dt);
         soundController.setMusicVolume(super.getVolume());
 //        System.out.println("Music playing? " + soundController.isMusicPlaying());
 //        System.out.println("What music? " + soundController.getPlayingMusic());
