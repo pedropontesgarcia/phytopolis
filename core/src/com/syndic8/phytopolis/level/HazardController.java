@@ -9,6 +9,7 @@ import com.syndic8.phytopolis.assets.AssetDirectory;
 import com.syndic8.phytopolis.level.models.*;
 import com.syndic8.phytopolis.util.FilmStrip;
 import com.syndic8.phytopolis.util.PooledList;
+import com.syndic8.phytopolis.util.RandomController;
 import com.syndic8.phytopolis.util.Tilemap;
 
 import java.util.ArrayList;
@@ -22,7 +23,7 @@ public class HazardController {
     /**
      * Random number generator for various hazard generation.
      */
-    private final Random random = new Random();
+    private final Random random = RandomController.generator;
     /**
      * Frame counter to switch from yellow and red warning.
      */
@@ -35,6 +36,8 @@ public class HazardController {
      * Reference to the PlantController.
      */
     private final ResourceController resourceController;
+    private final PooledList<Vector2> validFireLocs;
+    private final int FIRE_BUFFER = 1;
     /**
      * Texture for fire hazard.
      */
@@ -116,18 +119,16 @@ public class HazardController {
     private TextureRegion greenArrowDownTexture;
     private TextureRegion greenArrowUpTexture;
     private PooledList<Float> powerlineHeights;
-    private PooledList<Vector2> validFireLocs;
-    private float FIRE_BUFFER = 5;
     private float fireProgress;
 
-//    /**
-//     * Initializes a HazardController with the given parameters.
-//     *
-//     * @param plantController The PlantController instance associated with this HazardController.
-//     */
-//    public HazardController(PlantController plantController, Tilemap tm) {
-//        this(plantController, 8, 100000000, 6, 8, 6, 6, tm);
-//    }
+    //    /**
+    //     * Initializes a HazardController with the given parameters.
+    //     *
+    //     * @param plantController The PlantController instance associated with this HazardController.
+    //     */
+    //    public HazardController(PlantController plantController, Tilemap tm) {
+    //        this(plantController, 8, 100000000, 6, 8, 6, 6, tm);
+    //    }
 
     /**
      * Initializes a HazardController with the given parameters.
@@ -185,6 +186,7 @@ public class HazardController {
         addList = new PooledList<>();
         height = plantController.getHeight();
         width = plantController.getWidth();
+        powerlineHeights = tm.getPowerlineYVals();
         tilemap = tm;
     }
 
@@ -220,21 +222,22 @@ public class HazardController {
     }
 
     public boolean isValidFireLocation(int x, int y) {
-        return !plantController.hasHazard(x, y) &&
+        return (plantController.inBounds(x, y) &&
+                !plantController.hasHazard(x, y)) &&
                 ((plantController.inBounds(x - 1, y - 1) &&
-                plantController.branchExists(x - 1,
-                        y - 1,
-                        PlantController.branchDirection.RIGHT)) ||
-                (plantController.inBounds(x + 1, y - 1) &&
-                        plantController.branchExists(x + 1,
-                                y - 1,
-                                PlantController.branchDirection.LEFT)) ||
-                (plantController.inBounds(x, y - 1) &&
-                        plantController.branchExists(x,
-                                y - 1,
-                                PlantController.branchDirection.MIDDLE)) ||
-                (plantController.inBounds(x, y) &&
-                        !plantController.nodeIsEmpty(x, y)));
+                        plantController.branchExists(x - 1,
+                                                     y - 1,
+                                                     PlantController.branchDirection.RIGHT)) ||
+                        (plantController.inBounds(x + 1, y - 1) &&
+                                plantController.branchExists(x + 1,
+                                                             y - 1,
+                                                             PlantController.branchDirection.LEFT)) ||
+                        (plantController.inBounds(x, y - 1) &&
+                                plantController.branchExists(x,
+                                                             y - 1,
+                                                             PlantController.branchDirection.MIDDLE)) ||
+                        (plantController.inBounds(x, y) &&
+                                !plantController.nodeIsEmpty(x, y)));
     }
 
     /**
@@ -309,10 +312,13 @@ public class HazardController {
      * @return the generated fire (null if none)
      */
     public Fire generateFire() {
-        Vector2 fireLoc = validFireLocs.get(random.nextInt(validFireLocs.size()));
-        Hazard h = generateHazard(FIRE, (int)fireLoc.x, (int)fireLoc.y);
-        if (h != null) {
-            return (Fire) h;
+        if (validFireLocs.size() > 0) {
+            int index = random.nextInt(validFireLocs.size());
+            Vector2 fireLoc = validFireLocs.get(index);
+            Hazard h = generateHazard(FIRE, (int) fireLoc.x, (int) fireLoc.y);
+            if (h != null) {
+                return (Fire) h;
+            }
         }
         return null;
     }
@@ -321,12 +327,16 @@ public class HazardController {
         validFireLocs.clear();
         for (float height : powerlineHeights) {
             if (plantController.getMaxLeafHeight() >= height) {
-                int max = plantController.screenCoordToIndex(0, height + FIRE_BUFFER)[1];
-                int min = plantController.screenCoordToIndex(0, height - FIRE_BUFFER)[1];
+                int max = plantController.screenCoordToIndex(0, height)[1] +
+                        FIRE_BUFFER;
+                int min = plantController.screenCoordToIndex(0, height)[1] -
+                        FIRE_BUFFER;
                 for (int i = min; i <= max; i++) {
-                    for (int width = 0; width < plantController.getWidth(); width++) {
-                        if (isValidFireLocation(i, width)) {
-                            validFireLocs.add(new Vector2(i, width));
+                    for (int width = 0;
+                         width < plantController.getWidth();
+                         width++) {
+                        if (isValidFireLocation(width, i)) {
+                            validFireLocs.add(new Vector2(width, i));
                         }
                     }
                 }
@@ -367,15 +377,15 @@ public class HazardController {
         for (Hazard h : plantController.removeDeadLeafBugs()) {
             removeHazard(h);
         }
+        if (fireProgress >= 100) {
+            findValidFireLocs();
+            addList.add(generateFire());
+            fireProgress = 0;
+        }
         long currentTime = System.currentTimeMillis();
         if (currentTime - lastUpdateTime >=
                 1000) { // Check if one second has passed
             lastUpdateTime = currentTime; // Reset the last update time
-            if (fireProgress >= 100) {
-                findValidFireLocs();
-                addList.add(generateFire());
-                fireProgress = 0;
-            }
             addList.add(generateDrone());
             addList.add(generateBug());
             int i = 0;
@@ -412,6 +422,7 @@ public class HazardController {
 
     public void removeHazard(Hazard h) {
         hazards.remove(h);
+        plantController.removeHazardFromNodes(h);
         h.markRemoved(true);
     }
 
@@ -490,6 +501,7 @@ public class HazardController {
                     hazards.remove(h);
                     h.markRemoved(true);
                     resourceController.decrementExtinguish();
+                    plantController.removeHazardFromNodes(h);
                     break;
                 }
             }
@@ -695,10 +707,8 @@ public class HazardController {
                         (h.getType() == FIRE ?
                                 redArrowUpTexture :
                                 greenArrowUpTexture);
-
                 // Choose texture based on current time
                 long currentTime = System.currentTimeMillis();
-                System.out.println(h.getTimer());
                 int interval = (int) (500f * (float) h.getTimer() /
                         (float) h.getMaxTimer());
                 TextureRegion warningTex = (currentTime / interval) % 2 == 0 ?
@@ -726,7 +736,7 @@ public class HazardController {
     }
 
     public void update(float dt) {
-        fireProgress += dt * 10 * powerlinesTouching();
+        fireProgress += dt * 50 * powerlinesTouching();
     }
 
     public int powerlinesTouching() {
@@ -739,11 +749,15 @@ public class HazardController {
         return count;
     }
 
-    public void reset() {
-        hazards.clear();
-        fireNodes.clear();
-        bugNodes.clear();
-        addList.clear();
+    public float getFireProgress() {
+        return fireProgress;
     }
+    //
+    //    public void reset() {
+    //        hazards.clear();
+    //        fireNodes.clear();
+    //        bugNodes.clear();
+    //        addList.clear();
+    //    }
 
 }

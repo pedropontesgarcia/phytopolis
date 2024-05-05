@@ -10,7 +10,6 @@
  */
 package com.syndic8.phytopolis;
 
-import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.math.Vector2;
@@ -21,7 +20,6 @@ import com.syndic8.phytopolis.assets.AssetDirectory;
 import com.syndic8.phytopolis.level.*;
 import com.syndic8.phytopolis.level.models.*;
 import com.syndic8.phytopolis.util.FilmStrip;
-import com.syndic8.phytopolis.util.PooledList;
 import com.syndic8.phytopolis.util.Tilemap;
 import edu.cornell.gdiac.audio.AudioSource;
 
@@ -36,6 +34,7 @@ public class GameplayMode extends WorldController {
     private final float lvl1LeafWidth = 1.4f;
     private final float lvl2LeafWidth = 1.2f;
     private final float lvl3LeafWidth = 0.9f;
+    private final SoundController soundController;
     protected Texture jumpTexture;
     private PlantController plantController;
     private HazardController hazardController;
@@ -55,7 +54,6 @@ public class GameplayMode extends WorldController {
     private String lvl;
     private CollisionController collisionController;
     private float timeSinceUIUpdate = 0;
-    private SoundController soundController;
 
     /**
      * Creates and initialize a new instance of the game.
@@ -134,7 +132,8 @@ public class GameplayMode extends WorldController {
                                                     8,
                                                     6,
                                                     10,
-                                                    new PooledList<>(), // REPLACE THIS!!
+                                                    tilemap.getPowerlineYVals(),
+                                                    // REPLACE THIS!!
                                                     tilemap);
             sunController = new SunController(5,
                                               10,
@@ -155,7 +154,7 @@ public class GameplayMode extends WorldController {
      */
     public void show() {
         super.show();
-        if(soundController.getMusicQueuePos() != backgroundMusic){
+        if (soundController.getMusicQueuePos() != backgroundMusic) {
             soundController.setMusic(backgroundMusic);
         }
         if (!soundController.isMusicPlaying()) {
@@ -203,9 +202,9 @@ public class GameplayMode extends WorldController {
         int water = resourceController.getCurrWater();
         hazardController.update(dt);
         soundController.setMusicVolume(super.getVolume());
-//        System.out.println("Music playing? " + soundController.isMusicPlaying());
-//        System.out.println("What music? " + soundController.getPlayingMusic());
-//        System.out.println("Is it looping? " + soundController.getIsLooping());
+        //        System.out.println("Music playing? " + soundController.isMusicPlaying());
+        //        System.out.println("What music? " + soundController.getPlayingMusic());
+        //        System.out.println("Is it looping? " + soundController.getIsLooping());
         // Process actions in object model
         avatar.setMovement(ic.getHorizontal() * avatar.getForce());
         avatar.setJumping(ic.didJump());
@@ -258,7 +257,8 @@ public class GameplayMode extends WorldController {
                                 hazardController,
                                 collisionController.getAddedWater(),
                                 resourceController.getCurrWater() < water,
-                                plantController.countTimerDeductions());
+                                plantController.countTimerDeductions(),
+                                hazardController.getFireProgress());
             collisionController.setAddedWater(false);
         } else {
             timeSinceUIUpdate += 0.05;
@@ -344,7 +344,6 @@ public class GameplayMode extends WorldController {
      * to be overriden if the world needs fancy backgrounds or the like.
      * <p>
      * The method draws all objects in the order that they were added.
-     *
      */
     public void draw() {
         canvas.clear();
@@ -359,8 +358,8 @@ public class GameplayMode extends WorldController {
             if (!hazardController.hasFire(unprojMousePos)) {
                 if (!ic.isGrowLeafModDown()) {
                     plantController.drawGhostBranch(canvas,
-                            unprojMousePos.x,
-                            unprojMousePos.y);
+                                                    unprojMousePos.x,
+                                                    unprojMousePos.y);
                 } else {
                     Leaf.leafType lt;
                     float width;
@@ -377,7 +376,12 @@ public class GameplayMode extends WorldController {
                             lt = Leaf.leafType.NORMAL;
                             width = lvl1LeafWidth;
                     }
-                    plantController.drawGhostLeaf(canvas, lt, width, unprojMousePos.x, unprojMousePos.y);
+                    plantController.drawGhostLeaf(canvas,
+                                                  lt,
+                                                  width,
+                                                  unprojMousePos.x,
+                                                  unprojMousePos.y + 0.5f *
+                                                          tilemap.getTileHeight());
                 }
 
             }
@@ -441,8 +445,8 @@ public class GameplayMode extends WorldController {
         objects.clear();
         addQueue.clear();
         world.dispose();
-//        soundController.stopMusic();
-//        soundController.playMusic();
+        //        soundController.stopMusic();
+        //        soundController.playMusic();
         uiController.reset();
 
         ic.resetScrolled();

@@ -4,7 +4,6 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
-import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator.FreeTypeFontParameter;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
@@ -45,10 +44,10 @@ public class SharedAssetContainer {
         uiFont.getData().setScale(BASE_FONT_SCALE);
         uiFontMap.put(1f, uiFont);
 
-        TextureAtlas atlas = new TextureAtlas(Gdx.files.internal(
-                "ui/skins/prog.atlas"));
+        //        TextureAtlas atlas = new TextureAtlas(Gdx.files.internal(
+        //                "ui/skins/prog.atlas"));
         //        TextureAtlas.AtlasRegion region = atlas.findRegion("barfill.9");
-        progressBarSkin = new Skin(Gdx.files.internal("ui/skins/prog.json"));
+        progressBarSkin = new Skin(Gdx.files.internal("ui/skins/fire.json"));
         sliderSkin = new Skin(Gdx.files.internal("ui/skins/slider.json"));
     }
 

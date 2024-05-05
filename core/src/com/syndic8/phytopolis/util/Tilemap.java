@@ -298,4 +298,11 @@ public class Tilemap {
         for (Tile tile : tiles) tile.draw(c);
     }
 
+    public PooledList<Float> getPowerlineYVals() {
+        PooledList<Float> l = new PooledList<>();
+        l.push(6f);
+        l.push(12f);
+        return l;
+    }
+
 }
