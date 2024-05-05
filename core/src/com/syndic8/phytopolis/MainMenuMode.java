@@ -326,17 +326,6 @@ public class MainMenuMode extends FadingScreen implements Screen {
             progress = assets.getProgress();
         }
         if (progress >= 1 && timer >= LOAD_DELAY && state == State.LOADING) {
-            progress = 1;
-            state = State.LOADING_FADEOUT;
-            fadeOut(0.5f);
-        }
-        if (state == State.LOADING || state == State.LOADING_FADEOUT) {
-            sprothFilmstrip.setFrame(
-                    (int) (timer / 0.1f) % sprothFilmstrip.getSize());
-        }
-        if (progress >= 1 && timer >= LOAD_DELAY) {
-            progress = 1;
-            fadeIn(1.5f);
             if (backgroundMusic == -1) {
                 AudioSource bgm = assets.getEntry("newgrowth",
                                                   AudioSource.class);
@@ -345,8 +334,14 @@ public class MainMenuMode extends FadingScreen implements Screen {
                 soundController.setLooping(true);
                 soundController.playMusic();
             }
+            progress = 1;
+            state = State.LOADING_FADEOUT;
+            fadeOut(0.5f);
         }
-
+        if (state == State.LOADING || state == State.LOADING_FADEOUT) {
+            sprothFilmstrip.setFrame(
+                    (int) (timer / 0.1f) % sprothFilmstrip.getSize());
+        }
         if (exit) {
             exit = false;
             ready = true;
@@ -392,6 +387,7 @@ public class MainMenuMode extends FadingScreen implements Screen {
             canvas.end();
         }
         super.draw(canvas);
+        System.out.println(state);
     }
 /*
     private void playMusic() {
