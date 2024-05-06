@@ -504,7 +504,11 @@ public class HazardController {
 //        float avatarY = avatar.getY();
 //        float distance = mousePos.dst(avatarX, avatarY);
 //        if (distance > 2) return;
-        if (!resourceController.canExtinguish()) return;
+        if (!resourceController.canExtinguish()) {
+            System.out.println("fire");
+            resourceController.setNotEnough(true);
+            return;
+        }
         for (Hazard h : hazards) {
             if (h.getType().equals(FIRE)) {
                 Vector2 hazPos = plantController.indexToWorldCoord((int) h.getLocation().x,

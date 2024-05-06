@@ -38,6 +38,8 @@ public class UIController {
     private Cursor leafCursor;
     private Cursor waterCursor;
     private Cursor noWaterCursor;
+    private float animProgress;
+    private boolean currNotEnough;
 
     /**
      * Initializes a UIController.
@@ -69,6 +71,8 @@ public class UIController {
                                         progressBar.getWidth() / 2f,
                                 c.getTextViewport().getWorldHeight() * 0.9f);
         stage.addActor(progressBar);
+        animProgress = 0;
+        currNotEnough = false;
         initialize();
     }
 
@@ -157,8 +161,6 @@ public class UIController {
      * @param dt               delta time.
      * @param waterLvl         level of water, in percentage between 0 and 1.
      * @param hazardController hazard controller.
-     * @param addedWater       whether water needs to be added.
-     * @param removedWater     whether water needs to be removed.
      * @param timerDeduction   deduction to apply to the timer.
      */
     public void update(float dt,
@@ -166,12 +168,11 @@ public class UIController {
                        HazardController hazardController,
                        ResourceController resourceController,
                        Player avatar,
-                       boolean addedWater,
-                       boolean removedWater,
+                       int prevWater,
                        float timerDeduction,
                        float fireProgress) {
         updateCursor(hazardController, resourceController, avatar);
-        updateTexture(waterLvl, addedWater, removedWater);
+        updateTexture(dt, waterLvl, prevWater, resourceController);
         progressBar.setValue(fireProgress);
         progressBar.setVisible(hazardController.findValidFireLocs());
         timer.updateTime(dt + timerDeduction); // 1 SEC PER LEAF BITE
@@ -212,19 +213,48 @@ public class UIController {
         }
     }
 
-    private void updateTexture(float waterLvl,
-                               boolean addedWater,
-                               boolean removedWater) {
-        if (addedWater) {
+    private void updateTexture(float dt, float waterLvl,
+                               int prevWater, ResourceController rc) {
+        if (rc.getNotEnough()) {
+            if (!currNotEnough) {
+                currNotEnough = true;
+                animProgress = 0;
+            }
+            rc.setNotEnough(false);
+        }
+            if (currNotEnough){
+//            if (rc.getCurrWater() == 0) {
+                if (animProgress >= 1) {
+                    currNotEnough = false;
+                    current = waterdropStrip;
+                } else {
+                    current = waterdropRemove;
+                    current.setFrame(0);
+                    animProgress += dt * 3;
+                }
+//            } else {
+//                rc.setNotEnough(false);
+//            }
+        }
+        if (prevWater < rc.getCurrWater()) {
             current = waterdropAdd;
-            current.setFrame(Math.round((current.getSize() - 1) * waterLvl));
-        } else if (removedWater) {
+            animProgress = 0;
+        } else if (prevWater > rc.getCurrWater()) {
             current = waterdropRemove;
-            current.setFrame(Math.round((current.getSize() - 1) * waterLvl));
-        } else {
+            animProgress = 0;
+        } else if (animProgress >= 1) {
             current = waterdropStrip;
-            current.setFrame(
-                    Math.round((current.getSize() - 2) * waterLvl) + 1);
+        } else {
+            animProgress += dt * 3;
+        }
+        if (current == waterdropAdd) {
+            current.setFrame((int)((current.getSize() - 1) * waterLvl));
+        } else if (current == waterdropRemove) {
+            if (!currNotEnough) {
+                current.setFrame((int) ((current.getSize() - 1) * waterLvl));
+            }
+        } else {
+            current.setFrame((int)((current.getSize() - 2) * waterLvl) + 1);
         }
     }
 
@@ -262,6 +292,7 @@ public class UIController {
         float widthRatio = txWidth / txHeight;
         float txWidthDrawn = w * 0.1f;
         float txHeightDrawn = w * 0.1f / widthRatio;
+        c.beginHud();
         c.drawHud(vignette, 0, 0, canvas.getWidth(), canvas.getHeight());
         c.drawHud(current,
                   w * 0.075f - txWidthDrawn / 2f,
@@ -270,7 +301,6 @@ public class UIController {
                   txHeightDrawn);
         c.endHud();
         stage.draw();
-        c.beginHud();
     }
 
 }

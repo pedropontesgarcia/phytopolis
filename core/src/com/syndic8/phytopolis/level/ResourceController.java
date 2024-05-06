@@ -29,6 +29,7 @@ public class ResourceController {
      * Current amount of water stored
      */
     private int currWater;
+    private boolean notEnough = false;
 
     public ResourceController() {
         currWater = MAX_WATER;
@@ -84,6 +85,14 @@ public class ResourceController {
         if (canUpgrade()) {
             currWater -= UPGRADE_AMT - LEAF_GROW_AMT;
         }
+    }
+
+    public boolean getNotEnough() {
+        return notEnough;
+    }
+
+    public void setNotEnough(boolean value) {
+        notEnough = value;
     }
 
     public boolean canUpgrade() {

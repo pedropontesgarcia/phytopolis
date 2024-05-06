@@ -198,7 +198,12 @@ public class PlantController {
         boolean isAtEnds = (xIndex == 0 && direction == branchDirection.LEFT) ||
                 (xIndex == plantGrid.length - 1 &&
                         direction == branchDirection.RIGHT);
-        if (direction == null || !resourceController.canGrowBranch() ||
+        if (!resourceController.canGrowBranch()) {
+            System.out.println("branch");
+            resourceController.setNotEnough(true);
+            return null;
+        }
+        if (direction == null ||
                 isAtEnds) return null;
         return plantGrid[xIndex][yIndex].makeBranch(direction,
                                                     Branch.branchType.NORMAL,
@@ -417,8 +422,12 @@ public class PlantController {
         if (!inBounds(xIndex, yIndex)) return null;
         if (plantGrid[xIndex][yIndex].hasLeaf() &&
                 plantGrid[xIndex][yIndex].getLeafType() !=
-                        Leaf.leafType.BOUNCY &&
-                resourceController.canUpgrade()) {
+                        Leaf.leafType.BOUNCY) {
+            if (!resourceController.canUpgrade()) {
+                System.out.println("upgrade");
+                resourceController.setNotEnough(true);
+                return null;
+            }
             plantGrid[xIndex][yIndex].unmakeLeaf();
             resourceController.decrementUpgrade();
             Leaf l = plantGrid[xIndex][yIndex].makeLeaf(Leaf.leafType.BOUNCY,
@@ -456,6 +465,12 @@ public class PlantController {
         int yIndex = screenCoordToIndex(x, y)[1];
         boolean lowerNode = xIndex % 2 == 0;
         if (!inBounds(xIndex, yIndex)) return null;
+
+        if (!resourceController.canGrowLeaf()) {
+            System.out.println("leaf");
+            resourceController.setNotEnough(true);
+            return null;
+        }
 
         if (!plantGrid[xIndex][yIndex].hasLeaf() &&
                 (yIndex > 0 || !lowerNode) &&
