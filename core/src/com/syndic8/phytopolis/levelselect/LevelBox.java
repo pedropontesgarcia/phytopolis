@@ -24,10 +24,11 @@ public class LevelBox {
         if (debugOn) {
             Color c = Color.WHITE;
             if (selected) c = Color.BLACK;
+            float scale = 0.01f;
             canvas.draw(texture,
                         c,
-                        texture.getWidth() / 2f,
-                        texture.getHeight() / 2f,
+                        texture.getWidth() / scale,
+                        texture.getHeight() / scale,
                         x,
                         y,
                         0f,
@@ -35,8 +36,8 @@ public class LevelBox {
                         0.01f);
             canvas.draw(texture,
                         c,
-                        texture.getWidth() / 2f,
-                        texture.getHeight() / 2f,
+                        texture.getWidth() / scale,
+                        texture.getHeight() / scale,
                         x + width,
                         y,
                         0f,
@@ -44,8 +45,8 @@ public class LevelBox {
                         0.01f);
             canvas.draw(texture,
                         c,
-                        texture.getWidth() / 2f,
-                        texture.getHeight() / 2f,
+                        texture.getWidth() / scale,
+                        texture.getHeight() / scale,
                         x + width,
                         y + height,
                         0f,
@@ -53,14 +54,14 @@ public class LevelBox {
                         0.01f);
             canvas.draw(texture,
                         c,
-                        texture.getWidth() / 2f,
-                        texture.getHeight() / 2f,
+                        texture.getWidth() / scale,
+                        texture.getHeight() / scale,
                         x,
                         y + height,
                         0f,
                         0.01f,
                         0.01f);
-            //System.out.println("X: " + x + " Y: " + y);
+            System.out.println("X: " + x + " Y: " + y);
         }
     }
 

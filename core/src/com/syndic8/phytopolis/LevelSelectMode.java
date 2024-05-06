@@ -55,6 +55,7 @@ public class LevelSelectMode extends FadingScreen implements Screen {
     private levelState[] levelStates;
     private boolean screen1;
     private Texture lighting7to12;
+    private Texture background7to12;
 
     public LevelSelectMode(GameCanvas c) {
         canvas = c;
@@ -108,8 +109,10 @@ public class LevelSelectMode extends FadingScreen implements Screen {
 
     public void gatherAssets(AssetDirectory directory) {
         if (!gathered) {
-            background = directory.getEntry("lvlsel:background",
+            background = directory.getEntry("lvlsel:background1to6",
                                                           Texture.class);
+            background7to12 = directory.getEntry("lvlsel:background7to12",
+                    Texture.class);
             lighting = directory.getEntry("lvlsel:lighting", Texture.class);
             lighting7to12 = directory.getEntry("lvlsel:lighting7to12", Texture.class);
             rs = directory.getEntry("lvlsel:redsquare", Texture.class);
@@ -139,15 +142,20 @@ public class LevelSelectMode extends FadingScreen implements Screen {
         ready = false;
         menuContainer.activate();
         // Set up levelboxes
+        float xOff = -1.65f;
+        float yOff = -2.3f;
         levelBoxes[0] = new LevelBox(canvas.getWidth() / 5f,
                                      canvas.getHeight() / 3.3f);
         levelBoxes[1] = new LevelBox(canvas.getWidth() / 2.3f,
                                      canvas.getHeight() / 3.3f);
         levelBoxes[2] = new LevelBox(canvas.getWidth() / 1.47f,
                                      canvas.getHeight() / 3.3f);
-        levelBoxes[3] = new LevelBox(canvas.getWidth() / 1.47f,canvas.getHeight() / 3.3f);
-        levelBoxes[4] = new LevelBox(canvas.getWidth() / 1.47f,canvas.getHeight() / 3.3f);
-        levelBoxes[5] = new LevelBox(canvas.getWidth() / 1.47f,canvas.getHeight() / 3.3f);
+        levelBoxes[3] = new LevelBox((canvas.getWidth() / 5f) + xOff,
+                (canvas.getHeight() / 3.3f) + yOff);
+        levelBoxes[4] = new LevelBox((canvas.getWidth() / 2.3f) + xOff,
+                (canvas.getHeight() / 3.3f) + yOff);
+        levelBoxes[5] = new LevelBox((canvas.getWidth() / 1.47f) + xOff,
+                (canvas.getHeight() / 3.3f) + yOff);
         for (LevelBox lb : levelBoxes) if (lb != null) lb.setTexture(rs);
 //        if (backgroundMusic != null) {
 //            backgroundMusic.setVolume(1);
@@ -199,59 +207,65 @@ public class LevelSelectMode extends FadingScreen implements Screen {
         canvas.clear();
         canvas.begin();
         //Draw background
-        canvas.draw(background,
+        if(screen1) canvas.draw(background,
                     Color.WHITE,
                     0,
                     0,
                     canvas.getWidth(),
                     canvas.getHeight());
-//
-//        //Next, draw pots
-//        int selectedPot = getSelectedPot();
-//        if (screen1) {
-//            for (int i = 0; i < 6; i++){
-//
-//                switch(levelStates[i]){
-//                    case LOCKED:
-//                        pots1to6[i].setFrame(0);
-//                        break;
-//                    case BEATEN:
-//                        if(i == selectedPot) pots1to6[i].setFrame(4);
-//                        else pots1to6[i].setFrame(3);
-//                        break;
-//                    case UNLOCKED:
-//                        if(i == selectedPot) pots1to6[i].setFrame(2);
-//                        else pots1to6[i].setFrame(1);
-//                        break;
-//                }
-//                canvas.draw(pots1to6[i],
-//                        Color.WHITE,
-//                        0,
-//                        0,
-//                        canvas.getWidth(),
-//                        canvas.getHeight());
-//            }
-//        }else{
-//            System.out.println("7 to 12");
-//        }
-//
-//        //Finally, draw lighting
-//        canvas.setBlendState(GameCanvas.BlendState.ADDITIVE);
-//        if(screen1) canvas.draw(lighting,
-//                    Color.WHITE,
-//                    0,
-//                    0,
-//                    canvas.getWidth(),
-//                    canvas.getHeight());
-//        else canvas.draw(lighting7to12,
-//                Color.WHITE,
-//                0,
-//                0,
-//                canvas.getWidth(),
-//                canvas.getHeight());
-//        canvas.setBlendState(GameCanvas.BlendState.NO_PREMULT);
-//        for (LevelBox lb : levelBoxes) if (lb != null) lb.draw(canvas);
-//        menuContainer.draw(canvas);
+        else canvas.draw(background7to12,
+                Color.WHITE,
+                0,
+                0,
+                canvas.getWidth(),
+                canvas.getHeight());
+
+        //Next, draw pots
+        int selectedPot = getSelectedPot();
+        if (screen1) {
+            for (int i = 0; i < 6; i++){
+
+                switch(levelStates[i]){
+                    case LOCKED:
+                        pots1to6[i].setFrame(0);
+                        break;
+                    case BEATEN:
+                        if(i == selectedPot) pots1to6[i].setFrame(4);
+                        else pots1to6[i].setFrame(3);
+                        break;
+                    case UNLOCKED:
+                        if(i == selectedPot) pots1to6[i].setFrame(2);
+                        else pots1to6[i].setFrame(1);
+                        break;
+                }
+                canvas.draw(pots1to6[i],
+                        Color.WHITE,
+                        0,
+                        0,
+                        canvas.getWidth(),
+                        canvas.getHeight());
+            }
+        }else{
+            System.out.println("7 to 12");
+        }
+
+        //Finally, draw lighting
+        canvas.setBlendState(GameCanvas.BlendState.ADDITIVE);
+        if(screen1) canvas.draw(lighting,
+                    Color.WHITE,
+                    0,
+                    0,
+                    canvas.getWidth(),
+                    canvas.getHeight());
+        else canvas.draw(lighting7to12,
+                Color.WHITE,
+                0,
+                0,
+                canvas.getWidth(),
+                canvas.getHeight());
+        canvas.setBlendState(GameCanvas.BlendState.NO_PREMULT);
+        for (LevelBox lb : levelBoxes) if (lb != null) lb.draw(canvas);
+        menuContainer.draw(canvas);
         canvas.end();
         super.draw(canvas);
     }
