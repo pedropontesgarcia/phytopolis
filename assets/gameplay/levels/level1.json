@@ -80,14 +80,14 @@
          "value":1
         }, 
         {
-         "name":"time",
+         "name":"levelnumber",
          "type":"int",
-         "value":180
+         "value":1
         }, 
         {
-         "name":"tutorial",
+         "name":"time",
          "type":"int",
-         "value":0
+         "value":120
         },
     
         {

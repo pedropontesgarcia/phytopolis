@@ -190,6 +190,7 @@ public class HazardController {
         width = plantController.getWidth();
         powerlineHeights = tm.getPowerlineYVals();
         tilemap = tm;
+        fireProgress = 0;
     }
 
     public Hazard generateHazard(Model.ModelType type) {

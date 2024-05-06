@@ -113,7 +113,7 @@ public class CollisionController implements ContactListener {
                     Leaf l = (Leaf) (player == bd1 ? bd2 : bd1);
                     if (l.getLeafType() == Leaf.leafType.BOUNCY) {
                         player.setBouncy(false);
-                        if (!ic.didJump()){
+                        if (!ic.didJump()) {
                             l.setBouncy(false);
                         }
                     }
@@ -179,8 +179,8 @@ public class CollisionController implements ContactListener {
                                 .getUserData()).getType() ==
                                 Model.ModelType.SUN);
         boolean isCollisionBetweenPlatformAndSun =
-                (((Model) fix1.getBody().getUserData()).getType() ==
-                        Model.ModelType.PLATFORM &&
+                ((((Model) fix1.getBody().getUserData()).getType() ==
+                        Model.ModelType.PLATFORM) &&
                         ((Model) fix2.getBody().getUserData()).getType() ==
                                 Model.ModelType.SUN) ||
                         (((Model) fix2.getBody().getUserData()).getType() ==
@@ -188,6 +188,15 @@ public class CollisionController implements ContactListener {
                                 ((Model) fix1.getBody()
                                         .getUserData()).getType() ==
                                         Model.ModelType.SUN);
+        boolean isCollisionBetweenWaterAndSun =
+                ((((Model) fix1.getBody().getUserData()).getType() ==
+                        Model.ModelType.WATER) &&
+                        ((Model) fix2.getBody().getUserData()).getType() ==
+                                Model.ModelType.SUN) ||
+                        (((Model) fix2.getBody().getUserData()).getType() ==
+                                Model.ModelType.WATER && ((Model) fix1.getBody()
+                                .getUserData()).getType() ==
+                                Model.ModelType.SUN);
         boolean isCollisionBetweenTileAndSun =
                 (((Model) fix1.getBody().getUserData()).getType() ==
                         Model.ModelType.TILE_NOTOP &&
@@ -212,19 +221,18 @@ public class CollisionController implements ContactListener {
                 (((Model) fix1.getBody().getUserData()).getType() ==
                         Model.ModelType.LEAF &&
                         ((Model) fix2.getBody().getUserData()).getType() ==
-                        Model.ModelType.BUG) ||
-                (((Model) fix1.getBody().getUserData()).getType() ==
-                        Model.ModelType.BUG &&
-                        ((Model) fix2.getBody()
+                                Model.ModelType.BUG) ||
+                        (((Model) fix1.getBody().getUserData()).getType() ==
+                                Model.ModelType.BUG && ((Model) fix2.getBody()
                                 .getUserData()).getType() ==
                                 Model.ModelType.LEAF);
 
         if (isCollisionBetweenPlayerAndSun ||
                 isCollisionBetweenPlatformAndSun ||
-                isCollisionBetweenTileAndSun) {
+                isCollisionBetweenTileAndSun || isCollisionBetweenWaterAndSun) {
             contact.setEnabled(false);
         }
-        if (isCollisionBetweenBugAndBouncy){
+        if (isCollisionBetweenBugAndBouncy) {
             Bug b;
             Leaf l;
             if (((Model) fix1.getBody().getUserData()).getType() ==
@@ -236,7 +244,7 @@ public class CollisionController implements ContactListener {
                 l = (Leaf) fix1.getBody().getUserData();
             }
 
-            if (l.getLeafType() == Leaf.leafType.BOUNCY){
+            if (l.getLeafType() == Leaf.leafType.BOUNCY) {
                 hazardController.removeHazard(b);
                 plantController.removeHazardFromNodes(b);
             }
