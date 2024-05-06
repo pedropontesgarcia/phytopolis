@@ -325,7 +325,7 @@ public class HazardController {
         return null;
     }
 
-    public void findValidFireLocs() {
+    public boolean findValidFireLocs() {
         validFireLocs.clear();
         for (float height : powerlineHeights) {
             if (plantController.getMaxLeafHeight() >= height) {
@@ -344,6 +344,7 @@ public class HazardController {
                 }
             }
         }
+        return !validFireLocs.isEmpty();
     }
 
     /**
@@ -744,7 +745,7 @@ public class HazardController {
     }
 
     public void update(float dt) {
-        fireProgress += dt * 10 * powerlinesTouching();
+        fireProgress += dt * 5 * powerlinesTouching();
     }
 
     public int powerlinesTouching() {

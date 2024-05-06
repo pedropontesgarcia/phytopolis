@@ -46,7 +46,7 @@
     "over:failure": "gameplay/failure.png"
   },
   "jsons": {
-    "gameplay:lvl1": "gameplay/levels/fucked.json",
+    "gameplay:lvl1": "gameplay/levels/tutorial1.json",
     "gameplay:lvl2": "gameplay/levels/lvl2.json",
     "gameplay:lvl3": "gameplay/levels/lvl3.json",
     "gameplay:constants": "gameplay/constants.json",

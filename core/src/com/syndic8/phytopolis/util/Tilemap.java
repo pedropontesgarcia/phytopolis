@@ -28,8 +28,7 @@ public class Tilemap {
     float tileWidth;
     Texture[] resourceTextures;
     int time;
-    int star;
-    int starTime;
+    int levelNumber;
     float fireRate;
     float victoryHeight;
     private Texture sunCircle;
@@ -77,12 +76,8 @@ public class Tilemap {
         return time;
     }
 
-    public int getStar() {
-        return star;
-    }
-
-    public int getStarTime() {
-        return starTime;
+    public int getLevelNumber() {
+        return levelNumber;
     }
 
     public float getFireRate() {
@@ -131,12 +126,10 @@ public class Tilemap {
                 fireRate = propertyJson.getFloat("value");
             else if (propertyJson.getString("name").equals("time"))
                 time = propertyJson.getInt("value");
-            else if (propertyJson.getString("name").equals("star"))
-                star = propertyJson.getInt("value");
-            else if (propertyJson.getString("name").equals("startime"))
-                starTime = propertyJson.getInt("value");
             else if (propertyJson.getString("name").equals("victory"))
                 victoryHeight = propertyJson.getFloat("value");
+            else if (propertyJson.getString("name").equals("levelnumber"))
+                levelNumber = propertyJson.getInt("value");
         }
         sunCircle = directory.getEntry("gameplay:sun_circle", Texture.class);
         sunSwirl = directory.getEntry("gameplay:sun_swirl", Texture.class);
