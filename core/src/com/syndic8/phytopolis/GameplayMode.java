@@ -258,28 +258,26 @@ public class GameplayMode extends WorldController {
         for (Hazard h : hazardController.updateHazards()) {
             addObject(h);
         }
-
-        if (ic.didMousePress()) {
-            projMousePosCache.set(ic.getMouseX(), ic.getMouseY());
-            Vector2 unprojMousePos = canvas.unprojectGame(projMousePosCache);
+        projMousePosCache.set(ic.getMouseX(), ic.getMouseY());
+        Vector2 unprojMousePos = canvas.unprojectGame(projMousePosCache);
+        if (ic.didMousePress() && hazardController.hasFire(unprojMousePos)) {
             hazardController.extinguishFire(unprojMousePos, avatar);
         }
         plantController.propagateDestruction();
 
-        if (timeSinceUIUpdate >= 1) {
+//        if (timeSinceUIUpdate >= 1) {
             uiController.update(dt,
                                 resourceController.getCurrRatio(),
                                 hazardController,
                                 resourceController,
                                 avatar,
-                                collisionController.getAddedWater(),
-                                resourceController.getCurrWater() < water,
+                                water,
                                 plantController.countTimerDeductions(),
                                 hazardController.getFireProgress());
             collisionController.setAddedWater(false);
-        } else {
-            timeSinceUIUpdate += 0.05;
-        }
+//        } else {
+//            timeSinceUIUpdate += 0.05;
+//        }
         // Check for win condition
         if ((plantController.getMaxLeafHeight() >
                 tilemap.getVictoryHeight() * tilemap.getTileHeight()) &&
@@ -419,9 +417,7 @@ public class GameplayMode extends WorldController {
         }
         hazardController.drawWarning(canvas, cameraVector);
         canvas.end();
-        canvas.beginHud();
         uiController.draw(canvas);
-        canvas.endHud();
         super.draw(canvas);
     }
 
