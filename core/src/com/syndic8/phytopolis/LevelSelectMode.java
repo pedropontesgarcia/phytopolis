@@ -73,7 +73,13 @@ public class LevelSelectMode extends FadingScreen implements Screen {
         this.levelStates = new levelState[12];
         this.screen1 = true;
         this.swapping = false;
-        Arrays.fill(levelStates, levelState.BEATEN);
+        //TODO remove this code for showcase/release
+        Arrays.fill(levelStates, levelState.LOCKED);
+        for(int i = 0; i < levelStates.length; i++){
+            if(i <= 5) levelStates[i] = levelState.BEATEN;
+            if(i>=6 && i<=8) levelStates[i] = levelState.UNLOCKED;
+            if(i>8) levelStates[i] = levelState.LOCKED;
+        }
     }
 
     private void createMenu() {
