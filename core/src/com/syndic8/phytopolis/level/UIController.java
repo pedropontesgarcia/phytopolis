@@ -181,13 +181,15 @@ public class UIController {
     private void updateCursor(HazardController hc, ResourceController rc, Player avatar) {
         projMousePosCache.set(ic.getMouseX(), ic.getMouseY());
         Vector2 unprojMousePos = canvas.unprojectGame(projMousePosCache);
-        float avatarX = avatar.getX();
-        float avatarY = avatar.getY();
+        // TODO: uncomment this later
+//        float avatarX = avatar.getX();
+//        float avatarY = avatar.getY();
 
         if (!Float.isNaN(unprojMousePos.x)) { // make sure we aren't tabbed out
 
-            float distance = unprojMousePos.dst(avatarX, avatarY);
-            if (distance > 2) {
+//            float distance = unprojMousePos.dst(avatarX, avatarY);
+//            if (distance > 2) {
+            if (false) {
                 Gdx.graphics.setCursor(normalCursor);
             } else {
                 if (hc.hasFire(unprojMousePos)) {
