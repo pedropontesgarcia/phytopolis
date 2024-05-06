@@ -76,8 +76,8 @@ public class LevelSelectMode extends FadingScreen implements Screen {
         //TODO remove this code for showcase/release
         Arrays.fill(levelStates, levelState.LOCKED);
         for(int i = 0; i < levelStates.length; i++){
-            if(i <= 5) levelStates[i] = levelState.BEATEN;
-            if(i>=6 && i<=7) levelStates[i] = levelState.UNLOCKED;
+            if(i <= 6) levelStates[i] = levelState.BEATEN;
+            if(i>=7 && i<=7) levelStates[i] = levelState.UNLOCKED;
             if(i>7) levelStates[i] = levelState.LOCKED;
         }
     }
