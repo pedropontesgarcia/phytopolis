@@ -88,7 +88,7 @@ public class GameplayMode extends WorldController {
 
         setBounds(tilemap.getWorldWidth(), tilemap.getWorldHeight());
 
-        AudioSource bgm = directory.getEntry("viridian", AudioSource.class);
+        AudioSource bgm = getLevelMusic(directory);
         backgroundMusic = soundController.addMusic(bgm);
         soundController.setMusic(backgroundMusic);
         soundController.setLooping(true);
@@ -451,6 +451,28 @@ public class GameplayMode extends WorldController {
                 return Leaf.leafType.NORMAL2;
             default:
                 return Leaf.leafType.NORMAL;
+        }
+    }
+
+    private AudioSource getLevelMusic(AssetDirectory directory){
+        switch (lvl) {
+            case "gameplay:lvl1":
+            case "gameplay:lvl2":
+            case "gameplay:lvl3":
+                return directory.getEntry("viridian", AudioSource.class);
+            case "gameplay:lvl4":
+            case "gameplay:lvl5":
+            case "gameplay:lvl6":
+            case "gameplay:lvl7":
+                return directory.getEntry("ozonelayer", AudioSource.class);
+            case "gameplay:lvl8":
+            case "gameplay:lvl9":
+            case "gameplay:lvl10":
+            case "gameplay:lvl11":
+            case "gameplay:lvl12":
+                return directory.getEntry("sunrise", AudioSource.class);
+            default:
+                return directory.getEntry("viridian", AudioSource.class);
         }
     }
 
