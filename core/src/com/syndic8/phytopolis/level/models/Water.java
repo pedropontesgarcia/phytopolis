@@ -36,7 +36,7 @@ public class Water extends Resource {
     }
 
     public void clear() {
-        currRegen = 0;
+//        currRegen = 0;
         currDelay = 0;
     }
 
