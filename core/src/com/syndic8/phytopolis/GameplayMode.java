@@ -82,7 +82,8 @@ public class GameplayMode extends WorldController {
      * @param directory Reference to global asset manager.
      */
     public void gatherAssets(AssetDirectory directory) {
-        tilemap = new Tilemap(directory.getEntry(lvl, JsonValue.class), canvas);
+        JsonValue level = directory.getEntry(lvl, JsonValue.class);
+        tilemap = new Tilemap(level, canvas);
         tilemap.gatherAssets(directory);
         canvas.setWorldSize(tilemap.getWorldWidth());
 
@@ -93,13 +94,13 @@ public class GameplayMode extends WorldController {
         soundController.setMusic(backgroundMusic);
         soundController.setLooping(true);
         soundController.playMusic();
+        background = directory.getEntry(level.get("background").asString(),
+                Texture.class);
 
         if (!gathered) {
             gathered = true;
             avatarTexture = directory.getEntry("gameplay:player",
                                                Texture.class);
-            background = directory.getEntry("gameplay:background",
-                                            Texture.class);
             jumpTexture = directory.getEntry("jump", Texture.class);
             jumpAnimator = new FilmStrip(jumpTexture, 1, 13, 13);
 
@@ -207,6 +208,9 @@ public class GameplayMode extends WorldController {
         // Process actions in object model
         avatar.setMovement(ic.getHorizontal() * avatar.getForce());
         avatar.setJumping(ic.didJump());
+        if (ic.getHorizontal() != 0 || ic.didJump()) {
+            ic.resetScrolled();
+        }
         processPlantGrowth();
 
         avatar.applyForce();
@@ -214,19 +218,23 @@ public class GameplayMode extends WorldController {
         if (ic.didScrollReset()) {
             ic.resetScrolled();
         }
-        ic.setHeight(tilemap.getTilemapHeight() - canvas.getHeight());
+        ic.setHeight(tilemap.getTilemapHeight() * tilemap.getTileHeight() - canvas.getHeight());
         float aspectRatio = canvas.getWidth() / canvas.getHeight();
         float cameraHeight = tilemap.getWorldWidth() / aspectRatio;
+//        cameraVector.set(tilemap.getWorldWidth() / 2f,
+//                         Math.max(cameraHeight / 2f,
+//                                  Math.min(tilemap.getTilemapHeight() *
+//                                                   tilemap.getTileHeight() -
+//                                                   cameraHeight / 2f,
+//                                           avatar.getY()) + ic.getScrolled()));
         cameraVector.set(tilemap.getWorldWidth() / 2f,
-                         Math.max(cameraHeight / 2f,
-                                  Math.min(tilemap.getTilemapHeight() *
-                                                   tilemap.getTileHeight() -
-                                                   cameraHeight / 2f,
-                                           avatar.getY()) + ic.getScrolled()));
+                Math.max(cameraHeight / 2f,
+                                avatar.getY()) + ic.getScrolled());
         // generate hazards please
         for (Model m : objects) {
             if (m instanceof Water) {
                 ((Water) m).regenerate();
+                m.update(dt);
             }
             if (m instanceof Sun) {
                 ((Sun) m).update(dt,

@@ -335,11 +335,13 @@ public class HazardController {
                 int min = plantController.screenCoordToIndex(0, height)[1] -
                         FIRE_BUFFER_BELOW;
                 for (int i = min; i <= max; i++) {
-                    for (int width = 0;
-                         width < plantController.getWidth();
-                         width++) {
-                        if (isValidFireLocation(width, i)) {
-                            validFireLocs.add(new Vector2(width, i));
+                    if (i != 0) {
+                        for (int width = 0;
+                             width < plantController.getWidth();
+                             width++) {
+                            if (isValidFireLocation(width, i)) {
+                                validFireLocs.add(new Vector2(width, i));
+                            }
                         }
                     }
                 }

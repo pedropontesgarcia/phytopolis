@@ -13,6 +13,7 @@ public class Water extends Resource {
     private final FilmStrip waterFilmstrip;
     private int currRegen;
     private int currDelay;
+    private float animFrame;
 
     public Water(float x,
                  float y,
@@ -27,6 +28,7 @@ public class Water extends Resource {
         bodyinfo.type = BodyDef.BodyType.StaticBody;
         waterFilmstrip = wf;
         setFilmStrip(wf);
+        animFrame = 13;
     }
 
     public boolean isFull() {
@@ -54,9 +56,21 @@ public class Water extends Resource {
         return ModelType.WATER;
     }
 
+    public void update(float dt) {
+        if (isFull()) {
+            animFrame += dt * 5;
+            if (animFrame >= 26) {
+                animFrame = 13;
+            }
+            waterFilmstrip.setFrame((int)animFrame);
+        } else {
+            waterFilmstrip.setFrame(Math.round(
+                    (waterFilmstrip.getSize() - 1) * (getRegenRatio())));
+            animFrame = 13;
+        }
+    }
+
     public void draw(GameCanvas canvas) {
-        waterFilmstrip.setFrame(Math.round(
-                (waterFilmstrip.getSize() - 1) * (getRegenRatio())));
         float sclX = width / waterFilmstrip.getRegionWidth();
         float sclY = height / waterFilmstrip.getRegionHeight();
         canvas.draw(waterFilmstrip,

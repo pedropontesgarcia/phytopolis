@@ -453,5 +453,6 @@
   "tilewidth": 600,
   "type": "map",
   "version": "1.10",
-  "width": 6
+  "width": 6,
+  "background": "gameplay:background4"
 }

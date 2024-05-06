@@ -253,7 +253,7 @@ public class Tilemap {
                             .equals("water")) {
                         FilmStrip waterFilmstrip = new FilmStrip(
                                 resourceTextures[0],
-                                1,
+                                2,
                                 13);
                         Water w = new Water(xMid,
                                             yMid,
