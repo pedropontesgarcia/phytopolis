@@ -18,6 +18,8 @@ public class Player extends CapsuleObject {
     private static final int NUM_JUMP_DOWN_FRAMES = 6;
     private static final float ANIMATION_SPEED = 0.15f;
     private static final float ANIMATION_SPEED2 = 0.16f;
+
+    private static final float ANIMATION_SPEED3 = 0.05f;
     /**
      * The initializing data (to avoid magic numbers)
      */
@@ -52,6 +54,8 @@ public class Player extends CapsuleObject {
     private final Vector2 forceCache = new Vector2();
     private final FilmStrip jumpAnimator;
     private final FilmStrip jogAnimator;
+
+    private final FilmStrip idleAnimator;
     /**
      * Multiplier for when standing on bouncy leaf
      */
@@ -63,6 +67,8 @@ public class Player extends CapsuleObject {
     private final int shootCooldown;
     private float animFrame;
     private float animFrame2;
+
+    private float animFrame3;
     /**
      * The current horizontal movement of the character
      */
@@ -109,6 +115,7 @@ public class Player extends CapsuleObject {
                   float height,
                   FilmStrip jump,
                   FilmStrip jog,
+                  FilmStrip idle,
                   Tilemap tm,
                   float texScl) {
         // The shrink factors fit the image to a tigher hitbox
@@ -137,8 +144,10 @@ public class Player extends CapsuleObject {
         faceRight = true;
 
         animFrame = 0.0f;
+        animFrame3 = 0.0f;
         jumpAnimator = jump;
         jogAnimator = jog;
+        idleAnimator = idle;
         shootCooldown = 0;
         jumpCooldown = 0;
         setName("dude");
@@ -288,6 +297,15 @@ public class Player extends CapsuleObject {
             jumpCooldown = Math.max(0, jumpCooldown - 1);
         }
 
+        if (!(Math.abs(getVX()) >= 0.1) && !(!isGrounded() || animFrame != 0)){
+            if (animFrame3 < 3){
+                animFrame3 += ANIMATION_SPEED3;
+            }if ( animFrame3 >= 3){
+                animFrame3 -= 3;
+            }
+
+        }
+
         super.update(dt);
     }
 
@@ -370,10 +388,14 @@ public class Player extends CapsuleObject {
                         sclX * effect,
                         sclY);
         } else {
-            canvas.draw(texture,
+            idleAnimator.setFrame((int)animFrame3);
+            float x = idleAnimator.getRegionWidth() / 2.0f;
+            float y = idleAnimator.getRegionHeight() / 2.0f;
+            System.out.println(animFrame3);
+            canvas.draw(idleAnimator,
                         Color.WHITE,
-                        origin.x,
-                        origin.y,
+                        x,
+                        y,
                         getX() * drawScale.x,
                         getY() * drawScale.y,
                         getAngle(),

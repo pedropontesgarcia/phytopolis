@@ -44,6 +44,8 @@ public class GameplayMode extends WorldController {
     private FilmStrip jumpAnimator;
     private Texture jogTexture;
     private FilmStrip jogAnimator;
+
+    private FilmStrip idleAnimator;
     private boolean gathered;
     private Texture background;
     private Texture avatarTexture;
@@ -106,6 +108,11 @@ public class GameplayMode extends WorldController {
 
             jogTexture = directory.getEntry("jog", Texture.class);
             jogAnimator = new FilmStrip(jogTexture, 1, 8, 8);
+
+            idleAnimator =
+                    new FilmStrip(directory.getEntry(
+                            "idle", Texture.class), 1, 3,
+                            3);
 
             constants = directory.getEntry("gameplay:constants",
                                            JsonValue.class);
@@ -634,6 +641,7 @@ public class GameplayMode extends WorldController {
                             tilemap.getTileHeight() * 0.9f,
                             jumpAnimator,
                             jogAnimator,
+                            idleAnimator,
                             tilemap,
                             0.9f);
         avatar.setTexture(avatarTexture);
