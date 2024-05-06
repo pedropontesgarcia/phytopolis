@@ -246,7 +246,7 @@ public class GameplayMode extends WorldController {
         if (ic.didMousePress()) {
             projMousePosCache.set(ic.getMouseX(), ic.getMouseY());
             Vector2 unprojMousePos = canvas.unprojectGame(projMousePosCache);
-            hazardController.extinguishFire(unprojMousePos);
+            hazardController.extinguishFire(unprojMousePos, avatar);
         }
         plantController.propagateDestruction();
 
@@ -281,6 +281,11 @@ public class GameplayMode extends WorldController {
         // get mouse position
         projMousePosCache.set(ic.getMouseX(), ic.getMouseY());
         Vector2 unprojMousePos = canvas.unprojectGame(projMousePosCache);
+        float avatarX = avatar.getX();
+        float avatarY = avatar.getY();
+        float distance = unprojMousePos.dst(avatarX, avatarY);
+        if (distance > 2) return;
+
         boolean canGrowBranch = ic.didGrowBranch() && ic.isGrowBranchModDown();
         boolean canGrowLeaf = ic.didGrowLeaf() && ic.isGrowLeafModDown();
         boolean noPriority = ic.isGrowLeafModSet() == ic.isGrowBranchModSet();
@@ -301,11 +306,9 @@ public class GameplayMode extends WorldController {
 
         if (!hazardController.hasFire(unprojMousePos)) {
             if (shouldGrowBranch) {
-
                 Branch branch = plantController.growBranch(unprojMousePos.x,
                                                            unprojMousePos.y);
                 if (branch != null) addObject(branch);
-
             }
             if (shouldGrowLeaf) {
                 // don't grow if there's a fire there (prioritize fire)
@@ -356,37 +359,41 @@ public class GameplayMode extends WorldController {
         if (!isPaused()) {
             projMousePosCache.set(ic.getMouseX(), ic.getMouseY());
             Vector2 unprojMousePos = canvas.unprojectGame(projMousePosCache);
-            if (!hazardController.hasFire(unprojMousePos)) {
-                if (!ic.isGrowLeafModDown()) {
-                    plantController.drawGhostBranch(canvas,
-                                                    unprojMousePos.x,
-                                                    unprojMousePos.y);
-                } else {
-                    Leaf.leafType lt;
-                    float width;
-                    switch (lvl) {
-                        case "gameplay:lvl2":
-                            lt = Leaf.leafType.NORMAL1;
-                            width = lvl2LeafWidth;
-                            break;
-                        case "gameplay:lvl3":
-                            lt = Leaf.leafType.NORMAL2;
-                            width = lvl3LeafWidth;
-                            break;
-                        default:
-                            lt = Leaf.leafType.NORMAL;
-                            width = lvl1LeafWidth;
+            float avatarX = avatar.getX();
+            float avatarY = avatar.getY();
+            float distance = unprojMousePos.dst(avatarX, avatarY);
+            if (distance <= 2) {
+                if (!hazardController.hasFire(unprojMousePos)) {
+                    if (!ic.isGrowLeafModDown()) {
+                        plantController.drawGhostBranch(canvas,
+                                unprojMousePos.x,
+                                unprojMousePos.y);
+                    } else {
+                        Leaf.leafType lt;
+                        float width;
+                        switch (lvl) {
+                            case "gameplay:lvl2":
+                                lt = Leaf.leafType.NORMAL1;
+                                width = lvl2LeafWidth;
+                                break;
+                            case "gameplay:lvl3":
+                                lt = Leaf.leafType.NORMAL2;
+                                width = lvl3LeafWidth;
+                                break;
+                            default:
+                                lt = Leaf.leafType.NORMAL;
+                                width = lvl1LeafWidth;
+                        }
+                        plantController.drawGhostLeaf(canvas,
+                                lt,
+                                width,
+                                unprojMousePos.x,
+                                unprojMousePos.y + 0.5f *
+                                        tilemap.getTileHeight());
                     }
-                    plantController.drawGhostLeaf(canvas,
-                                                  lt,
-                                                  width,
-                                                  unprojMousePos.x,
-                                                  unprojMousePos.y + 0.5f *
-                                                          tilemap.getTileHeight());
+
                 }
-
             }
-
         }
         hazardController.drawWarning(canvas, cameraVector);
         canvas.end();

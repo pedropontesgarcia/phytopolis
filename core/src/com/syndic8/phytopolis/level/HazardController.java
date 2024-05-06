@@ -494,7 +494,12 @@ public class HazardController {
      *
      * @param mousePos mouse position
      */
-    public void extinguishFire(Vector2 mousePos) {
+    public void extinguishFire(Vector2 mousePos, Player avatar) {
+        if (!Float.isNaN(mousePos.x)) return;
+        float avatarX = avatar.getX();
+        float avatarY = avatar.getY();
+        float distance = mousePos.dst(avatarX, avatarY);
+        if (distance > 2) return;
         if (!resourceController.canExtinguish()) return;
         for (Hazard h : hazards) {
             if (h.getType().equals(FIRE)) {
