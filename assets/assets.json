@@ -1,7 +1,15 @@
 {
   "textures": {
-    "lvlsel:background": "gameplay/levelselect-123-filmstrip.png",
-    "lvlsel:lighting": "gameplay/levelselect-lighting.png",
+    "lvlsel:background1to6": "levelselect/background1to6.png",
+    "lvlsel:background7to12": "levelselect/background7to12.png",
+    "lvlsel:lighting": "levelselect/lighting.png",
+    "lvlsel:lighting7to12": "levelselect/lighting7to12.png",
+    "lvlsel:pot1": "levelselect/level1pots.png",
+    "lvlsel:pot2": "levelselect/level2pots.png",
+    "lvlsel:pot3": "levelselect/level3pots.png",
+    "lvlsel:pot4": "levelselect/level4pots.png",
+    "lvlsel:pot5": "levelselect/level5pots.png",
+    "lvlsel:pot6": "levelselect/level6pots.png",
     "lvlsel:redsquare": "gameplay/redsquare.png",
     "gameplay:player": "gameplay/static.png",
     "gameplay:leaf": "gameplay/level1leaf.png",
@@ -46,9 +54,9 @@
     "over:failure": "gameplay/failure.png"
   },
   "jsons": {
-    "gameplay:lvl1": "gameplay/levels/fucked.json",
-    "gameplay:lvl2": "gameplay/levels/lvl2.json",
-    "gameplay:lvl3": "gameplay/levels/lvl3.json",
+    "gameplay:lvl1": "gameplay/levels/level1.json",
+    "gameplay:lvl2": "gameplay/levels/level2.json",
+    "gameplay:lvl3": "gameplay/levels/level3.json",
     "gameplay:constants": "gameplay/constants.json",
     "tileset.tsx": "gameplay/tileset.json",
     "rsrc.tsx": "gameplay/rsrc.json",

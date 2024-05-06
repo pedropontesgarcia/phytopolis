@@ -173,6 +173,7 @@ public class UIController {
         updateCursor(hazardController, resourceController, avatar);
         updateTexture(waterLvl, addedWater, removedWater);
         progressBar.setValue(fireProgress);
+        progressBar.setVisible(hazardController.findValidFireLocs());
         timer.updateTime(dt + timerDeduction); // 1 SEC PER LEAF BITE
         label.setText(timer.toString());
     }
