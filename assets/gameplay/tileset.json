@@ -1,863 +1,924 @@
-{ "columns":0,
- "grid":
+{
+  "columns": 0,
+  "grid": {
+    "height": 1,
+    "orientation": "orthogonal",
+    "width": 1
+  },
+  "margin": 0,
+  "name": "tileset",
+  "spacing": 0,
+  "tilecount": 36,
+  "tiledversion": "1.10.2",
+  "tileheight": 400,
+  "tiles": [
     {
-     "height":1,
-     "orientation":"orthogonal",
-     "width":1
+      "id": 0,
+      "image": "left-clothesline-1.png",
+      "imageheight": 400,
+      "imagewidth": 600,
+      "objectgroup": {
+        "draworder": "index",
+        "id": 2,
+        "name": "",
+        "objects": [
+          {
+            "height": 17.9548,
+            "id": 1,
+            "name": "",
+            "rotation": 0,
+            "type": "",
+            "visible": true,
+            "width": 600,
+            "x": 0,
+            "y": 371.045
+          }
+        ],
+        "opacity": 1,
+        "type": "objectgroup",
+        "visible": true,
+        "x": 0,
+        "y": 0
+      },
+      "properties": [
+        {
+          "name": "collidetop",
+          "type": "bool",
+          "value": false
+        }
+      ]
     },
- "margin":0,
- "name":"tileset",
- "spacing":0,
- "tilecount":34,
- "tiledversion":"1.10.2",
- "tileheight":400,
- "tiles":[
+    {
+      "id": 1,
+      "image": "left-clothesline-2.png",
+      "imageheight": 400,
+      "imagewidth": 600,
+      "objectgroup": {
+        "draworder": "index",
+        "id": 2,
+        "name": "",
+        "objects": [
+          {
+            "height": 16.4369,
+            "id": 1,
+            "name": "",
+            "rotation": 0,
+            "type": "",
+            "visible": true,
+            "width": 168.393,
+            "x": 0,
+            "y": 358.563
+          }
+        ],
+        "opacity": 1,
+        "type": "objectgroup",
+        "visible": true,
+        "x": 0,
+        "y": 0
+      },
+      "properties": [
         {
-         "id":0,
-         "image":"left-clothesline-1.png",
-         "imageheight":400,
-         "imagewidth":600,
-         "objectgroup":
-            {
-             "draworder":"index",
-             "id":2,
-             "name":"",
-             "objects":[
-                    {
-                     "height":17.9548472775565,
-                     "id":1,
-                     "name":"",
-                     "rotation":0,
-                     "type":"",
-                     "visible":true,
-                     "width":600,
-                     "x":0,
-                     "y":371.045152722444
-                    }],
-             "opacity":1,
-             "type":"objectgroup",
-             "visible":true,
-             "x":0,
-             "y":0
-            },
-         "properties":[
-                {
-                 "name":"collidetop",
-                 "type":"bool",
-                 "value":false
-                }]
-        }, 
+          "name": "collidetop",
+          "type": "bool",
+          "value": false
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "image": "left-clothesline-3.png",
+      "imageheight": 400,
+      "imagewidth": 600,
+      "properties": [
         {
-         "id":1,
-         "image":"left-clothesline-2.png",
-         "imageheight":400,
-         "imagewidth":600,
-         "objectgroup":
-            {
-             "draworder":"index",
-             "id":2,
-             "name":"",
-             "objects":[
-                    {
-                     "height":16.4369189907039,
-                     "id":1,
-                     "name":"",
-                     "rotation":0,
-                     "type":"",
-                     "visible":true,
-                     "width":168.393094289509,
-                     "x":0,
-                     "y":358.563081009296
-                    }],
-             "opacity":1,
-             "type":"objectgroup",
-             "visible":true,
-             "x":0,
-             "y":0
-            },
-         "properties":[
-                {
-                 "name":"collidetop",
-                 "type":"bool",
-                 "value":false
-                }]
-        }, 
+          "name": "collidetop",
+          "type": "bool",
+          "value": false
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "image": "left-clothesline-4.png",
+      "imageheight": 400,
+      "imagewidth": 600,
+      "properties": [
         {
-         "id":2,
-         "image":"left-clothesline-3.png",
-         "imageheight":400,
-         "imagewidth":600,
-         "properties":[
-                {
-                 "name":"collidetop",
-                 "type":"bool",
-                 "value":false
-                }]
-        }, 
+          "name": "collidetop",
+          "type": "bool",
+          "value": false
+        }
+      ]
+    },
+    {
+      "id": 4,
+      "image": "leftdouble-clothesline-1.png",
+      "imageheight": 400,
+      "imagewidth": 600,
+      "objectgroup": {
+        "draworder": "index",
+        "id": 2,
+        "name": "",
+        "objects": [
+          {
+            "height": 20.4741,
+            "id": 1,
+            "name": "",
+            "rotation": 0,
+            "type": "",
+            "visible": true,
+            "width": 600,
+            "x": 0,
+            "y": 368.526
+          }
+        ],
+        "opacity": 1,
+        "type": "objectgroup",
+        "visible": true,
+        "x": 0,
+        "y": 0
+      },
+      "properties": [
         {
-         "id":3,
-         "image":"left-clothesline-4.png",
-         "imageheight":400,
-         "imagewidth":600,
-         "properties":[
-                {
-                 "name":"collidetop",
-                 "type":"bool",
-                 "value":false
-                }]
-        }, 
+          "name": "collidetop",
+          "type": "bool",
+          "value": false
+        }
+      ]
+    },
+    {
+      "id": 5,
+      "image": "leftdouble-clothesline-2.png",
+      "imageheight": 400,
+      "imagewidth": 600,
+      "objectgroup": {
+        "draworder": "index",
+        "id": 2,
+        "name": "",
+        "objects": [
+          {
+            "height": 21.8765,
+            "id": 1,
+            "name": "",
+            "rotation": 0,
+            "type": "",
+            "visible": true,
+            "width": 600,
+            "x": 0,
+            "y": 370.124
+          }
+        ],
+        "opacity": 1,
+        "type": "objectgroup",
+        "visible": true,
+        "x": 0,
+        "y": 0
+      },
+      "properties": [
         {
-         "id":4,
-         "image":"leftdouble-clothesline-1.png",
-         "imageheight":400,
-         "imagewidth":600,
-         "objectgroup":
-            {
-             "draworder":"index",
-             "id":2,
-             "name":"",
-             "objects":[
-                    {
-                     "height":20.4741035856574,
-                     "id":1,
-                     "name":"",
-                     "rotation":0,
-                     "type":"",
-                     "visible":true,
-                     "width":600,
-                     "x":0,
-                     "y":368.525896414343
-                    }],
-             "opacity":1,
-             "type":"objectgroup",
-             "visible":true,
-             "x":0,
-             "y":0
-            },
-         "properties":[
-                {
-                 "name":"collidetop",
-                 "type":"bool",
-                 "value":false
-                }]
-        }, 
+          "name": "collidetop",
+          "type": "bool",
+          "value": false
+        }
+      ]
+    },
+    {
+      "id": 6,
+      "image": "leftdouble-clothesline-3.png",
+      "imageheight": 400,
+      "imagewidth": 600,
+      "objectgroup": {
+        "draworder": "index",
+        "id": 2,
+        "name": "",
+        "objects": [
+          {
+            "height": 17.676,
+            "id": 1,
+            "name": "",
+            "rotation": 0,
+            "type": "",
+            "visible": true,
+            "width": 251.394,
+            "x": 0,
+            "y": 363.324
+          }
+        ],
+        "opacity": 1,
+        "type": "objectgroup",
+        "visible": true,
+        "x": 0,
+        "y": 0
+      },
+      "properties": [
         {
-         "id":5,
-         "image":"leftdouble-clothesline-2.png",
-         "imageheight":400,
-         "imagewidth":600,
-         "objectgroup":
-            {
-             "draworder":"index",
-             "id":2,
-             "name":"",
-             "objects":[
-                    {
-                     "height":21.8764940239045,
-                     "id":1,
-                     "name":"",
-                     "rotation":0,
-                     "type":"",
-                     "visible":true,
-                     "width":600,
-                     "x":0,
-                     "y":370.123505976096
-                    }],
-             "opacity":1,
-             "type":"objectgroup",
-             "visible":true,
-             "x":0,
-             "y":0
-            },
-         "properties":[
-                {
-                 "name":"collidetop",
-                 "type":"bool",
-                 "value":false
-                }]
-        }, 
+          "name": "collidetop",
+          "type": "bool",
+          "value": false
+        }
+      ]
+    },
+    {
+      "id": 7,
+      "image": "leftdouble-clothesline-4.png",
+      "imageheight": 400,
+      "imagewidth": 600,
+      "properties": [
         {
-         "id":6,
-         "image":"leftdouble-clothesline-3.png",
-         "imageheight":400,
-         "imagewidth":600,
-         "objectgroup":
-            {
-             "draworder":"index",
-             "id":2,
-             "name":"",
-             "objects":[
-                    {
-                     "height":17.6759628154051,
-                     "id":1,
-                     "name":"",
-                     "rotation":0,
-                     "type":"",
-                     "visible":true,
-                     "width":251.394422310757,
-                     "x":0,
-                     "y":363.324037184595
-                    }],
-             "opacity":1,
-             "type":"objectgroup",
-             "visible":true,
-             "x":0,
-             "y":0
-            },
-         "properties":[
-                {
-                 "name":"collidetop",
-                 "type":"bool",
-                 "value":false
-                }]
-        }, 
+          "name": "collidetop",
+          "type": "bool",
+          "value": false
+        }
+      ]
+    },
+    {
+      "id": 8,
+      "image": "middle-clothesline-1.png",
+      "imageheight": 400,
+      "imagewidth": 600,
+      "properties": [
         {
-         "id":7,
-         "image":"leftdouble-clothesline-4.png",
-         "imageheight":400,
-         "imagewidth":600,
-         "properties":[
-                {
-                 "name":"collidetop",
-                 "type":"bool",
-                 "value":false
-                }]
-        }, 
+          "name": "collidetop",
+          "type": "bool",
+          "value": false
+        }
+      ]
+    },
+    {
+      "id": 9,
+      "image": "middle-clothesline-2.png",
+      "imageheight": 400,
+      "imagewidth": 600,
+      "objectgroup": {
+        "draworder": "index",
+        "id": 2,
+        "name": "",
+        "objects": [
+          {
+            "height": 24.1965,
+            "id": 1,
+            "name": "",
+            "rotation": 0,
+            "type": "",
+            "visible": true,
+            "width": 407.437,
+            "x": 192.563,
+            "y": 353.803
+          }
+        ],
+        "opacity": 1,
+        "type": "objectgroup",
+        "visible": true,
+        "x": 0,
+        "y": 0
+      },
+      "properties": [
         {
-         "id":8,
-         "image":"middle-clothesline-1.png",
-         "imageheight":400,
-         "imagewidth":600,
-         "properties":[
-                {
-                 "name":"collidetop",
-                 "type":"bool",
-                 "value":false
-                }]
-        }, 
+          "name": "collidetop",
+          "type": "bool",
+          "value": false
+        }
+      ]
+    },
+    {
+      "id": 10,
+      "image": "middle-clothesline-3.png",
+      "imageheight": 400,
+      "imagewidth": 600,
+      "objectgroup": {
+        "draworder": "index",
+        "id": 2,
+        "name": "",
+        "objects": [
+          {
+            "height": 28.1169,
+            "id": 1,
+            "name": "",
+            "rotation": 0,
+            "type": "",
+            "visible": true,
+            "width": 287.915,
+            "x": 0,
+            "y": 307.883
+          }
+        ],
+        "opacity": 1,
+        "type": "objectgroup",
+        "visible": true,
+        "x": 0,
+        "y": 0
+      },
+      "properties": [
         {
-         "id":9,
-         "image":"middle-clothesline-2.png",
-         "imageheight":400,
-         "imagewidth":600,
-         "objectgroup":
-            {
-             "draworder":"index",
-             "id":2,
-             "name":"",
-             "objects":[
-                    {
-                     "height":24.1965471447544,
-                     "id":1,
-                     "name":"",
-                     "rotation":0,
-                     "type":"",
-                     "visible":true,
-                     "width":407.436918990704,
-                     "x":192.563081009296,
-                     "y":353.803452855246
-                    }],
-             "opacity":1,
-             "type":"objectgroup",
-             "visible":true,
-             "x":0,
-             "y":0
-            },
-         "properties":[
-                {
-                 "name":"collidetop",
-                 "type":"bool",
-                 "value":false
-                }]
-        }, 
+          "name": "collidetop",
+          "type": "bool",
+          "value": false
+        }
+      ]
+    },
+    {
+      "id": 11,
+      "image": "middle-clothesline-4.png",
+      "imageheight": 400,
+      "imagewidth": 600,
+      "properties": [
         {
-         "id":10,
-         "image":"middle-clothesline-3.png",
-         "imageheight":400,
-         "imagewidth":600,
-         "objectgroup":
-            {
-             "draworder":"index",
-             "id":2,
-             "name":"",
-             "objects":[
-                    {
-                     "height":28.1168658698539,
-                     "id":1,
-                     "name":"",
-                     "rotation":0,
-                     "type":"",
-                     "visible":true,
-                     "width":287.915006640106,
-                     "x":0,
-                     "y":307.883134130146
-                    }],
-             "opacity":1,
-             "type":"objectgroup",
-             "visible":true,
-             "x":0,
-             "y":0
-            },
-         "properties":[
-                {
-                 "name":"collidetop",
-                 "type":"bool",
-                 "value":false
-                }]
-        }, 
+          "name": "collidetop",
+          "type": "bool",
+          "value": false
+        }
+      ]
+    },
+    {
+      "id": 12,
+      "image": "right-clothesline-1.png",
+      "imageheight": 400,
+      "imagewidth": 600,
+      "properties": [
         {
-         "id":11,
-         "image":"middle-clothesline-4.png",
-         "imageheight":400,
-         "imagewidth":600,
-         "properties":[
-                {
-                 "name":"collidetop",
-                 "type":"bool",
-                 "value":false
-                }]
-        }, 
+          "name": "collidetop",
+          "type": "bool",
+          "value": false
+        }
+      ]
+    },
+    {
+      "id": 13,
+      "image": "right-clothesline-2.png",
+      "imageheight": 400,
+      "imagewidth": 600,
+      "properties": [
         {
-         "id":12,
-         "image":"right-clothesline-1.png",
-         "imageheight":400,
-         "imagewidth":600,
-         "properties":[
-                {
-                 "name":"collidetop",
-                 "type":"bool",
-                 "value":false
-                }]
-        }, 
+          "name": "collidetop",
+          "type": "bool",
+          "value": false
+        }
+      ]
+    },
+    {
+      "id": 14,
+      "image": "right-clothesline-3.png",
+      "imageheight": 400,
+      "imagewidth": 600,
+      "objectgroup": {
+        "draworder": "index",
+        "id": 2,
+        "name": "",
+        "objects": [
+          {
+            "height": 22.7556,
+            "id": 1,
+            "name": "",
+            "rotation": 0,
+            "type": "",
+            "visible": true,
+            "width": 234.794,
+            "x": 278.884,
+            "y": 372.244
+          }
+        ],
+        "opacity": 1,
+        "type": "objectgroup",
+        "visible": true,
+        "x": 0,
+        "y": 0
+      },
+      "properties": [
         {
-         "id":13,
-         "image":"right-clothesline-2.png",
-         "imageheight":400,
-         "imagewidth":600,
-         "properties":[
-                {
-                 "name":"collidetop",
-                 "type":"bool",
-                 "value":false
-                }]
-        }, 
+          "name": "collidetop",
+          "type": "bool",
+          "value": false
+        }
+      ]
+    },
+    {
+      "id": 15,
+      "image": "right-clothesline-4.png",
+      "imageheight": 400,
+      "imagewidth": 600,
+      "objectgroup": {
+        "draworder": "index",
+        "id": 2,
+        "name": "",
+        "objects": [
+          {
+            "height": 26.3546,
+            "id": 1,
+            "name": "",
+            "rotation": 0,
+            "type": "",
+            "visible": true,
+            "width": 600,
+            "x": 0,
+            "y": 361.645
+          }
+        ],
+        "opacity": 1,
+        "type": "objectgroup",
+        "visible": true,
+        "x": 0,
+        "y": 0
+      },
+      "properties": [
         {
-         "id":14,
-         "image":"right-clothesline-3.png",
-         "imageheight":400,
-         "imagewidth":600,
-         "objectgroup":
-            {
-             "draworder":"index",
-             "id":2,
-             "name":"",
-             "objects":[
-                    {
-                     "height":22.7556440903055,
-                     "id":1,
-                     "name":"",
-                     "rotation":0,
-                     "type":"",
-                     "visible":true,
-                     "width":234.794156706507,
-                     "x":278.884462151394,
-                     "y":372.244355909694
-                    }],
-             "opacity":1,
-             "type":"objectgroup",
-             "visible":true,
-             "x":0,
-             "y":0
-            },
-         "properties":[
-                {
-                 "name":"collidetop",
-                 "type":"bool",
-                 "value":false
-                }]
-        }, 
+          "name": "collidetop",
+          "type": "bool",
+          "value": false
+        }
+      ]
+    },
+    {
+      "id": 16,
+      "image": "rightdouble-clothesline-1.png",
+      "imageheight": 400,
+      "imagewidth": 600,
+      "properties": [
         {
-         "id":15,
-         "image":"right-clothesline-4.png",
-         "imageheight":400,
-         "imagewidth":600,
-         "objectgroup":
-            {
-             "draworder":"index",
-             "id":2,
-             "name":"",
-             "objects":[
-                    {
-                     "height":26.3545816733068,
-                     "id":1,
-                     "name":"",
-                     "rotation":0,
-                     "type":"",
-                     "visible":true,
-                     "width":600,
-                     "x":0,
-                     "y":361.645418326693
-                    }],
-             "opacity":1,
-             "type":"objectgroup",
-             "visible":true,
-             "x":0,
-             "y":0
-            },
-         "properties":[
-                {
-                 "name":"collidetop",
-                 "type":"bool",
-                 "value":false
-                }]
-        }, 
+          "name": "collidetop",
+          "type": "bool",
+          "value": false
+        }
+      ]
+    },
+    {
+      "id": 17,
+      "image": "rightdouble-clothesline-2.png",
+      "imageheight": 400,
+      "imagewidth": 600,
+      "objectgroup": {
+        "draworder": "index",
+        "id": 2,
+        "name": "",
+        "objects": [
+          {
+            "height": 20.996,
+            "id": 1,
+            "name": "",
+            "rotation": 0,
+            "type": "",
+            "visible": true,
+            "width": 248.074,
+            "x": 351.926,
+            "y": 360.004
+          }
+        ],
+        "opacity": 1,
+        "type": "objectgroup",
+        "visible": true,
+        "x": 0,
+        "y": 0
+      },
+      "properties": [
         {
-         "id":16,
-         "image":"rightdouble-clothesline-1.png",
-         "imageheight":400,
-         "imagewidth":600,
-         "properties":[
-                {
-                 "name":"collidetop",
-                 "type":"bool",
-                 "value":false
-                }]
-        }, 
+          "name": "collidetop",
+          "type": "bool",
+          "value": false
+        }
+      ]
+    },
+    {
+      "id": 18,
+      "image": "rightdouble-clothesline-3.png",
+      "imageheight": 400,
+      "imagewidth": 600,
+      "objectgroup": {
+        "draworder": "index",
+        "id": 2,
+        "name": "",
+        "objects": [
+          {
+            "height": 25.1965,
+            "id": 1,
+            "name": "",
+            "rotation": 0,
+            "type": "",
+            "visible": true,
+            "width": 600,
+            "x": 0,
+            "y": 366.803
+          }
+        ],
+        "opacity": 1,
+        "type": "objectgroup",
+        "visible": true,
+        "x": 0,
+        "y": 0
+      },
+      "properties": [
         {
-         "id":17,
-         "image":"rightdouble-clothesline-2.png",
-         "imageheight":400,
-         "imagewidth":600,
-         "objectgroup":
-            {
-             "draworder":"index",
-             "id":2,
-             "name":"",
-             "objects":[
-                    {
-                     "height":20.996015936255,
-                     "id":1,
-                     "name":"",
-                     "rotation":0,
-                     "type":"",
-                     "visible":true,
-                     "width":248.074369189907,
-                     "x":351.925630810093,
-                     "y":360.003984063745
-                    }],
-             "opacity":1,
-             "type":"objectgroup",
-             "visible":true,
-             "x":0,
-             "y":0
-            },
-         "properties":[
-                {
-                 "name":"collidetop",
-                 "type":"bool",
-                 "value":false
-                }]
-        }, 
+          "name": "collidetop",
+          "type": "bool",
+          "value": false
+        }
+      ]
+    },
+    {
+      "id": 19,
+      "image": "rightdouble-clothesline-4.png",
+      "imageheight": 400,
+      "imagewidth": 600,
+      "objectgroup": {
+        "draworder": "index",
+        "id": 2,
+        "name": "",
+        "objects": [
+          {
+            "height": 23.7942,
+            "id": 1,
+            "name": "",
+            "rotation": 0,
+            "type": "",
+            "visible": true,
+            "width": 600,
+            "x": 0,
+            "y": 365.206
+          }
+        ],
+        "opacity": 1,
+        "type": "objectgroup",
+        "visible": true,
+        "x": 0,
+        "y": 0
+      },
+      "properties": [
         {
-         "id":18,
-         "image":"rightdouble-clothesline-3.png",
-         "imageheight":400,
-         "imagewidth":600,
-         "objectgroup":
-            {
-             "draworder":"index",
-             "id":2,
-             "name":"",
-             "objects":[
-                    {
-                     "height":25.1965471447544,
-                     "id":1,
-                     "name":"",
-                     "rotation":0,
-                     "type":"",
-                     "visible":true,
-                     "width":600,
-                     "x":0,
-                     "y":366.803452855246
-                    }],
-             "opacity":1,
-             "type":"objectgroup",
-             "visible":true,
-             "x":0,
-             "y":0
-            },
-         "properties":[
-                {
-                 "name":"collidetop",
-                 "type":"bool",
-                 "value":false
-                }]
-        }, 
+          "name": "collidetop",
+          "type": "bool",
+          "value": false
+        }
+      ]
+    },
+    {
+      "id": 20,
+      "image": "standarized_balony1.png",
+      "imageheight": 400,
+      "imagewidth": 600,
+      "properties": [
         {
-         "id":19,
-         "image":"rightdouble-clothesline-4.png",
-         "imageheight":400,
-         "imagewidth":600,
-         "objectgroup":
-            {
-             "draworder":"index",
-             "id":2,
-             "name":"",
-             "objects":[
-                    {
-                     "height":23.7941567065074,
-                     "id":1,
-                     "name":"",
-                     "rotation":0,
-                     "type":"",
-                     "visible":true,
-                     "width":600,
-                     "x":0,
-                     "y":365.205843293493
-                    }],
-             "opacity":1,
-             "type":"objectgroup",
-             "visible":true,
-             "x":0,
-             "y":0
-            },
-         "properties":[
-                {
-                 "name":"collidetop",
-                 "type":"bool",
-                 "value":false
-                }]
-        }, 
+          "name": "collidetop",
+          "type": "bool",
+          "value": true
+        }
+      ]
+    },
+    {
+      "id": 21,
+      "image": "standarized_balony2.png",
+      "imageheight": 400,
+      "imagewidth": 600,
+      "properties": [
         {
-         "id":20,
-         "image":"notop_balcony1.png",
-         "imageheight":400,
-         "imagewidth":600,
-         "properties":[
-                {
-                 "name":"collidetop",
-                 "type":"bool",
-                 "value":true
-                }]
-        }, 
+          "name": "collidetop",
+          "type": "bool",
+          "value": true
+        }
+      ]
+    },
+    {
+      "id": 22,
+      "image": "standarized_balony3.png",
+      "imageheight": 400,
+      "imagewidth": 600,
+      "properties": [
         {
-         "id":21,
-         "image":"notop_balcony2.png",
-         "imageheight":400,
-         "imagewidth":600,
-         "properties":[
-                {
-                 "name":"collidetop",
-                 "type":"bool",
-                 "value":true
-                }]
-        }, 
+          "name": "collidetop",
+          "type": "bool",
+          "value": true
+        }
+      ]
+    },
+    {
+      "id": 23,
+      "image": "standarized_balony4.png",
+      "imageheight": 400,
+      "imagewidth": 600,
+      "properties": [
         {
-         "id":22,
-         "image":"notop_balcony3.png",
-         "imageheight":400,
-         "imagewidth":600,
-         "properties":[
-                {
-                 "name":"collidetop",
-                 "type":"bool",
-                 "value":true
-                }]
-        }, 
+          "name": "collidetop",
+          "type": "bool",
+          "value": true
+        }
+      ]
+    },
+    {
+      "id": 24,
+      "image": "standarized_window1.png",
+      "imageheight": 400,
+      "imagewidth": 600,
+      "objectgroup": {
+        "draworder": "index",
+        "id": 2,
+        "name": "",
+        "objects": [
+          {
+            "height": 400,
+            "id": 1,
+            "name": "",
+            "rotation": 0,
+            "type": "",
+            "visible": true,
+            "width": 600,
+            "x": 0,
+            "y": 0
+          }
+        ],
+        "opacity": 1,
+        "type": "objectgroup",
+        "visible": true,
+        "x": 0,
+        "y": 0
+      },
+      "properties": [
         {
-         "id":23,
-         "image":"notop_balcony1.png",
-         "imageheight":400,
-         "imagewidth":600,
-         "properties":[
-                {
-                 "name":"collidetop",
-                 "type":"bool",
-                 "value":true
-                }]
-        }, 
+          "name": "collidetop",
+          "type": "bool",
+          "value": true
+        }
+      ]
+    },
+    {
+      "id": 25,
+      "image": "standarized_window2.png.png",
+      "imageheight": 400,
+      "imagewidth": 600,
+      "objectgroup": {
+        "draworder": "index",
+        "id": 2,
+        "name": "",
+        "objects": [
+          {
+            "height": 400,
+            "id": 1,
+            "name": "",
+            "rotation": 0,
+            "type": "",
+            "visible": true,
+            "width": 600,
+            "x": 0,
+            "y": 0
+          }
+        ],
+        "opacity": 1,
+        "type": "objectgroup",
+        "visible": true,
+        "x": 0,
+        "y": 0
+      },
+      "properties": [
         {
-         "id":24,
-         "image":"standarized_window1.png",
-         "imageheight":400,
-         "imagewidth":600,
-         "objectgroup":
-            {
-             "draworder":"index",
-             "id":2,
-             "name":"",
-             "objects":[
-                    {
-                     "height":400,
-                     "id":1,
-                     "name":"",
-                     "rotation":0,
-                     "type":"",
-                     "visible":true,
-                     "width":600,
-                     "x":0,
-                     "y":0
-                    }],
-             "opacity":1,
-             "type":"objectgroup",
-             "visible":true,
-             "x":0,
-             "y":0
-            },
-         "properties":[
-                {
-                 "name":"collidetop",
-                 "type":"bool",
-                 "value":true
-                }]
-        }, 
+          "name": "collidetop",
+          "type": "bool",
+          "value": true
+        }
+      ]
+    },
+    {
+      "id": 26,
+      "image": "standarized_window3.png.png",
+      "imageheight": 400,
+      "imagewidth": 600,
+      "objectgroup": {
+        "draworder": "index",
+        "id": 2,
+        "name": "",
+        "objects": [
+          {
+            "height": 400,
+            "id": 1,
+            "name": "",
+            "rotation": 0,
+            "type": "",
+            "visible": true,
+            "width": 600,
+            "x": 0,
+            "y": 0
+          }
+        ],
+        "opacity": 1,
+        "type": "objectgroup",
+        "visible": true,
+        "x": 0,
+        "y": 0
+      },
+      "properties": [
         {
-         "id":25,
-         "image":"standarized_window2.png.png",
-         "imageheight":400,
-         "imagewidth":600,
-         "objectgroup":
-            {
-             "draworder":"index",
-             "id":2,
-             "name":"",
-             "objects":[
-                    {
-                     "height":400,
-                     "id":1,
-                     "name":"",
-                     "rotation":0,
-                     "type":"",
-                     "visible":true,
-                     "width":600,
-                     "x":0,
-                     "y":0
-                    }],
-             "opacity":1,
-             "type":"objectgroup",
-             "visible":true,
-             "x":0,
-             "y":0
-            },
-         "properties":[
-                {
-                 "name":"collidetop",
-                 "type":"bool",
-                 "value":true
-                }]
-        }, 
+          "name": "collidetop",
+          "type": "bool",
+          "value": true
+        }
+      ]
+    },
+    {
+      "id": 27,
+      "image": "standarized_window4.png",
+      "imageheight": 400,
+      "imagewidth": 600,
+      "objectgroup": {
+        "draworder": "index",
+        "id": 2,
+        "name": "",
+        "objects": [
+          {
+            "height": 400,
+            "id": 1,
+            "name": "",
+            "rotation": 0,
+            "type": "",
+            "visible": true,
+            "width": 600,
+            "x": 0,
+            "y": 0
+          }
+        ],
+        "opacity": 1,
+        "type": "objectgroup",
+        "visible": true,
+        "x": 0,
+        "y": 0
+      },
+      "properties": [
         {
-         "id":26,
-         "image":"standarized_window3.png.png",
-         "imageheight":400,
-         "imagewidth":600,
-         "objectgroup":
-            {
-             "draworder":"index",
-             "id":2,
-             "name":"",
-             "objects":[
-                    {
-                     "height":400,
-                     "id":1,
-                     "name":"",
-                     "rotation":0,
-                     "type":"",
-                     "visible":true,
-                     "width":600,
-                     "x":0,
-                     "y":0
-                    }],
-             "opacity":1,
-             "type":"objectgroup",
-             "visible":true,
-             "x":0,
-             "y":0
-            },
-         "properties":[
-                {
-                 "name":"collidetop",
-                 "type":"bool",
-                 "value":true
-                }]
-        }, 
+          "name": "collidetop",
+          "type": "bool",
+          "value": true
+        }
+      ]
+    },
+    {
+      "id": 28,
+      "image": "twosided-clothesline-1.png",
+      "imageheight": 400,
+      "imagewidth": 600,
+      "objectgroup": {
+        "draworder": "index",
+        "id": 2,
+        "name": "",
+        "objects": [
+          {
+            "height": 25.915,
+            "id": 1,
+            "name": "",
+            "rotation": 0,
+            "type": "",
+            "visible": true,
+            "width": 600,
+            "x": 0,
+            "y": 318.085
+          }
+        ],
+        "opacity": 1,
+        "type": "objectgroup",
+        "visible": true,
+        "x": 0,
+        "y": 0
+      },
+      "properties": [
         {
-         "id":27,
-         "image":"standarized_window4.png",
-         "imageheight":400,
-         "imagewidth":600,
-         "objectgroup":
-            {
-             "draworder":"index",
-             "id":2,
-             "name":"",
-             "objects":[
-                    {
-                     "height":400,
-                     "id":1,
-                     "name":"",
-                     "rotation":0,
-                     "type":"",
-                     "visible":true,
-                     "width":600,
-                     "x":0,
-                     "y":0
-                    }],
-             "opacity":1,
-             "type":"objectgroup",
-             "visible":true,
-             "x":0,
-             "y":0
-            },
-         "properties":[
-                {
-                 "name":"collidetop",
-                 "type":"bool",
-                 "value":true
-                }]
-        }, 
+          "name": "collidetop",
+          "type": "bool",
+          "value": false
+        }
+      ]
+    },
+    {
+      "id": 29,
+      "image": "twosided-clothesline-2.png",
+      "imageheight": 400,
+      "imagewidth": 600,
+      "objectgroup": {
+        "draworder": "index",
+        "id": 2,
+        "name": "",
+        "objects": [
+          {
+            "height": 28.5166,
+            "id": 1,
+            "name": "",
+            "rotation": 0,
+            "type": "",
+            "visible": true,
+            "width": 211.554,
+            "x": 0,
+            "y": 341.483
+          }
+        ],
+        "opacity": 1,
+        "type": "objectgroup",
+        "visible": true,
+        "x": 0,
+        "y": 0
+      },
+      "properties": [
         {
-         "id":28,
-         "image":"twosided-clothesline-1.png",
-         "imageheight":400,
-         "imagewidth":600,
-         "objectgroup":
-            {
-             "draworder":"index",
-             "id":2,
-             "name":"",
-             "objects":[
-                    {
-                     "height":25.9150066401062,
-                     "id":1,
-                     "name":"",
-                     "rotation":0,
-                     "type":"",
-                     "visible":true,
-                     "width":600,
-                     "x":0,
-                     "y":318.084993359894
-                    }],
-             "opacity":1,
-             "type":"objectgroup",
-             "visible":true,
-             "x":0,
-             "y":0
-            },
-         "properties":[
-                {
-                 "name":"collidetop",
-                 "type":"bool",
-                 "value":false
-                }]
-        }, 
+          "name": "collidetop",
+          "type": "bool",
+          "value": false
+        }
+      ]
+    },
+    {
+      "id": 30,
+      "image": "twosided-clothesline-3.png",
+      "imageheight": 400,
+      "imagewidth": 600,
+      "properties": [
         {
-         "id":29,
-         "image":"twosided-clothesline-2.png",
-         "imageheight":400,
-         "imagewidth":600,
-         "objectgroup":
-            {
-             "draworder":"index",
-             "id":2,
-             "name":"",
-             "objects":[
-                    {
-                     "height":28.5166002656043,
-                     "id":1,
-                     "name":"",
-                     "rotation":0,
-                     "type":"",
-                     "visible":true,
-                     "width":211.553784860558,
-                     "x":0,
-                     "y":341.483399734396
-                    }],
-             "opacity":1,
-             "type":"objectgroup",
-             "visible":true,
-             "x":0,
-             "y":0
-            },
-         "properties":[
-                {
-                 "name":"collidetop",
-                 "type":"bool",
-                 "value":false
-                }]
-        }, 
+          "name": "collidetop",
+          "type": "bool",
+          "value": false
+        }
+      ]
+    },
+    {
+      "id": 31,
+      "image": "twosided-clothesline-4.png",
+      "imageheight": 400,
+      "imagewidth": 600,
+      "objectgroup": {
+        "draworder": "index",
+        "id": 2,
+        "name": "",
+        "objects": [
+          {
+            "height": 24.3944,
+            "id": 1,
+            "name": "",
+            "rotation": 0,
+            "type": "",
+            "visible": true,
+            "width": 600,
+            "x": 0,
+            "y": 348.606
+          }
+        ],
+        "opacity": 1,
+        "type": "objectgroup",
+        "visible": true,
+        "x": 0,
+        "y": 0
+      },
+      "properties": [
         {
-         "id":30,
-         "image":"twosided-clothesline-3.png",
-         "imageheight":400,
-         "imagewidth":600,
-         "properties":[
-                {
-                 "name":"collidetop",
-                 "type":"bool",
-                 "value":false
-                }]
-        }, 
+          "name": "collidetop",
+          "type": "bool",
+          "value": false
+        }
+      ]
+    },
+    {
+      "id": 32,
+      "image": "left_arch_top.png",
+      "imageheight": 400,
+      "imagewidth": 600,
+      "properties": [
         {
-         "id":31,
-         "image":"twosided-clothesline-4.png",
-         "imageheight":400,
-         "imagewidth":600,
-         "objectgroup":
-            {
-             "draworder":"index",
-             "id":2,
-             "name":"",
-             "objects":[
-                    {
-                     "height":24.394422310757,
-                     "id":1,
-                     "name":"",
-                     "rotation":0,
-                     "type":"",
-                     "visible":true,
-                     "width":600,
-                     "x":0,
-                     "y":348.605577689243
-                    }],
-             "opacity":1,
-             "type":"objectgroup",
-             "visible":true,
-             "x":0,
-             "y":0
-            },
-         "properties":[
-                {
-                 "name":"collidetop",
-                 "type":"bool",
-                 "value":false
-                }]
-        }, 
+          "name": "collidetop",
+          "type": "bool",
+          "value": true
+        }
+      ]
+    },
+    {
+      "id": 33,
+      "image": "right_arch_top.png",
+      "imageheight": 400,
+      "imagewidth": 600,
+      "properties": [
         {
-         "id":32,
-         "image":"left_arch_top.png",
-         "imageheight":400,
-         "imagewidth":600,
-         "properties":[
-                {
-                 "name":"collidetop",
-                 "type":"bool",
-                 "value":true
-                }]
-        }, 
+          "name": "collidetop",
+          "type": "bool",
+          "value": true
+        }
+      ]
+    },
+    {
+      "id": 34,
+      "image": "right-clothesline-2.png",
+      "imageheight": 400,
+      "imagewidth": 600,
+      "properties": [
         {
-         "id":33,
-         "image":"right_arch_top.png",
-         "imageheight":400,
-         "imagewidth":600,
-         "properties":[
-                {
-                 "name":"collidetop",
-                 "type":"bool",
-                 "value":true
-                }]
-        }],
- "tilewidth":600,
- "type":"tileset",
- "version":"1.10"
+          "name": "collidetop",
+          "type": "bool",
+          "value": true
+        }
+      ]
+    },
+    {
+      "id": 35,
+      "image": "standarized_balony4 copy.png",
+      "imageheight": 400,
+      "imagewidth": 600,
+      "properties": [
+        {
+          "name": "collidetop",
+          "type": "bool",
+          "value": true
+        }
+      ]
+    }
+  ],
+  "tilewidth": 600,
+  "type": "tileset",
+  "version": "1.10"
 }

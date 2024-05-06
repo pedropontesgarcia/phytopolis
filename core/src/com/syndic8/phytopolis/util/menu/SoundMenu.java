@@ -13,12 +13,6 @@ public class SoundMenu extends Menu {
 
     public SoundMenu(GameCanvas c, MenuContainer ctr, Menu back) {
         super(5, 0.075f, 0, 0f, 0.75f, Align.left, DEFAULT_WIDTH);
-        addItem(new SoundMenuItem("MASTER VOLUME",
-                                  0,
-                                  this,
-                                  ctr,
-                                  c,
-                                  SoundOption.MASTER_VOLUME));
         addItem(new SoundMenuItem("MUSIC VOLUME",
                                   1,
                                   this,

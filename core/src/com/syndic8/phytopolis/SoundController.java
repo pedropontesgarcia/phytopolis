@@ -21,9 +21,9 @@ public class SoundController {
     private final FileHandle configFile;
     private final JsonValue settingsJson;
     private final float fxVolume;
+    private final float masterVolume;
     MusicQueue music;
     ArrayList<SoundEffect> sounds;
-    private float masterVolume;
     private float musicVolume;
     private int musicQueuePos;
 
@@ -69,21 +69,6 @@ public class SoundController {
         return sounds.size() - 1;
     }
 
-    public void setLooping(boolean b) {
-        music.setLooping(b);
-        music.setLoopBehavior(true);
-    }
-
-    /**
-     * Plays the music at the given index
-     *
-     * @param i the index of the song to be played
-     */
-    public void setMusic(int i) {
-        music.jumpToSource(i);
-        musicQueuePos = i;
-    }
-
     /**
      * Plays the sound at the given index
      *
@@ -115,30 +100,41 @@ public class SoundController {
         }
     }
 
-    public void setMusicVolume(float value){
+    public void setMusicVolume(float value) {
         music.setVolume(value);
     }
 
-    public int getMusicQueuePos(){
+    public int getMusicQueuePos() {
         return musicQueuePos;
     }
 
-    public boolean isMusicPlaying(){
+    public boolean isMusicPlaying() {
         return music.isPlaying();
     }
 
-    public void rewindMusic(){
+    public void rewindMusic() {
         music.reset();
         setMusic(musicQueuePos);
         setLooping(true);
     }
 
+    /**
+     * Plays the music at the given index
+     *
+     * @param i the index of the song to be played
+     */
+    public void setMusic(int i) {
+        music.jumpToSource(i);
+        musicQueuePos = i;
+    }
+
+    public void setLooping(boolean b) {
+        music.setLooping(b);
+        music.setLoopBehavior(true);
+    }
+
     public void updateOption(SoundOption opn, float val) {
         switch (opn) {
-            case MASTER_VOLUME:
-                masterVolume = val;
-                saveOptions();
-                break;
             case MUSIC_VOLUME:
                 musicVolume = val;
                 music.setVolume(val);
@@ -164,8 +160,6 @@ public class SoundController {
 
     public float getOptionValue(SoundOption opn) {
         switch (opn) {
-            case MASTER_VOLUME:
-                return masterVolume;
             case MUSIC_VOLUME:
                 return musicVolume;
             case FX_VOLUME:
@@ -191,7 +185,7 @@ public class SoundController {
     //    }
 
     public enum SoundOption {
-        MASTER_VOLUME, MUSIC_VOLUME, FX_VOLUME
+        MUSIC_VOLUME, FX_VOLUME
     }
 
 }
