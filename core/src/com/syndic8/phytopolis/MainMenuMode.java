@@ -61,6 +61,7 @@ public class MainMenuMode extends FadingScreen implements Screen {
      */
     private final GameCanvas canvas;
     private final SoundController soundController;
+    private final Texture syndic8;
     private State state;
     private float timer;
     private boolean ready;
@@ -119,6 +120,7 @@ public class MainMenuMode extends FadingScreen implements Screen {
 
         // Load the next two images immediately.
         background = internal.getEntry("background", Texture.class);
+        syndic8 = internal.getEntry("syndic8", Texture.class);
         Texture sprothTexture = internal.getEntry("sproth", Texture.class);
         sprothFilmstrip = new FilmStrip(sprothTexture, 1, 10);
         background.setFilter(TextureFilter.Linear, TextureFilter.Linear);
@@ -384,7 +386,13 @@ public class MainMenuMode extends FadingScreen implements Screen {
         }
         if (state == State.LOADING || state == State.LOADING_FADEOUT) {
             canvas.begin();
-            canvas.draw(sprothFilmstrip, Color.WHITE, 7, 3.5f, 2, 2);
+            canvas.draw(syndic8,
+                        Color.WHITE,
+                        0,
+                        0,
+                        canvas.getWidth(),
+                        canvas.getHeight());
+            canvas.draw(sprothFilmstrip, Color.WHITE, 7, 4, 2, 2);
             canvas.end();
         }
         super.draw(canvas);

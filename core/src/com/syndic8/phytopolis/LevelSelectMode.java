@@ -115,13 +115,18 @@ public class LevelSelectMode extends FadingScreen implements Screen {
                                  menu,
                                  menuContainer,
                                  canvas,
-                                 Align.right,
-                                 2,
+                                 Align.center,
+                                 2.5f,
                                  0.4f,
                                  -0.2f,
                                  100);
+
+        arrowItem.getLabel()
+                .setPosition(
+                        1500 - arrowItem.getLabel().getLabel().getWidth() / 2f,
+                        450 - arrowItem.getLabel().getHeight() / 2f);
         menu.addItem(arrowItem);
-        menu.addItem(new MenuItem("BACK",
+        menu.addItem(new MenuItem("< BACK",
                                   0,
                                   mainMenuListener,
                                   menu,
@@ -260,8 +265,23 @@ public class LevelSelectMode extends FadingScreen implements Screen {
         if (getFadeState() == Fade.HIDDEN && swapping) {
             screen1 = !screen1;
             fadeIn(fadeTime);
-            if (screen1) arrowItem.getLabel().getLabel().setText(">");
-            else arrowItem.getLabel().getLabel().setText("<");
+            if (screen1) {
+                arrowItem.getLabel().getLabel().setText(">");
+                arrowItem.getLabel()
+                        .setPosition(1500 - arrowItem.getLabel()
+                                             .getLabel()
+                                             .getWidth() / 2f,
+                                     450 - arrowItem.getLabel().getHeight() /
+                                             2f);
+            } else {
+                arrowItem.getLabel().getLabel().setText("<");
+                arrowItem.getLabel()
+                        .setPosition(100 - arrowItem.getLabel()
+                                             .getLabel()
+                                             .getWidth() / 2f,
+                                     450 - arrowItem.getLabel().getHeight() /
+                                             2f);
+            }
         }
         if (getFadeState() == Fade.SHOWN && swapping) {
             swapping = false;
