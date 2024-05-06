@@ -203,8 +203,7 @@ public class PlantController {
             resourceController.setNotEnough(true);
             return null;
         }
-        if (direction == null ||
-                isAtEnds) return null;
+        if (direction == null || isAtEnds) return null;
         return plantGrid[xIndex][yIndex].makeBranch(direction,
                                                     Branch.branchType.NORMAL,
                                                     world);
@@ -629,29 +628,12 @@ public class PlantController {
         return removedHazards;
     }
 
-    public boolean leafGrowableAt(float xArg, float yArg) {
-        return canGrowAt(xArg, yArg) && resourceController.canGrowLeaf();
-    }
-
-    /**
-     * Returns whether or not a node can be grown at the given world units
-     *
-     * @param xArg x coordinate of the node in world units
-     * @param yArg y coordinate of the node in world units
-     * @return whether or not a node can be grown at
-     */
-    public boolean canGrowAt(float xArg, float yArg) {
-        int xIndex = worldCoordToIndex(xArg, yArg)[0];
-        int yIndex = worldCoordToIndex(xArg, yArg)[1];
-        return canGrowAtIndex(xIndex, yIndex);
-    }
-
     /**
      * draws the branch that the mouse hovers over
      *
      * @param canvas the canvas to draw to
-     * @param x mouse x position
-     * @param y mouse y position
+     * @param x      mouse x position
+     * @param y      mouse y position
      */
     public void drawGhostBranch(GameCanvas canvas, float x, float y) {
         int xIndex = worldCoordToIndex(x, y)[0];
@@ -690,30 +672,36 @@ public class PlantController {
      * draws the leaf that the mouse hovers over
      *
      * @param canvas the canvas to draw to
-     * @param x mouse x position
-     * @param y mouse y position
+     * @param x      mouse x position
+     * @param y      mouse y position
      */
-    public void drawGhostLeaf(GameCanvas canvas, Leaf.leafType type, float leafWidth, float x, float y) {
+    public void drawGhostLeaf(GameCanvas canvas,
+                              Leaf.leafType type,
+                              float leafWidth,
+                              float x,
+                              float y) {
         int xIndex = screenCoordToIndex(x, y)[0];
         int yIndex = screenCoordToIndex(x, y)[1];
         boolean lowerNode = xIndex % 2 == 0;
         if (!inBounds(xIndex, yIndex)) return;
 
-        if (!plantGrid[xIndex][yIndex].hasLeaf() && (yIndex > 0 || !lowerNode)) {
+        if (!plantGrid[xIndex][yIndex].hasLeaf() &&
+                (yIndex > 0 || !lowerNode)) {
             float xl = plantGrid[xIndex][yIndex].getX();
             float yl = plantGrid[xIndex][yIndex].getY();
-            if (screenCoordToIndex(xl / worldToPixelConversionRatio, yl / worldToPixelConversionRatio)[1] > 0
-                    && plantGrid[xIndex][yIndex].hasBranch()
-                    || leafGrowableAt(xl / worldToPixelConversionRatio, yl / worldToPixelConversionRatio)) {
-
+            if (screenCoordToIndex(xl / worldToPixelConversionRatio,
+                                   yl / worldToPixelConversionRatio)[1] > 0 &&
+                    plantGrid[xIndex][yIndex].hasBranch() ||
+                    leafGrowableAt(xl / worldToPixelConversionRatio,
+                                   yl / worldToPixelConversionRatio)) {
 
                 Leaf leaf = new Leaf(xl / worldToPixelConversionRatio,
-                        yl / worldToPixelConversionRatio,
-                        leafWidth,
-                        plantGrid[xIndex][yIndex].leafHeight,
-                        type,
-                        tilemap,
-                        0.75f);
+                                     yl / worldToPixelConversionRatio,
+                                     leafWidth,
+                                     PlantNode.LEAF_HEIGHT,
+                                     type,
+                                     tilemap,
+                                     0.75f);
 
                 switch (type) {
                     case NORMAL:
@@ -733,6 +721,23 @@ public class PlantController {
             }
 
         }
+    }
+
+    public boolean leafGrowableAt(float xArg, float yArg) {
+        return canGrowAt(xArg, yArg) && resourceController.canGrowLeaf();
+    }
+
+    /**
+     * Returns whether or not a node can be grown at the given world units
+     *
+     * @param xArg x coordinate of the node in world units
+     * @param yArg y coordinate of the node in world units
+     * @return whether or not a node can be grown at
+     */
+    public boolean canGrowAt(float xArg, float yArg) {
+        int xIndex = worldCoordToIndex(xArg, yArg)[0];
+        int yIndex = worldCoordToIndex(xArg, yArg)[1];
+        return canGrowAtIndex(xIndex, yIndex);
     }
 
     //    /**
@@ -803,9 +808,10 @@ public class PlantController {
                                        1,
                                        9,
                                        9);
-        bouncyLeafTexture = new FilmStrip(directory.getEntry(
-                "gameplay:bouncy",
-                                               Texture.class), 1, 6);
+        bouncyLeafTexture = new FilmStrip(directory.getEntry("gameplay:bouncy",
+                                                             Texture.class),
+                                          1,
+                                          6);
         enBranchTextureUp = directory.getEntry("gameplay:enbranch",
                                                Texture.class);
     }
@@ -870,6 +876,14 @@ public class PlantController {
     public class PlantNode {
 
         /**
+         * height of the leaf at this node
+         */
+        public static final float LEAF_HEIGHT = 0.1f;
+        /**
+         * width of the leaf at this node
+         */
+        public final float leafWidth = 1.5f;
+        /**
          * x coordinate of this node
          */
         private final float x;
@@ -878,18 +892,10 @@ public class PlantController {
          */
         private final float y;
         /**
-         * height of the leaf at this node
-         */
-        public final float leafHeight = 0.05f;
-        /**
          * conversion ration for converting between world coords and pixels
          */
         private final float worldToPixelConversionRatio;
         private final Tilemap tilemap;
-        /**
-         * width of the leaf at this node
-         */
-        public final float leafWidth = 1.5f;
         /**
          * whether there is a branch in the leftmost slot of this node
          */
@@ -985,7 +991,7 @@ public class PlantController {
                 leaf = new Leaf(x / worldToPixelConversionRatio,
                                 y / worldToPixelConversionRatio,
                                 width,
-                                leafHeight,
+                                LEAF_HEIGHT,
                                 type,
                                 tilemap,
                                 0.75f);
@@ -1136,7 +1142,8 @@ public class PlantController {
         public void setHazard(Hazard h) {
             hazard = h;
             if (h != null && leaf != null &&
-                    h.getType() == Model.ModelType.BUG && leaf.getLeafType() != Leaf.leafType.BOUNCY) {
+                    h.getType() == Model.ModelType.BUG &&
+                    leaf.getLeafType() != Leaf.leafType.BOUNCY) {
                 leaf.setBeingEaten(true);
             }
         }

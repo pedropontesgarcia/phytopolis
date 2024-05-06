@@ -35,6 +35,7 @@ public class GameplayMode extends WorldController {
     private final float lvl2LeafWidth = 1.2f;
     private final float lvl3LeafWidth = 0.9f;
     private final SoundController soundController;
+    private final float timeSinceUIUpdate = 0;
     protected Texture jumpTexture;
     private PlantController plantController;
     private HazardController hazardController;
@@ -44,7 +45,6 @@ public class GameplayMode extends WorldController {
     private FilmStrip jumpAnimator;
     private Texture jogTexture;
     private FilmStrip jogAnimator;
-
     private FilmStrip idleAnimator;
     private boolean gathered;
     private Texture background;
@@ -55,7 +55,6 @@ public class GameplayMode extends WorldController {
     private int backgroundMusic;
     private String lvl;
     private CollisionController collisionController;
-    private float timeSinceUIUpdate = 0;
 
     /**
      * Creates and initialize a new instance of the game.
@@ -96,8 +95,7 @@ public class GameplayMode extends WorldController {
         soundController.setMusic(backgroundMusic);
         soundController.setLooping(true);
         soundController.playMusic();
-        background = directory.getEntry(level.get("background").asString(),
-                Texture.class);
+        background = directory.getEntry(tilemap.getBackground(), Texture.class);
 
         if (!gathered) {
             gathered = true;
@@ -109,10 +107,11 @@ public class GameplayMode extends WorldController {
             jogTexture = directory.getEntry("jog", Texture.class);
             jogAnimator = new FilmStrip(jogTexture, 1, 8, 8);
 
-            idleAnimator =
-                    new FilmStrip(directory.getEntry(
-                            "idle", Texture.class), 1, 3,
-                            3);
+            idleAnimator = new FilmStrip(directory.getEntry("idle",
+                                                            Texture.class),
+                                         1,
+                                         3,
+                                         3);
 
             constants = directory.getEntry("gameplay:constants",
                                            JsonValue.class);
@@ -147,11 +146,33 @@ public class GameplayMode extends WorldController {
                                               bounds.width -
                                                       tilemap.getTileWidth() *
                                                               1.5f,
-                                              bounds.height);
+                                              tilemap.getWorldHeight());
             plantController.gatherAssets(directory);
             hazardController.gatherAssets(directory);
             uiController.gatherAssets(directory);
             sunController.gatherAssets(directory);
+        }
+    }
+
+    private AudioSource getLevelMusic(AssetDirectory directory) {
+        switch (lvl) {
+            case "gameplay:lvl1":
+            case "gameplay:lvl2":
+            case "gameplay:lvl3":
+                return directory.getEntry("viridian", AudioSource.class);
+            case "gameplay:lvl4":
+            case "gameplay:lvl5":
+            case "gameplay:lvl6":
+            case "gameplay:lvl7":
+                return directory.getEntry("ozonelayer", AudioSource.class);
+            case "gameplay:lvl8":
+            case "gameplay:lvl9":
+            case "gameplay:lvl10":
+            case "gameplay:lvl11":
+            case "gameplay:lvl12":
+                return directory.getEntry("sunrise", AudioSource.class);
+            default:
+                return directory.getEntry("viridian", AudioSource.class);
         }
     }
 
@@ -225,18 +246,19 @@ public class GameplayMode extends WorldController {
         if (ic.didScrollReset()) {
             ic.resetScrolled();
         }
-        ic.setHeight(tilemap.getTilemapHeight() * tilemap.getTileHeight() - canvas.getHeight());
+        ic.setHeight(tilemap.getTilemapHeight() * tilemap.getTileHeight() -
+                             canvas.getHeight());
         float aspectRatio = canvas.getWidth() / canvas.getHeight();
         float cameraHeight = tilemap.getWorldWidth() / aspectRatio;
-//        cameraVector.set(tilemap.getWorldWidth() / 2f,
-//                         Math.max(cameraHeight / 2f,
-//                                  Math.min(tilemap.getTilemapHeight() *
-//                                                   tilemap.getTileHeight() -
-//                                                   cameraHeight / 2f,
-//                                           avatar.getY()) + ic.getScrolled()));
+        //        cameraVector.set(tilemap.getWorldWidth() / 2f,
+        //                         Math.max(cameraHeight / 2f,
+        //                                  Math.min(tilemap.getTilemapHeight() *
+        //                                                   tilemap.getTileHeight() -
+        //                                                   cameraHeight / 2f,
+        //                                           avatar.getY()) + ic.getScrolled()));
         cameraVector.set(tilemap.getWorldWidth() / 2f,
-                Math.max(cameraHeight / 2f,
-                                avatar.getY()) + ic.getScrolled());
+                         Math.max(cameraHeight / 2f, avatar.getY()) +
+                                 ic.getScrolled());
         // generate hazards please
         for (Model m : objects) {
             if (m instanceof Water) {
@@ -265,19 +287,19 @@ public class GameplayMode extends WorldController {
         }
         plantController.propagateDestruction();
 
-//        if (timeSinceUIUpdate >= 1) {
-            uiController.update(dt,
-                                resourceController.getCurrRatio(),
-                                hazardController,
-                                resourceController,
-                                avatar,
-                                water,
-                                plantController.countTimerDeductions(),
-                                hazardController.getFireProgress());
-            collisionController.setAddedWater(false);
-//        } else {
-//            timeSinceUIUpdate += 0.05;
-//        }
+        //        if (timeSinceUIUpdate >= 1) {
+        uiController.update(dt,
+                            resourceController.getCurrRatio(),
+                            hazardController,
+                            resourceController,
+                            avatar,
+                            water,
+                            plantController.countTimerDeductions(),
+                            hazardController.getFireProgress());
+        collisionController.setAddedWater(false);
+        //        } else {
+        //            timeSinceUIUpdate += 0.05;
+        //        }
         // Check for win condition
         if ((plantController.getMaxLeafHeight() >
                 tilemap.getVictoryHeight() * tilemap.getTileHeight()) &&
@@ -297,10 +319,10 @@ public class GameplayMode extends WorldController {
         projMousePosCache.set(ic.getMouseX(), ic.getMouseY());
         Vector2 unprojMousePos = canvas.unprojectGame(projMousePosCache);
         // TODO: uncomment this later
-//        float avatarX = avatar.getX();
-//        float avatarY = avatar.getY();
-//        float distance = unprojMousePos.dst(avatarX, avatarY);
-//        if (distance > 2) return;
+        //        float avatarX = avatar.getX();
+        //        float avatarY = avatar.getY();
+        //        float distance = unprojMousePos.dst(avatarX, avatarY);
+        //        if (distance > 2) return;
 
         boolean canGrowBranch = ic.didGrowBranch() && ic.isGrowBranchModDown();
         boolean canGrowLeaf = ic.didGrowLeaf() && ic.isGrowLeafModDown();
@@ -331,20 +353,20 @@ public class GameplayMode extends WorldController {
 
                 Leaf.leafType lt = getLevelLeafType();
                 float width = getLevelLeafWidth();
-//                switch (lvl) {
-//                    case "gameplay:lvl1":
-//                        lt = Leaf.leafType.NORMAL;
-//                        width = lvl1LeafWidth;
-//                        break;
-//                    case "gameplay:lvl2":
-//                        lt = Leaf.leafType.NORMAL1;
-//                        width = lvl2LeafWidth;
-//                        break;
-//                    case "gameplay:lvl3":
-//                        lt = Leaf.leafType.NORMAL2;
-//                        width = lvl3LeafWidth;
-//                        break;
-//                }
+                //                switch (lvl) {
+                //                    case "gameplay:lvl1":
+                //                        lt = Leaf.leafType.NORMAL;
+                //                        width = lvl1LeafWidth;
+                //                        break;
+                //                    case "gameplay:lvl2":
+                //                        lt = Leaf.leafType.NORMAL1;
+                //                        width = lvl2LeafWidth;
+                //                        break;
+                //                    case "gameplay:lvl3":
+                //                        lt = Leaf.leafType.NORMAL2;
+                //                        width = lvl3LeafWidth;
+                //                        break;
+                //                }
                 Model newLeaf = plantController.makeLeaf(unprojMousePos.x,
                                                          unprojMousePos.y +
                                                                  0.5f *
@@ -354,92 +376,6 @@ public class GameplayMode extends WorldController {
                 if (newLeaf != null) addObject(newLeaf);
 
             }
-        }
-    }
-
-    /**
-     * Draw the physics objects to the canvas
-     * <p>
-     * For simple worlds, this method is enough by itself.  It will need
-     * to be overriden if the world needs fancy backgrounds or the like.
-     * <p>
-     * The method draws all objects in the order that they were added.
-     */
-    public void draw() {
-        canvas.clear();
-        canvas.cameraUpdate(cameraVector);
-        canvas.beginGame();
-        drawBackground();
-        tilemap.draw(canvas);
-        super.draw();
-        if (!isPaused()) {
-            projMousePosCache.set(ic.getMouseX(), ic.getMouseY());
-            Vector2 unprojMousePos = canvas.unprojectGame(projMousePosCache);
-            // TODO: uncomment this later
-//            float avatarX = avatar.getX();
-//            float avatarY = avatar.getY();
-//            float distance = unprojMousePos.dst(avatarX, avatarY);
-//            if (distance <= 2) {
-            if (true) {
-                if (!hazardController.hasFire(unprojMousePos)) {
-                    if (!ic.isGrowLeafModDown()) {
-                        plantController.drawGhostBranch(canvas,
-                                unprojMousePos.x,
-                                unprojMousePos.y);
-                    } else {
-                        Leaf.leafType lt = getLevelLeafType();
-                        float width = getLevelLeafWidth();
-
-//                        switch (lvl) {
-//                            case "gameplay:lvl2":
-//                                lt = Leaf.leafType.NORMAL1;
-//                                width = lvl2LeafWidth;
-//                                break;
-//                            case "gameplay:lvl3":
-//                                lt = Leaf.leafType.NORMAL2;
-//                                width = lvl3LeafWidth;
-//                                break;
-//                            default:
-//                                lt = Leaf.leafType.NORMAL;
-//                                width = lvl1LeafWidth;
-//                                break;
-//                        }
-                        plantController.drawGhostLeaf(canvas,
-                                lt,
-                                width,
-                                unprojMousePos.x,
-                                unprojMousePos.y + 0.5f *
-                                        tilemap.getTileHeight());
-                    }
-
-                }
-            }
-        }
-        hazardController.drawWarning(canvas, cameraVector);
-        canvas.end();
-        uiController.draw(canvas);
-        super.draw(canvas);
-    }
-
-    private float getLevelLeafWidth() {
-        switch (lvl) {
-            case "gameplay:lvl1":
-            case "gameplay:lvl2":
-            case "gameplay:lvl3":
-                return lvl1LeafWidth;
-            case "gameplay:lvl4":
-            case "gameplay:lvl5":
-            case "gameplay:lvl6":
-                return lvl2LeafWidth;
-            case "gameplay:lvl7":
-            case "gameplay:lvl8":
-            case "gameplay:lvl9":
-            case "gameplay:lvl10":
-            case "gameplay:lvl11":
-            case "gameplay:lvl12":
-                return lvl3LeafWidth;
-            default:
-                return lvl1LeafWidth;
         }
     }
 
@@ -465,26 +401,90 @@ public class GameplayMode extends WorldController {
         }
     }
 
-    private AudioSource getLevelMusic(AssetDirectory directory){
+    private float getLevelLeafWidth() {
         switch (lvl) {
             case "gameplay:lvl1":
             case "gameplay:lvl2":
             case "gameplay:lvl3":
-                return directory.getEntry("viridian", AudioSource.class);
+                return lvl1LeafWidth;
             case "gameplay:lvl4":
             case "gameplay:lvl5":
             case "gameplay:lvl6":
+                return lvl2LeafWidth;
             case "gameplay:lvl7":
-                return directory.getEntry("ozonelayer", AudioSource.class);
             case "gameplay:lvl8":
             case "gameplay:lvl9":
             case "gameplay:lvl10":
             case "gameplay:lvl11":
             case "gameplay:lvl12":
-                return directory.getEntry("sunrise", AudioSource.class);
+                return lvl3LeafWidth;
             default:
-                return directory.getEntry("viridian", AudioSource.class);
+                return lvl1LeafWidth;
         }
+    }
+
+    /**
+     * Draw the physics objects to the canvas
+     * <p>
+     * For simple worlds, this method is enough by itself.  It will need
+     * to be overriden if the world needs fancy backgrounds or the like.
+     * <p>
+     * The method draws all objects in the order that they were added.
+     */
+    public void draw() {
+        canvas.clear();
+        canvas.cameraUpdate(cameraVector);
+        canvas.beginGame();
+        drawBackground();
+        tilemap.draw(canvas);
+        super.draw();
+        if (!isPaused()) {
+            projMousePosCache.set(ic.getMouseX(), ic.getMouseY());
+            Vector2 unprojMousePos = canvas.unprojectGame(projMousePosCache);
+            // TODO: uncomment this later
+            //            float avatarX = avatar.getX();
+            //            float avatarY = avatar.getY();
+            //            float distance = unprojMousePos.dst(avatarX, avatarY);
+            //            if (distance <= 2) {
+            if (true) {
+                if (!hazardController.hasFire(unprojMousePos)) {
+                    if (!ic.isGrowLeafModDown()) {
+                        plantController.drawGhostBranch(canvas,
+                                                        unprojMousePos.x,
+                                                        unprojMousePos.y);
+                    } else {
+                        Leaf.leafType lt = getLevelLeafType();
+                        float width = getLevelLeafWidth();
+
+                        //                        switch (lvl) {
+                        //                            case "gameplay:lvl2":
+                        //                                lt = Leaf.leafType.NORMAL1;
+                        //                                width = lvl2LeafWidth;
+                        //                                break;
+                        //                            case "gameplay:lvl3":
+                        //                                lt = Leaf.leafType.NORMAL2;
+                        //                                width = lvl3LeafWidth;
+                        //                                break;
+                        //                            default:
+                        //                                lt = Leaf.leafType.NORMAL;
+                        //                                width = lvl1LeafWidth;
+                        //                                break;
+                        //                        }
+                        plantController.drawGhostLeaf(canvas,
+                                                      lt,
+                                                      width,
+                                                      unprojMousePos.x,
+                                                      unprojMousePos.y + 0.5f *
+                                                              tilemap.getTileHeight());
+                    }
+
+                }
+            }
+        }
+        hazardController.drawWarning(canvas, cameraVector);
+        canvas.end();
+        uiController.draw(canvas);
+        super.draw(canvas);
     }
 
     /**

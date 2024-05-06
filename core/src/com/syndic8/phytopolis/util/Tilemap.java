@@ -15,6 +15,9 @@ import java.util.List;
 
 public class Tilemap {
 
+    private static final String PHYSICS_TILESET = "tileset.tsx";
+    private static final String RESOURCES_TILESET = "rsrc.tsx";
+    private static final String HAZARDS_TILESET = "hazards.tsx";
     private final GameCanvas canvas;
     private final PooledList<Float> powerlineYVals;
     PooledList<Tile> tiles;
@@ -34,6 +37,7 @@ public class Tilemap {
     private Texture sunCircle;
     private Texture sunRay;
     private Texture sunSwirl;
+    private String backgroundFile;
 
     /**
      * Constructs a tilemap from the world dimensions and a JSON file from
@@ -78,6 +82,10 @@ public class Tilemap {
 
     public int getLevelNumber() {
         return levelNumber;
+    }
+
+    public String getBackground() {
+        return backgroundFile;
     }
 
     public float getFireRate() {
@@ -130,6 +138,8 @@ public class Tilemap {
                 victoryHeight = propertyJson.getFloat("value");
             else if (propertyJson.getString("name").equals("levelnumber"))
                 levelNumber = propertyJson.getInt("value");
+            else if (propertyJson.getString("name").equals("background"))
+                backgroundFile = propertyJson.getString("value");
         }
         sunCircle = directory.getEntry("gameplay:sun_circle", Texture.class);
         sunSwirl = directory.getEntry("gameplay:sun_swirl", Texture.class);
@@ -165,8 +175,14 @@ public class Tilemap {
                 physicsLayer = layerJson;
         }
         assert physicsLayer != null;
-        String tilesetName = tilemap.get("tilesets").get(0).getString("source");
-        JsonValue tilesetJson = directory.getEntry(tilesetName,
+        int i;
+        for (i = 0; i < tilemap.get("tilesets").size; i++) {
+            if (tilemap.get("tilesets")
+                    .get(i)
+                    .getString("source")
+                    .equals(PHYSICS_TILESET)) break;
+        }
+        JsonValue tilesetJson = directory.getEntry(PHYSICS_TILESET,
                                                    JsonValue.class);
         float tilePixelWidth = tilesetJson.getFloat("tilewidth");
         float tilePixelHeight = tilesetJson.getFloat("tileheight");
@@ -183,7 +199,7 @@ public class Tilemap {
                     float y0 = worldHeight - (row + 1) * tileHeight;
                     float y1 = worldHeight - row * tileHeight;
                     JsonValue tileJson = tilesJson.get(tileValue - tilemap.get(
-                            "tilesets").get(0).getInt("firstgid"));
+                            "tilesets").get(i).getInt("firstgid"));
                     Texture tx = new Texture(
                             "gameplay/tiles/" + tileJson.getString("image"));
                     boolean hasCollider = tileJson.has("objectgroup");
@@ -233,8 +249,14 @@ public class Tilemap {
                 resourceLayer = layerJson;
         }
         assert resourceLayer != null;
-        String tilesetName = tilemap.get("tilesets").get(1).getString("source");
-        JsonValue tilesetJson = directory.getEntry(tilesetName,
+        int i;
+        for (i = 0; i < tilemap.get("tilesets").size; i++) {
+            if (tilemap.get("tilesets")
+                    .get(i)
+                    .getString("source")
+                    .equals(RESOURCES_TILESET)) break;
+        }
+        JsonValue tilesetJson = directory.getEntry(RESOURCES_TILESET,
                                                    JsonValue.class);
         JsonValue tilesJson = tilesetJson.get("tiles");
 
@@ -244,7 +266,7 @@ public class Tilemap {
                         row * tilemapWidth + col];
                 if (tileValue != 0) {
                     JsonValue tileJson = tilesJson.get(tileValue - tilemap.get(
-                            "tilesets").get(1).getInt("firstgid"));
+                            "tilesets").get(i).getInt("firstgid"));
                     float xMid = (col + 0.5f) * tileWidth;
                     float yMid = worldHeight - (row + 0.5f) * tileHeight;
                     if (tileJson.get("properties")
@@ -293,8 +315,14 @@ public class Tilemap {
                 hazardsLayer = layerJson;
         }
         assert hazardsLayer != null;
-        String tilesetName = tilemap.get("tilesets").get(2).getString("source");
-        JsonValue tilesetJson = directory.getEntry(tilesetName,
+        int i;
+        for (i = 0; i < tilemap.get("tilesets").size; i++) {
+            if (tilemap.get("tilesets")
+                    .get(i)
+                    .getString("source")
+                    .equals(HAZARDS_TILESET)) break;
+        }
+        JsonValue tilesetJson = directory.getEntry(HAZARDS_TILESET,
                                                    JsonValue.class);
         JsonValue tilesJson = tilesetJson.get("tiles");
 
@@ -308,7 +336,7 @@ public class Tilemap {
                     float y0 = worldHeight - (row + 1) * tileHeight;
                     float y1 = worldHeight - row * tileHeight;
                     JsonValue tileJson = tilesJson.get(tileValue - tilemap.get(
-                            "tilesets").get(2).getInt("firstgid"));
+                            "tilesets").get(i).getInt("firstgid"));
                     Texture tx = new Texture(
                             "gameplay/tiles/" + tileJson.getString("image"));
                     Tile tile = new Tile(this, new Vector2(x0, y0), false, tx);

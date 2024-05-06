@@ -5,6 +5,8 @@ import com.badlogic.gdx.utils.ObjectSet;
 import com.syndic8.phytopolis.InputController;
 import com.syndic8.phytopolis.level.models.*;
 
+import static com.syndic8.phytopolis.level.PlantController.PlantNode.LEAF_HEIGHT;
+
 public class CollisionController implements ContactListener {
 
     private final Player player;
@@ -281,19 +283,20 @@ public class CollisionController implements ContactListener {
                 setAddedWater(true);
             }
         }
-
-        boolean isPlayerGoingUp = player.getVY() >= 0;
+        // Some tolerance is necessary to prevent jittering
+        boolean isPlayerGoingUp = player.getVY() > 0.1f;
         boolean isPlayerGoingDown = player.getVY() <= 0;
         boolean isPlayerBelow = false;
         if (fix1.getBody() == player.getBody()) isPlayerBelow =
                 fix1.getBody().getPosition().y - player.getHeight() / 2f <
-                        fix2.getBody().getPosition().y;
+                        fix2.getBody().getPosition().y + LEAF_HEIGHT / 2f;
         else if (fix2.getBody() == player.getBody()) isPlayerBelow =
                 fix2.getBody().getPosition().y - player.getHeight() / 2f <
                         fix1.getBody().getPosition().y;
         if (isCollisionBetweenPlayerAndLeaf &&
                 (isPlayerGoingUp || isPlayerBelow || ic.isDropKeyDown())) {
             contact.setEnabled(false);
+            System.out.println(isPlayerBelow);
         }
         if (isCollisionBetweenPlayerAndNoTopTile && isPlayerGoingDown) {
             contact.setEnabled(false);

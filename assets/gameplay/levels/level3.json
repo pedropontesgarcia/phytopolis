@@ -82,6 +82,11 @@
  "orientation":"orthogonal",
  "properties":[
         {
+         "name":"background",
+         "type":"string",
+         "value":"gameplay:background2"
+        }, 
+        {
          "name":"firerate",
          "type":"float",
          "value":3
@@ -100,7 +105,8 @@
          "name":"time",
          "type":"int",
          "value":90
-        }, 
+        },
+    
         {
          "name":"victory",
          "type":"float",
@@ -125,6 +131,5 @@
  "tilewidth":600,
  "type":"map",
  "version":"1.10",
- "width":5,
-  "background": "gameplay:background2"
+ "width":5
 }
