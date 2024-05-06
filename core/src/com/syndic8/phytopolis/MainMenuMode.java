@@ -346,6 +346,7 @@ public class MainMenuMode extends FadingScreen implements Screen {
             exit = false;
             ready = true;
             fadeOut(0.5f);
+            doVolumeFade(false);
             menuContainer.deactivate();
         }
         menuContainer.update(delta);

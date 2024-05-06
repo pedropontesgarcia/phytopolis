@@ -11,12 +11,14 @@ public abstract class FadingScreen {
     private Fade fadeState;
     private boolean done;
     private float volume;
+    private boolean fadeVolume;
 
     public FadingScreen() {
         tmr = 0;
         fadeState = Fade.HIDDEN;
         done = false;
         volume = 1;
+        this.fadeVolume = false;
     }
 
     protected void update(float deltaTime) {
@@ -42,10 +44,14 @@ public abstract class FadingScreen {
                 alpha = 0;
                 break;
         }
-        volume = Math.max(Math.min(1 - alpha, 1), 0);
+        if(fadeVolume) volume = Math.max(Math.min(1 - alpha, 1), 0);
         if (fadeState != Fade.HIDDEN && fadeState != Fade.SHOWN) {
             tmr += deltaTime;
         }
+    }
+
+    public void doVolumeFade(boolean b){
+        fadeVolume = b;
     }
 
     protected void draw(GameCanvas c) {

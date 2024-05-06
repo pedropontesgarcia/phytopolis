@@ -77,7 +77,10 @@
   },
   "samples": {
     "viridian": "gameplay/ViridianEXP1OGG.ogg",
-    "newgrowth": "gameplay/NewGrowthEXP3SOGG.ogg"
+    "newgrowth": "gameplay/NewGrowthEXP3SOGG.ogg",
+    "anotherday": "gameplay/AnotherDayEXP2OGG.ogg",
+    "ozonelayer": "gameplay/OzoneLayerEXP1OGG.ogg",
+    "sunrise": "gameplay/SunriseEXP2OGG.ogg"
   },
   "fonts": {
     "times": {

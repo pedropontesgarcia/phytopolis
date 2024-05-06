@@ -14,6 +14,7 @@ import com.syndic8.phytopolis.util.menu.Menu;
 import com.syndic8.phytopolis.util.menu.MenuContainer;
 import com.syndic8.phytopolis.util.menu.MenuItem;
 import edu.cornell.gdiac.audio.AudioEngine;
+import edu.cornell.gdiac.audio.AudioSource;
 
 public class LevelOverMode extends FadingScreen implements Screen {
 
@@ -34,16 +35,18 @@ public class LevelOverMode extends FadingScreen implements Screen {
     private boolean ready;
     private boolean won;
     private boolean gathered;
-    private Music backgroundMusic;
+    private int backgroundMusic;
     private AudioEngine audioEngine;
     private Texture rs;
     private MenuContainer menuContainer;
+    private SoundController soundController;
 
     public LevelOverMode(GameCanvas c) {
         ready = false;
         gathered = false;
         canvas = c;
         createMenu();
+        this.soundController = SoundController.getInstance();
     }
 
     private void createMenu() {
@@ -61,6 +64,7 @@ public class LevelOverMode extends FadingScreen implements Screen {
                 ready = true;
                 menuContainer.deactivate();
                 fadeOut(0.5f);
+                doVolumeFade(true);
             }
         };
         menu.addItem(new MenuItem("BACK TO\nLEVELS",
@@ -76,6 +80,11 @@ public class LevelOverMode extends FadingScreen implements Screen {
         if (!gathered) {
             victory = directory.getEntry("over:victory", Texture.class);
             failure = directory.getEntry("over:failure", Texture.class);
+            AudioSource bgm = directory.getEntry("anotherday", AudioSource.class);
+            backgroundMusic = soundController.addMusic(bgm);
+            soundController.setMusic(backgroundMusic);
+            soundController.setLooping(true);
+            soundController.playMusic();
             gathered = true;
         }
         //        backgroundMusic = directory.getEntry("newgrowth", Music.class);
@@ -83,7 +92,7 @@ public class LevelOverMode extends FadingScreen implements Screen {
         //        backgroundMusic.play();
     }
 
-    public void setBackgroundMusic(Music m) {
+    public void setBackgroundMusic(int m) {
         backgroundMusic = m;
     }
 
@@ -114,6 +123,7 @@ public class LevelOverMode extends FadingScreen implements Screen {
 
     public void update(float delta) {
         super.update(delta);
+        soundController.setMusicVolume(super.getVolume());
         menuContainer.update(delta);
     }
 

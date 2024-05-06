@@ -91,12 +91,14 @@ public class LevelSelectMode extends FadingScreen implements Screen {
                 ready = true;
                 exitCode = ExitCode.EXIT_MAIN_MENU;
                 fadeOut(0.5f);
+                doVolumeFade(false);
             }
         };
         ClickListener swapListener = new ClickListener(){
             @Override
             public void clicked(InputEvent event, float x, float y) {
                 fadeOut(fadeTime);
+                doVolumeFade(false);
                 swapping = true;
             }
         };
@@ -188,6 +190,7 @@ public class LevelSelectMode extends FadingScreen implements Screen {
 //            backgroundMusic.setVolume(1);
 //            backgroundMusic.play();
 //        }
+        fadeIn(0.5f);
         if (backgroundMusic != soundController.getMusicQueuePos()) {
             soundController.setMusic(backgroundMusic);
             soundController.setLooping(true);
@@ -223,16 +226,22 @@ public class LevelSelectMode extends FadingScreen implements Screen {
                 InputController.getInstance().didMousePress() && !ready) {
             setLevel();
             fadeOut(1);
+            doVolumeFade(true);
             ready = true;
             exitCode = ExitCode.EXIT_LEVELS;
         }
         if(getFadeState() == Fade.HIDDEN && swapping){
             screen1 = !screen1;
             fadeIn(fadeTime);
+
+        }
+        if(getFadeState() == Fade.SHOWN && swapping){
             swapping = false;
         }
-        if (ready && exitCode == ExitCode.EXIT_LEVELS)
-            soundController.setMusicVolume(super.getVolume());
+        //if(getFadeState() == Fade.SHOWN || ready || (!swapping && getFadeState() == Fade.FADE_IN))
+        soundController.setMusicVolume(super.getVolume());
+//        if (ready && exitCode == ExitCode.EXIT_LEVELS)
+//            soundController.setMusicVolume(super.getVolume());
     }
 
     public void draw() {
