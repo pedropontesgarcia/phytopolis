@@ -28,6 +28,7 @@ public class DesktopLauncher {
         GDXAppSettings config = new GDXAppSettings();
         config.width = Lwjgl3ApplicationConfiguration.getDisplayMode().width;
         config.height = Lwjgl3ApplicationConfiguration.getDisplayMode().height;
+        config.title = "Phytopolis";
         config.getLwjgl3Configuration()
                 .setWindowedMode(Lwjgl3ApplicationConfiguration.getDisplayMode().width,
                                  Lwjgl3ApplicationConfiguration.getDisplayMode().height);
@@ -66,7 +67,6 @@ public class DesktopLauncher {
             int fpsIndex = settingsJson.getInt("fpsIndex");
             int currentFps = fps[fpsIndex];
 
-            //            if (!windowed) config.setFullscreenMode(resolution);
             if (!windowed) config.setFullscreenMode(resolution);
             else config.setWindowedMode(windowWidth, windowHeight);
             config.setForegroundFPS(currentFps);

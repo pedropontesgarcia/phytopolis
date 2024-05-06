@@ -295,7 +295,8 @@ public class GameplayMode extends WorldController {
                             avatar,
                             water,
                             plantController.countTimerDeductions(),
-                            hazardController.getFireProgress());
+                            hazardController.getFireProgress(),
+                            tilemap);
         collisionController.setAddedWater(false);
         //        } else {
         //            timeSinceUIUpdate += 0.05;

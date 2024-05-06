@@ -170,8 +170,9 @@ public class UIController {
                        Player avatar,
                        int prevWater,
                        float timerDeduction,
-                       float fireProgress) {
-        updateCursor(hazardController, resourceController, avatar);
+                       float fireProgress,
+                       Tilemap tm) {
+        updateCursor(hazardController, resourceController, avatar, tm);
         updateTexture(dt, waterLvl, prevWater, resourceController);
         progressBar.setValue(fireProgress);
         progressBar.setVisible(hazardController.findValidFireLocs());
@@ -179,18 +180,20 @@ public class UIController {
         label.setText(timer.toString());
     }
 
-    private void updateCursor(HazardController hc, ResourceController rc, Player avatar) {
+    private void updateCursor(HazardController hc,
+                              ResourceController rc,
+                              Player avatar,
+                              Tilemap tm) {
         projMousePosCache.set(ic.getMouseX(), ic.getMouseY());
         Vector2 unprojMousePos = canvas.unprojectGame(projMousePosCache);
         // TODO: uncomment this later
-//        float avatarX = avatar.getX();
-//        float avatarY = avatar.getY();
+        float avatarX = avatar.getX();
+        float avatarY = avatar.getY();
 
         if (!Float.isNaN(unprojMousePos.x)) { // make sure we aren't tabbed out
 
-//            float distance = unprojMousePos.dst(avatarX, avatarY);
-//            if (distance > 2) {
-            if (false) {
+            float distance = unprojMousePos.dst(avatarX, avatarY);
+            if (distance > tm.getTileHeight() * 2) {
                 Gdx.graphics.setCursor(normalCursor);
             } else {
                 if (hc.hasFire(unprojMousePos)) {
@@ -199,11 +202,11 @@ public class UIController {
                 } else if ((ic.isGrowBranchModSet() ||
                         (ic.isGrowLeafModSet() && !ic.isGrowLeafModDown())) &&
                         ic.isGrowBranchModDown()) {
-                    if (rc.canGrowBranch()) Gdx.graphics.setCursor(branchCursor);
+                    if (rc.canGrowBranch())
+                        Gdx.graphics.setCursor(branchCursor);
                     else Gdx.graphics.setCursor(noWaterCursor);
-                } else if ((ic.isGrowLeafModSet() ||
-                        (ic.isGrowBranchModSet() && !ic.isGrowBranchModDown())) &&
-                        ic.isGrowLeafModDown()) {
+                } else if ((ic.isGrowLeafModSet() || (ic.isGrowBranchModSet() &&
+                        !ic.isGrowBranchModDown())) && ic.isGrowLeafModDown()) {
                     if (rc.canGrowLeaf()) Gdx.graphics.setCursor(leafCursor);
                     else Gdx.graphics.setCursor(noWaterCursor);
                 } else {
@@ -213,8 +216,10 @@ public class UIController {
         }
     }
 
-    private void updateTexture(float dt, float waterLvl,
-                               int prevWater, ResourceController rc) {
+    private void updateTexture(float dt,
+                               float waterLvl,
+                               int prevWater,
+                               ResourceController rc) {
         if (rc.getNotEnough()) {
             if (!currNotEnough) {
                 currNotEnough = true;
@@ -222,19 +227,19 @@ public class UIController {
             }
             rc.setNotEnough(false);
         }
-            if (currNotEnough){
-//            if (rc.getCurrWater() == 0) {
-                if (animProgress >= 1) {
-                    currNotEnough = false;
-                    current = waterdropStrip;
-                } else {
-                    current = waterdropRemove;
-                    current.setFrame(0);
-                    animProgress += dt * 3;
-                }
-//            } else {
-//                rc.setNotEnough(false);
-//            }
+        if (currNotEnough) {
+            //            if (rc.getCurrWater() == 0) {
+            if (animProgress >= 1) {
+                currNotEnough = false;
+                current = waterdropStrip;
+            } else {
+                current = waterdropRemove;
+                current.setFrame(0);
+                animProgress += dt * 3;
+            }
+            //            } else {
+            //                rc.setNotEnough(false);
+            //            }
         }
         if (prevWater < rc.getCurrWater()) {
             current = waterdropAdd;
@@ -248,13 +253,13 @@ public class UIController {
             animProgress += dt * 3;
         }
         if (current == waterdropAdd) {
-            current.setFrame((int)((current.getSize() - 1) * waterLvl));
+            current.setFrame((int) ((current.getSize() - 1) * waterLvl));
         } else if (current == waterdropRemove) {
             if (!currNotEnough) {
                 current.setFrame((int) ((current.getSize() - 1) * waterLvl));
             }
         } else {
-            current.setFrame((int)((current.getSize() - 2) * waterLvl) + 1);
+            current.setFrame((int) ((current.getSize() - 2) * waterLvl) + 1);
         }
     }
 
