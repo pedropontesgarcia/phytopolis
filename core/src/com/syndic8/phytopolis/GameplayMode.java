@@ -254,6 +254,8 @@ public class GameplayMode extends WorldController {
             uiController.update(dt,
                                 resourceController.getCurrRatio(),
                                 hazardController,
+                                resourceController,
+                                avatar,
                                 collisionController.getAddedWater(),
                                 resourceController.getCurrWater() < water,
                                 plantController.countTimerDeductions(),

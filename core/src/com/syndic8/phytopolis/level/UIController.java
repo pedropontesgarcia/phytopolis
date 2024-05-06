@@ -13,6 +13,7 @@ import com.badlogic.gdx.scenes.scene2d.ui.ProgressBar;
 import com.syndic8.phytopolis.GameCanvas;
 import com.syndic8.phytopolis.InputController;
 import com.syndic8.phytopolis.assets.AssetDirectory;
+import com.syndic8.phytopolis.level.models.Player;
 import com.syndic8.phytopolis.util.FilmStrip;
 import com.syndic8.phytopolis.util.SharedAssetContainer;
 import com.syndic8.phytopolis.util.Tilemap;
@@ -32,9 +33,11 @@ public class UIController {
     private FilmStrip waterdropAdd;
     private FilmStrip waterdropRemove;
     private TextureRegion vignette;
+    private Cursor normalCursor;
     private Cursor branchCursor;
     private Cursor leafCursor;
     private Cursor waterCursor;
+    private Cursor noWaterCursor;
 
     /**
      * Initializes a UIController.
@@ -91,6 +94,9 @@ public class UIController {
         current = waterdropStrip;
         vignette = new TextureRegion(directory.getEntry("ui:vignette",
                                                         Texture.class));
+        TextureRegion cursorTexture = new TextureRegion(directory.getEntry(
+                "ui:cursor",
+                Texture.class));
         TextureRegion branchCursorTexture = new TextureRegion(directory.getEntry(
                 "ui:branch-cursor",
                 Texture.class));
@@ -100,6 +106,9 @@ public class UIController {
         TextureRegion waterCursorTexture = new TextureRegion(directory.getEntry(
                 "ui:water-cursor",
                 Texture.class));
+        TextureRegion noWaterCursorTexture = new TextureRegion(directory.getEntry(
+                "ui:no-water-cursor",
+                Texture.class));
         Pixmap pixmap = getPixmapFromRegion(branchCursorTexture);
         branchCursor = Gdx.graphics.newCursor(pixmap, 0, 0);
         pixmap = getPixmapFromRegion(leafCursorTexture);
@@ -108,6 +117,10 @@ public class UIController {
         waterCursor = Gdx.graphics.newCursor(pixmap,
                                              pixmap.getWidth() / 2,
                                              pixmap.getHeight() / 2);
+        pixmap = getPixmapFromRegion(cursorTexture);
+        normalCursor = Gdx.graphics.newCursor(pixmap, 0, 0);
+        pixmap = getPixmapFromRegion(noWaterCursorTexture);
+        noWaterCursor = Gdx.graphics.newCursor(pixmap, 0, 0);
         pixmap.dispose();
     }
 
@@ -151,32 +164,48 @@ public class UIController {
     public void update(float dt,
                        float waterLvl,
                        HazardController hazardController,
+                       ResourceController resourceController,
+                       Player avatar,
                        boolean addedWater,
                        boolean removedWater,
                        float timerDeduction,
                        float fireProgress) {
-        updateCursor(hazardController);
+        updateCursor(hazardController, resourceController, avatar);
         updateTexture(waterLvl, addedWater, removedWater);
         progressBar.setValue(fireProgress);
         timer.updateTime(dt + timerDeduction); // 1 SEC PER LEAF BITE
         label.setText(timer.toString());
     }
 
-    private void updateCursor(HazardController hazardController) {
+    private void updateCursor(HazardController hc, ResourceController rc, Player avatar) {
         projMousePosCache.set(ic.getMouseX(), ic.getMouseY());
         Vector2 unprojMousePos = canvas.unprojectGame(projMousePosCache);
-        if (hazardController.hasFire(unprojMousePos)) {
-            Gdx.graphics.setCursor(waterCursor);
-        } else if ((ic.isGrowBranchModSet() ||
-                (ic.isGrowLeafModSet() && !ic.isGrowLeafModDown())) &&
-                ic.isGrowBranchModDown()) {
-            Gdx.graphics.setCursor(branchCursor);
-        } else if ((ic.isGrowLeafModSet() ||
-                (ic.isGrowBranchModSet() && !ic.isGrowBranchModDown())) &&
-                ic.isGrowLeafModDown()) {
-            Gdx.graphics.setCursor(leafCursor);
-        } else {
-            Gdx.graphics.setSystemCursor(Cursor.SystemCursor.Arrow);
+        float avatarX = avatar.getX();
+        float avatarY = avatar.getY();
+
+        if (!Float.isNaN(unprojMousePos.x)) { // make sure we aren't tabbed out
+
+            float distance = unprojMousePos.dst(avatarX, avatarY);
+            if (distance > 2) {
+                Gdx.graphics.setCursor(normalCursor);
+            } else {
+                if (hc.hasFire(unprojMousePos)) {
+                    if (rc.canExtinguish()) Gdx.graphics.setCursor(waterCursor);
+                    else Gdx.graphics.setCursor(noWaterCursor);
+                } else if ((ic.isGrowBranchModSet() ||
+                        (ic.isGrowLeafModSet() && !ic.isGrowLeafModDown())) &&
+                        ic.isGrowBranchModDown()) {
+                    if (rc.canGrowBranch()) Gdx.graphics.setCursor(branchCursor);
+                    else Gdx.graphics.setCursor(noWaterCursor);
+                } else if ((ic.isGrowLeafModSet() ||
+                        (ic.isGrowBranchModSet() && !ic.isGrowBranchModDown())) &&
+                        ic.isGrowLeafModDown()) {
+                    if (rc.canGrowLeaf()) Gdx.graphics.setCursor(leafCursor);
+                    else Gdx.graphics.setCursor(noWaterCursor);
+                } else {
+                    Gdx.graphics.setCursor(normalCursor);
+                }
+            }
         }
     }
 

@@ -36,9 +36,11 @@
     "ui:water_ui": "ui/waterUI_filmstripv3.png",
     "ui:water_add": "ui/waterUI_addflash_filmstrip.png",
     "ui:water_remove": "ui/waterUI_removeflash_filmstrip.png",
+    "ui:cursor": "ui/cursor.png",
     "ui:branch-cursor": "ui/branch-cursor.png",
     "ui:leaf-cursor": "ui/leaf-cursor.png",
     "ui:water-cursor": "ui/water-cursor.png",
+    "ui:no-water-cursor": "ui/no-water-cursor.png",
     "ui:vignette": "ui/vignette2.png",
     "over:victory": "gameplay/victory_text.png",
     "over:failure": "gameplay/failure.png"
