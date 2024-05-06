@@ -19,6 +19,8 @@ import com.syndic8.phytopolis.util.menu.MenuItem;
 import edu.cornell.gdiac.audio.AudioEngine;
 import edu.cornell.gdiac.audio.AudioSource;
 
+import java.util.Arrays;
+
 import static com.syndic8.phytopolis.GDXRoot.ExitCode;
 
 public class LevelSelectMode extends FadingScreen implements Screen {
@@ -38,7 +40,7 @@ public class LevelSelectMode extends FadingScreen implements Screen {
      * Listener that will update the player mode when we are done
      */
     private ScreenListener listener;
-    private FilmStrip background;
+    private Texture background;
     private Texture lighting;
     private boolean ready;
     private boolean gathered;
@@ -49,6 +51,10 @@ public class LevelSelectMode extends FadingScreen implements Screen {
     private ExitCode exitCode;
     private MenuContainer menuContainer;
     private SoundController soundController;
+    private FilmStrip[] pots1to6;
+    private levelState[] levelStates;
+    private boolean screen1;
+    private Texture lighting7to12;
 
     public LevelSelectMode(GameCanvas c) {
         canvas = c;
@@ -60,6 +66,9 @@ public class LevelSelectMode extends FadingScreen implements Screen {
         createMenu();
         gathered = false;
         this.soundController = SoundController.getInstance();
+        this.levelStates = new levelState[12];
+        this.screen1 = true;
+        Arrays.fill(levelStates, levelState.BEATEN);
     }
 
     private void createMenu() {
@@ -99,10 +108,20 @@ public class LevelSelectMode extends FadingScreen implements Screen {
 
     public void gatherAssets(AssetDirectory directory) {
         if (!gathered) {
-            background = new FilmStrip(directory.getEntry("lvlsel:background",
-                                                          Texture.class), 1, 4);
+            background = directory.getEntry("lvlsel:background",
+                                                          Texture.class);
             lighting = directory.getEntry("lvlsel:lighting", Texture.class);
+            lighting7to12 = directory.getEntry("lvlsel:lighting7to12", Texture.class);
             rs = directory.getEntry("lvlsel:redsquare", Texture.class);
+
+            //pots
+            pots1to6 = new FilmStrip[6];
+            pots1to6[0] = new FilmStrip(directory.getEntry("lvlsel:pot1", Texture.class), 1, 5);
+            pots1to6[1] = new FilmStrip(directory.getEntry("lvlsel:pot2", Texture.class), 1, 5);
+            pots1to6[2] = new FilmStrip(directory.getEntry("lvlsel:pot3", Texture.class), 1, 5);
+            pots1to6[3] = new FilmStrip(directory.getEntry("lvlsel:pot4", Texture.class), 1, 5);
+            pots1to6[4] = new FilmStrip(directory.getEntry("lvlsel:pot5", Texture.class), 1, 5);
+            pots1to6[5] = new FilmStrip(directory.getEntry("lvlsel:pot6", Texture.class), 1, 5);
             gathered = true;
         }
         fadeIn(0.5f);
@@ -126,6 +145,9 @@ public class LevelSelectMode extends FadingScreen implements Screen {
                                      canvas.getHeight() / 3.3f);
         levelBoxes[2] = new LevelBox(canvas.getWidth() / 1.47f,
                                      canvas.getHeight() / 3.3f);
+        levelBoxes[3] = new LevelBox(canvas.getWidth() / 1.47f,canvas.getHeight() / 3.3f);
+        levelBoxes[4] = new LevelBox(canvas.getWidth() / 1.47f,canvas.getHeight() / 3.3f);
+        levelBoxes[5] = new LevelBox(canvas.getWidth() / 1.47f,canvas.getHeight() / 3.3f);
         for (LevelBox lb : levelBoxes) if (lb != null) lb.setTexture(rs);
 //        if (backgroundMusic != null) {
 //            backgroundMusic.setVolume(1);
@@ -176,29 +198,66 @@ public class LevelSelectMode extends FadingScreen implements Screen {
     public void draw() {
         canvas.clear();
         canvas.begin();
-        canvas.setBlendState(GameCanvas.BlendState.ADDITIVE);
-        background.setFrame(getSelectedPot() + 1);
+        //Draw background
         canvas.draw(background,
                     Color.WHITE,
                     0,
                     0,
                     canvas.getWidth(),
                     canvas.getHeight());
-        canvas.draw(lighting,
-                    Color.WHITE,
-                    0,
-                    0,
-                    canvas.getWidth(),
-                    canvas.getHeight());
-        canvas.setBlendState(GameCanvas.BlendState.NO_PREMULT);
-        for (LevelBox lb : levelBoxes) if (lb != null) lb.draw(canvas);
-        menuContainer.draw(canvas);
+//
+//        //Next, draw pots
+//        int selectedPot = getSelectedPot();
+//        if (screen1) {
+//            for (int i = 0; i < 6; i++){
+//
+//                switch(levelStates[i]){
+//                    case LOCKED:
+//                        pots1to6[i].setFrame(0);
+//                        break;
+//                    case BEATEN:
+//                        if(i == selectedPot) pots1to6[i].setFrame(4);
+//                        else pots1to6[i].setFrame(3);
+//                        break;
+//                    case UNLOCKED:
+//                        if(i == selectedPot) pots1to6[i].setFrame(2);
+//                        else pots1to6[i].setFrame(1);
+//                        break;
+//                }
+//                canvas.draw(pots1to6[i],
+//                        Color.WHITE,
+//                        0,
+//                        0,
+//                        canvas.getWidth(),
+//                        canvas.getHeight());
+//            }
+//        }else{
+//            System.out.println("7 to 12");
+//        }
+//
+//        //Finally, draw lighting
+//        canvas.setBlendState(GameCanvas.BlendState.ADDITIVE);
+//        if(screen1) canvas.draw(lighting,
+//                    Color.WHITE,
+//                    0,
+//                    0,
+//                    canvas.getWidth(),
+//                    canvas.getHeight());
+//        else canvas.draw(lighting7to12,
+//                Color.WHITE,
+//                0,
+//                0,
+//                canvas.getWidth(),
+//                canvas.getHeight());
+//        canvas.setBlendState(GameCanvas.BlendState.NO_PREMULT);
+//        for (LevelBox lb : levelBoxes) if (lb != null) lb.draw(canvas);
+//        menuContainer.draw(canvas);
         canvas.end();
         super.draw(canvas);
     }
 
     public int getSelectedPot() {
-        for (int i = 0; i < numLevels; i++) {
+        for (int i = numLevels - 1; i >= 0; i--) {
             if (levelBoxes[i] != null && levelBoxes[i].getSelected()) return i;
         }
         return -1;
@@ -257,5 +316,7 @@ public class LevelSelectMode extends FadingScreen implements Screen {
     public String getLevel() {
         return level;
     }
+
+    public enum levelState {LOCKED, UNLOCKED, BEATEN};
 
 }
