@@ -314,22 +314,22 @@ public class GameplayMode extends WorldController {
             if (shouldGrowLeaf) {
                 // don't grow if there's a fire there (prioritize fire)
 
-                Leaf.leafType lt = Leaf.leafType.NORMAL;
-                float width = 0;
-                switch (lvl) {
-                    case "gameplay:lvl1":
-                        lt = Leaf.leafType.NORMAL;
-                        width = lvl1LeafWidth;
-                        break;
-                    case "gameplay:lvl2":
-                        lt = Leaf.leafType.NORMAL1;
-                        width = lvl2LeafWidth;
-                        break;
-                    case "gameplay:lvl3":
-                        lt = Leaf.leafType.NORMAL2;
-                        width = lvl3LeafWidth;
-                        break;
-                }
+                Leaf.leafType lt = getLevelLeafType();
+                float width = getLevelLeafWidth();
+//                switch (lvl) {
+//                    case "gameplay:lvl1":
+//                        lt = Leaf.leafType.NORMAL;
+//                        width = lvl1LeafWidth;
+//                        break;
+//                    case "gameplay:lvl2":
+//                        lt = Leaf.leafType.NORMAL1;
+//                        width = lvl2LeafWidth;
+//                        break;
+//                    case "gameplay:lvl3":
+//                        lt = Leaf.leafType.NORMAL2;
+//                        width = lvl3LeafWidth;
+//                        break;
+//                }
                 Model newLeaf = plantController.makeLeaf(unprojMousePos.x,
                                                          unprojMousePos.y +
                                                                  0.5f *
@@ -372,21 +372,23 @@ public class GameplayMode extends WorldController {
                                 unprojMousePos.x,
                                 unprojMousePos.y);
                     } else {
-                        Leaf.leafType lt;
-                        float width;
-                        switch (lvl) {
-                            case "gameplay:lvl2":
-                                lt = Leaf.leafType.NORMAL1;
-                                width = lvl2LeafWidth;
-                                break;
-                            case "gameplay:lvl3":
-                                lt = Leaf.leafType.NORMAL2;
-                                width = lvl3LeafWidth;
-                                break;
-                            default:
-                                lt = Leaf.leafType.NORMAL;
-                                width = lvl1LeafWidth;
-                        }
+                        Leaf.leafType lt = getLevelLeafType();
+                        float width = getLevelLeafWidth();
+
+//                        switch (lvl) {
+//                            case "gameplay:lvl2":
+//                                lt = Leaf.leafType.NORMAL1;
+//                                width = lvl2LeafWidth;
+//                                break;
+//                            case "gameplay:lvl3":
+//                                lt = Leaf.leafType.NORMAL2;
+//                                width = lvl3LeafWidth;
+//                                break;
+//                            default:
+//                                lt = Leaf.leafType.NORMAL;
+//                                width = lvl1LeafWidth;
+//                                break;
+//                        }
                         plantController.drawGhostLeaf(canvas,
                                 lt,
                                 width,
@@ -404,6 +406,50 @@ public class GameplayMode extends WorldController {
         uiController.draw(canvas);
         canvas.endHud();
         super.draw(canvas);
+    }
+
+    private float getLevelLeafWidth() {
+        switch (lvl) {
+            case "gameplay:lvl1":
+            case "gameplay:lvl2":
+            case "gameplay:lvl3":
+                return lvl1LeafWidth;
+            case "gameplay:lvl4":
+            case "gameplay:lvl5":
+            case "gameplay:lvl6":
+                return lvl2LeafWidth;
+            case "gameplay:lvl7":
+            case "gameplay:lvl8":
+            case "gameplay:lvl9":
+            case "gameplay:lvl10":
+            case "gameplay:lvl11":
+            case "gameplay:lvl12":
+                return lvl3LeafWidth;
+            default:
+                return lvl1LeafWidth;
+        }
+    }
+
+    private Leaf.leafType getLevelLeafType() {
+        switch (lvl) {
+            case "gameplay:lvl1":
+            case "gameplay:lvl2":
+            case "gameplay:lvl3":
+                return Leaf.leafType.NORMAL;
+            case "gameplay:lvl4":
+            case "gameplay:lvl5":
+            case "gameplay:lvl6":
+                return Leaf.leafType.NORMAL1;
+            case "gameplay:lvl7":
+            case "gameplay:lvl8":
+            case "gameplay:lvl9":
+            case "gameplay:lvl10":
+            case "gameplay:lvl11":
+            case "gameplay:lvl12":
+                return Leaf.leafType.NORMAL2;
+            default:
+                return Leaf.leafType.NORMAL;
+        }
     }
 
     /**
