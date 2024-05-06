@@ -33,7 +33,7 @@ public class Fire extends Hazard {
         return ModelType.FIRE;
     }
 
-    private float size = .2f; // Initial size
+    private float size = .4f; // Initial size
     private float growthRate = 0.00005f; // Growth rate per second
     private float elapsedTime = 0.0f; // Elapsed time since last update
 
@@ -50,7 +50,7 @@ public class Fire extends Hazard {
                 Color.WHITE,
                 x,
                 y,
-                getX()+.1f,
+                getX(),
                 getY(),
                 0,
                 sclX * size,
