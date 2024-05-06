@@ -391,7 +391,6 @@ public class Player extends CapsuleObject {
             idleAnimator.setFrame((int)animFrame3);
             float x = idleAnimator.getRegionWidth() / 2.0f;
             float y = idleAnimator.getRegionHeight() / 2.0f;
-            System.out.println(animFrame3);
             canvas.draw(idleAnimator,
                         Color.WHITE,
                         x,
