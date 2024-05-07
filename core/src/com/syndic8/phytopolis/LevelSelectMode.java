@@ -12,6 +12,7 @@ import com.syndic8.phytopolis.levelselect.LevelBox;
 import com.syndic8.phytopolis.util.FadingScreen;
 import com.syndic8.phytopolis.util.FilmStrip;
 import com.syndic8.phytopolis.util.ScreenListener;
+import com.syndic8.phytopolis.util.SharedAssetContainer;
 import com.syndic8.phytopolis.util.menu.Menu;
 import com.syndic8.phytopolis.util.menu.MenuContainer;
 import com.syndic8.phytopolis.util.menu.MenuItem;
@@ -95,6 +96,9 @@ public class LevelSelectMode extends FadingScreen implements Screen {
         ClickListener mainMenuListener = new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
+                SoundController.getInstance()
+                        .playSound(SharedAssetContainer.getInstance()
+                                           .getSound("click"));
                 ready = true;
                 exitCode = ExitCode.EXIT_MAIN_MENU;
                 fadeOut(0.5f);
@@ -104,6 +108,9 @@ public class LevelSelectMode extends FadingScreen implements Screen {
         ClickListener swapListener = new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
+                SoundController.getInstance()
+                        .playSound(SharedAssetContainer.getInstance()
+                                           .getSound("click"));
                 fadeOut(fadeTime);
                 doVolumeFade(false);
                 swapping = true;

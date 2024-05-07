@@ -33,7 +33,7 @@ public class SoundController {
         settingsJson = settingsJsonReader.parse(configFile);
         masterVolume = settingsJson.getFloat("masterVolume");
         musicVolume = settingsJson.getFloat("musicVolume");
-        fxVolume = settingsJson.getInt("fxVolume");
+        fxVolume = settingsJson.getFloat("fxVolume");
 
         AudioEngine engine = (AudioEngine) Gdx.audio;
         music = engine.newMusicBuffer(false, 44100);

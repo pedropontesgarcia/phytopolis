@@ -8,6 +8,7 @@ import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.utils.Align;
 import com.syndic8.phytopolis.GameCanvas;
 import com.syndic8.phytopolis.InputController;
+import com.syndic8.phytopolis.SoundController;
 import com.syndic8.phytopolis.util.SharedAssetContainer;
 
 import java.util.ArrayList;
@@ -71,6 +72,9 @@ public class ControlsMenu extends Menu {
         addItem(new MenuItem("RESET", 9, new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
+                SoundController.getInstance()
+                        .playSound(SharedAssetContainer.getInstance()
+                                           .getSound("click"));
                 InputController.getInstance().resetBindings();
             }
         }, this, ctr, c, Align.center, this.getFontScale(), 0.15f, 0, 200));

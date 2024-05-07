@@ -82,7 +82,8 @@
   },
   "soundfx": {
     "plant": "gameplay/audio/plant.wav",
-    "leaf": "gameplay/audio/leaf.wav"
+    "leaf": "gameplay/audio/leaf.wav",
+    "click": "ui/audio/click.wav"
   },
   "fonts": {
     "times": {

@@ -6,6 +6,7 @@ import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.syndic8.phytopolis.GameCanvas;
+import com.syndic8.phytopolis.SoundController;
 import com.syndic8.phytopolis.util.SharedAssetContainer;
 
 /**
@@ -34,6 +35,9 @@ public class MenuItem {
         this(text, index, new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
+                SoundController.getInstance()
+                        .playSound(SharedAssetContainer.getInstance()
+                                           .getSound("click"));
                 ctr.setMenu(sm);
             }
         }, m, ctr, c);
@@ -142,6 +146,9 @@ public class MenuItem {
         this(text, index, new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
+                SoundController.getInstance()
+                        .playSound(SharedAssetContainer.getInstance()
+                                           .getSound("click"));
                 ctr.setMenu(sm);
             }
         }, m, ctr, c, align, scl, xOffset, yOffset, width);

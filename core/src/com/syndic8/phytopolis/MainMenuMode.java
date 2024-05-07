@@ -20,11 +20,13 @@ import com.syndic8.phytopolis.assets.AssetDirectory;
 import com.syndic8.phytopolis.util.FadingScreen;
 import com.syndic8.phytopolis.util.FilmStrip;
 import com.syndic8.phytopolis.util.ScreenListener;
+import com.syndic8.phytopolis.util.SharedAssetContainer;
 import com.syndic8.phytopolis.util.menu.Menu;
 import com.syndic8.phytopolis.util.menu.MenuContainer;
 import com.syndic8.phytopolis.util.menu.MenuItem;
 import com.syndic8.phytopolis.util.menu.OptionsMenu;
 import edu.cornell.gdiac.audio.AudioSource;
+import edu.cornell.gdiac.audio.SoundEffect;
 
 /**
  * Class that provides a loading screen for the state of the game.
@@ -85,6 +87,7 @@ public class MainMenuMode extends FadingScreen implements Screen {
     private MenuContainer menuContainer;
     private Menu menu;
     private boolean exit;
+    private int clickSound;
 
     /**
      * Creates a MainMenuMode with the default budget, size and position.
@@ -143,8 +146,6 @@ public class MainMenuMode extends FadingScreen implements Screen {
 
         // Load SoundController singleton
         soundController = SoundController.getInstance();
-        //        // Load background music
-        //        backgroundMusic = internal.getEntry("newgrowth", AudioSource.class);
         this.backgroundMusic = -1;
     }
 
@@ -155,12 +156,18 @@ public class MainMenuMode extends FadingScreen implements Screen {
         ClickListener lvlListener = new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
+                SoundController.getInstance()
+                        .playSound(SharedAssetContainer.getInstance()
+                                           .getSound("click"));
                 exit = true;
             }
         };
         ClickListener exitListener = new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
+                SoundController.getInstance()
+                        .playSound(SharedAssetContainer.getInstance()
+                                           .getSound("click"));
                 Gdx.app.exit();
             }
         };
@@ -336,6 +343,10 @@ public class MainMenuMode extends FadingScreen implements Screen {
                 soundController.setLooping(true);
                 soundController.playMusic();
             }
+            SoundEffect clickSoundEffect = assets.getEntry("click",
+                                                           SoundEffect.class);
+            clickSound = soundController.addSoundEffect(clickSoundEffect);
+            SharedAssetContainer.getInstance().addSound("click", clickSound);
             progress = 1;
             state = State.LOADING_FADEOUT;
             fadeOut(0.5f);

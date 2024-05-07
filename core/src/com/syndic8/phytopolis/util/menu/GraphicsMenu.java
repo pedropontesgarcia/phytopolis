@@ -6,6 +6,8 @@ import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.utils.Align;
 import com.syndic8.phytopolis.GameCanvas;
 import com.syndic8.phytopolis.GameCanvas.GraphicsOption;
+import com.syndic8.phytopolis.SoundController;
+import com.syndic8.phytopolis.util.SharedAssetContainer;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -36,6 +38,9 @@ public class GraphicsMenu extends Menu {
         addItem(new MenuItem("APPLY", 4, new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
+                SoundController.getInstance()
+                        .playSound(SharedAssetContainer.getInstance()
+                                           .getSound("click"));
                 c.applyOptions();
             }
         }, this, ctr, c, Align.center, this.getFontScale(), 0.15f, 0, 200));

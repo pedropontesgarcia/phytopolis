@@ -8,6 +8,7 @@ import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.utils.Align;
 import com.syndic8.phytopolis.GameCanvas;
 import com.syndic8.phytopolis.GameCanvas.GraphicsOption;
+import com.syndic8.phytopolis.SoundController;
 import com.syndic8.phytopolis.util.SharedAssetContainer;
 
 public class GraphicsMenuItem extends MenuItem {
@@ -25,6 +26,9 @@ public class GraphicsMenuItem extends MenuItem {
         super(text, index, new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
+                SoundController.getInstance()
+                        .playSound(SharedAssetContainer.getInstance()
+                                           .getSound("click"));
                 c.updateOption(opn);
             }
         }, m, ctr, c);

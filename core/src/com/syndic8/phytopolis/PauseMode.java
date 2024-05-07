@@ -5,6 +5,7 @@ import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.syndic8.phytopolis.util.FadingScreen;
 import com.syndic8.phytopolis.util.ScreenListener;
+import com.syndic8.phytopolis.util.SharedAssetContainer;
 import com.syndic8.phytopolis.util.menu.Menu;
 import com.syndic8.phytopolis.util.menu.MenuContainer;
 import com.syndic8.phytopolis.util.menu.MenuItem;
@@ -41,6 +42,9 @@ public class PauseMode extends FadingScreen implements Screen {
         ClickListener resumeListener = new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
+                SoundController.getInstance()
+                        .playSound(SharedAssetContainer.getInstance()
+                                           .getSound("click"));
                 exitCode = ExitCode.EXIT_RESUME;
                 exit = true;
             }
@@ -48,6 +52,9 @@ public class PauseMode extends FadingScreen implements Screen {
         ClickListener resetListener = new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
+                SoundController.getInstance()
+                        .playSound(SharedAssetContainer.getInstance()
+                                           .getSound("click"));
                 exitCode = ExitCode.EXIT_RESET;
                 exit = true;
                 fadeOut(0.5f);
@@ -56,6 +63,9 @@ public class PauseMode extends FadingScreen implements Screen {
         ClickListener mainMenuListener = new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
+                SoundController.getInstance()
+                        .playSound(SharedAssetContainer.getInstance()
+                                           .getSound("click"));
                 exitCode = ExitCode.EXIT_LEVELS;
                 exit = true;
                 fadeOut(0.5f);
@@ -64,6 +74,9 @@ public class PauseMode extends FadingScreen implements Screen {
         ClickListener exitListener = new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
+                SoundController.getInstance()
+                        .playSound(SharedAssetContainer.getInstance()
+                                           .getSound("click"));
                 exitCode = ExitCode.EXIT_QUIT;
                 exit = true;
             }

@@ -24,9 +24,11 @@ public class SharedAssetContainer {
     private final FreeTypeFontParameter uiFontParameter;
     private final Skin progressBarSkin;
     private final Skin sliderSkin;
+    private final Map<String, Integer> soundMap;
 
     public SharedAssetContainer() {
-        uiFontMap = new HashMap<Float, BitmapFont>();
+        soundMap = new HashMap<>();
+        uiFontMap = new HashMap<>();
         uiFontGenerator = new FreeTypeFontGenerator(Gdx.files.internal(
                 "fonts/Krungthep.ttf"));
         FreeTypeFontGenerator.setMaxTextureSize(4096);
@@ -44,9 +46,6 @@ public class SharedAssetContainer {
         uiFont.getData().setScale(BASE_FONT_SCALE);
         uiFontMap.put(1f, uiFont);
 
-        //        TextureAtlas atlas = new TextureAtlas(Gdx.files.internal(
-        //                "ui/skins/prog.atlas"));
-        //        TextureAtlas.AtlasRegion region = atlas.findRegion("barfill.9");
         progressBarSkin = new Skin(Gdx.files.internal("ui/skins/fire.json"));
         sliderSkin = new Skin(Gdx.files.internal("ui/skins/slider.json"));
     }
@@ -103,6 +102,14 @@ public class SharedAssetContainer {
 
     public Skin getSliderSkin() {
         return sliderSkin;
+    }
+
+    public void addSound(String name, int i) {
+        soundMap.put(name, i);
+    }
+
+    public int getSound(String name) {
+        return soundMap.get(name);
     }
 
 }

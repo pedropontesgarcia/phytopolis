@@ -1,7 +1,6 @@
 package com.syndic8.phytopolis;
 
 import com.badlogic.gdx.Screen;
-import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
@@ -10,6 +9,7 @@ import com.badlogic.gdx.utils.Align;
 import com.syndic8.phytopolis.assets.AssetDirectory;
 import com.syndic8.phytopolis.util.FadingScreen;
 import com.syndic8.phytopolis.util.ScreenListener;
+import com.syndic8.phytopolis.util.SharedAssetContainer;
 import com.syndic8.phytopolis.util.menu.Menu;
 import com.syndic8.phytopolis.util.menu.MenuContainer;
 import com.syndic8.phytopolis.util.menu.MenuItem;
@@ -39,7 +39,7 @@ public class LevelOverMode extends FadingScreen implements Screen {
     private AudioEngine audioEngine;
     private Texture rs;
     private MenuContainer menuContainer;
-    private SoundController soundController;
+    private final SoundController soundController;
 
     public LevelOverMode(GameCanvas c) {
         ready = false;
@@ -61,6 +61,9 @@ public class LevelOverMode extends FadingScreen implements Screen {
         ClickListener exitListener = new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
+                SoundController.getInstance()
+                        .playSound(SharedAssetContainer.getInstance()
+                                           .getSound("click"));
                 ready = true;
                 menuContainer.deactivate();
                 fadeOut(0.5f);
@@ -80,7 +83,8 @@ public class LevelOverMode extends FadingScreen implements Screen {
         if (!gathered) {
             victory = directory.getEntry("over:victory", Texture.class);
             failure = directory.getEntry("over:failure", Texture.class);
-            AudioSource bgm = directory.getEntry("anotherday", AudioSource.class);
+            AudioSource bgm = directory.getEntry("anotherday",
+                                                 AudioSource.class);
             backgroundMusic = soundController.addMusic(bgm);
             soundController.setMusic(backgroundMusic);
             soundController.setLooping(true);

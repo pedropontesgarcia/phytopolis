@@ -9,6 +9,7 @@ import com.badlogic.gdx.utils.Align;
 import com.syndic8.phytopolis.GameCanvas;
 import com.syndic8.phytopolis.InputController;
 import com.syndic8.phytopolis.InputController.Binding;
+import com.syndic8.phytopolis.SoundController;
 import com.syndic8.phytopolis.util.SharedAssetContainer;
 
 public class ControlsMenuItem extends MenuItem {
@@ -25,6 +26,9 @@ public class ControlsMenuItem extends MenuItem {
         super(text, index, new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
+                SoundController.getInstance()
+                        .playSound(SharedAssetContainer.getInstance()
+                                           .getSound("click"));
                 InputController.getInstance().updateBinding(b);
             }
         }, m, ctr, c);
