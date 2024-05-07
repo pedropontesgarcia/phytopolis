@@ -199,7 +199,7 @@ public class PlantController {
                 (xIndex == plantGrid.length - 1 &&
                         direction == branchDirection.RIGHT);
         if (!resourceController.canGrowBranch()) {
-            System.out.println("branch");
+            //            System.out.println("branch");
             resourceController.setNotEnough(true);
             return null;
         }
@@ -423,7 +423,7 @@ public class PlantController {
                 plantGrid[xIndex][yIndex].getLeafType() !=
                         Leaf.leafType.BOUNCY) {
             if (!resourceController.canUpgrade()) {
-                System.out.println("upgrade");
+                //                System.out.println("upgrade");
                 resourceController.setNotEnough(true);
                 return null;
             }
@@ -466,7 +466,7 @@ public class PlantController {
         if (!inBounds(xIndex, yIndex)) return null;
 
         if (!resourceController.canGrowLeaf()) {
-            System.out.println("leaf");
+            //            System.out.println("leaf");
             resourceController.setNotEnough(true);
             return null;
         }

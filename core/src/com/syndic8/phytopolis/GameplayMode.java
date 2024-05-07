@@ -24,6 +24,9 @@ import com.syndic8.phytopolis.util.Tilemap;
 import edu.cornell.gdiac.audio.AudioSource;
 import edu.cornell.gdiac.audio.SoundEffect;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * Main controller for the gameplay mode.
  */
@@ -133,6 +136,11 @@ public class GameplayMode extends WorldController {
             float plantWidth = branchHeight * (float) Math.sqrt(3) *
                     (plantNodesPerRow - 1) / 2;
             float plantXOrigin = bounds.width / 2 - plantWidth / 2;
+            List<Float> plantXPositions = new ArrayList<Float>();
+            for (int i = 0; i < plantNodesPerRow; i++) {
+                plantXPositions.add(
+                        plantXOrigin + i * plantWidth / (plantNodesPerRow - 1));
+            }
             plantController = new PlantController(plantNodesPerRow,
                                                   40,
                                                   tilemap.getTileHeight(),
@@ -152,10 +160,7 @@ public class GameplayMode extends WorldController {
             sunController = new SunController(5,
                                               10,
                                               tilemap.getTileWidth() * 1.5f,
-                                              bounds.width -
-                                                      tilemap.getTileWidth() *
-                                                              1.5f,
-                                              tilemap.getWorldHeight());
+                                              plantXPositions);
             plantController.gatherAssets(directory);
             hazardController.gatherAssets(directory);
             uiController.gatherAssets(directory);

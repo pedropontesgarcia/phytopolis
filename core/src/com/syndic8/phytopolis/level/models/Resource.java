@@ -7,10 +7,9 @@ public abstract class Resource extends CircleObject {
     /**
      * Radius for resource collisions
      */
-    private static final int RESOURCE_RADIUS = 1;
+    private static final float RESOURCE_RADIUS = 0.5f;
     public final float width;
     public final float height;
-
 
     /**
      * Creates a resource object.

@@ -6,13 +6,14 @@ import com.syndic8.phytopolis.level.models.Sun;
 import com.syndic8.phytopolis.util.RandomController;
 import com.syndic8.phytopolis.util.Tilemap;
 
+import java.util.List;
+
 public class SunController {
 
     private final float delayMin;
     private final float delayMax;
-    private final float xGenerationMin;
-    private final float xGenerationMax;
     private final float yGeneration;
+    private final List<Float> plantXPositions;
     private float currentDelay;
     private float timer;
     private float xGeneration;
@@ -22,24 +23,23 @@ public class SunController {
 
     public SunController(float dMin,
                          float dMax,
-                         float xGenMin,
-                         float xGenMax,
-                         float yGen) {
+                         float yGen,
+                         List<Float> plantXs) {
 
         delayMin = dMin;
         delayMax = dMax;
         timer = 0;
-        xGenerationMin = xGenMin;
-        xGenerationMax = xGenMax;
         yGeneration = yGen;
+        plantXPositions = plantXs;
         generateDelay();
     }
 
     private void generateDelay() {
         timer = 0;
         currentDelay = RandomController.rollFloat(delayMin, delayMax);
-        xGeneration = RandomController.rollFloat(xGenerationMin,
-                                                 xGenerationMax);
+        xGeneration = plantXPositions.get(RandomController.rollInt(0,
+                                                                   plantXPositions.size() -
+                                                                           1));
     }
 
     public void gatherAssets(AssetDirectory directory) {

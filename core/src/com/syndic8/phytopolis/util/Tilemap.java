@@ -357,7 +357,7 @@ public class Tilemap {
     }
 
     public PooledList<Float> getPowerlineYVals() {
-        System.out.println(powerlineYVals);
+        //        System.out.println(powerlineYVals);
         return powerlineYVals;
     }
 

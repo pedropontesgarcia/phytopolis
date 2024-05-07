@@ -500,12 +500,12 @@ public class HazardController {
      */
     public void extinguishFire(Vector2 mousePos, Player avatar) {
         // TODO: uncomment this later
-//        float avatarX = avatar.getX();
-//        float avatarY = avatar.getY();
-//        float distance = mousePos.dst(avatarX, avatarY);
-//        if (distance > 2) return;
+        //        float avatarX = avatar.getX();
+        //        float avatarY = avatar.getY();
+        //        float distance = mousePos.dst(avatarX, avatarY);
+        //        if (distance > 2) return;
         if (!resourceController.canExtinguish()) {
-            System.out.println("fire");
+            //            System.out.println("fire");
             resourceController.setNotEnough(true);
             return;
         }

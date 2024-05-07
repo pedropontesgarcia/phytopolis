@@ -296,7 +296,6 @@ public class CollisionController implements ContactListener {
         if (isCollisionBetweenPlayerAndLeaf &&
                 (isPlayerGoingUp || isPlayerBelow || ic.isDropKeyDown())) {
             contact.setEnabled(false);
-            System.out.println(isPlayerBelow);
         }
         if (isCollisionBetweenPlayerAndNoTopTile && isPlayerGoingDown) {
             contact.setEnabled(false);
