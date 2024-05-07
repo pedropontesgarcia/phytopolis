@@ -22,6 +22,7 @@ import com.syndic8.phytopolis.level.models.*;
 import com.syndic8.phytopolis.util.FilmStrip;
 import com.syndic8.phytopolis.util.Tilemap;
 import edu.cornell.gdiac.audio.AudioSource;
+import edu.cornell.gdiac.audio.SoundEffect;
 
 /**
  * Main controller for the gameplay mode.
@@ -55,6 +56,7 @@ public class GameplayMode extends WorldController {
     private int backgroundMusic;
     private String lvl;
     private CollisionController collisionController;
+    private int plantSound;
 
     /**
      * Creates and initialize a new instance of the game.
@@ -95,6 +97,9 @@ public class GameplayMode extends WorldController {
         soundController.setMusic(backgroundMusic);
         soundController.setLooping(true);
         soundController.playMusic();
+        SoundEffect plantSoundEffect = directory.getEntry("plant",
+                                                          SoundEffect.class);
+        plantSound = soundController.addSoundEffect(plantSoundEffect);
         background = directory.getEntry(tilemap.getBackground(), Texture.class);
 
         if (!gathered) {
@@ -347,7 +352,10 @@ public class GameplayMode extends WorldController {
             if (shouldGrowBranch) {
                 Branch branch = plantController.growBranch(unprojMousePos.x,
                                                            unprojMousePos.y);
-                if (branch != null) addObject(branch);
+                if (branch != null) {
+                    addObject(branch);
+                    soundController.playSound(plantSound);
+                }
             }
             if (shouldGrowLeaf) {
                 // don't grow if there's a fire there (prioritize fire)

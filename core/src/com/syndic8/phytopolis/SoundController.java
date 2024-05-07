@@ -20,10 +20,10 @@ public class SoundController {
 
     private final FileHandle configFile;
     private final JsonValue settingsJson;
-    private final float fxVolume;
     private final float masterVolume;
     MusicQueue music;
     ArrayList<SoundEffect> sounds;
+    private float fxVolume;
     private float musicVolume;
     private int musicQueuePos;
 
@@ -38,6 +38,7 @@ public class SoundController {
         AudioEngine engine = (AudioEngine) Gdx.audio;
         music = engine.newMusicBuffer(false, 44100);
         music.setVolume(musicVolume);
+        sounds = new ArrayList<>();
     }
 
     public static SoundController getInstance() {
@@ -75,7 +76,7 @@ public class SoundController {
      * @param i the index of the sound to be played
      */
     public void playSound(int i) {
-        sounds.get(i).play();
+        sounds.get(i).play(fxVolume);
     }
 
     public void stopSound(int i) {
@@ -83,6 +84,7 @@ public class SoundController {
     }
 
     public void playMusic() {
+        music.setVolume(musicVolume);
         music.play();
     }
 
@@ -98,10 +100,6 @@ public class SoundController {
         for (SoundEffect s : sounds) {
             s.stop();
         }
-    }
-
-    public void setMusicVolume(float value) {
-        music.setVolume(value);
     }
 
     public int getMusicQueuePos() {
@@ -124,13 +122,22 @@ public class SoundController {
      * @param i the index of the song to be played
      */
     public void setMusic(int i) {
-        music.jumpToSource(i);
         musicQueuePos = i;
+        music.setVolume(musicVolume);
+        music.jumpToSource(i);
     }
 
     public void setLooping(boolean b) {
         music.setLooping(b);
         music.setLoopBehavior(true);
+    }
+
+    public float getMusicVolume() {
+        return musicVolume;
+    }
+
+    public void setMusicVolume(float value) {
+        music.setVolume(value);
     }
 
     public void updateOption(SoundOption opn, float val) {
@@ -142,6 +149,7 @@ public class SoundController {
                 break;
             case FX_VOLUME:
                 saveOptions();
+                fxVolume = val;
                 break;
         }
     }

@@ -86,6 +86,9 @@
     "ozonelayer": "gameplay/OzoneLayerEXP1OGG.ogg",
     "sunrise": "gameplay/SunriseEXP2OGG.ogg"
   },
+  "soundfx": {
+    "plant": "gameplay/audio/plant.wav"
+  },
   "fonts": {
     "times": {
       "file": "fonts/Krungthep.ttf",

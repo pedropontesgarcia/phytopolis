@@ -2,6 +2,7 @@ package com.syndic8.phytopolis.util;
 
 import com.badlogic.gdx.math.Interpolation;
 import com.syndic8.phytopolis.GameCanvas;
+import com.syndic8.phytopolis.SoundController;
 
 public abstract class FadingScreen {
 
@@ -44,13 +45,13 @@ public abstract class FadingScreen {
                 alpha = 0;
                 break;
         }
-        if(fadeVolume) volume = Math.max(Math.min(1 - alpha, 1), 0);
+        if (fadeVolume) volume = Math.max(Math.min(1 - alpha, 1), 0);
         if (fadeState != Fade.HIDDEN && fadeState != Fade.SHOWN) {
             tmr += deltaTime;
         }
     }
 
-    public void doVolumeFade(boolean b){
+    public void doVolumeFade(boolean b) {
         fadeVolume = b;
     }
 
@@ -76,7 +77,7 @@ public abstract class FadingScreen {
     }
 
     public float getVolume() {
-        return volume;
+        return volume * SoundController.getInstance().getMusicVolume();
     }
 
     protected boolean isFadeDone() {

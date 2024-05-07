@@ -218,14 +218,12 @@ public class LevelSelectMode extends FadingScreen implements Screen {
         levelBoxes[5] = new LevelBox((canvas.getWidth() / 1.47f) + xOff,
                                      (canvas.getHeight() / 3.3f) + yOff);
         for (LevelBox lb : levelBoxes) if (lb != null) lb.setTexture(rs);
-        //        if (backgroundMusic != null) {
-        //            backgroundMusic.setVolume(1);
-        //            backgroundMusic.play();
-        //        }
         fadeIn(0.5f);
         if (backgroundMusic != soundController.getMusicQueuePos()) {
             soundController.setMusic(backgroundMusic);
             soundController.setLooping(true);
+            soundController.playMusic();
+        } else if (!soundController.isMusicPlaying()) {
             soundController.playMusic();
         }
     }
