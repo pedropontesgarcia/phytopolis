@@ -24,14 +24,9 @@
     "gameplay:leaf1": "gameplay/level2leaf.png",
     "gameplay:leaf2": "gameplay/level3leaf.png",
     "gameplay:bouncy": "gameplay/modified_bounce_strip.png",
-    "gameplay:node": "gameplay/node.png",
     "gameplay:branch": "gameplay/branch-filmstrip.png",
     "gameplay:enbranch": "gameplay/enbranchup.png",
-    "water_outline": "gameplay/water_woutline.png",
-    "water_nooutline": "gameplay/water_nooutline.png",
     "gameplay:water_filmstrip": "gameplay/water_full_filmstrip.png",
-    "gameplay:sun_filmstrip": "gameplay/sun-ui-filmstrip.png",
-    "gameplay:sun_resource": "gameplay/sun-resource.png",
     "gameplay:sun_circle": "gameplay/ResourceSun_Circle.png",
     "gameplay:sun_ray": "gameplay/ResourceSun_Ray.png",
     "gameplay:sun_swirl": "gameplay/ResourceSun_Swirl.png",
@@ -39,7 +34,6 @@
     "gameplay:background2": "gameplay/3screens_novictoryline.png",
     "gameplay:background3": "gameplay/4screens_novictoryline.png",
     "hazards:fire": "hazards/fire-filmstrip.png",
-    "hazards:drone": "hazards/drone.png",
     "hazards:bug": "hazards/bug-filmstrip.png",
     "hazards:red-warning": "hazards/red_warning.png",
     "hazards:red-warning-flash": "hazards/yellow_warning.png",
@@ -87,7 +81,8 @@
     "sunrise": "gameplay/SunriseEXP2OGG.ogg"
   },
   "soundfx": {
-    "plant": "gameplay/audio/plant.wav"
+    "plant": "gameplay/audio/plant.wav",
+    "leaf": "gameplay/audio/leaf.wav"
   },
   "fonts": {
     "times": {

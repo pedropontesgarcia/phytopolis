@@ -57,6 +57,7 @@ public class GameplayMode extends WorldController {
     private String lvl;
     private CollisionController collisionController;
     private int plantSound;
+    private int leafSound;
 
     /**
      * Creates and initialize a new instance of the game.
@@ -100,6 +101,9 @@ public class GameplayMode extends WorldController {
         SoundEffect plantSoundEffect = directory.getEntry("plant",
                                                           SoundEffect.class);
         plantSound = soundController.addSoundEffect(plantSoundEffect);
+        SoundEffect leafSoundEffect = directory.getEntry("leaf",
+                                                         SoundEffect.class);
+        leafSound = soundController.addSoundEffect(leafSoundEffect);
         background = directory.getEntry(tilemap.getBackground(), Texture.class);
 
         if (!gathered) {
@@ -382,7 +386,10 @@ public class GameplayMode extends WorldController {
                                                                          tilemap.getTileHeight(),
                                                          lt,
                                                          width);
-                if (newLeaf != null) addObject(newLeaf);
+                if (newLeaf != null) {
+                    addObject(newLeaf);
+                    soundController.playSound(leafSound);
+                }
 
             }
         }
