@@ -83,7 +83,18 @@
   "soundfx": {
     "plant": "gameplay/audio/plant.wav",
     "leaf": "gameplay/audio/leaf.wav",
-    "click": "ui/audio/click.wav"
+    "click": "ui/audio/click.wav",
+    "bouncyleafboing": "gameplay/audio/BouncyLeafBoingSFXN.wav",
+    "destroyplant2": "gameplay/audio/DestroyPlant2SFXN.wav",
+    "destroyplant": "gameplay/audio/DestroyPlantSFXN.wav",
+    "fireextinguish": "gameplay/audio/FireExtinguishSFXN.wav",
+    "growbranch": "gameplay/audio/GrowBranchSFX2N.wav",
+    "growbranch2": "gameplay/audio/GrowBranchSFX3N.wav",
+    "growleaf": "gameplay/audio/GrowLeafSFX2.wav",
+    "landingconcrete": "gameplay/audio/LandingConcreteSFXN.wav",
+    "landingleaf": "gameplay/audio/LandingOnLeafSFXN.wav",
+    "menuclick": "gameplay/audio/MenuClickSFXN.wav",
+    "upgradeleaf": "gameplay/audio/UpgradeLeafSFXN.wav"
   },
   "fonts": {
     "times": {

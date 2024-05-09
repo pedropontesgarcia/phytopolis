@@ -361,7 +361,7 @@ public class MainMenuMode extends FadingScreen implements Screen {
                 soundController.setLooping(true);
                 soundController.playMusic();
             }
-            SoundEffect clickSoundEffect = assets.getEntry("click",
+            SoundEffect clickSoundEffect = assets.getEntry("menuclick",
                                                            SoundEffect.class);
             clickSound = soundController.addSoundEffect(clickSoundEffect);
             SharedAssetContainer.getInstance().addSound("click", clickSound);

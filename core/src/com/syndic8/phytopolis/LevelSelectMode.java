@@ -96,8 +96,7 @@ public class LevelSelectMode extends FadingScreen implements Screen {
         ClickListener mainMenuListener = new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
-                SoundController.getInstance()
-                        .playSound(SharedAssetContainer.getInstance()
+                soundController.playSound(SharedAssetContainer.getInstance()
                                            .getSound("click"));
                 ready = true;
                 exitCode = ExitCode.EXIT_MAIN_MENU;
@@ -108,8 +107,7 @@ public class LevelSelectMode extends FadingScreen implements Screen {
         ClickListener swapListener = new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
-                SoundController.getInstance()
-                        .playSound(SharedAssetContainer.getInstance()
+                soundController.playSound(SharedAssetContainer.getInstance()
                                            .getSound("click"));
                 fadeOut(fadeTime);
                 doVolumeFade(false);

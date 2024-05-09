@@ -8,7 +8,9 @@ import com.badlogic.gdx.physics.box2d.PolygonShape;
 import com.badlogic.gdx.physics.box2d.World;
 import com.badlogic.gdx.utils.JsonValue;
 import com.syndic8.phytopolis.GameCanvas;
+import com.syndic8.phytopolis.SoundController;
 import com.syndic8.phytopolis.util.FilmStrip;
+import com.syndic8.phytopolis.util.SharedAssetContainer;
 import com.syndic8.phytopolis.util.Tilemap;
 
 public class Player extends CapsuleObject {
@@ -98,6 +100,7 @@ public class Player extends CapsuleObject {
      */
     private boolean bouncy = false;
     private int bouncyTimer = 0;
+    private int boingSound;
 
     /**
      * Creates a new dude avatar with the given physics data
@@ -460,8 +463,10 @@ public class Player extends CapsuleObject {
 
         // Jump!
         if (isJumping()) {
-            if (bouncyTimer > 0)
+            if (bouncyTimer > 0) {
                 forceCache.set(0, jump_force * bouncyMultiplier);
+                SoundController.getInstance().playSound(boingSound);
+            }
             else forceCache.set(0, jump_force);
             body.applyLinearImpulse(forceCache, getPosition(), true);
         }
@@ -518,6 +523,10 @@ public class Player extends CapsuleObject {
     @Override
     public ModelType getType() {
         return ModelType.PLAYER;
+    }
+
+    public void setBoingSound(int bs) {
+        boingSound = bs;
     }
 
     //    /**

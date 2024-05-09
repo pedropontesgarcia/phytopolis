@@ -5,12 +5,14 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Vector2;
 import com.syndic8.phytopolis.GameCanvas;
+import com.syndic8.phytopolis.SoundController;
 import com.syndic8.phytopolis.assets.AssetDirectory;
 import com.syndic8.phytopolis.level.models.*;
 import com.syndic8.phytopolis.util.FilmStrip;
 import com.syndic8.phytopolis.util.PooledList;
 import com.syndic8.phytopolis.util.RandomController;
 import com.syndic8.phytopolis.util.Tilemap;
+import edu.cornell.gdiac.audio.SoundEffect;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -124,6 +126,7 @@ public class HazardController {
     private TextureRegion greenArrowUpTexture;
     private PooledList<Float> powerlineHeights;
     private float fireProgress;
+    private int extinguishSound;
 
     //    /**
     //     * Initializes a HazardController with the given parameters.
@@ -508,6 +511,7 @@ public class HazardController {
             resourceController.setNotEnough(true);
             return;
         }
+        SoundController.getInstance().playSound(extinguishSound);
         for (Hazard h : hazards) {
             if (h.getType().equals(FIRE)) {
                 Vector2 hazPos = plantController.indexToWorldCoord((int) h.getLocation().x,
@@ -685,6 +689,8 @@ public class HazardController {
         this.greenArrowUpTexture = new TextureRegion(directory.getEntry(
                 "hazards:arrow-up-green",
                 Texture.class));
+        extinguishSound = SoundController.getInstance().addSoundEffect(directory.getEntry("fireextinguish", SoundEffect.class));
+
     }
 
     /**

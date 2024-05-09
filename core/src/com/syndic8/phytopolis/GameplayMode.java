@@ -61,6 +61,7 @@ public class GameplayMode extends WorldController {
     private CollisionController collisionController;
     private int plantSound;
     private int leafSound;
+    private int boingSound;
 
     /**
      * Creates and initialize a new instance of the game.
@@ -101,12 +102,13 @@ public class GameplayMode extends WorldController {
         soundController.setMusic(backgroundMusic);
         soundController.setLooping(true);
         soundController.playMusic();
-        SoundEffect plantSoundEffect = directory.getEntry("plant",
+        SoundEffect plantSoundEffect = directory.getEntry("growbranch2",
                                                           SoundEffect.class);
         plantSound = soundController.addSoundEffect(plantSoundEffect);
-        SoundEffect leafSoundEffect = directory.getEntry("leaf",
+        SoundEffect leafSoundEffect = directory.getEntry("growleaf",
                                                          SoundEffect.class);
         leafSound = soundController.addSoundEffect(leafSoundEffect);
+        boingSound = soundController.addSoundEffect(directory.getEntry("bouncyleafboing", SoundEffect.class));
         background = directory.getEntry(tilemap.getBackground(), Texture.class);
 
         if (!gathered) {
@@ -659,6 +661,8 @@ public class GameplayMode extends WorldController {
                             idleAnimator,
                             tilemap,
                             0.9f);
+
+        avatar.setBoingSound(boingSound);
         avatar.setTexture(avatarTexture);
         avatar.setName("dude");
         addObject(avatar);

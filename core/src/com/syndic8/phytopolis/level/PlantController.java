@@ -6,13 +6,16 @@ import com.badlogic.gdx.physics.box2d.World;
 import com.badlogic.gdx.utils.ObjectSet;
 import com.badlogic.gdx.utils.Queue;
 import com.syndic8.phytopolis.GameCanvas;
+import com.syndic8.phytopolis.SoundController;
 import com.syndic8.phytopolis.assets.AssetDirectory;
 import com.syndic8.phytopolis.level.models.Branch;
 import com.syndic8.phytopolis.level.models.Hazard;
 import com.syndic8.phytopolis.level.models.Leaf;
 import com.syndic8.phytopolis.level.models.Model;
 import com.syndic8.phytopolis.util.FilmStrip;
+import com.syndic8.phytopolis.util.SharedAssetContainer;
 import com.syndic8.phytopolis.util.Tilemap;
+import edu.cornell.gdiac.audio.SoundEffect;
 
 public class PlantController {
 
@@ -94,6 +97,9 @@ public class PlantController {
     private int plantCoyoteTimeRemaining = 0;
     private FilmStrip leafTextureOne;
     private FilmStrip leafTextureTwo;
+    private SoundController soundController;
+    private int upgradeSound;
+    private int destroySound;
 
     /**
      * Initialize a PlantController with specified height and width
@@ -139,6 +145,7 @@ public class PlantController {
             }
         }
         removedHazards = new ObjectSet<>();
+        this.soundController = SoundController.getInstance();
     }
 
     public Leaf.leafType getLevelLeaf(String l) {
@@ -400,6 +407,7 @@ public class PlantController {
                                         y * worldToPixelConversionRatio)[1];
         if (resourceController.canUpgrade()) {
             resourceController.decrementUpgrade();
+            soundController.playSound(SharedAssetContainer.getInstance().getSound("upgradeleaf"));
             plantGrid[xIndex][yIndex].unmakeBranch(direction);
             return plantGrid[xIndex][yIndex].makeBranch(direction, type, world);
         }
@@ -544,6 +552,7 @@ public class PlantController {
     public void destroyAll(int xArg, int yArg) {
         PlantNode nodeToDestroy = plantGrid[xArg][yArg];
         nodeToDestroy.unmakeLeaf();
+        soundController.playSound(destroySound);
         if (!canGrowAtIndex(xArg, yArg) ||
                 nodeToDestroy.getBranchType(branchDirection.LEFT) ==
                         Branch.branchType.NORMAL)
@@ -814,6 +823,10 @@ public class PlantController {
                                           6);
         enBranchTextureUp = directory.getEntry("gameplay:enbranch",
                                                Texture.class);
+        SoundEffect upgrade = directory.getEntry("upgradeleaf", SoundEffect.class);
+        upgradeSound = soundController.addSoundEffect(upgrade);
+        //SharedAssetContainer.getInstance().addSound("upgradeleaf", upgradeSound);
+        destroySound = soundController.addSoundEffect(directory.getEntry("destroyplant2", SoundEffect.class));
     }
 
     /**
