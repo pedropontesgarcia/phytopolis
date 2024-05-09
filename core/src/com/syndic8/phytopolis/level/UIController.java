@@ -186,7 +186,6 @@ public class UIController {
                               Tilemap tm) {
         projMousePosCache.set(ic.getMouseX(), ic.getMouseY());
         Vector2 unprojMousePos = canvas.unprojectGame(projMousePosCache);
-        // TODO: uncomment this later
         float avatarX = avatar.getX();
         float avatarY = avatar.getY();
 

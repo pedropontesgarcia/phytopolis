@@ -333,11 +333,11 @@ public class GameplayMode extends WorldController {
         // get mouse position
         projMousePosCache.set(ic.getMouseX(), ic.getMouseY());
         Vector2 unprojMousePos = canvas.unprojectGame(projMousePosCache);
-        // TODO: uncomment this later
-        //        float avatarX = avatar.getX();
-        //        float avatarY = avatar.getY();
-        //        float distance = unprojMousePos.dst(avatarX, avatarY);
-        //        if (distance > 2) return;
+
+        float avatarX = avatar.getX();
+        float avatarY = avatar.getY();
+        float distance = unprojMousePos.dst(avatarX, avatarY);
+        if (distance > tilemap.getTileHeight() * 2) return;
 
         boolean canGrowBranch = ic.didGrowBranch() && ic.isGrowBranchModDown();
         boolean canGrowLeaf = ic.didGrowLeaf() && ic.isGrowLeafModDown();
@@ -462,12 +462,10 @@ public class GameplayMode extends WorldController {
         if (!isPaused()) {
             projMousePosCache.set(ic.getMouseX(), ic.getMouseY());
             Vector2 unprojMousePos = canvas.unprojectGame(projMousePosCache);
-            // TODO: uncomment this later
-            //            float avatarX = avatar.getX();
-            //            float avatarY = avatar.getY();
-            //            float distance = unprojMousePos.dst(avatarX, avatarY);
-            //            if (distance <= 2) {
-            if (true) {
+            float avatarX = avatar.getX();
+            float avatarY = avatar.getY();
+            float distance = unprojMousePos.dst(avatarX, avatarY);
+            if (distance <= tilemap.getTileHeight() * 2) {
                 if (!hazardController.hasFire(unprojMousePos)) {
                     if (!ic.isGrowLeafModDown()) {
                         plantController.drawGhostBranch(canvas,
