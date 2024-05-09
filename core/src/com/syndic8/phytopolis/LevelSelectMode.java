@@ -264,6 +264,8 @@ public class LevelSelectMode extends FadingScreen implements Screen {
             doVolumeFade(true);
             ready = true;
             exitCode = ExitCode.EXIT_LEVELS;
+            soundController.playSound(SharedAssetContainer.getInstance()
+                    .getSound("click"));
         }
         if (getFadeState() == Fade.HIDDEN && swapping) {
             screen1 = !screen1;
