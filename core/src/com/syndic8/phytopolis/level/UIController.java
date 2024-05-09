@@ -128,7 +128,7 @@ public class UIController {
         pixmap.dispose();
     }
 
-    private Pixmap getPixmapFromRegion(TextureRegion region) {
+    public static Pixmap getPixmapFromRegion(TextureRegion region) {
         if (!region.getTexture().getTextureData().isPrepared()) {
             region.getTexture().getTextureData().prepare();
         }

@@ -3,6 +3,7 @@
     "background": "mainmenu/menuart.png",
     "logo": "mainmenu/logo.png",
     "sproth": "mainmenu/sproth.png",
-    "syndic8": "mainmenu/syndic8.png"
+    "syndic8": "mainmenu/syndic8.png",
+    "cursor": "ui/cursor.png"
   }
 }

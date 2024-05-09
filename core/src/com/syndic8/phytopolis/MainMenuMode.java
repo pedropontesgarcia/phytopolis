@@ -11,12 +11,16 @@ package com.syndic8.phytopolis;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.Cursor;
+import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.Texture.TextureFilter;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.utils.Align;
 import com.syndic8.phytopolis.assets.AssetDirectory;
+import com.syndic8.phytopolis.level.UIController;
 import com.syndic8.phytopolis.util.FadingScreen;
 import com.syndic8.phytopolis.util.FilmStrip;
 import com.syndic8.phytopolis.util.ScreenListener;
@@ -88,6 +92,7 @@ public class MainMenuMode extends FadingScreen implements Screen {
     private Menu menu;
     private boolean exit;
     private int clickSound;
+    Cursor cursor;
 
     /**
      * Creates a MainMenuMode with the default budget, size and position.
@@ -147,6 +152,14 @@ public class MainMenuMode extends FadingScreen implements Screen {
         // Load SoundController singleton
         soundController = SoundController.getInstance();
         this.backgroundMusic = -1;
+
+        // Cursor
+        TextureRegion cursorTexture = new TextureRegion(internal.getEntry(
+                "cursor",
+                Texture.class));
+        Pixmap pixmap = UIController.getPixmapFromRegion(cursorTexture);
+        cursor = Gdx.graphics.newCursor(pixmap, 0, 0);
+        Gdx.graphics.setCursor(cursor);
     }
 
     private void createMenu() {
@@ -311,6 +324,10 @@ public class MainMenuMode extends FadingScreen implements Screen {
         internal.dispose();
     }
 
+    public void resetCursor() {
+        Gdx.graphics.setCursor(cursor);
+    }
+
     /**
      * Update the status of this player mode.
      * <p>
@@ -321,6 +338,7 @@ public class MainMenuMode extends FadingScreen implements Screen {
      * @param delta Number of seconds since last animation frame
      */
     protected void update(float delta) {
+        resetCursor();
         timer += delta;
         if (state == State.LOADING_FADEOUT && isFadeDone()) {
             state = State.MAIN_FADEIN;

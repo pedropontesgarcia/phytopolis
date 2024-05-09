@@ -84,7 +84,7 @@ public class GDXRoot extends Game implements ScreenListener {
      * @param exitCode the state of the screen upon exit.
      */
     public void exitScreen(Screen screen, int exitCode) {
-        Gdx.graphics.setSystemCursor(Cursor.SystemCursor.Arrow);
+        menu.resetCursor();
         if (screen == menu) {
             directory = menu.getAssets();
             levelSelect.gatherAssets(directory);
