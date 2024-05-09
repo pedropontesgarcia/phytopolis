@@ -60,7 +60,7 @@ public class GameplayMode extends WorldController {
     private String lvl;
     private CollisionController collisionController;
     private int plantSound;
-    private int leafSound;
+    //private int leafSound;
     private int boingSound;
 
     /**
@@ -105,9 +105,9 @@ public class GameplayMode extends WorldController {
         SoundEffect plantSoundEffect = directory.getEntry("growbranch2",
                                                           SoundEffect.class);
         plantSound = soundController.addSoundEffect(plantSoundEffect);
-        SoundEffect leafSoundEffect = directory.getEntry("growleaf",
-                                                         SoundEffect.class);
-        leafSound = soundController.addSoundEffect(leafSoundEffect);
+//        SoundEffect leafSoundEffect = directory.getEntry("growleaf",
+//                                                         SoundEffect.class);
+//        leafSound = soundController.addSoundEffect(leafSoundEffect);
         boingSound = soundController.addSoundEffect(directory.getEntry("bouncyleafboing", SoundEffect.class));
         background = directory.getEntry(tilemap.getBackground(), Texture.class);
 
@@ -394,7 +394,7 @@ public class GameplayMode extends WorldController {
                                                          width);
                 if (newLeaf != null) {
                     addObject(newLeaf);
-                    soundController.playSound(leafSound);
+                    //soundController.playSound(leafSound);
                 }
 
             }

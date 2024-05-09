@@ -100,6 +100,7 @@ public class PlantController {
     private SoundController soundController;
     private int upgradeSound;
     private int destroySound;
+    private int leafSound;
 
     /**
      * Initialize a PlantController with specified height and width
@@ -407,7 +408,7 @@ public class PlantController {
                                         y * worldToPixelConversionRatio)[1];
         if (resourceController.canUpgrade()) {
             resourceController.decrementUpgrade();
-            soundController.playSound(SharedAssetContainer.getInstance().getSound("upgradeleaf"));
+            soundController.playSound(upgradeSound);
             plantGrid[xIndex][yIndex].unmakeBranch(direction);
             return plantGrid[xIndex][yIndex].makeBranch(direction, type, world);
         }
@@ -437,6 +438,7 @@ public class PlantController {
             }
             plantGrid[xIndex][yIndex].unmakeLeaf();
             resourceController.decrementUpgrade();
+            soundController.playSound(upgradeSound);
             Leaf l = plantGrid[xIndex][yIndex].makeLeaf(Leaf.leafType.BOUNCY,
                                                         width);
             if (l != null && l.getY() > getMaxLeafHeight()) {
@@ -444,6 +446,7 @@ public class PlantController {
             }
             return l;
         } else {
+            soundController.playSound(leafSound);
             return growLeaf(x, y, lt, width);
         }
     }
@@ -827,6 +830,9 @@ public class PlantController {
         upgradeSound = soundController.addSoundEffect(upgrade);
         //SharedAssetContainer.getInstance().addSound("upgradeleaf", upgradeSound);
         destroySound = soundController.addSoundEffect(directory.getEntry("destroyplant2", SoundEffect.class));
+        SoundEffect leafSoundEffect = directory.getEntry("growleaf",
+                SoundEffect.class);
+        leafSound = soundController.addSoundEffect(leafSoundEffect);
     }
 
     /**
