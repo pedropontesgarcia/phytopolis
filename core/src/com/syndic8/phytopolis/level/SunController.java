@@ -25,7 +25,6 @@ public class SunController {
                          float dMax,
                          float yGen,
                          List<Float> plantXs) {
-
         delayMin = dMin;
         delayMax = dMax;
         timer = 0;

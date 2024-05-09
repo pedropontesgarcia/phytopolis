@@ -116,7 +116,7 @@
         {
          "name":"time",
          "type":"int",
-         "value":40
+         "value":120
         }, 
         {
          "name":"victory",
