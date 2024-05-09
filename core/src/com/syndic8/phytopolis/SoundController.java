@@ -16,6 +16,7 @@ import java.util.ArrayList;
 
 public class SoundController {
 
+    private static final float FXSCALE = 0.25f;
     private static SoundController soundControllerInstance;
 
     private final FileHandle configFile;
@@ -76,7 +77,7 @@ public class SoundController {
      * @param i the index of the sound to be played
      */
     public void playSound(int i) {
-        sounds.get(i).play(fxVolume);
+        sounds.get(i).play(fxVolume * FXSCALE);
     }
 
     public void stopSound(int i) {
