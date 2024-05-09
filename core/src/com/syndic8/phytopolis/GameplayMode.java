@@ -153,7 +153,6 @@ public class GameplayMode extends WorldController {
                                                   tilemap);
             hazardController = new HazardController(plantController,
                                                     (int) tilemap.getFireRate(),
-                                                    1000000000,
                                                     6,
                                                     8,
                                                     6,
@@ -161,7 +160,7 @@ public class GameplayMode extends WorldController {
                                                     tilemap);
             sunController = new SunController(5,
                                               10,
-                                              tilemap.getTileWidth() * 1.5f,
+                                              tilemap.getWorldHeight(),
                                               plantXPositions);
             plantController.gatherAssets(directory);
             hazardController.gatherAssets(directory);
@@ -179,8 +178,8 @@ public class GameplayMode extends WorldController {
             case "gameplay:lvl4":
             case "gameplay:lvl5":
             case "gameplay:lvl6":
-            case "gameplay:lvl7":
                 return directory.getEntry("ozonelayer", AudioSource.class);
+            case "gameplay:lvl7":
             case "gameplay:lvl8":
             case "gameplay:lvl9":
             case "gameplay:lvl10":
@@ -585,7 +584,6 @@ public class GameplayMode extends WorldController {
                               tilemap);
 
         hazardController.reset((int) tilemap.getFireRate(),
-                               1000000000,
                                6,
                                8,
                                6,

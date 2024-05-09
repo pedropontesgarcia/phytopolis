@@ -147,14 +147,12 @@ public class HazardController {
      */
     public HazardController(PlantController plantController,
                             int fireFrequency,
-                            int droneFrequency,
                             int bugFrequency,
                             int burnTime,
                             int explodeTime,
                             int eatTime,
                             Tilemap tm) {
         this.fireFrequency = fireFrequency;
-        this.droneFrequency = droneFrequency;
         this.bugFrequency = bugFrequency;
         this.plantController = plantController;
         this.resourceController = plantController.getResourceController();
@@ -173,14 +171,12 @@ public class HazardController {
     }
 
     public void reset(int fireFrequency,
-                      int droneFrequency,
                       int bugFrequency,
                       int burnTime,
                       int explodeTime,
                       int eatTime,
                       Tilemap tm) {
         this.fireFrequency = fireFrequency;
-        this.droneFrequency = droneFrequency;
         this.bugFrequency = bugFrequency;
         this.burnTime = burnTime;
         this.explodeTime = explodeTime;
@@ -256,10 +252,6 @@ public class HazardController {
         switch (type) {
             case FIRE:
                 if (random.nextDouble() < 1.0 / fireFrequency)
-                    hazardHeight = random.nextInt(height);
-                break;
-            case DRONE:
-                if (random.nextDouble() < 1.0 / droneFrequency)
                     hazardHeight = random.nextInt(height);
                 break;
             case BUG:

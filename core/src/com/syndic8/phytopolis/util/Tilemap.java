@@ -6,7 +6,6 @@ import com.badlogic.gdx.utils.JsonValue;
 import com.syndic8.phytopolis.GameCanvas;
 import com.syndic8.phytopolis.WorldController;
 import com.syndic8.phytopolis.assets.AssetDirectory;
-import com.syndic8.phytopolis.level.models.Sun;
 import com.syndic8.phytopolis.level.models.Tile;
 import com.syndic8.phytopolis.level.models.Water;
 
@@ -290,17 +289,17 @@ public class Tilemap {
                             .get(0)
                             .getString("value")
                             .equals("sun")) {
-                        Sun s = new Sun(xMid,
-                                        yMid,
-                                        tileWidth * 0.5f,
-                                        tileHeight * 0.5f,
-                                        sunCircle,
-                                        sunRay,
-                                        sunSwirl,
-                                        this,
-                                        1);
-                        ctrl.addObject(s);
-                        s.setVY(-0.5f);
+                        //                        Sun s = new Sun(xMid,
+                        //                                        yMid,
+                        //                                        tileWidth * 0.5f,
+                        //                                        tileHeight * 0.5f,
+                        //                                        sunCircle,
+                        //                                        sunRay,
+                        //                                        sunSwirl,
+                        //                                        this,
+                        //                                        1);
+                        //                        ctrl.addObject(s);
+                        //                        s.setVY(-0.5f);
                     }
                 }
             }
