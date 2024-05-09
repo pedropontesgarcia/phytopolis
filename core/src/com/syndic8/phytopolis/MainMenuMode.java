@@ -92,6 +92,7 @@ public class MainMenuMode extends FadingScreen implements Screen {
     private Menu menu;
     private boolean exit;
     private int clickSound;
+    private boolean menuWasMade;
     Cursor cursor;
 
     /**
@@ -139,7 +140,8 @@ public class MainMenuMode extends FadingScreen implements Screen {
         progress = 0;
 
         // Create menu
-        createMenu();
+        //createMenu();
+        this.menuWasMade = false;
 
         // Start loading the real assets
         assets = new AssetDirectory(file);
@@ -169,7 +171,7 @@ public class MainMenuMode extends FadingScreen implements Screen {
         ClickListener lvlListener = new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
-                SoundController.getInstance()
+                if(progress >= 1) SoundController.getInstance()
                         .playSound(SharedAssetContainer.getInstance()
                                            .getSound("click"));
                 exit = true;
@@ -178,7 +180,7 @@ public class MainMenuMode extends FadingScreen implements Screen {
         ClickListener exitListener = new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
-                SoundController.getInstance()
+                if(progress >= 1) SoundController.getInstance()
                         .playSound(SharedAssetContainer.getInstance()
                                            .getSound("click"));
                 Gdx.app.exit();
@@ -265,7 +267,7 @@ public class MainMenuMode extends FadingScreen implements Screen {
         if (getFadeState() != Fade.SHOWN) {
             fadeIn(0.5f);
         }
-        menuContainer.activate();
+        if(menuContainer != null) menuContainer.activate();
     }
 
     /**
@@ -353,6 +355,11 @@ public class MainMenuMode extends FadingScreen implements Screen {
             progress = assets.getProgress();
         }
         if (progress >= 1 && timer >= LOAD_DELAY && state == State.LOADING) {
+            if(!menuWasMade){
+                createMenu();
+                menuWasMade = true;
+                menuContainer.activate();
+            }
             if (backgroundMusic == -1) {
                 AudioSource bgm = assets.getEntry("newgrowth",
                                                   AudioSource.class);
@@ -361,7 +368,7 @@ public class MainMenuMode extends FadingScreen implements Screen {
                 soundController.setLooping(true);
                 soundController.playMusic();
             }
-            SoundEffect clickSoundEffect = assets.getEntry("menuclick",
+            SoundEffect clickSoundEffect = assets.getEntry("click",
                                                            SoundEffect.class);
             clickSound = soundController.addSoundEffect(clickSoundEffect);
             SharedAssetContainer.getInstance().addSound("click", clickSound);
@@ -380,7 +387,7 @@ public class MainMenuMode extends FadingScreen implements Screen {
             doVolumeFade(false);
             menuContainer.deactivate();
         }
-        menuContainer.update(delta);
+        if(menuContainer != null) menuContainer.update(delta);
         super.update(delta);
     }
 
