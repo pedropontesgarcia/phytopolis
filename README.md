@@ -4,7 +4,10 @@
 
 Sow seeds of hope in a city of shadows by cultivating and climbing a sprout as it grows into a mighty ivy! Ascend and defend a flourishing plant against the dangers of a careless society until it reaches a clear sky beyond the rooftops of a polluted metropolis, leaving behind a lush legacy of green.
 
-## Getting Started
+## Download
+Download the [latest release](https://github.coecis.cornell.edu/pp457/phytopolis/releases) according to your OS (we provide Windows and macOS releases), unzip the files, and run the game. Note that the macOS release is not signed, so you may need to [follow these instructions](https://support.apple.com/guide/mac-help/open-a-mac-app-from-an-unidentified-developer-mh40616/mac) to run it.
+
+## Getting started
 
 - **Movement:** Use `A` and `D` to move horizontally, `W` to jump, and `S` to fall through leaves.
 - **Growing:** Click over branch previews to build branches, hold left shift and click over leaf previews to build or upgrade leaves.
