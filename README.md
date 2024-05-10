@@ -1,3 +1,5 @@
+![Logo](assets/mainmenu/logo.png)
+
 # Phytopolis
 
 Sow seeds of hope in a city of shadows by cultivating and climbing a sprout as it grows into a mighty ivy! Ascend and defend a flourishing plant against the dangers of a careless society until it reaches a clear sky beyond the rooftops of a polluted metropolis, leaving behind a lush legacy of green.
@@ -34,4 +36,5 @@ Phytopolis is developed by Syndic8, a team composed of the following members:
 
 We reserve all rights to the source code of Phytopolis, although we grant Cornell University a permanent, non-exclusive license for the game as it is submitted at Showcase on May 18, 2024. Cornell University has the right to archive, exhibit, and distribute that version of the game for promotional and non-commercial purposes.
 
-© Syndic8, 2024
+
+**© Syndic8, 2024**
