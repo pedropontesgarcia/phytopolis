@@ -1,4 +1,4 @@
-<img src="assets/mainmenu/logo.png" alt="logo" width="200"/>
+<img src="assets/mainmenu/logo.png" alt="logo" width="500"/>
 
 # Phytopolis
 
