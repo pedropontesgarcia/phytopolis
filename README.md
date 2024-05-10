@@ -1,8 +1,10 @@
 <img src="assets/mainmenu/logo.png" alt="logo" width="500"/>
 
 # Phytopolis
+Ascend and defend a flourishing plant against the dangers of a careless society until it reaches a clear sky beyond the rooftops of a polluted metropolis, leaving behind a lush legacy of green.
 
-Sow seeds of hope in a city of shadows by cultivating and climbing a sprout as it grows into a mighty ivy! Ascend and defend a flourishing plant against the dangers of a careless society until it reaches a clear sky beyond the rooftops of a polluted metropolis, leaving behind a lush legacy of green.
+## Concept statement
+Step into the world of Phytopolis, where nature clashes with technology in a mesmerizing showdown. Your mission? Take a humble sprout and cultivate it into a thriving vine as it climbs up the concrete chaos of a cyberpunk metropolis. Sunlight absorbed by leaves will keep the plant alive as you use water to branch upwards. Extinguish fiery flames, stomp on invasive cyberbugs, and protect your plant until it reaches the clear skies above. 
 
 ## Download
 Download the [latest release](https://github.coecis.cornell.edu/pp457/phytopolis/releases) according to your OS (we provide Windows and macOS releases), unzip the files, and run the game. Note that the macOS release is not signed, so you may need to [follow these instructions](https://support.apple.com/guide/mac-help/open-a-mac-app-from-an-unidentified-developer-mh40616/mac) to run it.
