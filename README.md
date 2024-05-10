@@ -1,4 +1,4 @@
-![Logo](assets/mainmenu/logo.png)
+<img src="assets/mainmenu/logo.png" alt="logo" width="200"/>
 
 # Phytopolis
 
