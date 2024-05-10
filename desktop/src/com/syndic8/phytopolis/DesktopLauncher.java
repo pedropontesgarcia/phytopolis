@@ -74,7 +74,7 @@ public class DesktopLauncher {
             config.setTitle("Phytopolis");
             config.setWindowPosition(-1, -1);
             config.setWindowIcon("ui/leaf-cursor.png");
-        } catch (IOException ignored) {
+        } catch (Exception ignored) {
             resetSettings(configFile);
             // Try again
             manageSettings(config, displayModes);
