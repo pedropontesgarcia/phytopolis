@@ -97,7 +97,7 @@ public class LevelSelectMode extends FadingScreen implements Screen {
             @Override
             public void clicked(InputEvent event, float x, float y) {
                 soundController.playSound(SharedAssetContainer.getInstance()
-                                           .getSound("click"));
+                                                  .getSound("click"));
                 ready = true;
                 exitCode = ExitCode.EXIT_MAIN_MENU;
                 fadeOut(0.5f);
@@ -108,7 +108,7 @@ public class LevelSelectMode extends FadingScreen implements Screen {
             @Override
             public void clicked(InputEvent event, float x, float y) {
                 soundController.playSound(SharedAssetContainer.getInstance()
-                                           .getSound("click"));
+                                                  .getSound("click"));
                 fadeOut(fadeTime);
                 doVolumeFade(false);
                 swapping = true;
@@ -265,7 +265,7 @@ public class LevelSelectMode extends FadingScreen implements Screen {
             ready = true;
             exitCode = ExitCode.EXIT_LEVELS;
             soundController.playSound(SharedAssetContainer.getInstance()
-                    .getSound("click"));
+                                              .getSound("click"));
         }
         if (getFadeState() == Fade.HIDDEN && swapping) {
             screen1 = !screen1;
@@ -292,9 +292,9 @@ public class LevelSelectMode extends FadingScreen implements Screen {
             swapping = false;
         }
         //if(getFadeState() == Fade.SHOWN || ready || (!swapping && getFadeState() == Fade.FADE_IN))
-        soundController.setMusicVolume(super.getVolume());
+        soundController.setActualMusicVolume(super.getVolume());
         //        if (ready && exitCode == ExitCode.EXIT_LEVELS)
-        //            soundController.setMusicVolume(super.getVolume());
+        //            soundController.setActualMusicVolume(super.getVolume());
     }
 
     public void draw() {

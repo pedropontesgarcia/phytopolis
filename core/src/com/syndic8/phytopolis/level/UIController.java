@@ -278,8 +278,8 @@ public class UIController {
         return timer.isOver();
     }
 
-    public void reset() {
-        timer.reset();
+    public void reset(float initialTime) {
+        timer.reset(initialTime);
         timer.start();
     }
 

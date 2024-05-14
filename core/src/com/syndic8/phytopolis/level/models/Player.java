@@ -10,7 +10,6 @@ import com.badlogic.gdx.utils.JsonValue;
 import com.syndic8.phytopolis.GameCanvas;
 import com.syndic8.phytopolis.SoundController;
 import com.syndic8.phytopolis.util.FilmStrip;
-import com.syndic8.phytopolis.util.SharedAssetContainer;
 import com.syndic8.phytopolis.util.Tilemap;
 
 public class Player extends CapsuleObject {
@@ -170,7 +169,7 @@ public class Player extends CapsuleObject {
         }
     }
 
-    public boolean getBounce(){
+    public boolean getBounce() {
         return bouncyTimer > 0;
     }
 
@@ -183,58 +182,6 @@ public class Player extends CapsuleObject {
      */
     public float getForce() {
         return force;
-    }
-
-    /**
-     * Creates the physics Body(s) for this object, adding them to the world.
-     * <p>
-     * This method overrides the base method to keep your ship from spinning.
-     *
-     * @param world Box2D world to store body
-     * @return true if object allocation succeeded
-     */
-    public boolean activatePhysics(World world) {
-        // create the box from our superclass
-        if (!super.activatePhysics(world)) {
-            return false;
-        }
-
-        // Ground Sensor
-        // -------------
-        // We only allow the dude to jump when he's on the ground.
-        // Double jumping is not allowed.
-        //
-        // To determine whether or not the dude is on the ground,
-        // we create a thin sensor under his feet, which reports
-        // collisions with the world but has no collision response.
-        Vector2 sensorCenter = new Vector2(0, -getHeight() / 2);
-        FixtureDef sensorDef = new FixtureDef();
-        sensorDef.density = data.getFloat("density", 0);
-        sensorDef.isSensor = true;
-        sensorShape = new PolygonShape();
-        JsonValue sensorjv = data.get("sensor");
-        sensorShape.setAsBox(sensorjv.getFloat("shrink", 0) * getWidth() / 2.0f,
-                             sensorjv.getFloat("height", 0),
-                             sensorCenter,
-                             0.0f);
-        sensorDef.shape = sensorShape;
-
-        // Ground sensor to represent our feet
-        Fixture sensorFixture = body.createFixture(sensorDef);
-        sensorFixture.setUserData(getSensorName());
-
-        return true;
-    }
-
-    /**
-     * Returns the name of the ground sensor
-     * <p>
-     * This is used by ContactListener
-     *
-     * @return the name of the ground sensor
-     */
-    public String getSensorName() {
-        return sensorName;
     }
 
     /**
@@ -300,10 +247,11 @@ public class Player extends CapsuleObject {
             jumpCooldown = Math.max(0, jumpCooldown - 1);
         }
 
-        if (!(Math.abs(getVX()) >= 0.1) && !(!isGrounded() || animFrame != 0)){
-            if (animFrame3 < 3){
+        if (!(Math.abs(getVX()) >= 0.1) && !(!isGrounded() || animFrame != 0)) {
+            if (animFrame3 < 3) {
                 animFrame3 += ANIMATION_SPEED3;
-            }if ( animFrame3 >= 3){
+            }
+            if (animFrame3 >= 3) {
                 animFrame3 -= 3;
             }
 
@@ -391,7 +339,7 @@ public class Player extends CapsuleObject {
                         sclX * effect,
                         sclY);
         } else {
-            idleAnimator.setFrame((int)animFrame3);
+            idleAnimator.setFrame((int) animFrame3);
             float x = idleAnimator.getRegionWidth() / 2.0f;
             float y = idleAnimator.getRegionHeight() / 2.0f;
             canvas.draw(idleAnimator,
@@ -438,6 +386,58 @@ public class Player extends CapsuleObject {
     }
 
     /**
+     * Creates the physics Body(s) for this object, adding them to the world.
+     * <p>
+     * This method overrides the base method to keep your ship from spinning.
+     *
+     * @param world Box2D world to store body
+     * @return true if object allocation succeeded
+     */
+    public boolean activatePhysics(World world) {
+        // create the box from our superclass
+        if (!super.activatePhysics(world)) {
+            return false;
+        }
+
+        // Ground Sensor
+        // -------------
+        // We only allow the dude to jump when he's on the ground.
+        // Double jumping is not allowed.
+        //
+        // To determine whether or not the dude is on the ground,
+        // we create a thin sensor under his feet, which reports
+        // collisions with the world but has no collision response.
+        Vector2 sensorCenter = new Vector2(0, -getHeight() / 2);
+        FixtureDef sensorDef = new FixtureDef();
+        sensorDef.density = data.getFloat("density", 0);
+        sensorDef.isSensor = true;
+        sensorShape = new PolygonShape();
+        JsonValue sensorjv = data.get("sensor");
+        sensorShape.setAsBox(sensorjv.getFloat("shrink", 0) * getWidth() / 2.0f,
+                             sensorjv.getFloat("height", 0),
+                             sensorCenter,
+                             0.0f);
+        sensorDef.shape = sensorShape;
+
+        // Ground sensor to represent our feet
+        Fixture sensorFixture = body.createFixture(sensorDef);
+        sensorFixture.setUserData(getSensorName());
+
+        return true;
+    }
+
+    /**
+     * Returns the name of the ground sensor
+     * <p>
+     * This is used by ContactListener
+     *
+     * @return the name of the ground sensor
+     */
+    public String getSensorName() {
+        return sensorName;
+    }
+
+    /**
      * Applies the force to the body of this dude
      * <p>
      * This method should be called after the force attribute is set.
@@ -447,15 +447,15 @@ public class Player extends CapsuleObject {
             return;
         }
 
+        // Velocity too high, clamp it
+        if (Math.abs(getVX()) >= getMaxSpeed()) {
+            setVX(Math.signum(getVX()) * getMaxSpeed());
+        }
+
         // Don't want to be moving. Damp out player motion
         if (getMovement() == 0f) {
             forceCache.set(-getDamping() * getVX(), 0);
             body.applyForce(forceCache, getPosition(), true);
-        }
-
-        // Velocity too high, clamp it
-        if (Math.abs(getVX()) >= getMaxSpeed()) {
-            setVX(Math.signum(getVX()) * getMaxSpeed());
         } else {
             forceCache.set(getMovement(), 0);
             body.applyForce(forceCache, getPosition(), true);
@@ -466,10 +466,20 @@ public class Player extends CapsuleObject {
             if (bouncyTimer > 0) {
                 forceCache.set(0, jump_force * bouncyMultiplier);
                 SoundController.getInstance().playSound(boingSound);
-            }
-            else forceCache.set(0, jump_force);
+            } else forceCache.set(0, jump_force);
             body.applyLinearImpulse(forceCache, getPosition(), true);
         }
+    }
+
+    /**
+     * Returns the upper limit on dude left-right movement.
+     * <p>
+     * This does NOT apply to vertical movement.
+     *
+     * @return the upper limit on dude left-right movement.
+     */
+    public float getMaxSpeed() {
+        return maxspeed;
     }
 
     /**
@@ -492,6 +502,7 @@ public class Player extends CapsuleObject {
      */
     public void setMovement(float value) {
         movement = value;
+        System.out.println(movement);
         // Change facing if appropriate
         if (movement < 0) {
             faceRight = false;
@@ -507,17 +518,6 @@ public class Player extends CapsuleObject {
      */
     public float getDamping() {
         return damping;
-    }
-
-    /**
-     * Returns the upper limit on dude left-right movement.
-     * <p>
-     * This does NOT apply to vertical movement.
-     *
-     * @return the upper limit on dude left-right movement.
-     */
-    public float getMaxSpeed() {
-        return maxspeed;
     }
 
     @Override

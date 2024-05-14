@@ -105,10 +105,12 @@ public class GameplayMode extends WorldController {
         SoundEffect plantSoundEffect = directory.getEntry("growbranch2",
                                                           SoundEffect.class);
         plantSound = soundController.addSoundEffect(plantSoundEffect);
-//        SoundEffect leafSoundEffect = directory.getEntry("growleaf",
-//                                                         SoundEffect.class);
-//        leafSound = soundController.addSoundEffect(leafSoundEffect);
-        boingSound = soundController.addSoundEffect(directory.getEntry("bouncyleafboing", SoundEffect.class));
+        //        SoundEffect leafSoundEffect = directory.getEntry("growleaf",
+        //                                                         SoundEffect.class);
+        //        leafSound = soundController.addSoundEffect(leafSoundEffect);
+        boingSound = soundController.addSoundEffect(directory.getEntry(
+                "bouncyleafboing",
+                SoundEffect.class));
         background = directory.getEntry(tilemap.getBackground(), Texture.class);
 
         if (!gathered) {
@@ -244,7 +246,7 @@ public class GameplayMode extends WorldController {
     public void update(float dt) {
         int water = resourceController.getCurrWater();
         hazardController.update(dt);
-        soundController.setMusicVolume(super.getVolume());
+        soundController.setActualMusicVolume(super.getVolume());
         //        System.out.println("Music playing? " + soundController.isMusicPlaying());
         //        System.out.println("What music? " + soundController.getPlayingMusic());
         //        System.out.println("Is it looping? " + soundController.getIsLooping());
@@ -559,7 +561,7 @@ public class GameplayMode extends WorldController {
         world.dispose();
         //        soundController.stopMusic();
         //        soundController.playMusic();
-        uiController.reset();
+        uiController.reset(tilemap.getTime());
 
         ic.resetScrolled();
 
@@ -589,6 +591,12 @@ public class GameplayMode extends WorldController {
                                6,
                                10,
                                tilemap);
+        List<Float> plantXPositions = new ArrayList<Float>();
+        for (int i = 0; i < plantNodesPerRow; i++) {
+            plantXPositions.add(
+                    plantXOrigin + i * plantWidth / (plantNodesPerRow - 1));
+        }
+        sunController.reset(tilemap.getWorldHeight(), plantXPositions);
         setComplete(false);
         setFailure(false);
         populateLevel();

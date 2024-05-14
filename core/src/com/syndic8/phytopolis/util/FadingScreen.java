@@ -77,7 +77,7 @@ public abstract class FadingScreen {
     }
 
     public float getVolume() {
-        return volume * SoundController.getInstance().getMusicVolume();
+        return volume * SoundController.getInstance().getUserMusicVolume();
     }
 
     protected boolean isFadeDone() {

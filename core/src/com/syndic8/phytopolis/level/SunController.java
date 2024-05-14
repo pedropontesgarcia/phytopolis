@@ -12,8 +12,8 @@ public class SunController {
 
     private final float delayMin;
     private final float delayMax;
-    private final float yGeneration;
-    private final List<Float> plantXPositions;
+    private float yGeneration;
+    private List<Float> plantXPositions;
     private float currentDelay;
     private float timer;
     private float xGeneration;
@@ -39,6 +39,13 @@ public class SunController {
         xGeneration = plantXPositions.get(RandomController.rollInt(0,
                                                                    plantXPositions.size() -
                                                                            1));
+    }
+
+    public void reset(float yGen, List<Float> plantXs) {
+        timer = 0;
+        yGeneration = yGen;
+        plantXPositions = plantXs;
+        generateDelay();
     }
 
     public void gatherAssets(AssetDirectory directory) {

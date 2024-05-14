@@ -269,6 +269,7 @@ public class CollisionController implements ContactListener {
             uiController.addTime();
         }
         if (isCollisionBetweenPlayerAndWater) {
+            contact.setEnabled(false);
             Water w;
             if (((Model) fix1.getBody().getUserData()).getType() ==
                     Model.ModelType.WATER) {
@@ -276,7 +277,6 @@ public class CollisionController implements ContactListener {
             } else {
                 w = (Water) fix2.getBody().getUserData();
             }
-            contact.setEnabled(false);
             if (w.isFull() && !resourceController.fullWater()) {
                 w.clear();
                 resourceController.pickupWater();

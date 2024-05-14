@@ -6,7 +6,7 @@ import static com.badlogic.gdx.scenes.scene2d.utils.UIUtils.*;
  * Credit to Alfred Reibenschuh, 2021.
  * <a href="https://github.com/libgdx/libgdx/issues/6559#issuecomment-890307952">Original code</a>
  */
-public class OSUtils {
+public final class OSUtils {
 
     public static String getConfigFile() {
         return getConfigDirectory() + "/settings.json";

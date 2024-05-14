@@ -48,7 +48,7 @@ public class Timer {
         this.sunTime = sunTime;
     }
 
-    public void reset() {
+    public void reset(float initialTime) {
         time = initialTime;
     }
 

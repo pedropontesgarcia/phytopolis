@@ -22,6 +22,7 @@ public class LevelOverMode extends FadingScreen implements Screen {
      * Reference to GameCanvas created by the root
      */
     private final GameCanvas canvas;
+    private final SoundController soundController;
     /**
      * Whether or not this screen is active
      */
@@ -39,7 +40,6 @@ public class LevelOverMode extends FadingScreen implements Screen {
     private AudioEngine audioEngine;
     private Texture rs;
     private MenuContainer menuContainer;
-    private final SoundController soundController;
 
     public LevelOverMode(GameCanvas c) {
         ready = false;
@@ -127,7 +127,7 @@ public class LevelOverMode extends FadingScreen implements Screen {
 
     public void update(float delta) {
         super.update(delta);
-        soundController.setMusicVolume(super.getVolume());
+        soundController.setActualMusicVolume(super.getVolume());
         menuContainer.update(delta);
     }
 

@@ -182,6 +182,10 @@ public class PauseMode extends FadingScreen implements Screen {
                 tmr / TRANSITION_DURATION);
         menuContainer.update(delta);
         menuContainer.setAlpha(alpha);
+        float volume = SoundController.getInstance().getUserMusicVolume() *
+                (2f - alpha) / 6f;
+        System.out.println(volume);
+        SoundController.getInstance().setActualMusicVolume(volume);
         if (exit) {
             exit = false;
             ready = true;

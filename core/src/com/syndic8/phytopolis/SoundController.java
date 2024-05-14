@@ -133,11 +133,11 @@ public class SoundController {
         music.setLoopBehavior(true);
     }
 
-    public float getMusicVolume() {
+    public float getUserMusicVolume() {
         return musicVolume;
     }
 
-    public void setMusicVolume(float value) {
+    public void setActualMusicVolume(float value) {
         music.setVolume(value);
     }
 
