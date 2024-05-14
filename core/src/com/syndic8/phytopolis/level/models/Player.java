@@ -502,7 +502,6 @@ public class Player extends CapsuleObject {
      */
     public void setMovement(float value) {
         movement = value;
-        System.out.println(movement);
         // Change facing if appropriate
         if (movement < 0) {
             faceRight = false;
