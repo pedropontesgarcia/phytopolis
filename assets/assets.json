@@ -55,6 +55,7 @@
     "ui:leaf-cursor": "ui/leaf-cursor.png",
     "ui:water-cursor": "ui/water-cursor.png",
     "ui:no-water-cursor": "ui/no-water-cursor.png",
+    "ui:sun_indicator": "ui/indicators/10s.png",
     "ui:vignette": "ui/vignette2.png",
     "over:victory": "gameplay/victory_text.png",
     "over:failure": "gameplay/failure.png"

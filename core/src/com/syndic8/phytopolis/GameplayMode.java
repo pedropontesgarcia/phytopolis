@@ -62,6 +62,7 @@ public class GameplayMode extends WorldController {
     private int plantSound;
     //private int leafSound;
     private int boingSound;
+    private Texture sunIndicatorTexture;
 
     /**
      * Creates and initialize a new instance of the game.
@@ -79,6 +80,14 @@ public class GameplayMode extends WorldController {
 
     public void setLevel(String lvl) {
         this.lvl = lvl;
+    }
+
+    public Tilemap getTilemap() {
+        return tilemap;
+    }
+
+    public Texture getSunIndicatorTexture() {
+        return sunIndicatorTexture;
     }
 
     /**
@@ -128,6 +137,8 @@ public class GameplayMode extends WorldController {
                                          1,
                                          3,
                                          3);
+            sunIndicatorTexture = directory.getEntry("ui:sun_indicator",
+                                                     Texture.class);
 
             constants = directory.getEntry("gameplay:constants",
                                            JsonValue.class);
@@ -672,7 +683,8 @@ public class GameplayMode extends WorldController {
         avatar.setTexture(avatarTexture);
         avatar.setName("dude");
         addObject(avatar);
-        collisionController = new CollisionController(avatar,
+        collisionController = new CollisionController(this,
+                                                      avatar,
                                                       uiController,
                                                       resourceController,
                                                       plantController,

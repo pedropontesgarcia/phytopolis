@@ -2,6 +2,7 @@ package com.syndic8.phytopolis.level;
 
 import com.badlogic.gdx.physics.box2d.*;
 import com.badlogic.gdx.utils.ObjectSet;
+import com.syndic8.phytopolis.GameplayMode;
 import com.syndic8.phytopolis.InputController;
 import com.syndic8.phytopolis.level.models.*;
 
@@ -15,14 +16,17 @@ public class CollisionController implements ContactListener {
     private final PlantController plantController;
     private final HazardController hazardController;
     private final InputController ic;
+    private final GameplayMode worldController;
     protected ObjectSet<Fixture> sensorFixtures;
     private boolean addedWater;
 
-    public CollisionController(Player p,
+    public CollisionController(GameplayMode c,
+                               Player p,
                                UIController ui,
                                ResourceController rsrc,
                                PlantController plt,
                                HazardController hzd) {
+        worldController = c;
         player = p;
         sensorFixtures = new ObjectSet<>();
         uiController = ui;
@@ -266,6 +270,10 @@ public class CollisionController implements ContactListener {
             l.setSun(true);
             contact.setEnabled(false);
             s.clear();
+            worldController.addObject(new Indicator(s.getX(),
+                                                    s.getY(),
+                                                    worldController.getSunIndicatorTexture(),
+                                                    worldController.getTilemap()));
             uiController.addTime();
         }
         if (isCollisionBetweenPlayerAndWater) {

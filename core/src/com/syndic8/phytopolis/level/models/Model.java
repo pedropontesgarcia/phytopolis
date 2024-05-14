@@ -215,7 +215,11 @@ public abstract class Model {
         /**
          * Bug hazard
          */
-        BUG
+        BUG,
+        /**
+         * UI indicator
+         */
+        INDICATOR
     }
 
 }
