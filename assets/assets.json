@@ -46,6 +46,7 @@
     "jump": "gameplay/jump-filmstrip.png",
     "jog": "gameplay/jog-filmstrip.png",
     "ui:water": "ui/full_water_filmstrip.png",
+    "ui:fire": "ui/fire.png",
     "idle": "gameplay/idle-filmstrip.png",
     "ui:water_ui": "ui/waterUI_filmstripv3.png",
     "ui:water_add": "ui/waterUI_addflash_filmstrip.png",

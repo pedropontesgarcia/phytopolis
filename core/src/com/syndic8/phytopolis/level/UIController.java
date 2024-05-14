@@ -38,6 +38,7 @@ public class UIController {
     private Cursor leafCursor;
     private Cursor waterCursor;
     private Cursor noWaterCursor;
+    private Texture fireTexture;
     private float animProgress;
     private boolean currNotEnough;
 
@@ -96,6 +97,7 @@ public class UIController {
                                         1,
                                         20);
         current = waterdropStrip;
+        fireTexture = directory.getEntry("ui:fire", Texture.class);
         vignette = new TextureRegion(directory.getEntry("ui:vignette",
                                                         Texture.class));
         TextureRegion cursorTexture = new TextureRegion(directory.getEntry(
@@ -298,13 +300,22 @@ public class UIController {
         float txHeightDrawn = w * 0.1f / widthRatio;
         c.beginHud();
         c.drawHud(vignette, 0, 0, canvas.getWidth(), canvas.getHeight());
+        c.endHud();
+        stage.draw();
+        c.beginHud();
         c.drawHud(current,
                   w * 0.075f - txWidthDrawn / 2f,
                   h * 0.85f,
                   txWidthDrawn,
                   txHeightDrawn);
+        if (progressBar.isVisible()) {
+            c.drawHud(fireTexture,
+                      w * 0.385f,
+                      h * 0.885f,
+                      txWidthDrawn * 0.6f,
+                      txHeightDrawn * 0.6f);
+        }
         c.endHud();
-        stage.draw();
     }
 
 }

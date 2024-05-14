@@ -373,6 +373,17 @@ public class GameCanvas {
     }
 
     /**
+     * Draws a TextureRegion t to the HUD batch at the given coordinates.
+     *
+     * @param t
+     * @param x
+     * @param y
+     */
+    public void drawHud(Texture t, float x, float y, float w, float h) {
+        hudBatch.draw(t, x, y, w, h);
+    }
+
+    /**
      * Draws the tinted texture at the given position.
      * <p>
      * The texture colors will be multiplied by the given color.  This will turn
