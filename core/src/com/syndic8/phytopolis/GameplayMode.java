@@ -346,7 +346,9 @@ public class GameplayMode extends WorldController {
             FileHandle saveFile = Gdx.files.absolute(OSUtils.getSaveFile());
             JsonReader saveJsonReader = new JsonReader();
             JsonValue saveJson = saveJsonReader.parse(saveFile);
-            saveJson.get("lastBeaten").set(tilemap.getLevelNumber() - 1, null);
+            int lastBeaten = Math.max(saveJson.getInt("lastBeaten"),
+                                      tilemap.getLevelNumber() - 1);
+            saveJson.get("lastBeaten").set(lastBeaten, null);
             saveFile.writeString(saveJson.prettyPrint(JsonWriter.OutputType.json,
                                                       0), false);
         }
