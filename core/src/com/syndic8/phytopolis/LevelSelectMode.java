@@ -267,7 +267,9 @@ public class LevelSelectMode extends FadingScreen implements Screen {
             if (lb != null) lb.setSelected(lb.inBounds(mouseX, mouseY));
         }
         if (getSelectedPot() != -1 &&
-                InputController.getInstance().didMousePress() && !ready) {
+                InputController.getInstance().didMousePress() && !ready &&
+                levelStates[getSelectedPot() + (screen1 ? 0 : 6)] !=
+                        levelState.LOCKED) {
             setLevel();
             fadeOut(1);
             doVolumeFade(true);
