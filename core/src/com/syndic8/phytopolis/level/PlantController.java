@@ -448,8 +448,11 @@ public class PlantController {
             }
             return l;
         } else {
-            soundController.playSound(leafSound);
-            return growLeaf(x, y, lt, width);
+            Leaf l = growLeaf(x, y, lt, width);
+            if (l != null) {
+                soundController.playSound(leafSound);
+            }
+            return l;
         }
     }
 
