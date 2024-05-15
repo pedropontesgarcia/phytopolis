@@ -501,21 +501,6 @@ public class GameplayMode extends WorldController {
                     } else {
                         Leaf.leafType lt = getLevelLeafType();
                         float width = getLevelLeafWidth();
-
-                        //                        switch (lvl) {
-                        //                            case "gameplay:lvl2":
-                        //                                lt = Leaf.leafType.NORMAL1;
-                        //                                width = lvl2LeafWidth;
-                        //                                break;
-                        //                            case "gameplay:lvl3":
-                        //                                lt = Leaf.leafType.NORMAL2;
-                        //                                width = lvl3LeafWidth;
-                        //                                break;
-                        //                            default:
-                        //                                lt = Leaf.leafType.NORMAL;
-                        //                                width = lvl1LeafWidth;
-                        //                                break;
-                        //                        }
                         plantController.drawGhostLeaf(canvas,
                                                       lt,
                                                       width,

@@ -13,7 +13,6 @@ import com.syndic8.phytopolis.level.models.Hazard;
 import com.syndic8.phytopolis.level.models.Leaf;
 import com.syndic8.phytopolis.level.models.Model;
 import com.syndic8.phytopolis.util.FilmStrip;
-import com.syndic8.phytopolis.util.SharedAssetContainer;
 import com.syndic8.phytopolis.util.Tilemap;
 import edu.cornell.gdiac.audio.SoundEffect;
 
@@ -32,6 +31,7 @@ public class PlantController {
      * Reference to the ResourceController
      */
     private final ResourceController resourceController;
+    private final SoundController soundController;
     /**
      * node texture
      */
@@ -97,7 +97,6 @@ public class PlantController {
     private int plantCoyoteTimeRemaining = 0;
     private FilmStrip leafTextureOne;
     private FilmStrip leafTextureTwo;
-    private SoundController soundController;
     private int upgradeSound;
     private int destroySound;
     private int leafSound;
@@ -337,6 +336,7 @@ public class PlantController {
      * @return if the checked node can be grown at
      */
     public boolean canGrowAtIndex(int xIndex, int yIndex) {
+        System.out.println("Can we grow at " + xIndex + " and " + yIndex + "?");
 
         boolean lowerNode = xIndex % 2 == 0;
         //If this is a node at the base of the plant, return true
@@ -356,7 +356,9 @@ public class PlantController {
         if (inBounds(xIndex + 1, yIndex - yOff))
             downRight = plantGrid[xIndex + 1][yIndex -
                     yOff].hasBranchInDirection(branchDirection.LEFT);
-        //System.out.println("Below: " + below + " downLeft: " + downLeft + " downRight: " + downRight);
+        System.out.println(
+                "Below: " + below + ", down-left: " + downLeft + ", " +
+                        "down-right" + ":" + " " + downRight);
         return below || downLeft || downRight;
     }
 
@@ -475,13 +477,11 @@ public class PlantController {
         int yIndex = screenCoordToIndex(x, y)[1];
         boolean lowerNode = xIndex % 2 == 0;
         if (!inBounds(xIndex, yIndex)) return null;
-
         if (!resourceController.canGrowLeaf()) {
             //            System.out.println("leaf");
             resourceController.setNotEnough(true);
             return null;
         }
-
         if (!plantGrid[xIndex][yIndex].hasLeaf() &&
                 (yIndex > 0 || !lowerNode) &&
                 resourceController.canGrowLeaf()) {
@@ -701,14 +701,12 @@ public class PlantController {
                 (yIndex > 0 || !lowerNode)) {
             float xl = plantGrid[xIndex][yIndex].getX();
             float yl = plantGrid[xIndex][yIndex].getY();
-            if (screenCoordToIndex(xl / worldToPixelConversionRatio,
-                                   yl / worldToPixelConversionRatio)[1] > 0 &&
+            if (screenCoordToIndex(xl, yl)[1] > 0 &&
                     plantGrid[xIndex][yIndex].hasBranch() ||
-                    leafGrowableAt(xl / worldToPixelConversionRatio,
-                                   yl / worldToPixelConversionRatio)) {
+                    leafGrowableAt(xl, yl + 0.5f)) {
 
-                Leaf leaf = new Leaf(xl / worldToPixelConversionRatio,
-                                     yl / worldToPixelConversionRatio,
+                Leaf leaf = new Leaf(xl,
+                                     yl,
                                      leafWidth,
                                      PlantNode.LEAF_HEIGHT,
                                      type,
@@ -826,12 +824,15 @@ public class PlantController {
                                           6);
         enBranchTextureUp = directory.getEntry("gameplay:enbranch",
                                                Texture.class);
-        SoundEffect upgrade = directory.getEntry("upgradeleaf", SoundEffect.class);
+        SoundEffect upgrade = directory.getEntry("upgradeleaf",
+                                                 SoundEffect.class);
         upgradeSound = soundController.addSoundEffect(upgrade);
         //SharedAssetContainer.getInstance().addSound("upgradeleaf", upgradeSound);
-        destroySound = soundController.addSoundEffect(directory.getEntry("destroyplant2", SoundEffect.class));
+        destroySound = soundController.addSoundEffect(directory.getEntry(
+                "destroyplant2",
+                SoundEffect.class));
         SoundEffect leafSoundEffect = directory.getEntry("growleaf",
-                SoundEffect.class);
+                                                         SoundEffect.class);
         leafSound = soundController.addSoundEffect(leafSoundEffect);
     }
 
@@ -1001,11 +1002,8 @@ public class PlantController {
          * @param type type of leaf to create
          */
         public Leaf makeLeaf(Leaf.leafType type, float width) {
-            if (screenCoordToIndex(x / worldToPixelConversionRatio,
-                                   y / worldToPixelConversionRatio)[1] > 0 &&
-                    !hasLeaf() && hasBranch() ||
-                    leafGrowableAt(x / worldToPixelConversionRatio,
-                                   y / worldToPixelConversionRatio)) {
+            if (screenCoordToIndex(x, y)[1] > 0 && !hasLeaf() && hasBranch() ||
+                    leafGrowableAt(x, y + 0.5f)) {
                 if (type == Leaf.leafType.BOUNCY) width = leafWidth;
                 leaf = new Leaf(x / worldToPixelConversionRatio,
                                 y / worldToPixelConversionRatio,
