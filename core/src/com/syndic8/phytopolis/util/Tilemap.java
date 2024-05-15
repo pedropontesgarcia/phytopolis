@@ -197,8 +197,18 @@ public class Tilemap {
                     float x1 = (col + 1) * tileWidth;
                     float y0 = worldHeight - (row + 1) * tileHeight;
                     float y1 = worldHeight - row * tileHeight;
-                    JsonValue tileJson = tilesJson.get(tileValue - tilemap.get(
-                            "tilesets").get(i).getInt("firstgid"));
+                    System.out.println(tileValue - tilemap.get("tilesets")
+                            .get(i)
+                            .getInt("firstgid"));
+                    JsonValue tileJson = null;
+                    for (JsonValue indivTileJson : tilesJson) {
+                        if (indivTileJson.getInt("id") == tileValue -
+                                tilemap.get("tilesets")
+                                        .get(i)
+                                        .getInt("firstgid"))
+                            tileJson = indivTileJson;
+                    }
+                    assert tileJson != null;
                     Texture tx = new Texture(
                             "gameplay/tiles/" + tileJson.getString("image"));
                     boolean hasCollider = tileJson.has("objectgroup");
