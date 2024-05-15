@@ -37,6 +37,10 @@ public final class OSUtils {
         return CONFIG_HOME + "/Phytopolis";
     }
 
+    public static String getSaveFile() {
+        return getDataDirectory() + "/saves.json";
+    }
+
     /**
      * Checks the OS type and returns the data directory.
      *

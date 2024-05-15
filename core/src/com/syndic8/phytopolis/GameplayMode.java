@@ -10,16 +10,21 @@
  */
 package com.syndic8.phytopolis;
 
+import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.BodyDef;
 import com.badlogic.gdx.physics.box2d.World;
+import com.badlogic.gdx.utils.JsonReader;
 import com.badlogic.gdx.utils.JsonValue;
+import com.badlogic.gdx.utils.JsonWriter;
 import com.syndic8.phytopolis.assets.AssetDirectory;
 import com.syndic8.phytopolis.level.*;
 import com.syndic8.phytopolis.level.models.*;
 import com.syndic8.phytopolis.util.FilmStrip;
+import com.syndic8.phytopolis.util.OSUtils;
 import com.syndic8.phytopolis.util.Tilemap;
 import edu.cornell.gdiac.audio.AudioSource;
 import edu.cornell.gdiac.audio.SoundEffect;
@@ -333,9 +338,17 @@ public class GameplayMode extends WorldController {
         if ((plantController.getMaxLeafHeight() >
                 tilemap.getVictoryHeight() * tilemap.getTileHeight()) &&
                 !isComplete()) {
+
             setComplete(true);
             fadeOut(3);
             doVolumeFade(true);
+            uiController.pauseTimer();
+            FileHandle saveFile = Gdx.files.absolute(OSUtils.getSaveFile());
+            JsonReader saveJsonReader = new JsonReader();
+            JsonValue saveJson = saveJsonReader.parse(saveFile);
+            saveJson.get("lastBeaten").set(tilemap.getLevelNumber() - 1, null);
+            saveFile.writeString(saveJson.prettyPrint(JsonWriter.OutputType.json,
+                                                      0), false);
         }
     }
 

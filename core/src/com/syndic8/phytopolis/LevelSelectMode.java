@@ -1,18 +1,19 @@
 package com.syndic8.phytopolis;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
+import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.utils.Align;
+import com.badlogic.gdx.utils.JsonReader;
+import com.badlogic.gdx.utils.JsonValue;
 import com.syndic8.phytopolis.assets.AssetDirectory;
 import com.syndic8.phytopolis.levelselect.LevelBox;
-import com.syndic8.phytopolis.util.FadingScreen;
-import com.syndic8.phytopolis.util.FilmStrip;
-import com.syndic8.phytopolis.util.ScreenListener;
-import com.syndic8.phytopolis.util.SharedAssetContainer;
+import com.syndic8.phytopolis.util.*;
 import com.syndic8.phytopolis.util.menu.Menu;
 import com.syndic8.phytopolis.util.menu.MenuContainer;
 import com.syndic8.phytopolis.util.menu.MenuItem;
@@ -35,6 +36,9 @@ public class LevelSelectMode extends FadingScreen implements Screen {
     private final float fadeTime = 0.3f;
     private final SoundController soundController;
     private final levelState[] levelStates;
+    private FileHandle saveFile;
+    private JsonValue saveJson;
+    private int lastBeaten;
     /**
      * Whether or not this screen is active
      */
@@ -77,11 +81,6 @@ public class LevelSelectMode extends FadingScreen implements Screen {
         this.swapping = false;
         //TODO remove this code for showcase/release
         Arrays.fill(levelStates, levelState.LOCKED);
-        for (int i = 0; i < levelStates.length; i++) {
-            if (i <= 6) levelStates[i] = levelState.BEATEN;
-            if (i >= 7 && i <= 7) levelStates[i] = levelState.UNLOCKED;
-            if (i > 7) levelStates[i] = levelState.LOCKED;
-        }
     }
 
     private void createMenu() {
@@ -207,6 +206,16 @@ public class LevelSelectMode extends FadingScreen implements Screen {
         exitCode = null;
         ready = false;
         menuContainer.activate();
+
+        saveFile = Gdx.files.absolute(OSUtils.getSaveFile());
+        JsonReader saveJsonReader = new JsonReader();
+        saveJson = saveJsonReader.parse(saveFile);
+        lastBeaten = saveJson.getInt("lastBeaten");
+        for (int i = 0; i < levelStates.length; i++) {
+            if (i <= lastBeaten) levelStates[i] = levelState.BEATEN;
+            if (i == lastBeaten + 1) levelStates[i] = levelState.UNLOCKED;
+            if (i > lastBeaten + 1) levelStates[i] = levelState.LOCKED;
+        }
         // Set up levelboxes
         float xOff = -1.65f;
         float yOff = -2.3f;

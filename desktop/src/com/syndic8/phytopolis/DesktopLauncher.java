@@ -45,6 +45,7 @@ public class DesktopLauncher {
             }
         }
         manageSettings(config.getLwjgl3Configuration(), goodDisplayModes);
+        manageSave();
         new GDXApp(new GDXRoot(goodDisplayModes), config);
     }
 
@@ -105,6 +106,32 @@ public class DesktopLauncher {
                 "defaultSettings.json",
                 Files.FileType.Internal);
         defaultConfigFile.copyTo(configFile);
+    }
+
+    private static void manageSave() {
+        FileHandle saveFile = new Lwjgl3FileHandle(OSUtils.getSaveFile(),
+                                                   Files.FileType.Absolute);
+        try {
+            JsonReader saveJsonReader = new JsonReader();
+            JsonValue saveJson = saveJsonReader.parse(saveFile);
+            ensureSaveExist(saveJson);
+        } catch (Exception ignored) {
+            resetSave(saveFile);
+            // Try again
+            manageSave();
+        }
+    }
+
+    private static void ensureSaveExist(JsonValue saveJson) throws IOException {
+        if (!(saveJson.has("lastBeaten"))) {
+            throw new IOException();
+        }
+    }
+
+    private static void resetSave(FileHandle saveFile) {
+        FileHandle defaultSaveFile = new Lwjgl3FileHandle("defaultSave.json",
+                                                          Files.FileType.Internal);
+        defaultSaveFile.copyTo(saveFile);
     }
 
 }
