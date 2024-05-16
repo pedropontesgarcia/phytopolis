@@ -8,7 +8,7 @@
  "margin":0,
  "name":"tileset",
  "spacing":0,
- "tilecount":66,
+ "tilecount":68,
  "tiledversion":"1.10.2",
  "tileheight":400,
  "tiles":[
@@ -1347,6 +1347,30 @@
         {
          "id":67,
          "image":"sun2.png",
+         "imageheight":400,
+         "imagewidth":600,
+         "properties":[
+                {
+                 "name":"collidetop",
+                 "type":"bool",
+                 "value":true
+                }]
+        }, 
+        {
+         "id":68,
+         "image":"grow1.png",
+         "imageheight":400,
+         "imagewidth":600,
+         "properties":[
+                {
+                 "name":"collidetop",
+                 "type":"bool",
+                 "value":true
+                }]
+        }, 
+        {
+         "id":69,
+         "image":"grow2.png",
          "imageheight":400,
          "imagewidth":600,
          "properties":[
