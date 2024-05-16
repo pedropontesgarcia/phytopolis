@@ -1,5 +1,6 @@
 package com.syndic8.phytopolis.level;
 
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.World;
@@ -100,6 +101,7 @@ public class PlantController {
     private int upgradeSound;
     private int destroySound;
     private int leafSound;
+    private Texture glowTexture;
 
     /**
      * Initialize a PlantController with specified height and width
@@ -141,6 +143,7 @@ public class PlantController {
                         (x * this.xSpacing) + this.xOrigin,
                         this.yOrigin + yOffset + (y * this.gridSpacing),
                         this.worldToPixelConversionRatio,
+                        yOffset != 0,
                         tilemap);
             }
         }
@@ -186,6 +189,7 @@ public class PlantController {
                         (x * this.xSpacing) + this.xOrigin,
                         this.yOrigin + yOffset + (y * this.gridSpacing),
                         this.worldToPixelConversionRatio,
+                        yOffset != 0,
                         tilemap);
             }
         }
@@ -748,23 +752,30 @@ public class PlantController {
         return canGrowAtIndex(xIndex, yIndex);
     }
 
-    //    /**
-    //     * draws the current plant to the canvas
-    //     *
-    //     * @param canvas the canvas to draw to
-    //     */
-    //    public void draw(GameCanvas canvas) {
-    //        for (PlantNode[] n : plantGrid) {
-    //            for (PlantNode node : n) {
-    //                try {
-    //                    node.drawBranches(canvas);
-    //                    node.drawLeaf(canvas);
-    //                } catch (Exception ignore) {
-    //                    System.out.println("could not draw " + ignore);
-    //                }
-    //            }
-    //        }
-    //    }
+    /**
+     * draws the glow to the canvas
+     *
+     * @param canvas the canvas to draw to
+     */
+    public void drawGlow(GameCanvas canvas) {
+        float width = tilemap.getTileWidth();
+        float height = tilemap.getTileHeight();
+        float sclX = width / glowTexture.getWidth();
+        float sclY = height / glowTexture.getHeight();
+        for (PlantNode[] col : plantGrid) {
+            if (!col[0].isOffset()) {
+                canvas.draw(glowTexture,
+                            Color.WHITE,
+                            glowTexture.getWidth() / 2f,
+                            0,
+                            col[0].x,
+                            col[0].y,
+                            0,
+                            sclX,
+                            sclY);
+            }
+        }
+    }
 
     /**
      * returns the number of nodes wide the plant is
@@ -803,6 +814,7 @@ public class PlantController {
                                             1,
                                             5,
                                             5);
+        glowTexture = directory.getEntry("gameplay:glow", Texture.class);
         staticBranchTexture.setFrame(4);
         leafTexture = new FilmStrip(directory.getEntry("gameplay:leaf",
                                                        Texture.class), 1, 9, 9);
@@ -914,6 +926,7 @@ public class PlantController {
          */
         private final float worldToPixelConversionRatio;
         private final Tilemap tilemap;
+        private final boolean isOffset;
         /**
          * whether there is a branch in the leftmost slot of this node
          */
@@ -944,11 +957,17 @@ public class PlantController {
         public PlantNode(float x,
                          float y,
                          float worldToPixelConversionRatio,
+                         boolean isOff,
                          Tilemap tm) {
             this.x = x;
             this.y = y;
             this.worldToPixelConversionRatio = worldToPixelConversionRatio;
+            isOffset = isOff;
             tilemap = tm;
+        }
+
+        public boolean isOffset() {
+            return isOffset;
         }
 
         /**

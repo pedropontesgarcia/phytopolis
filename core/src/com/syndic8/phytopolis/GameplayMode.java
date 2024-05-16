@@ -515,6 +515,7 @@ public class GameplayMode extends WorldController {
             }
         }
         hazardController.drawWarning(canvas, cameraVector);
+        plantController.drawGlow(canvas);
         canvas.end();
         uiController.draw(canvas);
         super.draw(canvas);
