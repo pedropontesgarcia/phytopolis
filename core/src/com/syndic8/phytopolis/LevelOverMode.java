@@ -109,6 +109,10 @@ public class LevelOverMode extends FadingScreen implements Screen {
         active = true;
         menuContainer.activate();
         fadeIn(0.5f);
+        soundController.setMusic(backgroundMusic);
+        soundController.setLooping(true);
+        soundController.playMusic();
+
         //        if (backgroundMusic != null) backgroundMusic.play();
     }
 
