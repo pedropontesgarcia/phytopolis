@@ -2,6 +2,7 @@ package com.syndic8.phytopolis.util.menu;
 
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.scenes.scene2d.Actor;
+import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.ui.Slider;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
@@ -47,6 +48,17 @@ public class SoundMenuItem extends MenuItem {
                             0.1f,
                             false,
                             SharedAssetContainer.getInstance().getSliderSkin());
+        slider.addListener(new ClickListener() {
+            @Override
+            public void touchUp(InputEvent event,
+                                float x,
+                                float y,
+                                int pointer,
+                                int button) {
+                super.touchUp(event, x, y, pointer, button);
+                SoundController.getInstance().playSound(0);
+            }
+        });
         float xPosSlider = ww / 2f + 0.015f * ww;
         float yPosSlider =
                 wh / 2f + (m.getLength() - 1f) * m.getSeparation() * wh / 2f -
