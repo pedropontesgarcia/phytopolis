@@ -336,8 +336,6 @@ public class PlantController {
      * @return if the checked node can be grown at
      */
     public boolean canGrowAtIndex(int xIndex, int yIndex) {
-        System.out.println("Can we grow at " + xIndex + " and " + yIndex + "?");
-
         boolean lowerNode = xIndex % 2 == 0;
         //If this is a node at the base of the plant, return true
         if (yIndex == 0 && lowerNode) return true;
@@ -356,9 +354,6 @@ public class PlantController {
         if (inBounds(xIndex + 1, yIndex - yOff))
             downRight = plantGrid[xIndex + 1][yIndex -
                     yOff].hasBranchInDirection(branchDirection.LEFT);
-        System.out.println(
-                "Below: " + below + ", down-left: " + downLeft + ", " +
-                        "down-right" + ":" + " " + downRight);
         return below || downLeft || downRight;
     }
 
