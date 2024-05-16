@@ -8,7 +8,7 @@
  "margin":0,
  "name":"tileset",
  "spacing":0,
- "tilecount":50,
+ "tilecount":54,
  "tiledversion":"1.10.2",
  "tileheight":400,
  "tiles":[
@@ -1155,6 +1155,54 @@
         {
          "id":51,
          "image":"topRight.png",
+         "imageheight":400,
+         "imagewidth":600,
+         "properties":[
+                {
+                 "name":"collidetop",
+                 "type":"bool",
+                 "value":true
+                }]
+        }, 
+        {
+         "id":52,
+         "image":"wasd-tutorial-2x2-bl.png",
+         "imageheight":400,
+         "imagewidth":600,
+         "properties":[
+                {
+                 "name":"collidetop",
+                 "type":"bool",
+                 "value":true
+                }]
+        }, 
+        {
+         "id":53,
+         "image":"wasd-tutorial-2x2-br.png",
+         "imageheight":400,
+         "imagewidth":600,
+         "properties":[
+                {
+                 "name":"collidetop",
+                 "type":"bool",
+                 "value":true
+                }]
+        }, 
+        {
+         "id":54,
+         "image":"wasd-tutorial-2x2-tl.png",
+         "imageheight":400,
+         "imagewidth":600,
+         "properties":[
+                {
+                 "name":"collidetop",
+                 "type":"bool",
+                 "value":true
+                }]
+        }, 
+        {
+         "id":55,
+         "image":"wasd-tutorial-2x2-tr.png",
          "imageheight":400,
          "imagewidth":600,
          "properties":[
