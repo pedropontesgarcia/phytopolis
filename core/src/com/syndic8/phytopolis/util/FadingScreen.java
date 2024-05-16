@@ -2,7 +2,6 @@ package com.syndic8.phytopolis.util;
 
 import com.badlogic.gdx.math.Interpolation;
 import com.syndic8.phytopolis.GameCanvas;
-import com.syndic8.phytopolis.GameplayMode;
 import com.syndic8.phytopolis.SoundController;
 
 public abstract class FadingScreen {
@@ -49,11 +48,6 @@ public abstract class FadingScreen {
         if (fadeVolume) volume = Math.max(Math.min(1 - alpha, 1), 0);
         if (fadeState != Fade.HIDDEN && fadeState != Fade.SHOWN) {
             tmr += deltaTime;
-        }
-        if (this instanceof GameplayMode) {
-            System.out.printf("Delta time: %.4f, alpha: %.4f\n",
-                              deltaTime,
-                              alpha);
         }
     }
 
