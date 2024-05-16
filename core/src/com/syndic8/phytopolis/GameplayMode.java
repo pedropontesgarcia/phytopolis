@@ -238,6 +238,7 @@ public class GameplayMode extends WorldController {
         if (!super.preUpdate(dt)) {
             return false;
         }
+        if (getFadeState() == Fade.HIDDEN) fadeIn(0.5f);
 
         if (!isFailure() && uiController.timerDone()) {
             setFailure(true);
@@ -486,6 +487,7 @@ public class GameplayMode extends WorldController {
         canvas.cameraUpdate(cameraVector);
         canvas.beginGame();
         drawBackground();
+        plantController.drawGlow(canvas);
         tilemap.draw(canvas);
         super.draw();
         if (!isPaused()) {
@@ -515,7 +517,6 @@ public class GameplayMode extends WorldController {
             }
         }
         hazardController.drawWarning(canvas, cameraVector);
-        plantController.drawGlow(canvas);
         canvas.end();
         uiController.draw(canvas);
         super.draw(canvas);

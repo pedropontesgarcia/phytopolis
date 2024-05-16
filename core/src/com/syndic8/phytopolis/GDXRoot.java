@@ -9,7 +9,6 @@ import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Graphics.DisplayMode;
 import com.badlogic.gdx.Screen;
-import com.badlogic.gdx.graphics.Cursor;
 import com.syndic8.phytopolis.assets.AssetDirectory;
 import com.syndic8.phytopolis.util.ScreenListener;
 
@@ -100,8 +99,8 @@ public class GDXRoot extends Game implements ScreenListener {
             controller.setLevel(levelSelect.getLevel());
             controller.gatherAssets(directory);
             controller.reset();
+            controller.fadeOut(0);
             controller.setScreenListener(this);
-            controller.fadeIn(0.5f);
             setScreen(controller);
         } else if (screen == levelOver) {
             controller.setPaused(false);
@@ -115,8 +114,8 @@ public class GDXRoot extends Game implements ScreenListener {
         } else if (screen == pause && exitCode == EXIT_RESET.ordinal()) {
             controller.setPaused(false);
             controller.reset();
+            controller.fadeOut(0);
             controller.setScreenListener(this);
-            controller.fadeIn(0.5f);
             setScreen(controller);
         } else if (screen == pause && exitCode == EXIT_LEVELS.ordinal()) {
             controller.setPaused(false);
