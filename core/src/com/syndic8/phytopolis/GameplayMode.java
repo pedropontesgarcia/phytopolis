@@ -242,7 +242,7 @@ public class GameplayMode extends WorldController {
 
         if (!isFailure() && uiController.timerDone()) {
             setFailure(true);
-            fadeOut(1.5f);
+            fadeOut(1f);
             doVolumeFade(true);
             return false;
         }

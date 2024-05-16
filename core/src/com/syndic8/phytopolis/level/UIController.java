@@ -1,6 +1,7 @@
 package com.syndic8.phytopolis.level;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Cursor;
 import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.Texture;
@@ -176,6 +177,21 @@ public class UIController {
                        Tilemap tm) {
         updateCursor(hazardController, resourceController, avatar, tm);
         updateTexture(dt, waterLvl, prevWater, resourceController);
+        if ((int) timer.time <= 5) {
+            label.setColor((int) (timer.time * 8) % 2 == 0 ?
+                                   Color.WHITE :
+                                   Color.FIREBRICK);
+        } else if ((int) timer.time <= 10) {
+            label.setColor((int) (timer.time * 4) % 2 == 0 ?
+                                   Color.WHITE :
+                                   Color.FIREBRICK);
+        } else if ((int) timer.time <= 15) {
+            label.setColor((int) (timer.time * 2) % 2 == 0 ?
+                                   Color.WHITE :
+                                   Color.FIREBRICK);
+        } else {
+            label.setColor(Color.WHITE);
+        }
         progressBar.setValue(fireProgress);
         progressBar.setVisible(hazardController.findValidFireLocs());
         timer.updateTime(dt + timerDeduction); // 1 SEC PER LEAF BITE

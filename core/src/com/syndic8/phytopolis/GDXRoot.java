@@ -98,8 +98,8 @@ public class GDXRoot extends Game implements ScreenListener {
         } else if (screen == levelSelect && exitCode == EXIT_LEVELS.ordinal()) {
             controller.setLevel(levelSelect.getLevel());
             controller.gatherAssets(directory);
-            controller.reset();
             controller.fadeOut(0);
+            controller.reset();
             controller.setScreenListener(this);
             setScreen(controller);
         } else if (screen == levelOver) {
@@ -113,8 +113,8 @@ public class GDXRoot extends Game implements ScreenListener {
             setScreen(controller);
         } else if (screen == pause && exitCode == EXIT_RESET.ordinal()) {
             controller.setPaused(false);
-            controller.reset();
             controller.fadeOut(0);
+            controller.reset();
             controller.setScreenListener(this);
             setScreen(controller);
         } else if (screen == pause && exitCode == EXIT_LEVELS.ordinal()) {
