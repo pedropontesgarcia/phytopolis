@@ -113,7 +113,7 @@ public class UIController {
         vignette = new TextureRegion(directory.getEntry("ui:vignette",
                                                         Texture.class));
         TextureRegion cursorTexture = new TextureRegion(directory.getEntry(
-                "ui:cursor",
+                "ui:no-grow-cursor",
                 Texture.class));
         TextureRegion branchCursorTexture = new TextureRegion(directory.getEntry(
                 "ui:branch-cursor",
@@ -177,6 +177,7 @@ public class UIController {
      */
     public void update(float dt,
                        float waterLvl,
+                       PlantController plantController,
                        HazardController hazardController,
                        ResourceController resourceController,
                        Player avatar,
@@ -184,7 +185,11 @@ public class UIController {
                        float timerDeduction,
                        float fireProgress,
                        Tilemap tm) {
-        updateCursor(hazardController, resourceController, avatar, tm);
+        updateCursor(plantController,
+                     hazardController,
+                     resourceController,
+                     avatar,
+                     tm);
         updateTexture(dt, waterLvl, prevWater, resourceController);
         updateLabelSize();
         if ((int) timer.time <= 5) {
@@ -230,7 +235,8 @@ public class UIController {
      * @param waterLvl level of water, in percentage between 0 and 1.
      */
 
-    private void updateCursor(HazardController hc,
+    private void updateCursor(PlantController pc,
+                              HazardController hc,
                               ResourceController rc,
                               Player avatar,
                               Tilemap tm) {
@@ -242,7 +248,11 @@ public class UIController {
         if (!Float.isNaN(unprojMousePos.x)) { // make sure we aren't tabbed out
 
             float distance = unprojMousePos.dst(avatarX, avatarY);
-            if (distance > tm.getTileHeight() * 2) {
+            int[] indices = pc.worldCoordToIndex(unprojMousePos.x,
+                                                 unprojMousePos.y + 0.5f *
+                                                         tm.getTileHeight());
+            boolean enabled = pc.isNodeEnabled(indices[0], indices[1]);
+            if (distance > tm.getTileHeight() * 2 || !enabled) {
                 Gdx.graphics.setCursor(normalCursor);
             } else {
                 if (hc.hasFire(unprojMousePos)) {

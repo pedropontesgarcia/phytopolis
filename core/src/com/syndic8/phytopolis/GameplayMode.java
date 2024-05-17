@@ -326,6 +326,7 @@ public class GameplayMode extends WorldController {
         //        if (timeSinceUIUpdate >= 1) {
         uiController.update(dt,
                             resourceController.getCurrRatio(),
+                            plantController,
                             hazardController,
                             resourceController,
                             avatar,

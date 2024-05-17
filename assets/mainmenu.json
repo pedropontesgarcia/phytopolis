@@ -4,6 +4,6 @@
     "logo": "mainmenu/logo.png",
     "sproth": "mainmenu/sproth.png",
     "syndic8": "mainmenu/syndic8.png",
-    "cursor": "ui/cursor.png"
+    "cursor": "ui/default_cursor.png"
   }
 }
