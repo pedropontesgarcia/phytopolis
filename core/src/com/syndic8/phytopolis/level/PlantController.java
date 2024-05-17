@@ -3,16 +3,15 @@ package com.syndic8.phytopolis.level;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.physics.box2d.Fixture;
+import com.badlogic.gdx.physics.box2d.QueryCallback;
 import com.badlogic.gdx.physics.box2d.World;
 import com.badlogic.gdx.utils.ObjectSet;
 import com.badlogic.gdx.utils.Queue;
 import com.syndic8.phytopolis.GameCanvas;
 import com.syndic8.phytopolis.SoundController;
 import com.syndic8.phytopolis.assets.AssetDirectory;
-import com.syndic8.phytopolis.level.models.Branch;
-import com.syndic8.phytopolis.level.models.Hazard;
-import com.syndic8.phytopolis.level.models.Leaf;
-import com.syndic8.phytopolis.level.models.Model;
+import com.syndic8.phytopolis.level.models.*;
 import com.syndic8.phytopolis.util.FilmStrip;
 import com.syndic8.phytopolis.util.Tilemap;
 import edu.cornell.gdiac.audio.SoundEffect;
@@ -135,18 +134,6 @@ public class PlantController {
                         ((this.gridSpacing / 2f) * (this.gridSpacing / 2f))));
         this.resourceController = rc;
         tilemap = tm;
-        for (int x = 0; x < width; x++) {
-            for (int y = 0; y < height; y++) {
-                float yOffset = 0;
-                if (x % 2 == 1) yOffset = this.gridSpacing / 2f;
-                plantGrid[x][y] = new PlantNode(
-                        (x * this.xSpacing) + this.xOrigin,
-                        this.yOrigin + yOffset + (y * this.gridSpacing),
-                        this.worldToPixelConversionRatio,
-                        yOffset != 0,
-                        tilemap);
-            }
-        }
         removedHazards = new ObjectSet<>();
         this.soundController = SoundController.getInstance();
     }
@@ -168,6 +155,7 @@ public class PlantController {
                       float gridSpacing,
                       float xOrigin,
                       float yOrigin,
+                      World world,
                       Tilemap tm) {
         plantGrid = new PlantNode[width][height];
         this.world = world;
@@ -185,12 +173,42 @@ public class PlantController {
             for (int y = 0; y < height; y++) {
                 float yOffset = 0;
                 if (x % 2 == 1) yOffset = this.gridSpacing / 2f;
-                plantGrid[x][y] = new PlantNode(
-                        (x * this.xSpacing) + this.xOrigin,
-                        this.yOrigin + yOffset + (y * this.gridSpacing),
-                        this.worldToPixelConversionRatio,
-                        yOffset != 0,
-                        tilemap);
+                float xCoord = (x * this.xSpacing) + this.xOrigin;
+                float yCoord = this.yOrigin + yOffset + (y * this.gridSpacing);
+                float margin = 0.1f;
+                final boolean[] hasBody = {false};
+                world.QueryAABB(new QueryCallback() {
+                                    @Override
+                                    public boolean reportFixture(Fixture fixture) {
+                                        if (fixture.getBody().getUserData() instanceof Tile)
+                                            hasBody[0] = true;
+                                        return false;
+                                    }
+                                },
+                                xCoord - margin,
+                                yCoord - margin,
+                                xCoord + margin,
+                                yCoord + margin);
+                if (y == 0 && yOffset == 0) {
+                    world.QueryAABB(new QueryCallback() {
+                                        @Override
+                                        public boolean reportFixture(Fixture fixture) {
+                                            if (fixture.getBody().getUserData() instanceof Tile)
+                                                hasBody[0] = true;
+                                            return false;
+                                        }
+                                    },
+                                    xCoord - margin,
+                                    yCoord + 2 * margin,
+                                    xCoord + margin,
+                                    yCoord + 4 * margin);
+                }
+                plantGrid[x][y] = new PlantNode(xCoord,
+                                                yCoord,
+                                                this.worldToPixelConversionRatio,
+                                                yOffset != 0,
+                                                !hasBody[0],
+                                                tilemap);
             }
         }
         removedHazards = new ObjectSet<>();
@@ -206,15 +224,27 @@ public class PlantController {
         int xIndex = worldCoordToIndex(x, y)[0];
         int yIndex = worldCoordToIndex(x, y)[1];
         branchDirection direction = worldToBranch(x, y);
-        boolean isAtEnds = (xIndex == 0 && direction == branchDirection.LEFT) ||
-                (xIndex == plantGrid.length - 1 &&
-                        direction == branchDirection.RIGHT);
+        if (direction == null) return null;
         if (!resourceController.canGrowBranch()) {
-            //            System.out.println("branch");
             resourceController.setNotEnough(true);
             return null;
         }
-        if (direction == null || isAtEnds) return null;
+        boolean isAtEnds = (xIndex == 0 && direction == branchDirection.LEFT) ||
+                (xIndex == plantGrid.length - 1 &&
+                        direction == branchDirection.RIGHT);
+        int yIndexOffset = plantGrid[xIndex][yIndex].isOffset() ? 1 : 0;
+        boolean canBuildTowards = (direction == branchDirection.LEFT &&
+                inBounds(xIndex - 1, yIndex + yIndexOffset) &&
+                plantGrid[xIndex - 1][yIndex + yIndexOffset].isEnabled() ||
+                direction == branchDirection.RIGHT &&
+                        inBounds(xIndex + 1, yIndex + yIndexOffset) &&
+                        plantGrid[xIndex + 1][yIndex +
+                                yIndexOffset].isEnabled() ||
+                direction == branchDirection.MIDDLE &&
+                        inBounds(xIndex, yIndex + 1) &&
+                        plantGrid[xIndex][yIndex + 1].isEnabled());
+        if (isAtEnds || !canBuildTowards ||
+                !plantGrid[xIndex][yIndex].isEnabled()) return null;
         return plantGrid[xIndex][yIndex].makeBranch(direction,
                                                     Branch.branchType.NORMAL,
                                                     world);
@@ -263,6 +293,10 @@ public class PlantController {
         return null;
     }
 
+    public boolean inBounds(int x, int y) {
+        return x >= 0 && y >= 0 && x < width && y < height;
+    }
+
     /**
      * Converts a screen coordinate to the corresponding node index in the plant
      *
@@ -276,10 +310,6 @@ public class PlantController {
                 (yArg - yOrigin - (gridSpacing * .5f * (xIndex % 2))) /
                         gridSpacing);
         return new int[]{xIndex, yIndex};
-    }
-
-    public boolean inBounds(int x, int y) {
-        return x >= 0 && y >= 0 && x < width && y < height;
     }
 
     /**
@@ -653,10 +683,23 @@ public class PlantController {
         int xIndex = worldCoordToIndex(x, y)[0];
         int yIndex = worldCoordToIndex(x, y)[1];
         branchDirection direction = worldToBranch(x, y);
+        if (direction == null) return;
         boolean isAtEnds = (xIndex == 0 && direction == branchDirection.LEFT) ||
                 (xIndex == plantGrid.length - 1 &&
                         direction == branchDirection.RIGHT);
-        if (direction != null && !isAtEnds) {
+        int yIndexOffset = plantGrid[xIndex][yIndex].isOffset() ? 1 : 0;
+        boolean canBuildTowards = (direction == branchDirection.LEFT &&
+                inBounds(xIndex - 1, yIndex + yIndexOffset) &&
+                plantGrid[xIndex - 1][yIndex + yIndexOffset].isEnabled() ||
+                direction == branchDirection.RIGHT &&
+                        inBounds(xIndex + 1, yIndex + yIndexOffset) &&
+                        plantGrid[xIndex + 1][yIndex +
+                                yIndexOffset].isEnabled() ||
+                direction == branchDirection.MIDDLE &&
+                        inBounds(xIndex, yIndex + 1) &&
+                        plantGrid[xIndex][yIndex + 1].isEnabled());
+        if (direction != null && !isAtEnds && canBuildTowards &&
+                plantGrid[xIndex][yIndex].isEnabled()) {
             float angle;
             switch (direction) {
                 case MIDDLE:
@@ -763,7 +806,7 @@ public class PlantController {
         float sclX = width / glowTexture.getWidth();
         float sclY = height / glowTexture.getHeight();
         for (PlantNode[] col : plantGrid) {
-            if (!col[0].isOffset()) {
+            if (!col[0].isOffset() && col[0].isEnabled()) {
                 canvas.draw(glowTexture,
                             Color.WHITE,
                             glowTexture.getWidth() / 2f,
@@ -927,6 +970,7 @@ public class PlantController {
         private final float worldToPixelConversionRatio;
         private final Tilemap tilemap;
         private final boolean isOffset;
+        private final boolean enabled;
         /**
          * whether there is a branch in the leftmost slot of this node
          */
@@ -958,11 +1002,13 @@ public class PlantController {
                          float y,
                          float worldToPixelConversionRatio,
                          boolean isOff,
+                         boolean on,
                          Tilemap tm) {
             this.x = x;
             this.y = y;
             this.worldToPixelConversionRatio = worldToPixelConversionRatio;
             isOffset = isOff;
+            enabled = on;
             tilemap = tm;
         }
 
@@ -1267,6 +1313,10 @@ public class PlantController {
         public Leaf.leafType getLeafType() {
             if (hasLeaf()) return leaf.getLeafType();
             else return null;
+        }
+
+        public boolean isEnabled() {
+            return enabled;
         }
 
     }

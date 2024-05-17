@@ -295,17 +295,20 @@ public class CollisionController implements ContactListener {
         boolean isPlayerGoingUp = player.getVY() > 0.1f;
         boolean isPlayerGoingDown = player.getVY() <= 0;
         boolean isPlayerBelow = false;
-        if (fix1.getBody() == player.getBody()) isPlayerBelow =
-                fix1.getBody().getPosition().y - player.getHeight() / 2f <
-                        fix2.getBody().getPosition().y + LEAF_HEIGHT / 2f;
-        else if (fix2.getBody() == player.getBody()) isPlayerBelow =
-                fix2.getBody().getPosition().y - player.getHeight() / 2f <
-                        fix1.getBody().getPosition().y;
+        if (fix1.getBody() == player.getBody()) {
+            isPlayerBelow =
+                    fix1.getBody().getPosition().y - player.getHeight() / 2f <
+                            fix2.getBody().getPosition().y + LEAF_HEIGHT / 2f;
+        } else if (fix2.getBody() == player.getBody()) {
+            isPlayerBelow =
+                    fix2.getBody().getPosition().y - player.getHeight() / 2f <
+                            fix1.getBody().getPosition().y;
+        }
         if (isCollisionBetweenPlayerAndLeaf &&
                 (isPlayerGoingUp || isPlayerBelow || ic.isDropKeyDown())) {
             contact.setEnabled(false);
         }
-        if (isCollisionBetweenPlayerAndNoTopTile && isPlayerGoingDown) {
+        if (isCollisionBetweenPlayerAndNoTopTile) {
             contact.setEnabled(false);
         }
 

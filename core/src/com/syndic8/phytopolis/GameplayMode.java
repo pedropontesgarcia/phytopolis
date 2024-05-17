@@ -487,7 +487,6 @@ public class GameplayMode extends WorldController {
         canvas.cameraUpdate(cameraVector);
         canvas.beginGame();
         drawBackground();
-        plantController.drawGlow(canvas);
         tilemap.draw(canvas);
         super.draw();
         if (!isPaused()) {
@@ -517,6 +516,7 @@ public class GameplayMode extends WorldController {
             }
         }
         hazardController.drawWarning(canvas, cameraVector);
+        plantController.drawGlow(canvas);
         canvas.end();
         uiController.draw(canvas);
         super.draw(canvas);
@@ -584,6 +584,7 @@ public class GameplayMode extends WorldController {
 
         world = new World(gravity, false);
         tilemap.populateLevel(this);
+        populateLevel();
         float branchHeight = tilemap.getTileHeight();
         int plantNodesPerRow = Math.round(
                 (tilemap.getTilemapWidth() - 2) * (float) Math.sqrt(3));
@@ -596,6 +597,7 @@ public class GameplayMode extends WorldController {
                               tilemap.getTileHeight(),
                               plantXOrigin,
                               0,
+                              world,
                               tilemap);
 
         hazardController.reset((int) tilemap.getFireRate(),
@@ -612,7 +614,6 @@ public class GameplayMode extends WorldController {
         sunController.reset(tilemap.getWorldHeight(), plantXPositions);
         setComplete(false);
         setFailure(false);
-        populateLevel();
     }
 
     /**
