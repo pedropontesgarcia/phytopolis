@@ -276,7 +276,6 @@ public class GameplayMode extends WorldController {
      * @param dt Number of seconds since last animation frame
      */
     public void update(float dt) {
-        System.out.println(plantController.getMaxPlantHeight());
         if (getFadeState() == Fade.FADE_OUT)
             soundController.setActualMusicVolume(
                     super.getVolume() * soundController.getUserMusicVolume());
@@ -306,7 +305,8 @@ public class GameplayMode extends WorldController {
         //                                                   cameraHeight / 2f,
         //                                           avatar.getY()) + ic.getScrolled()));
         cameraVector.set(tilemap.getWorldWidth() / 2f,
-                         Math.max(cameraHeight / 2f, avatar.getY() + ic.getScrolled()));
+                         Math.max(cameraHeight / 2f,
+                                  avatar.getY() + ic.getScrolled()));
 
         // generate hazards please
         for (Model m : objects) {
