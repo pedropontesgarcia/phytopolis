@@ -17,10 +17,10 @@ public class Player extends CapsuleObject {
     private static final int NUM_JOG_FRAMES = 8;
     private static final int NUM_JUMP_UP_FRAMES = 6;
     private static final int NUM_JUMP_DOWN_FRAMES = 6;
-    private static final float ANIMATION_SPEED = 0.15f;
-    private static final float ANIMATION_SPEED2 = 0.16f;
+    private static final float ANIMATION_SPEED = 10f;
+    private static final float ANIMATION_SPEED2 = 10f;
 
-    private static final float ANIMATION_SPEED3 = 0.05f;
+    private static final float ANIMATION_SPEED3 = 2.5f;
     /**
      * The initializing data (to avoid magic numbers)
      */
@@ -195,7 +195,7 @@ public class Player extends CapsuleObject {
         if (!isGrounded()) {
             if (getVY() > 0.1) {
                 if (animFrame < NUM_JUMP_UP_FRAMES) {
-                    animFrame += ANIMATION_SPEED;
+                    animFrame += dt * ANIMATION_SPEED;
                 }
                 if (animFrame >= NUM_JUMP_UP_FRAMES) {
                     animFrame = NUM_JUMP_UP_FRAMES - 1;
@@ -209,7 +209,7 @@ public class Player extends CapsuleObject {
                     animFrame = NUM_JUMP_UP_FRAMES;
                 } else if (animFrame <
                         NUM_JUMP_UP_FRAMES + NUM_JUMP_DOWN_FRAMES) {
-                    animFrame += ANIMATION_SPEED;
+                    animFrame += dt * ANIMATION_SPEED;
                     //                    animFrame = ((animFrame - NUM_JUMP_UP_FRAMES) % NUM_JUMP_DOWN_FRAMES) + NUM_JUMP_UP_FRAMES;
                 }
                 if (animFrame >= NUM_JUMP_UP_FRAMES + NUM_JUMP_DOWN_FRAMES) {
@@ -220,7 +220,7 @@ public class Player extends CapsuleObject {
             if (animFrame < 11) {
                 animFrame = 11;
             } else {
-                animFrame += ANIMATION_SPEED;
+                animFrame += dt * ANIMATION_SPEED;
             }
             if (animFrame >= jumpAnimator.getSize()) {
                 animFrame = 0;
@@ -228,7 +228,7 @@ public class Player extends CapsuleObject {
         }
 
         if (Math.abs(getVX()) >= 0.1) {
-            animFrame2 += ANIMATION_SPEED2;
+            animFrame2 += dt * ANIMATION_SPEED2;
             animFrame2 %= NUM_JOG_FRAMES;
             //            if (animFrame2 >= NUM_JOG_FRAMES) {
             //                animFrame2 -= NUM_JOG_FRAMES;
@@ -248,12 +248,8 @@ public class Player extends CapsuleObject {
         }
 
         if (!(Math.abs(getVX()) >= 0.1) && !(!isGrounded() || animFrame != 0)) {
-            if (animFrame3 < 3) {
-                animFrame3 += ANIMATION_SPEED3;
-            }
-            if (animFrame3 >= 3) {
-                animFrame3 -= 3;
-            }
+            animFrame3 += dt * ANIMATION_SPEED3;
+            animFrame3 %= 4;
 
         }
 
@@ -339,7 +335,7 @@ public class Player extends CapsuleObject {
                         sclX * effect,
                         sclY);
         } else {
-            idleAnimator.setFrame((int) animFrame3);
+            idleAnimator.setFrame((int) (animFrame3 >= 3 ? 1 : animFrame3));
             float x = idleAnimator.getRegionWidth() / 2.0f;
             float y = idleAnimator.getRegionHeight() / 2.0f;
             canvas.draw(idleAnimator,

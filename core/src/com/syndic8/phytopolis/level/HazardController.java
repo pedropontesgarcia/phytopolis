@@ -324,7 +324,7 @@ public class HazardController {
     public boolean findValidFireLocs() {
         validFireLocs.clear();
         for (float height : powerlineHeights) {
-            if (plantController.getMaxLeafHeight() >=
+            if (plantController.getMaxPlantHeight() >=
                     height - 0.5f * tilemap.getTileHeight()) {
                 int max = plantController.screenCoordToIndex(0,
                                                              height +
@@ -415,7 +415,8 @@ public class HazardController {
                 Fire f = (Fire) h;
                 // check if branch is still there (floating fire bug)
 
-                if (plantController.nodeIsEmpty(hx, hy)) {
+                if (plantController.nodeIsEmpty(hx, hy) &&
+                        !plantController.canGrowAtIndex(hx, hy)) {
                     removeHazard(h);
                     plantController.removeHazardFromNodes(h);
                     continue; // Continue to next hazard after removing
@@ -783,7 +784,7 @@ public class HazardController {
     public int powerlinesTouching() {
         int count = 0;
         for (float f : powerlineHeights) {
-            if (plantController.getMaxLeafHeight() >=
+            if (plantController.getMaxPlantHeight() >=
                     f - 0.5f * tilemap.getTileHeight()) {
                 count++;
             }

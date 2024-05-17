@@ -305,7 +305,8 @@ public class GameplayMode extends WorldController {
         //                                                   cameraHeight / 2f,
         //                                           avatar.getY()) + ic.getScrolled()));
         cameraVector.set(tilemap.getWorldWidth() / 2f,
-                         Math.max(cameraHeight / 2f, avatar.getY() + ic.getScrolled()));
+                         Math.max(cameraHeight / 2f,
+                                  avatar.getY() + ic.getScrolled()));
 
         // generate hazards please
         for (Model m : objects) {
@@ -315,8 +316,9 @@ public class GameplayMode extends WorldController {
             }
             if (m instanceof Sun) {
                 ((Sun) m).update(dt,
-                                 m.getY() < plantController.getMaxLeafHeight() -
-                                         resourceController.SUN_TOLERANCE);
+                                 m.getY() <
+                                         plantController.getMaxPlantHeight() -
+                                                 resourceController.SUN_TOLERANCE);
 
             }
             if (m instanceof Hazard) {
@@ -351,7 +353,7 @@ public class GameplayMode extends WorldController {
         //            timeSinceUIUpdate += 0.05;
         //        }
         // Check for win condition
-        if ((plantController.getMaxLeafHeight() >
+        if ((plantController.getMaxPlantHeight() >
                 tilemap.getVictoryHeight() * tilemap.getTileHeight()) &&
                 !isComplete()) {
 
@@ -595,7 +597,7 @@ public class GameplayMode extends WorldController {
         canvas.clear();
         canvas.beginGame();
         drawBackground();
-        tilemap.draw(canvas);
+        tilemap.drawLevelOver(canvas);
         super.drawLevelOver();
         canvas.end();
         super.draw(canvas);

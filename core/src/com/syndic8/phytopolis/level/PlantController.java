@@ -97,7 +97,7 @@ public class PlantController {
      */
     private World world;
     private Tilemap tilemap;
-    private Vector2 maxLeafIndex;
+    private Vector2 maxPlantIndex;
     private ObjectSet<Hazard> removedHazards;
     /**
      * how many more frames until the next propagation of destruction
@@ -136,7 +136,7 @@ public class PlantController {
         this.yOrigin = yOrigin * worldToPixelConversionRatio;
         this.width = width;
         this.height = height;
-        maxLeafIndex = new Vector2(-1, -1);
+        maxPlantIndex = new Vector2(-1, -1);
         this.gridSpacing = gridSpacing * worldToPixelConversionRatio;
         this.xSpacing = (float) (Math.sqrt(
                 (this.gridSpacing * this.gridSpacing) -
@@ -184,7 +184,7 @@ public class PlantController {
         this.yOrigin = yOrigin * worldToPixelConversionRatio;
         this.width = width;
         this.height = height;
-        maxLeafIndex = new Vector2(-1, -1);
+        maxPlantIndex = new Vector2(-1, -1);
         this.gridSpacing = gridSpacing * worldToPixelConversionRatio;
         this.xSpacing = (float) (Math.sqrt(
                 (this.gridSpacing * this.gridSpacing) -
@@ -495,8 +495,8 @@ public class PlantController {
             soundController.playSound(upgradeSound);
             Leaf l = plantGrid[xIndex][yIndex].makeLeaf(Leaf.leafType.BOUNCY,
                                                         width);
-            if (l != null && l.getY() > getMaxLeafHeight()) {
-                maxLeafIndex.set(xIndex, yIndex);
+            if (l != null && l.getY() > getMaxPlantHeight()) {
+                maxPlantIndex.set(xIndex, yIndex);
             }
             return l;
         } else {
@@ -516,12 +516,10 @@ public class PlantController {
         return hasLeaf(xIndex, yIndex);
     }
 
-    public float getMaxLeafHeight() {
+    public float getMaxPlantHeight() {
         if (getMaxLeafXIndex() != -1 &&
-                inBounds(getMaxLeafXIndex(), getMaxLeafYIndex()) &&
-                plantGrid[getMaxLeafXIndex()][getMaxLeafYIndex()].hasLeaf()) {
-            return plantGrid[getMaxLeafXIndex()][getMaxLeafYIndex()].getLeaf()
-                    .getY();
+                inBounds(getMaxLeafXIndex(), getMaxLeafYIndex())) {
+            return plantGrid[getMaxLeafXIndex()][getMaxLeafYIndex()].y;
         }
         return 0;
     }
@@ -550,8 +548,8 @@ public class PlantController {
                 (yIndex > 0 || !lowerNode) &&
                 resourceController.canGrowLeaf()) {
             Leaf l = plantGrid[xIndex][yIndex].makeLeaf(type, width);
-            if (l != null && l.getY() > getMaxLeafHeight()) {
-                maxLeafIndex.set(xIndex, yIndex);
+            if (l != null && l.getY() > getMaxPlantHeight()) {
+                maxPlantIndex.set(xIndex, yIndex);
             }
             return l;
         }
@@ -559,11 +557,11 @@ public class PlantController {
     }
 
     public int getMaxLeafXIndex() {
-        return (int) maxLeafIndex.x;
+        return (int) maxPlantIndex.x;
     }
 
     public int getMaxLeafYIndex() {
-        return (int) maxLeafIndex.y;
+        return (int) maxPlantIndex.y;
     }
 
     /**
@@ -647,18 +645,18 @@ public class PlantController {
         for (int y = height - 1; y >= 0; y--) {
             for (int x = 1; x < width; x += 2) {
                 if (plantGrid[x][y].hasLeaf()) {
-                    maxLeafIndex.set(x, y);
+                    maxPlantIndex.set(x, y);
                     return;
                 }
             }
             for (int x = 0; x < width; x += 2) {
                 if (plantGrid[x][y].hasLeaf()) {
-                    maxLeafIndex.set(x, y);
+                    maxPlantIndex.set(x, y);
                     return;
                 }
             }
         }
-        maxLeafIndex.set(-1, -1);
+        maxPlantIndex.set(-1, -1);
     }
 
     public int countTimerDeductions() {
@@ -1073,10 +1071,6 @@ public class PlantController {
             tilemap = tm;
         }
 
-        public boolean isOffset() {
-            return isOffset;
-        }
-
         /**
          * make a branch in the desired direction, of the desired type
          *
@@ -1090,18 +1084,32 @@ public class PlantController {
                                  World world) {
             float pi = (float) Math.PI;
             Branch newBranch = null;
+            int[] indices = worldCoordToIndex(x, y);
+            int xIndex = indices[0];
+            int yIndex = indices[1];
+            int yIndexOffset = isOffset() ? 1 : 0;
+            float maxY;
             switch (direction) {
                 case LEFT:
                     left = new Branch(x, y, pi / 3, type, tilemap, 1);
                     newBranch = left;
+                    maxY = plantGrid[xIndex - 1][yIndex + yIndexOffset].y;
+                    if (maxY > getMaxPlantHeight())
+                        maxPlantIndex.set(xIndex - 1, yIndex + yIndexOffset);
                     break;
                 case MIDDLE:
                     middle = new Branch(x, y, 0, type, tilemap, 1);
                     newBranch = middle;
+                    maxY = plantGrid[xIndex][yIndex + 1].y;
+                    if (maxY > getMaxPlantHeight())
+                        maxPlantIndex.set(xIndex, yIndex + 1);
                     break;
                 case RIGHT:
                     right = new Branch(x, y, -pi / 3, type, tilemap, 1);
                     newBranch = right;
+                    maxY = plantGrid[xIndex + 1][yIndex + yIndexOffset].y;
+                    if (maxY > getMaxPlantHeight())
+                        maxPlantIndex.set(xIndex + 1, yIndex + yIndexOffset);
                     break;
             }
             if (newBranch != null) {
@@ -1118,6 +1126,14 @@ public class PlantController {
             resourceController.decrementGrowBranch();
             return newBranch;
 
+        }
+
+        public boolean isOffset() {
+            return isOffset;
+        }
+
+        public boolean isEnabled() {
+            return enabled;
         }
 
         /**
@@ -1377,10 +1393,6 @@ public class PlantController {
         public Leaf.leafType getLeafType() {
             if (hasLeaf()) return leaf.getLeafType();
             else return null;
-        }
-
-        public boolean isEnabled() {
-            return enabled;
         }
 
     }
