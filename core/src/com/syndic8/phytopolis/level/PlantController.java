@@ -66,9 +66,13 @@ public class PlantController {
      * bouncy leaf texture
      */
     protected FilmStrip bouncyLeafTexture;
+
+    public FilmStrip bounceTexture;
+
     /**
      * the grid containing all possible nodes for a branch to grow from
      */
+
     private PlantNode[][] plantGrid;
     /**
      * width of the plant grid
@@ -111,6 +115,7 @@ public class PlantController {
     private int destroySound;
     private int leafSound;
     private Texture glowTexture;
+    private int errorSound;
 
     /**
      * Initialize a PlantController with specified height and width
@@ -248,6 +253,7 @@ public class PlantController {
         if (direction == null) return null;
         if (!resourceController.canGrowBranch()) {
             resourceController.setNotEnough(true);
+            SoundController.getInstance().playSound(errorSound);
             return null;
         }
         boolean isAtEnds = (xIndex == 0 && direction == branchDirection.LEFT) ||
@@ -486,6 +492,7 @@ public class PlantController {
             if (!resourceController.canUpgrade()) {
                 //                System.out.println("upgrade");
                 resourceController.setNotEnough(true);
+                SoundController.getInstance().playSound(errorSound);
                 return null;
             }
             plantGrid[xIndex][yIndex].unmakeLeaf();
@@ -533,6 +540,7 @@ public class PlantController {
         if (!resourceController.canGrowLeaf()) {
             //            System.out.println("leaf");
             resourceController.setNotEnough(true);
+            SoundController.getInstance().playSound(errorSound);
             return null;
         }
         if (!plantGrid[xIndex][yIndex].hasLeaf() &&
@@ -908,7 +916,12 @@ public class PlantController {
         bouncyLeafTexture = new FilmStrip(directory.getEntry("gameplay:bouncy",
                                                              Texture.class),
                                           1,
-                                          6);
+                                          7);
+        bounceTexture = new FilmStrip(directory.getEntry(
+                "gameplay:bouncy_bounce",
+                Texture.class),
+                1,
+                6);
         enBranchTextureUp = directory.getEntry("gameplay:enbranch",
                                                Texture.class);
         SoundEffect upgrade = directory.getEntry("upgradeleaf",
@@ -921,6 +934,9 @@ public class PlantController {
         SoundEffect leafSoundEffect = directory.getEntry("growleaf",
                                                          SoundEffect.class);
         leafSound = soundController.addSoundEffect(leafSoundEffect);
+        errorSound = soundController.addSoundEffect(directory.getEntry(
+                "errorsound",
+                SoundEffect.class));
     }
 
     /**
@@ -1114,6 +1130,8 @@ public class PlantController {
                         leaf.setFilmStrip(leafTexture);
                         break;
                     case BOUNCY:
+                        leaf.setBounceTexture(bounceTexture);
+                        leaf.setUpgradeTexture(bouncyLeafTexture);
                         leaf.setFilmStrip(bouncyLeafTexture);
                         break;
                     case NORMAL1:

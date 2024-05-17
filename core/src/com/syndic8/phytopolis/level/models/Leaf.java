@@ -4,6 +4,7 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.physics.box2d.BodyDef;
 import com.syndic8.phytopolis.GameCanvas;
 import com.syndic8.phytopolis.InputController;
+import com.syndic8.phytopolis.util.FilmStrip;
 import com.syndic8.phytopolis.util.Tilemap;
 
 public class Leaf extends BoxObject {
@@ -13,13 +14,17 @@ public class Leaf extends BoxObject {
     private float health;
     private int healthMark;
     private boolean beingEaten;
-    private static final int NUM_BOUNCY_FRAMES = 6;
+    private static final int NUM_BOUNCY_FRAMES = 7;
+    private static final int BOUNCE_FRAMES = 6;
 
     private float bounceFrame;
     private final int bouncyTimerMax = 10;
     private  int bouncyTimer = 0;
 
     private boolean bouncy;
+
+    private FilmStrip bounceTexture;
+    private FilmStrip upgradeTexture;
     private boolean sun;
 
     private InputController ic;
@@ -70,6 +75,13 @@ public class Leaf extends BoxObject {
         return ModelType.LEAF;
     }
 
+    public void setBounceTexture(FilmStrip value){
+        bounceTexture = value;
+    }
+    public void setUpgradeTexture(FilmStrip value){
+        upgradeTexture = value;
+    }
+
 
 
     public boolean fullyEaten() {
@@ -95,6 +107,7 @@ public class Leaf extends BoxObject {
     public void setSun(boolean value){
         sun = value;
         animFrame = 2;
+        bounceFrame = 2;
     }
 
     /**
@@ -127,28 +140,40 @@ public class Leaf extends BoxObject {
                 }
             }
         }else{
-            if (bouncy && ic.didJump()) {
-                bouncyTimer = bouncyTimerMax;
-                bouncy = false;
-            }
-            if (bouncyTimer > 0){
-                if (bounceFrame >= NUM_BOUNCY_FRAMES) {
-                    bounceFrame -= NUM_BOUNCY_FRAMES;
+            if (!sun){
+                if (bouncy && ic.didJump()) {
+                    setFilmStrip(bounceTexture);
+                    bouncyTimer = bouncyTimerMax;
+                    bouncy = false;
                 }
-                if (bounceFrame < NUM_BOUNCY_FRAMES) {
-                    bounceFrame +=ANIMATION_SPEED*2;
+                if (bouncyTimer > 0){
+                    if (bounceFrame >= BOUNCE_FRAMES) {
+                        bounceFrame -= BOUNCE_FRAMES;
+                    }
+                    if (bounceFrame < BOUNCE_FRAMES) {
+                        bounceFrame +=ANIMATION_SPEED*2;
+                    }
+                }else{
+                    if (bounceFrame < NUM_BOUNCY_FRAMES) {
+                        bounceFrame +=ANIMATION_SPEED;
+                    }
+                    if (bounceFrame >= NUM_BOUNCY_FRAMES) {
+                        bounceFrame -=1;
+                    }
+                }
+                if (!bouncy){
+                    bouncyTimer = Math.max (bouncyTimer-1, 0);
                 }
             }else{
-                if (bounceFrame < NUM_BOUNCY_FRAMES) {
-                    bounceFrame +=ANIMATION_SPEED;
-                }
-                if (bounceFrame >= NUM_BOUNCY_FRAMES) {
-                    bounceFrame -=1;
+                setFilmStrip(upgradeTexture);
+                if (bounceFrame >= 6){
+                    health = 5;
+                    sun = false;
+                }else if (bounceFrame < 6){
+                    bounceFrame += ANIMATION_SPEED;
                 }
             }
-            if (!bouncy){
-                bouncyTimer = Math.max (bouncyTimer-1, 0);
-            }
+
 
 
         }
