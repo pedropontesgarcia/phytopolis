@@ -415,7 +415,8 @@ public class HazardController {
                 Fire f = (Fire) h;
                 // check if branch is still there (floating fire bug)
 
-                if (plantController.nodeIsEmpty(hx, hy)) {
+                if (plantController.nodeIsEmpty(hx, hy) &&
+                        !plantController.canGrowAtIndex(hx, hy)) {
                     removeHazard(h);
                     plantController.removeHazardFromNodes(h);
                     continue; // Continue to next hazard after removing
