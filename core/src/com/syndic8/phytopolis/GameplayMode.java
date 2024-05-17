@@ -306,9 +306,6 @@ public class GameplayMode extends WorldController {
         //                                           avatar.getY()) + ic.getScrolled()));
         cameraVector.set(tilemap.getWorldWidth() / 2f,
                          Math.max(cameraHeight / 2f, avatar.getY() + ic.getScrolled()));
-        System.out.println(cameraVector.y);
-        System.out.println(cameraHeight / 2f);
-        System.out.println(avatar.getY() + ic.getScrolled());
 
         // generate hazards please
         for (Model m : objects) {

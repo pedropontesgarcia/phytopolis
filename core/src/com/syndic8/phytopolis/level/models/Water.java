@@ -8,7 +8,7 @@ import com.syndic8.phytopolis.util.Tilemap;
 
 public class Water extends Resource {
 
-    private static final int REGEN_DELAY = 15;
+    private static final int REGEN_DELAY = 5;
     private static final int MAX_REGEN = 100;
     private final FilmStrip waterFilmstrip;
     private int currRegen;
