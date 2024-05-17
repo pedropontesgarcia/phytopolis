@@ -200,6 +200,7 @@ public class GameplayMode extends WorldController {
             case "gameplay:lvl7":
             case "gameplay:lvl8":
             case "gameplay:lvl9":
+                return directory.getEntry("katabasis", AudioSource.class);
             case "gameplay:lvl10":
             case "gameplay:lvl11":
             case "gameplay:lvl12":

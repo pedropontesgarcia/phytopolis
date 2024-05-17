@@ -36,10 +36,11 @@ public class LevelOverMode extends FadingScreen implements Screen {
     private boolean ready;
     private boolean won;
     private boolean gathered;
-    private int backgroundMusic;
+    private int victoryMusic;
     private AudioEngine audioEngine;
     private Texture rs;
     private MenuContainer menuContainer;
+    private int lossMusic;
 
     public LevelOverMode(GameCanvas c) {
         ready = false;
@@ -83,10 +84,17 @@ public class LevelOverMode extends FadingScreen implements Screen {
         if (!gathered) {
             victory = directory.getEntry("over:victory", Texture.class);
             failure = directory.getEntry("over:failure", Texture.class);
-            AudioSource bgm = directory.getEntry("anotherday",
+            AudioSource bgm = directory.getEntry("levelcomplete",
                                                  AudioSource.class);
-            backgroundMusic = soundController.addMusic(bgm);
-            soundController.setMusic(backgroundMusic);
+            victoryMusic = soundController.addMusic(bgm);
+            bgm = directory.getEntry("gameover",
+                    AudioSource.class);
+            lossMusic = soundController.addMusic(bgm);
+            if(won){
+                soundController.setMusic(victoryMusic);
+            }else{
+                soundController.setMusic(lossMusic);
+            }
             soundController.setLooping(true);
             soundController.playMusic();
             gathered = true;
@@ -96,9 +104,9 @@ public class LevelOverMode extends FadingScreen implements Screen {
         //        backgroundMusic.play();
     }
 
-    public void setBackgroundMusic(int m) {
-        backgroundMusic = m;
-    }
+//    public void setBackgroundMusic(int m) {
+//        victoryMusic = m;
+//    }
 
     public void setWon(boolean value) {
         won = value;
@@ -109,7 +117,11 @@ public class LevelOverMode extends FadingScreen implements Screen {
         active = true;
         menuContainer.activate();
         fadeIn(0.5f);
-        soundController.setMusic(backgroundMusic);
+        if(won){
+            soundController.setMusic(victoryMusic);
+        }else{
+            soundController.setMusic(lossMusic);
+        }
         soundController.setLooping(true);
         soundController.playMusic();
 
