@@ -987,6 +987,10 @@ public class PlantController {
         return plantGrid[xIndex][yIndex].isEnabled();
     }
 
+    public boolean isColumnOffset(int col) {
+        return plantGrid[col][0].isOffset();
+    }
+
     /**
      * enum containing directions in which a plant can grow from a node
      */

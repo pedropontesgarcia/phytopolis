@@ -22,7 +22,7 @@
          "width":5,
          "x":0,
          "y":0
-        }, 
+        },
         {
          "data":[0, 71, 0, 0, 0,
             0, 0, 71, 0, 0,
@@ -43,7 +43,7 @@
          "width":5,
          "x":0,
          "y":0
-        }, 
+        },
         {
          "data":[0, 0, 0, 0, 0,
             0, 0, 0, 0, 0,
@@ -73,28 +73,28 @@
          "name":"background",
          "type":"string",
          "value":"gameplay:background1"
-        }, 
+        },
         {
          "name":"firerate",
          "type":"float",
          "value":3
-        }, 
+        },
         {
          "name":"leaftype",
          "type":"int",
          "value":1
-        }, 
+        },
         {
          "name":"levelnumber",
          "type":"int",
          "value":1
-        }, 
+        },
         {
          "name":"time",
          "type":"int",
          "value":120
         },
-    
+
         {
          "name":"victory",
          "type":"float",
@@ -107,7 +107,7 @@
         {
          "firstgid":1,
          "source":"tileset.tsx"
-        }, 
+        },
         {
          "firstgid":71,
          "source":"rsrc.tsx"

@@ -31,6 +31,7 @@ public class UIController {
     private final GameCanvas canvas;
     private final ProgressBar progressBar;
     private final Color yellowColor;
+    private final Color coolRed = new Color(0.792f, 0.243f, 0.173f, 1);
     private FilmStrip current;
     private FilmStrip waterdropStrip;
     private FilmStrip waterdropAdd;
@@ -193,17 +194,20 @@ public class UIController {
         updateTexture(dt, waterLvl, prevWater, resourceController);
         updateLabelSize();
         if ((int) timer.time <= 5) {
-            label.setColor((int) (timer.time * 8) % 2 == 0 ?
-                                   Color.WHITE :
-                                   Color.FIREBRICK);
+            label.getLabel()
+                    .setColor((int) (timer.time * 8) % 2 == 0 ?
+                                      Color.WHITE :
+                                      coolRed);
         } else if ((int) timer.time <= 10) {
-            label.setColor((int) (timer.time * 4) % 2 == 0 ?
-                                   Color.WHITE :
-                                   Color.FIREBRICK);
+            label.getLabel()
+                    .setColor((int) (timer.time * 4) % 2 == 0 ?
+                                      Color.WHITE :
+                                      coolRed);
         } else if ((int) timer.time <= 15) {
-            label.setColor((int) (timer.time * 2) % 2 == 0 ?
-                                   Color.WHITE :
-                                   Color.FIREBRICK);
+            label.getLabel()
+                    .setColor((int) (timer.time * 2) % 2 == 0 ?
+                                      Color.WHITE :
+                                      coolRed);
         } else if (yellowFlash) {
             label.getLabel()
                     .setColor((int) (timer.time * 4) % 2 == 0 ?

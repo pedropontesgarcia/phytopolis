@@ -346,7 +346,8 @@ public class Tilemap {
                     Texture tx = new Texture(
                             "gameplay/tiles/" + tileJson.getString("image"));
                     Tile tile = new Tile(this, new Vector2(x0, y0), false, tx);
-                    if (!powerlineYVals.contains(y0)) powerlineYVals.add(y0);
+                    if (!powerlineYVals.contains(y0))
+                        powerlineYVals.add(y0 + 0.5f * tileHeight);
                     tiles.add(tile);
                 }
             }

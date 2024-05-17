@@ -21,6 +21,11 @@ public class Indicator extends Model {
     }
 
     @Override
+    public int getZIndex() {
+        return 400;
+    }
+
+    @Override
     public ModelType getType() {
         return ModelType.INDICATOR;
     }

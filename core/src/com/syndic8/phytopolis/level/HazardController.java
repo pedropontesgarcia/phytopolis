@@ -39,11 +39,8 @@ public class HazardController {
      */
     private final ResourceController resourceController;
     private final PooledList<Vector2> validFireLocs;
-    private final int FIRE_BUFFER_ABOVE = 1;
-    // Since the power line is at the middle of a tile, but the plant nodes
-    // are at the ends, the power line y value is actually at the node right
-    // under the powerline. So we need one more tile of buffer above.
-    private final int FIRE_BUFFER_BELOW = FIRE_BUFFER_ABOVE - 1;
+    private final float FIRE_BUFFER_ABOVE;
+    private final float FIRE_BUFFER_BELOW;
     /**
      * Texture for fire hazard.
      */
@@ -169,6 +166,8 @@ public class HazardController {
         width = plantController.getWidth();
         tilemap = tm;
         fireProgress = 0;
+        FIRE_BUFFER_ABOVE = tilemap.getTileHeight() / 2f;
+        FIRE_BUFFER_BELOW = FIRE_BUFFER_ABOVE;
     }
 
     public void reset(int fireFrequency,
@@ -325,16 +324,28 @@ public class HazardController {
     public boolean findValidFireLocs() {
         validFireLocs.clear();
         for (float height : powerlineHeights) {
-            if (plantController.getMaxLeafHeight() >= height) {
-                int max = plantController.screenCoordToIndex(0, height)[1] +
-                        FIRE_BUFFER_ABOVE;
-                int min = plantController.screenCoordToIndex(0, height)[1] -
-                        FIRE_BUFFER_BELOW;
+            if (plantController.getMaxLeafHeight() >=
+                    height - 0.5f * tilemap.getTileHeight()) {
+                int max = plantController.screenCoordToIndex(0,
+                                                             height +
+                                                                     FIRE_BUFFER_ABOVE +
+                                                                     0.5f *
+                                                                             tilemap.getTileHeight())[1];
+                int min = plantController.screenCoordToIndex(0,
+                                                             height -
+                                                                     FIRE_BUFFER_BELOW +
+                                                                     0.5f *
+                                                                             tilemap.getTileHeight())[1];
                 for (int i = min; i <= max; i++) {
                     if (i != 0) {
                         for (int width = 0;
                              width < plantController.getWidth();
                              width++) {
+                            int idx = i;
+                            if (i == max &&
+                                    plantController.isColumnOffset(width))
+                                continue; // If the node is at the max height
+                            // and it's offset then it's too far visually
                             if (isValidFireLocation(width, i)) {
                                 validFireLocs.add(new Vector2(width, i));
                             }
@@ -381,8 +392,11 @@ public class HazardController {
         }
         if (fireProgress >= 100) {
             findValidFireLocs();
-            addList.add(generateFire());
-            SoundController.getInstance().playSound(electricShock);
+            Fire fire = generateFire();
+            addList.add(fire);
+            if (fire != null)
+                SoundController.getInstance().playSound(electricShock);
+            else SoundController.getInstance().playSound(extinguishSound);
             fireProgress = 0;
         }
         long currentTime = System.currentTimeMillis();
@@ -586,6 +600,9 @@ public class HazardController {
     public Hazard generateHazardAt(Model.ModelType type,
                                    int hazardWidth,
                                    int hazardHeight) {
+        if (plantController.hasHazard(hazardWidth, hazardHeight)) return null;
+        if (hazardHeight == 0 && !plantController.isColumnOffset(hazardWidth))
+            return null;
         switch (type) {
             case FIRE:
                 Fire f = new Fire(plantController.indexToWorldCoord(hazardWidth,
@@ -684,9 +701,15 @@ public class HazardController {
         this.greenArrowUpTexture = new TextureRegion(directory.getEntry(
                 "hazards:arrow-up-green",
                 Texture.class));
-        extinguishSound = SoundController.getInstance().addSoundEffect(directory.getEntry("fireextinguish", SoundEffect.class));
-        electricShock = SoundController.getInstance().addSoundEffect(directory.getEntry("electricshock", SoundEffect.class));
-        errorSound = SoundController.getInstance().addSoundEffect(directory.getEntry("errorsound", SoundEffect.class));
+        extinguishSound = SoundController.getInstance()
+                .addSoundEffect(directory.getEntry("fireextinguish",
+                                                   SoundEffect.class));
+        electricShock = SoundController.getInstance()
+                .addSoundEffect(directory.getEntry("electricshock",
+                                                   SoundEffect.class));
+        errorSound = SoundController.getInstance()
+                .addSoundEffect(directory.getEntry("errorsound",
+                                                   SoundEffect.class));
     }
 
     /**
@@ -754,13 +777,14 @@ public class HazardController {
     }
 
     public void update(float dt) {
-        fireProgress += dt * 5 * powerlinesTouching();
+        fireProgress += dt * 3 * Math.sqrt(powerlinesTouching());
     }
 
     public int powerlinesTouching() {
         int count = 0;
         for (float f : powerlineHeights) {
-            if (plantController.getMaxLeafHeight() >= f) {
+            if (plantController.getMaxLeafHeight() >=
+                    f - 0.5f * tilemap.getTileHeight()) {
                 count++;
             }
         }
