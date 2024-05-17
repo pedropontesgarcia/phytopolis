@@ -64,7 +64,7 @@ public class UIController {
         labelStyle.font = font;
         label = new TextButton("00:00", labelStyle);
         label.setStyle(label.getStyle());
-        label.setPosition(c.getTextViewport().getWorldWidth() * 0.925f -
+        label.setPosition(c.getTextViewport().getWorldWidth() * 0.915f -
                                   label.getWidth() / 2f,
                           c.getTextViewport().getWorldHeight() * 0.875f);
         stage.addActor(label);
