@@ -128,6 +128,7 @@ public class HazardController {
     private float fireProgress;
     private int extinguishSound;
     private int electricShock;
+    private int errorSound;
 
     //    /**
     //     * Initializes a HazardController with the given parameters.
@@ -501,6 +502,7 @@ public class HazardController {
         if (distance > tilemap.getTileHeight() * 2) return;
         if (!resourceController.canExtinguish()) {
             //            System.out.println("fire");
+            SoundController.getInstance().playSound(errorSound);
             resourceController.setNotEnough(true);
             return;
         }
@@ -684,6 +686,7 @@ public class HazardController {
                 Texture.class));
         extinguishSound = SoundController.getInstance().addSoundEffect(directory.getEntry("fireextinguish", SoundEffect.class));
         electricShock = SoundController.getInstance().addSoundEffect(directory.getEntry("electricshock", SoundEffect.class));
+        errorSound = SoundController.getInstance().addSoundEffect(directory.getEntry("errorsound", SoundEffect.class));
     }
 
     /**
