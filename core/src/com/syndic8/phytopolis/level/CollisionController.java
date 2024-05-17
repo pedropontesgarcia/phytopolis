@@ -85,7 +85,22 @@ public class CollisionController implements ContactListener {
                     l.setBouncy(true);
                 }
             }
-
+            boolean isCollisionBetweenPlayerAndBug =
+                    (player.getSensorName().equals(fd2) && player != bd1 &&
+                            bd1.getType() == Model.ModelType.BUG) ||
+                            (player.getSensorName().equals(fd1) && player != bd2 &&
+                                    bd2.getType() == Model.ModelType.BUG);
+            if (isCollisionBetweenPlayerAndBug) {
+                Bug b;
+                if (((Model) fix1.getBody().getUserData()).getType() ==
+                        Model.ModelType.BUG) {
+                    b = (Bug) fix1.getBody().getUserData();
+                } else {
+                    b = (Bug) fix2.getBody().getUserData();
+                }
+                hazardController.removeHazard(b);
+                plantController.removeHazardFromNodes(b);
+            }
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -322,19 +337,8 @@ public class CollisionController implements ContactListener {
 
         if (isCollisionBetweenPlayerAndBug) {
             //            System.out.println("BUG");
-            if (isPlayerGoingDown) {
+            if (!isPlayerGoingDown) {
                 //                System.out.println("BUG DOWN");
-                Bug b;
-                if (((Model) fix1.getBody().getUserData()).getType() ==
-                        Model.ModelType.BUG) {
-                    b = (Bug) fix1.getBody().getUserData();
-                } else {
-                    b = (Bug) fix2.getBody().getUserData();
-                }
-                hazardController.removeHazard(b);
-                plantController.removeHazardFromNodes(b);
-
-            } else {
                 contact.setEnabled(false);
             }
         }
