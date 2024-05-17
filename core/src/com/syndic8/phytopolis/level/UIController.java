@@ -45,7 +45,7 @@ public class UIController {
 
     private boolean yellowFlash;
     private int flashTime;
-    private static final int MAX_FLASH_TIME = 80;
+    private static final int MAX_FLASH_TIME = 60;
     private final Color yellowColor;
     private float waterSize;
 
