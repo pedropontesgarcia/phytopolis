@@ -4,19 +4,19 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.physics.box2d.BodyDef;
 import com.syndic8.phytopolis.GameCanvas;
-import com.syndic8.phytopolis.util.FilmStrip;
 import com.syndic8.phytopolis.util.Tilemap;
 
 public class Sun extends Resource {
 
     private static final float SPIN_RATE = 2f;
+    private static final float TOLERANCE = 2f;
     //private final FilmStrip sunFilmstrip;
-    private Color color;
+    private final Color color;
+    private final Texture sunCircle;
+    private final Texture sunRay;
+    private final Texture sunSwirl;
     private float maxLeafHeight = -1;
     private float angle;
-    private Texture sunCircle;
-    private Texture sunRay;
-    private Texture sunSwirl;
 
     public Sun(float x,
                float y,
@@ -38,19 +38,6 @@ public class Sun extends Resource {
         this.sunSwirl = ss;
     }
 
-    public boolean belowScreen() {
-        return getY() + getRadius() < 0;
-    }
-
-    public void clear() {
-        bodyinfo.type = BodyDef.BodyType.StaticBody;
-        markRemoved(true);
-    }
-
-    public void startFade(float f) {
-        maxLeafHeight = f;
-    }
-
     @Override
     public ModelType getType() {
         return ModelType.SUN;
@@ -60,10 +47,23 @@ public class Sun extends Resource {
         if (maxLeafHeight == -1 && belowLeaf) {
             startFade(getY());
         }
-        if (belowScreen() || maxLeafHeight - getY() >= 1) {
+        if (belowScreen() || maxLeafHeight - getY() >= TOLERANCE) {
             clear();
         }
         angle += dt * SPIN_RATE;
+    }
+
+    public void startFade(float f) {
+        maxLeafHeight = f;
+    }
+
+    public boolean belowScreen() {
+        return getY() + getRadius() < 0;
+    }
+
+    public void clear() {
+        bodyinfo.type = BodyDef.BodyType.StaticBody;
+        markRemoved(true);
     }
 
     public void draw(GameCanvas canvas) {
@@ -72,7 +72,11 @@ public class Sun extends Resource {
         float sclX = width / sunCircle.getWidth();
         float sclY = height / sunCircle.getHeight();
         if (maxLeafHeight != -1) {
-            color.set(1.0f, 1.0f, 1.0f, 1.0f - Math.max(0, maxLeafHeight - getY()));
+            color.set(1.0f,
+                      1.0f,
+                      1.0f,
+                      1.0f - Math.max(0,
+                                      maxLeafHeight - getY() - TOLERANCE + 1f));
         }
         canvas.draw(sunCircle,
                     color,
@@ -84,23 +88,23 @@ public class Sun extends Resource {
                     sclX,
                     sclY);
         canvas.draw(sunRay,
-                color,
-                origin.x,
-                origin.y,
-                getX(),
-                getY(),
-                getAngle() + angle,
-                sclX,
-                sclY);
+                    color,
+                    origin.x,
+                    origin.y,
+                    getX(),
+                    getY(),
+                    getAngle() + angle,
+                    sclX,
+                    sclY);
         canvas.draw(sunSwirl,
-                color,
-                origin.x,
-                origin.y,
-                getX(),
-                getY(),
-                getAngle() - angle,
-                sclX,
-                sclY);
+                    color,
+                    origin.x,
+                    origin.y,
+                    getX(),
+                    getY(),
+                    getAngle() - angle,
+                    sclX,
+                    sclY);
     }
 
 }

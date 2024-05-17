@@ -1,5 +1,6 @@
 package com.syndic8.phytopolis.util;
 
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.JsonValue;
@@ -37,6 +38,7 @@ public class Tilemap {
     private Texture sunRay;
     private Texture sunSwirl;
     private String backgroundFile;
+    private Texture victoryLine;
 
     /**
      * Constructs a tilemap from the world dimensions and a JSON file from
@@ -51,10 +53,6 @@ public class Tilemap {
         powerlineYVals = new PooledList<>();
     }
 
-    public float getWorldWidth() {
-        return worldWidth;
-    }
-
     public float getWorldHeight() {
         return worldHeight;
     }
@@ -65,10 +63,6 @@ public class Tilemap {
 
     public int getTilemapWidth() {
         return tilemapWidth;
-    }
-
-    public float getTileHeight() {
-        return tileHeight;
     }
 
     public float getTileWidth() {
@@ -149,6 +143,7 @@ public class Tilemap {
                                         Texture.class);
         Texture tx2 = directory.getEntry("gameplay:sun_resource",
                                          Texture.class);
+        victoryLine = directory.getEntry("gameplay:victoryline", Texture.class);
         resourceTextureList.add(tx);
         resourceTextureList.add(tx2);
         resourceTextures = resourceTextureList.toArray(new Texture[0]);
@@ -349,6 +344,23 @@ public class Tilemap {
      * @param c The game canvas.
      */
     public void draw(GameCanvas c) {
+        for (Tile tile : tiles) tile.draw(c);
+        float width = getWorldWidth();
+        float height = getTileHeight();
+        float x = 0;
+        float y = victoryHeight * getTileHeight();
+        c.draw(victoryLine, Color.WHITE, x, y, width, height);
+    }
+
+    public float getWorldWidth() {
+        return worldWidth;
+    }
+
+    public float getTileHeight() {
+        return tileHeight;
+    }
+
+    public void drawLevelOver(GameCanvas c) {
         for (Tile tile : tiles) tile.draw(c);
     }
 

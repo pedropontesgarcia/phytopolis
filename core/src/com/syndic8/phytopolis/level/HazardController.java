@@ -324,7 +324,7 @@ public class HazardController {
     public boolean findValidFireLocs() {
         validFireLocs.clear();
         for (float height : powerlineHeights) {
-            if (plantController.getMaxLeafHeight() >=
+            if (plantController.getMaxPlantHeight() >=
                     height - 0.5f * tilemap.getTileHeight()) {
                 int max = plantController.screenCoordToIndex(0,
                                                              height +
@@ -783,7 +783,7 @@ public class HazardController {
     public int powerlinesTouching() {
         int count = 0;
         for (float f : powerlineHeights) {
-            if (plantController.getMaxLeafHeight() >=
+            if (plantController.getMaxPlantHeight() >=
                     f - 0.5f * tilemap.getTileHeight()) {
                 count++;
             }

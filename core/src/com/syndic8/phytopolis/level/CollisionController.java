@@ -311,7 +311,7 @@ public class CollisionController implements ContactListener {
                                                         w.getY(),
                                                         worldController.getWaterIndicatorTexture(),
                                                         worldController.getTilemap(),
-                                                        0.5f));
+                                                        0.75f));
             }
         }
         // Some tolerance is necessary to prevent jittering
