@@ -36,7 +36,7 @@ public class Water extends Resource {
     }
 
     public void clear() {
-//        currRegen = 0;
+        currRegen = 0;
         currDelay = 0;
     }
 
@@ -64,9 +64,8 @@ public class Water extends Resource {
             }
             waterFilmstrip.setFrame((int)animFrame);
         } else {
-            waterFilmstrip.setFrame(Math.round(
-                    (waterFilmstrip.getSize() - 1) * (getRegenRatio())));
-            animFrame = 13;
+            waterFilmstrip.setFrame((int)(10 * getRegenRatio()));
+            animFrame = 10;
         }
     }
 

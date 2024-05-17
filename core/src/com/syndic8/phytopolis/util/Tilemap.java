@@ -281,8 +281,8 @@ public class Tilemap {
                             .equals("water")) {
                         FilmStrip waterFilmstrip = new FilmStrip(
                                 resourceTextures[0],
-                                2,
-                                13);
+                                1,
+                                26);
                         Water w = new Water(xMid,
                                             yMid,
                                             tileWidth,
