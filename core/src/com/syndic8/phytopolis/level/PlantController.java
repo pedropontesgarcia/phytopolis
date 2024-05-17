@@ -508,6 +508,14 @@ public class PlantController {
         }
     }
 
+    public boolean hasLeaf(Vector2 mousePos) {
+        float x = mousePos.x;
+        float y = mousePos.y;
+        int xIndex = screenCoordToIndex(x, y)[0];
+        int yIndex = screenCoordToIndex(x, y)[1];
+        return hasLeaf(xIndex, yIndex);
+    }
+
     public float getMaxLeafHeight() {
         if (getMaxLeafXIndex() != -1 &&
                 inBounds(getMaxLeafXIndex(), getMaxLeafYIndex()) &&

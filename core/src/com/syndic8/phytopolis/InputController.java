@@ -467,7 +467,7 @@ public class InputController implements InputProcessor {
     @Override
     public boolean scrolled(float v, float v1) {
         scrolled -= v1;
-        scrolled = Math.max(0, Math.min(height, scrolled));
+        scrolled = Math.max(-height, Math.min(height, scrolled));
         return false;
     }
 

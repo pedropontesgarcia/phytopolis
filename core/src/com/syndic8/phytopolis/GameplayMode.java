@@ -284,7 +284,7 @@ public class GameplayMode extends WorldController {
         // Process actions in object model
         avatar.setMovement(ic.getHorizontal() * avatar.getForce());
         avatar.setJumping(ic.didJump());
-        if (ic.getHorizontal() != 0 || ic.didJump()) {
+        if (ic.getHorizontal() != 0 || ic.didJump() || ic.isDropKeyDown()) {
             ic.resetScrolled();
         }
         processPlantGrowth();
@@ -305,8 +305,11 @@ public class GameplayMode extends WorldController {
         //                                                   cameraHeight / 2f,
         //                                           avatar.getY()) + ic.getScrolled()));
         cameraVector.set(tilemap.getWorldWidth() / 2f,
-                         Math.max(cameraHeight / 2f, avatar.getY()) +
-                                 ic.getScrolled());
+                         Math.max(cameraHeight / 2f, avatar.getY() + ic.getScrolled()));
+        System.out.println(cameraVector.y);
+        System.out.println(cameraHeight / 2f);
+        System.out.println(avatar.getY() + ic.getScrolled());
+
         // generate hazards please
         for (Model m : objects) {
             if (m instanceof Water) {

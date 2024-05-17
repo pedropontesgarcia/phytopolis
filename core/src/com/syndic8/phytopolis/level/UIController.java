@@ -270,8 +270,13 @@ public class UIController {
                     else Gdx.graphics.setCursor(noWaterCursor);
                 } else if ((ic.isGrowLeafModSet() || (ic.isGrowBranchModSet() &&
                         !ic.isGrowBranchModDown())) && ic.isGrowLeafModDown()) {
-                    if (rc.canGrowLeaf()) Gdx.graphics.setCursor(leafCursor);
-                    else Gdx.graphics.setCursor(noWaterCursor);
+                    if (pc.hasLeaf(unprojMousePos)) {
+                        if (rc.canUpgrade()) Gdx.graphics.setCursor(leafCursor);
+                        else Gdx.graphics.setCursor(noWaterCursor);
+                    } else {
+                        if (rc.canGrowLeaf()) Gdx.graphics.setCursor(leafCursor);
+                        else Gdx.graphics.setCursor(noWaterCursor);
+                    }
                 } else {
                     Gdx.graphics.setCursor(normalCursor);
                 }
