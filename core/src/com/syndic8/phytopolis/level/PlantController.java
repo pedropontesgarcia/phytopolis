@@ -6,6 +6,7 @@ import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.Fixture;
 import com.badlogic.gdx.physics.box2d.QueryCallback;
 import com.badlogic.gdx.physics.box2d.World;
+import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.ObjectSet;
 import com.badlogic.gdx.utils.Queue;
 import com.syndic8.phytopolis.GameCanvas;
@@ -15,6 +16,8 @@ import com.syndic8.phytopolis.level.models.*;
 import com.syndic8.phytopolis.util.FilmStrip;
 import com.syndic8.phytopolis.util.Tilemap;
 import edu.cornell.gdiac.audio.SoundEffect;
+
+import java.util.Random;
 
 public class PlantController {
 
@@ -40,6 +43,13 @@ public class PlantController {
      * branch texture
      */
     protected FilmStrip branchTexture;
+
+    protected FilmStrip firstBranchTexture;
+    protected FilmStrip secondBranchTexture;
+    protected FilmStrip thirdBranchTexture;
+
+    private Random branchChoice;
+
     /**
      * static branch texture
      */
@@ -135,7 +145,18 @@ public class PlantController {
         this.resourceController = rc;
         tilemap = tm;
         removedHazards = new ObjectSet<>();
+        branchChoice = new Random();
         this.soundController = SoundController.getInstance();
+    }
+    private FilmStrip getcurrentBranch(){
+        int num = branchChoice.nextInt(3);
+        if (num == 0){
+            return firstBranchTexture;
+        }else if (num== 1){
+            return secondBranchTexture;
+        }else{
+            return thirdBranchTexture;
+        }
     }
 
     public Leaf.leafType getLevelLeaf(String l) {
@@ -852,11 +873,24 @@ public class PlantController {
                                       1,
                                       5,
                                       5);
+        firstBranchTexture =
+                new FilmStrip(directory.getEntry(
+                        "gameplay:branch1",
+                        Texture.class), 1, 5, 5);
+        secondBranchTexture =
+                new FilmStrip(directory.getEntry(
+                        "gameplay:branch2",
+                        Texture.class), 1, 5, 5);
+        thirdBranchTexture =
+                new FilmStrip(directory.getEntry(
+                        "gameplay:branch3",
+                        Texture.class), 1, 5, 5);
         staticBranchTexture = new FilmStrip(directory.getEntry("gameplay:branch",
                                                                Texture.class),
                                             1,
                                             5,
                                             5);
+
         glowTexture = directory.getEntry("gameplay:glow", Texture.class);
         staticBranchTexture.setFrame(4);
         leafTexture = new FilmStrip(directory.getEntry("gameplay:leaf",
@@ -1046,7 +1080,7 @@ public class PlantController {
             if (newBranch != null) {
                 switch (type) {
                     case NORMAL:
-                        newBranch.setFilmStrip(branchTexture);
+                        newBranch.setFilmStrip(getcurrentBranch());
                         break;
                     case REINFORCED:
                         newBranch.setTexture(enBranchTextureUp);
@@ -1287,19 +1321,19 @@ public class PlantController {
                 case LEFT:
                     if (hasBranchInDirection(branchDirection.LEFT)) {
                         left.setBranchType(btype);
-                        left.setFilmStrip(branchTexture);
+                        left.setFilmStrip(getcurrentBranch());
                     }
                     break;
                 case RIGHT:
                     if (hasBranchInDirection(branchDirection.RIGHT)) {
                         right.setBranchType(btype);
-                        right.setFilmStrip(branchTexture);
+                        right.setFilmStrip(getcurrentBranch());
                     }
                     break;
                 case MIDDLE:
                     if (hasBranchInDirection(branchDirection.MIDDLE)) {
                         middle.setBranchType(btype);
-                        middle.setFilmStrip(branchTexture);
+                        middle.setFilmStrip(getcurrentBranch());
                     }
                     break;
             }

@@ -43,6 +43,12 @@ public class UIController {
     private float animProgress;
     private boolean currNotEnough;
 
+    private boolean yellowFlash;
+    private int flashTime;
+    private static final int MAX_FLASH_TIME = 80;
+    private final Color yellowColor;
+    private float waterSize;
+
     /**
      * Initializes a UIController.
      */
@@ -75,6 +81,9 @@ public class UIController {
         stage.addActor(progressBar);
         animProgress = 0;
         currNotEnough = false;
+        yellowFlash = false;
+        yellowColor = new Color(224f,231f,34f, 0f);
+        waterSize = 1.0f;
         initialize();
     }
 
@@ -129,6 +138,17 @@ public class UIController {
         pixmap = getPixmapFromRegion(noWaterCursorTexture);
         noWaterCursor = Gdx.graphics.newCursor(pixmap, 0, 0);
         pixmap.dispose();
+    }
+
+    public void setFlash(boolean value){
+        if (value){
+            flashTime = MAX_FLASH_TIME;
+        }
+        yellowFlash = value;
+
+    }
+    public void setWaterSize(float value){
+        waterSize = value;
     }
 
     public static Pixmap getPixmapFromRegion(TextureRegion region) {
@@ -189,8 +209,22 @@ public class UIController {
             label.setColor((int) (timer.time * 2) % 2 == 0 ?
                                    Color.WHITE :
                                    Color.FIREBRICK);
-        } else {
+        }else if (yellowFlash){
+            label.setColor((int) (timer.time * 4) % 2 == 0?
+                    Color.WHITE :
+                    Color.YELLOW);
+            flashTime--;
+            if (flashTime <= 0){
+                flashTime = 0;
+                setFlash(false);
+            }
+        }
+        else {
             label.setColor(Color.WHITE);
+        }
+
+        if (waterSize > 1.0f){
+            waterSize -= 0.01f;
         }
         progressBar.setValue(fireProgress);
         progressBar.setVisible(hazardController.findValidFireLocs());
@@ -322,8 +356,8 @@ public class UIController {
         c.drawHud(current,
                   w * 0.075f - txWidthDrawn / 2f,
                   h * 0.85f,
-                  txWidthDrawn,
-                  txHeightDrawn);
+                  txWidthDrawn*waterSize,
+                  txHeightDrawn*waterSize);
         if (progressBar.isVisible()) {
             c.drawHud(fireTexture,
                       w * 0.385f,

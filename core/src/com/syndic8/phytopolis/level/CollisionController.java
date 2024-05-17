@@ -268,6 +268,7 @@ public class CollisionController implements ContactListener {
             }
 
             l.setSun(true);
+            uiController.setFlash(true);
             contact.setEnabled(false);
             s.clear();
             worldController.addObject(new Indicator(s.getX(),
@@ -288,6 +289,7 @@ public class CollisionController implements ContactListener {
             if (w.isFull() && !resourceController.fullWater()) {
                 w.clear();
                 resourceController.pickupWater();
+                uiController.setWaterSize(1.2f);
                 setAddedWater(true);
             }
         }
