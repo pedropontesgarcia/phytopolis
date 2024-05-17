@@ -31,10 +31,6 @@ public class Water extends Resource {
         animFrame = 13;
     }
 
-    public boolean isFull() {
-        return currRegen == MAX_REGEN;
-    }
-
     public void clear() {
         currRegen = 0;
         currDelay = 0;
@@ -62,11 +58,19 @@ public class Water extends Resource {
             if (animFrame >= 26) {
                 animFrame = 13;
             }
-            waterFilmstrip.setFrame((int)animFrame);
+            waterFilmstrip.setFrame((int) animFrame);
         } else {
-            waterFilmstrip.setFrame((int)(10 * getRegenRatio()));
+            waterFilmstrip.setFrame((int) (10 * getRegenRatio()));
             animFrame = 10;
         }
+    }
+
+    public boolean isFull() {
+        return currRegen == MAX_REGEN;
+    }
+
+    public float getRegenRatio() {
+        return (float) currRegen / MAX_REGEN;
     }
 
     public void draw(GameCanvas canvas) {
@@ -81,10 +85,6 @@ public class Water extends Resource {
                     getAngle(),
                     sclX,
                     sclY);
-    }
-
-    public float getRegenRatio() {
-        return (float) currRegen / MAX_REGEN;
     }
 
 }

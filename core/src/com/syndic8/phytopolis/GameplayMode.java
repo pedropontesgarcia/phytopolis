@@ -654,7 +654,6 @@ public class GameplayMode extends WorldController {
      * Lays out the game geography.
      */
     private void populateLevel() {
-        tilemap.populateLevel(this);
         JsonValue defaults = constants.get("defaults");
 
         // Add floor

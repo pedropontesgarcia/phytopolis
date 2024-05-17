@@ -265,16 +265,19 @@ public class Tilemap {
         JsonValue tilesetJson = directory.getEntry(RESOURCES_TILESET,
                                                    JsonValue.class);
         JsonValue tilesJson = tilesetJson.get("tiles");
-
+        System.out.println(tilemapHeight * tilemapWidth);
+        int numTimes = 0;
         for (int row = 0; row < tilemapHeight; row++) {
             for (int col = 0; col < tilemapWidth; col++) {
                 int tileValue = resourceLayer.get("data").asIntArray()[
                         row * tilemapWidth + col];
                 if (tileValue != 0) {
+                    numTimes++;
                     JsonValue tileJson = tilesJson.get(tileValue - tilemap.get(
                             "tilesets").get(i).getInt("firstgid"));
                     float xMid = (col + 0.5f) * tileWidth;
                     float yMid = worldHeight - (row + 0.5f) * tileHeight;
+                    System.out.println(tileValue);
                     if (tileJson.get("properties")
                             .get(0)
                             .getString("value")
@@ -290,27 +293,13 @@ public class Tilemap {
                                             waterFilmstrip,
                                             this,
                                             1);
+                        System.out.println("CREATED WO'AH");
                         ctrl.addObject(w);
-
-                    } else if (tileJson.get("properties")
-                            .get(0)
-                            .getString("value")
-                            .equals("sun")) {
-                        //                        Sun s = new Sun(xMid,
-                        //                                        yMid,
-                        //                                        tileWidth * 0.5f,
-                        //                                        tileHeight * 0.5f,
-                        //                                        sunCircle,
-                        //                                        sunRay,
-                        //                                        sunSwirl,
-                        //                                        this,
-                        //                                        1);
-                        //                        ctrl.addObject(s);
-                        //                        s.setVY(-0.5f);
                     }
                 }
             }
         }
+        System.out.println(numTimes);
     }
 
     private void populateHazards() {
