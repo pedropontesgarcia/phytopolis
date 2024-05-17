@@ -24,6 +24,7 @@ public class Leaf extends BoxObject {
     private boolean bouncy;
 
     private FilmStrip bounceTexture;
+    private FilmStrip upgradeTexture;
     private boolean sun;
 
     private InputController ic;
@@ -77,6 +78,9 @@ public class Leaf extends BoxObject {
     public void setBounceTexture(FilmStrip value){
         bounceTexture = value;
     }
+    public void setUpgradeTexture(FilmStrip value){
+        upgradeTexture = value;
+    }
 
 
 
@@ -103,6 +107,7 @@ public class Leaf extends BoxObject {
     public void setSun(boolean value){
         sun = value;
         animFrame = 2;
+        bounceFrame = 2;
     }
 
     /**
@@ -135,29 +140,40 @@ public class Leaf extends BoxObject {
                 }
             }
         }else{
-            if (bouncy && ic.didJump()) {
-                setFilmStrip(bounceTexture);
-                bouncyTimer = bouncyTimerMax;
-                bouncy = false;
-            }
-            if (bouncyTimer > 0){
-                if (bounceFrame >= BOUNCE_FRAMES) {
-                    bounceFrame -= BOUNCE_FRAMES;
+            if (!sun){
+                if (bouncy && ic.didJump()) {
+                    setFilmStrip(bounceTexture);
+                    bouncyTimer = bouncyTimerMax;
+                    bouncy = false;
                 }
-                if (bounceFrame < BOUNCE_FRAMES) {
-                    bounceFrame +=ANIMATION_SPEED*2;
+                if (bouncyTimer > 0){
+                    if (bounceFrame >= BOUNCE_FRAMES) {
+                        bounceFrame -= BOUNCE_FRAMES;
+                    }
+                    if (bounceFrame < BOUNCE_FRAMES) {
+                        bounceFrame +=ANIMATION_SPEED*2;
+                    }
+                }else{
+                    if (bounceFrame < NUM_BOUNCY_FRAMES) {
+                        bounceFrame +=ANIMATION_SPEED;
+                    }
+                    if (bounceFrame >= NUM_BOUNCY_FRAMES) {
+                        bounceFrame -=1;
+                    }
+                }
+                if (!bouncy){
+                    bouncyTimer = Math.max (bouncyTimer-1, 0);
                 }
             }else{
-                if (bounceFrame < NUM_BOUNCY_FRAMES) {
-                    bounceFrame +=ANIMATION_SPEED;
-                }
-                if (bounceFrame >= NUM_BOUNCY_FRAMES) {
-                    bounceFrame -=1;
+                setFilmStrip(upgradeTexture);
+                if (bounceFrame >= 6){
+                    health = 5;
+                    sun = false;
+                }else if (bounceFrame < 6){
+                    bounceFrame += ANIMATION_SPEED;
                 }
             }
-            if (!bouncy){
-                bouncyTimer = Math.max (bouncyTimer-1, 0);
-            }
+
 
 
         }
