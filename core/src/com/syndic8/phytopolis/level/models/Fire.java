@@ -14,6 +14,7 @@ public class Fire extends Hazard {
     private final float growthRate = 0.0001f; // Growth rate per second
     private float size = .4f; // Initial size
     private float elapsedTime = 0.0f; // Elapsed time since last update
+    private float ANIMATION_SPEED = 10.0f/3.0f;
 
     /**
      * Constructs a Fire object with a specified location and duration.
@@ -39,15 +40,15 @@ public class Fire extends Hazard {
         return ModelType.FIRE;
     }
 
-    public void update(float delta) {
+    public void update(float dt) {
         if (animFrame < NUM_FRAMES) {
-            animFrame += animationSpeed;
+            animFrame += dt * ANIMATION_SPEED;
         }
         if (animFrame >= NUM_FRAMES) {
             animFrame = 0;
         }
         // Update elapsed time
-        elapsedTime += delta;
+        elapsedTime += dt;
         // Calculate size increment based on growth rate and elapsed time
         float sizeIncrement = growthRate * elapsedTime;
         // Limit size to maximum of 1f

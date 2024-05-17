@@ -7,7 +7,12 @@ import com.syndic8.phytopolis.util.Tilemap;
 
 public class Bug extends Hazard {
 
-    private final int NUM_FRAMES = 6;
+    private final int NUM_NORMAL_FRAMES = 6;
+    private final int NUM_TOTAL_FRAMES = 9;
+
+    private boolean despawning;
+    private boolean doneAnim;
+    private float ANIMATION_SPEED = 10.0f/3.0f;
 
     /**
      * Constructs a Bug object with a specified location and duration.
@@ -16,6 +21,8 @@ public class Bug extends Hazard {
     public Bug(Vector2 pos, Vector2 location, int duration, Tilemap tm, float texScl) {
         super(tm, texScl, pos.set(pos.x, pos.y + 0.4f), location, duration);
         setGravityScale(0);
+        despawning = false;
+        doneAnim = false;
     }
     @Override
     public ModelType getType() {
@@ -43,12 +50,32 @@ public class Bug extends Hazard {
                 sclY);
     }
 
+    public void setDespawning(boolean value) {
+        despawning = value;
+    }
+
+    public boolean getDoneAnim() {
+        return doneAnim;
+    }
+
     @Override
-    public void update(float delta) {
-        if (animFrame < NUM_FRAMES) {
-            animFrame += animationSpeed;
+    public void update(float dt) {
+        if (despawning) {
+            if (animFrame < NUM_NORMAL_FRAMES) {
+                animFrame = NUM_NORMAL_FRAMES;
+            } else {
+                animFrame += dt * ANIMATION_SPEED;
+            }
+            if (animFrame >= NUM_TOTAL_FRAMES) {
+                doneAnim = true;
+                animFrame = NUM_TOTAL_FRAMES - 1;
+            }
         } else {
-            animFrame = 3;
+            if (animFrame < NUM_NORMAL_FRAMES) {
+                animFrame += dt * ANIMATION_SPEED;
+            } else {
+                animFrame = 3;
+            }
         }
     }
 }

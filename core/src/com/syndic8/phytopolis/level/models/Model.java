@@ -27,7 +27,6 @@ public abstract class Model {
      */
     protected FilmStrip texture;
     protected float animFrame;
-    protected float animationSpeed;
     protected int zIndex;
 
     public Model(float x, float y, Tilemap tilemap, float textureSclInTiles) {
@@ -56,10 +55,6 @@ public abstract class Model {
         texture = animation;
         origin = new Vector2(texture.getRegionWidth() / 2.0f,
                              texture.getRegionHeight() / 2.0f);
-    }
-
-    public void setAnimationSpeed(float speed) {
-        animationSpeed = speed;
     }
 
     /**
