@@ -68,6 +68,8 @@ public class GameplayMode extends WorldController {
     //private int leafSound;
     private int boingSound;
     private Texture sunIndicatorTexture;
+    private Texture waterIndicatorTexture;
+    private Texture minusWaterIndicatorTexture;
 
     /**
      * Creates and initialize a new instance of the game.
@@ -147,6 +149,11 @@ public class GameplayMode extends WorldController {
                                          3);
             sunIndicatorTexture = directory.getEntry("ui:sun_indicator",
                                                      Texture.class);
+            waterIndicatorTexture = directory.getEntry("ui:water_indicator",
+                                                       Texture.class);
+            minusWaterIndicatorTexture = directory.getEntry(
+                    "ui:minus_water_indicator",
+                    Texture.class);
 
             constants = directory.getEntry("gameplay:constants",
                                            JsonValue.class);
@@ -401,6 +408,12 @@ public class GameplayMode extends WorldController {
                                                            unprojMousePos.y);
                 if (branch != null) {
                     addObject(branch);
+                    Vector2 branchCenter = getBranchCenter(branch);
+                    addObject(new Indicator(branchCenter.x,
+                                            branchCenter.y,
+                                            getMinusWaterIndicatorTexture(),
+                                            tilemap,
+                                            0.5f));
                     soundController.playSound(plantSound);
                 }
             }
@@ -431,11 +444,28 @@ public class GameplayMode extends WorldController {
                                                          width);
                 if (newLeaf != null) {
                     addObject(newLeaf);
+                    addObject(new Indicator(newLeaf.getX(),
+                                            newLeaf.getY(),
+                                            getMinusWaterIndicatorTexture(),
+                                            tilemap,
+                                            0.5f));
                     //soundController.playSound(leafSound);
                 }
 
             }
         }
+    }
+
+    private Vector2 getBranchCenter(Branch branch) {
+        return new Vector2((float) (branch.getX() -
+                tilemap.getTileHeight() / 2f * Math.sin(branch.getAngle())),
+                           (float) (branch.getY() +
+                                   tilemap.getTileHeight() / 2f *
+                                           Math.cos(branch.getAngle())));
+    }
+
+    public Texture getMinusWaterIndicatorTexture() {
+        return minusWaterIndicatorTexture;
     }
 
     private Leaf.leafType getLevelLeafType() {
@@ -726,6 +756,10 @@ public class GameplayMode extends WorldController {
                                                       plantController,
                                                       hazardController);
         world.setContactListener(collisionController);
+    }
+
+    public Texture getWaterIndicatorTexture() {
+        return waterIndicatorTexture;
     }
 
 }

@@ -1,18 +1,16 @@
 package com.syndic8.phytopolis.level.models;
 
 import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.math.Vector2;
 import com.syndic8.phytopolis.GameCanvas;
-import com.syndic8.phytopolis.util.FilmStrip;
 import com.syndic8.phytopolis.util.Tilemap;
 
 public class Branch extends Model {
-    private static final float ANIMATION_SPEED = 1/6.0f;
+
+    private static final float ANIMATION_SPEED = 1 / 6.0f;
     private final float angle;
+    private final Color ghostColor = new Color(1, 1, 1, .5f);
     private branchType type;
     private float animFrame;
-
-    private final Color ghostColor = new Color(1, 1, 1, .5f);
 
     public Branch(float x,
                   float y,
@@ -27,6 +25,10 @@ public class Branch extends Model {
         zIndex = 1;
     }
 
+    public float getAngle() {
+        return angle;
+    }
+
     /**
      * Returns the type of this object.
      * <p>
@@ -37,24 +39,6 @@ public class Branch extends Model {
     @Override
     public ModelType getType() {
         return ModelType.BRANCH;
-    }
-
-    /**
-     * returns the branch type of this branch
-     *
-     * @return the type of branch
-     */
-    public branchType getBranchType() {
-        return type;
-    }
-
-    /**
-     * changes the branch type to the given value
-     *
-     * @param t the new branch type to be assigned to this branch
-     */
-    public void setBranchType(branchType t) {
-        type = t;
     }
 
     /**
@@ -87,7 +71,7 @@ public class Branch extends Model {
         float sclY = height / texture.getRegionHeight();
         float x = texture.getRegionWidth() / 2.0f;
         float y = texture.getRegionHeight() / 2.0f;
-        getFilmStrip().setFrame((int)animFrame);
+        getFilmStrip().setFrame((int) animFrame);
         canvas.draw(texture,
                     Color.WHITE,
                     x,
@@ -97,6 +81,24 @@ public class Branch extends Model {
                     angle,
                     sclX,
                     sclY);
+    }
+
+    /**
+     * returns the branch type of this branch
+     *
+     * @return the type of branch
+     */
+    public branchType getBranchType() {
+        return type;
+    }
+
+    /**
+     * changes the branch type to the given value
+     *
+     * @param t the new branch type to be assigned to this branch
+     */
+    public void setBranchType(branchType t) {
+        type = t;
     }
 
     /**
@@ -113,14 +115,14 @@ public class Branch extends Model {
         float y = texture.getRegionHeight() / 2.0f;
         texture.setFrame(4);
         canvas.draw(texture,
-                ghostColor,
-                x,
-                0,
-                getX(),
-                getY(),
-                angle,
-                sclX,
-                sclY);
+                    ghostColor,
+                    x,
+                    0,
+                    getX(),
+                    getY(),
+                    angle,
+                    sclX,
+                    sclY);
     }
 
     /**
@@ -130,9 +132,9 @@ public class Branch extends Model {
      *
      * @param canvas Drawing context
      */
-//    public void drawDebug(GameCanvas canvas) {
-//        draw(canvas);
-//    }
+    //    public void drawDebug(GameCanvas canvas) {
+    //        draw(canvas);
+    //    }
 
     /**
      * enum containing possible branch types

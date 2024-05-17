@@ -20,6 +20,13 @@ public class Indicator extends Model {
         color = new Color(Color.WHITE);
     }
 
+    public Indicator(float x, float y, Texture tx, Tilemap tilemap, float scl) {
+        super(x, y, tilemap, 1.5f * scl);
+        texture = tx;
+        tmr = 0;
+        color = new Color(Color.WHITE);
+    }
+
     @Override
     public int getZIndex() {
         return 400;

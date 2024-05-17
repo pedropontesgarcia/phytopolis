@@ -292,6 +292,11 @@ public class CollisionController implements ContactListener {
                 resourceController.pickupWater();
                 uiController.setWaterSize(1.2f);
                 setAddedWater(true);
+                worldController.addObject(new Indicator(w.getX(),
+                                                        w.getY(),
+                                                        worldController.getWaterIndicatorTexture(),
+                                                        worldController.getTilemap(),
+                                                        0.5f));
             }
         }
         // Some tolerance is necessary to prevent jittering

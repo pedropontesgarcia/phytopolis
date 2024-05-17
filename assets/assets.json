@@ -63,6 +63,8 @@
     "ui:no-grow-cursor": "ui/no-grow-cursor.png",
     "ui:no-water-cursor": "ui/no-water-cursor.png",
     "ui:sun_indicator": "ui/indicators/10s.png",
+    "ui:water_indicator": "ui/indicators/add-water.png",
+    "ui:minus_water_indicator": "ui/indicators/minus-water.png",
     "ui:vignette": "ui/vignette2.png",
     "over:victory": "gameplay/victory_text.png",
     "over:failure": "gameplay/failure.png"
