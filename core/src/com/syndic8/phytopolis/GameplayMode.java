@@ -115,7 +115,9 @@ public class GameplayMode extends WorldController {
         backgroundMusic = soundController.addMusic(bgm);
         soundController.setMusic(backgroundMusic);
         soundController.setLooping(true);
+        soundController.setActualMusicVolume(soundController.getUserMusicVolume());
         soundController.playMusic();
+        soundController.pauseMusic();
         SoundEffect plantSoundEffect = directory.getEntry("growbranch2",
                                                           SoundEffect.class);
         plantSound = soundController.addSoundEffect(plantSoundEffect);
@@ -220,6 +222,7 @@ public class GameplayMode extends WorldController {
             soundController.setMusic(backgroundMusic);
         }
         if (!soundController.isMusicPlaying()) {
+            soundController.setActualMusicVolume(soundController.getUserMusicVolume());
             soundController.playMusic();
         }
         uiController.startTimer();
@@ -240,7 +243,10 @@ public class GameplayMode extends WorldController {
         if (!super.preUpdate(dt)) {
             return false;
         }
-        if (getFadeState() == Fade.HIDDEN) fadeIn(0.5f);
+        if (getFadeState() == Fade.HIDDEN) {
+            doVolumeFade(false);
+            fadeIn(0.5f);
+        }
 
         if (!isFailure() && uiController.timerDone()) {
             setFailure(true);
@@ -263,12 +269,11 @@ public class GameplayMode extends WorldController {
      * @param dt Number of seconds since last animation frame
      */
     public void update(float dt) {
+        if (getFadeState() == Fade.FADE_OUT)
+            soundController.setActualMusicVolume(
+                    super.getVolume() * soundController.getUserMusicVolume());
         int water = resourceController.getCurrWater();
         hazardController.update(dt);
-        soundController.setActualMusicVolume(super.getVolume());
-        //        System.out.println("Music playing? " + soundController.isMusicPlaying());
-        //        System.out.println("What music? " + soundController.getPlayingMusic());
-        //        System.out.println("Is it looping? " + soundController.getIsLooping());
         // Process actions in object model
         avatar.setMovement(ic.getHorizontal() * avatar.getForce());
         avatar.setJumping(ic.didJump());
@@ -344,7 +349,7 @@ public class GameplayMode extends WorldController {
                 !isComplete()) {
 
             setComplete(true);
-            fadeOut(3);
+            fadeOut(1f);
             doVolumeFade(true);
             uiController.pauseTimer();
             FileHandle saveFile = Gdx.files.absolute(OSUtils.getSaveFile());
@@ -487,7 +492,7 @@ public class GameplayMode extends WorldController {
      */
     public void draw() {
         canvas.clear();
-        canvas.cameraUpdate(cameraVector);
+        canvas.cameraUpdate(cameraVector, true);
         canvas.beginGame();
         drawBackground();
         tilemap.draw(canvas);
@@ -548,16 +553,42 @@ public class GameplayMode extends WorldController {
         uiController.pauseTimer();
     }
 
+    /**
+     * Draw the physics objects to the canvas
+     * <p>
+     * For simple worlds, this method is enough by itself.  It will need
+     * to be overriden if the world needs fancy backgrounds or the like.
+     * <p>
+     * The method draws all objects in the order that they were added.
+     */
+    public void drawLevelOver() {
+        canvas.clear();
+        canvas.beginGame();
+        drawBackground();
+        tilemap.draw(canvas);
+        super.drawLevelOver();
+        canvas.end();
+        super.draw(canvas);
+    }
+
     private void drawBackground() {
         if (background != null) {
             canvas.draw(background,
                         Color.WHITE,
                         -0.1f,
-                        -0.1f,
-                        tilemap.getWorldWidth(),
-                        tilemap.getWorldWidth() * background.getHeight() /
-                                background.getWidth());
+                        0,
+                        getBackgroundWidth(),
+                        getBackgroundHeight());
         }
+    }
+
+    public float getBackgroundWidth() {
+        return tilemap.getWorldWidth() * 1.05f;
+    }
+
+    public float getBackgroundHeight() {
+        return tilemap.getWorldWidth() * background.getHeight() /
+                background.getWidth();
     }
 
     /**

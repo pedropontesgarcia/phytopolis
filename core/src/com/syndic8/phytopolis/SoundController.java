@@ -89,6 +89,10 @@ public class SoundController {
         music.play();
     }
 
+    public void pauseMusic() {
+        music.pause();
+    }
+
     public void stopMusic() {
         music.stop();
     }

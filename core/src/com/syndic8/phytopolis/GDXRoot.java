@@ -39,7 +39,7 @@ public class GDXRoot extends Game implements ScreenListener {
         menu = new MainMenuMode("assets.json", canvas, 15);
         controller = new GameplayMode(canvas);
         levelSelect = new LevelSelectMode(canvas);
-        levelOver = new LevelOverMode(canvas);
+        levelOver = new LevelOverMode(canvas, controller);
         pause = new PauseMode(canvas, controller);
         Gdx.input.setInputProcessor(InputController.getInstance()
                                             .getMultiplexer());
@@ -96,9 +96,9 @@ public class GDXRoot extends Game implements ScreenListener {
             menu.setBackgroundMusic(levelSelect.getBackgroundMusic());
             setScreen(menu);
         } else if (screen == levelSelect && exitCode == EXIT_LEVELS.ordinal()) {
+            controller.fadeOut(0);
             controller.setLevel(levelSelect.getLevel());
             controller.gatherAssets(directory);
-            controller.fadeOut(0);
             controller.reset();
             controller.setScreenListener(this);
             setScreen(controller);

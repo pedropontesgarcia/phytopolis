@@ -231,9 +231,12 @@ public class GameCanvas {
         Gdx.gl.glDisable(GL20.GL_BLEND);
     }
 
-    public void cameraUpdate(Vector2 pos) {
+    public void cameraUpdate(Vector2 pos, boolean interpolate) {
         cameraCache.set(pos.x, pos.y, 0);
-        gameCamera.position.interpolate(cameraCache, 0.75f, Interpolation.fade);
+        if (interpolate) gameCamera.position.interpolate(cameraCache,
+                                                         0.75f,
+                                                         Interpolation.fade);
+        else gameCamera.position.set(pos, 0);
         gameCamera.update();
     }
 

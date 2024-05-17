@@ -22,7 +22,7 @@ public abstract class FadingScreen {
         this.fadeVolume = false;
     }
 
-    protected void update(float deltaTime) {
+    public void update(float deltaTime) {
         if (fadeDuration == 0) return;
         // Clamp between 0 and 1
         float linearAlpha = Math.max(Math.min(tmr / fadeDuration, 1), 0);
@@ -70,7 +70,9 @@ public abstract class FadingScreen {
         done = false;
         if (seconds == 0) {
             alpha = 0;
+            volume = 1;
             fadeState = Fade.SHOWN;
+            done = true;
         }
     }
 
@@ -81,8 +83,9 @@ public abstract class FadingScreen {
         done = false;
         if (seconds == 0) {
             alpha = 1;
-            volume = 1;
+            volume = 0;
             fadeState = Fade.HIDDEN;
+            done = true;
         }
     }
 

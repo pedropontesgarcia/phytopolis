@@ -777,7 +777,7 @@ public class HazardController {
     }
 
     public void update(float dt) {
-        fireProgress += dt * 3 * Math.sqrt(powerlinesTouching());
+        fireProgress += dt * 2 * Math.sqrt(powerlinesTouching());
     }
 
     public int powerlinesTouching() {

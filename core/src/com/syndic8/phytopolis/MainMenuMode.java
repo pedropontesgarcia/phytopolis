@@ -68,6 +68,7 @@ public class MainMenuMode extends FadingScreen implements Screen {
     private final GameCanvas canvas;
     private final SoundController soundController;
     private final Texture syndic8;
+    Cursor cursor;
     private State state;
     private float timer;
     private boolean ready;
@@ -93,7 +94,6 @@ public class MainMenuMode extends FadingScreen implements Screen {
     private boolean exit;
     private int clickSound;
     private boolean menuWasMade;
-    Cursor cursor;
 
     /**
      * Creates a MainMenuMode with the default budget, size and position.
@@ -164,49 +164,6 @@ public class MainMenuMode extends FadingScreen implements Screen {
         Gdx.graphics.setCursor(cursor);
     }
 
-    private void createMenu() {
-        menu = new Menu(3, 0.1f, 0, -0.2f, 1, Align.center, Menu.DEFAULT_WIDTH);
-        menuContainer = new MenuContainer(menu, canvas);
-        Menu optionsMenu = new OptionsMenu(canvas, menuContainer, menu);
-        ClickListener lvlListener = new ClickListener() {
-            @Override
-            public void clicked(InputEvent event, float x, float y) {
-                if(progress >= 1) SoundController.getInstance()
-                        .playSound(SharedAssetContainer.getInstance()
-                                           .getSound("click"));
-                exit = true;
-            }
-        };
-        ClickListener exitListener = new ClickListener() {
-            @Override
-            public void clicked(InputEvent event, float x, float y) {
-                if(progress >= 1) SoundController.getInstance()
-                        .playSound(SharedAssetContainer.getInstance()
-                                           .getSound("click"));
-                Gdx.app.exit();
-            }
-        };
-        menu.addItem(new MenuItem("PLAY",
-                                  0,
-                                  lvlListener,
-                                  menu,
-                                  menuContainer,
-                                  canvas));
-        menu.addItem(new MenuItem("OPTIONS",
-                                  1,
-                                  optionsMenu,
-                                  menu,
-                                  menuContainer,
-                                  canvas));
-        menu.addItem(new MenuItem("QUIT",
-                                  2,
-                                  exitListener,
-                                  menu,
-                                  menuContainer,
-                                  canvas));
-        menuContainer.populate();
-    }
-
     /**
      * Returns the budget for the asset loader.
      * <p>
@@ -267,7 +224,7 @@ public class MainMenuMode extends FadingScreen implements Screen {
         if (getFadeState() != Fade.SHOWN) {
             fadeIn(0.5f);
         }
-        if(menuContainer != null) menuContainer.activate();
+        if (menuContainer != null) menuContainer.activate();
     }
 
     /**
@@ -326,10 +283,6 @@ public class MainMenuMode extends FadingScreen implements Screen {
         internal.dispose();
     }
 
-    public void resetCursor() {
-        Gdx.graphics.setCursor(cursor);
-    }
-
     /**
      * Update the status of this player mode.
      * <p>
@@ -339,7 +292,7 @@ public class MainMenuMode extends FadingScreen implements Screen {
      *
      * @param delta Number of seconds since last animation frame
      */
-    protected void update(float delta) {
+    public void update(float delta) {
         resetCursor();
         timer += delta;
         if (state == State.LOADING_FADEOUT && isFadeDone()) {
@@ -355,7 +308,7 @@ public class MainMenuMode extends FadingScreen implements Screen {
             progress = assets.getProgress();
         }
         if (progress >= 1 && timer >= LOAD_DELAY && state == State.LOADING) {
-            if(!menuWasMade){
+            if (!menuWasMade) {
                 createMenu();
                 menuWasMade = true;
                 menuContainer.activate();
@@ -387,7 +340,7 @@ public class MainMenuMode extends FadingScreen implements Screen {
             doVolumeFade(false);
             menuContainer.deactivate();
         }
-        if(menuContainer != null) menuContainer.update(delta);
+        if (menuContainer != null) menuContainer.update(delta);
         super.update(delta);
     }
 
@@ -432,6 +385,53 @@ public class MainMenuMode extends FadingScreen implements Screen {
             canvas.end();
         }
         super.draw(canvas);
+    }
+
+    public void resetCursor() {
+        Gdx.graphics.setCursor(cursor);
+    }
+
+    private void createMenu() {
+        menu = new Menu(3, 0.1f, 0, -0.2f, 1, Align.center, Menu.DEFAULT_WIDTH);
+        menuContainer = new MenuContainer(menu, canvas);
+        Menu optionsMenu = new OptionsMenu(canvas, menuContainer, menu);
+        ClickListener lvlListener = new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                if (progress >= 1) SoundController.getInstance()
+                        .playSound(SharedAssetContainer.getInstance()
+                                           .getSound("click"));
+                exit = true;
+            }
+        };
+        ClickListener exitListener = new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                if (progress >= 1) SoundController.getInstance()
+                        .playSound(SharedAssetContainer.getInstance()
+                                           .getSound("click"));
+                Gdx.app.exit();
+            }
+        };
+        menu.addItem(new MenuItem("PLAY",
+                                  0,
+                                  lvlListener,
+                                  menu,
+                                  menuContainer,
+                                  canvas));
+        menu.addItem(new MenuItem("OPTIONS",
+                                  1,
+                                  optionsMenu,
+                                  menu,
+                                  menuContainer,
+                                  canvas));
+        menu.addItem(new MenuItem("QUIT",
+                                  2,
+                                  exitListener,
+                                  menu,
+                                  menuContainer,
+                                  canvas));
+        menuContainer.populate();
     }
 /*
     private void playMusic() {

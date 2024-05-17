@@ -21,9 +21,7 @@ import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.World;
-import com.syndic8.phytopolis.level.models.Fire;
-import com.syndic8.phytopolis.level.models.GameObject;
-import com.syndic8.phytopolis.level.models.Model;
+import com.syndic8.phytopolis.level.models.*;
 import com.syndic8.phytopolis.util.FadingScreen;
 import com.syndic8.phytopolis.util.PooledList;
 import com.syndic8.phytopolis.util.ScreenListener;
@@ -429,6 +427,23 @@ public abstract class WorldController extends FadingScreen implements Screen {
         scale = null;
         world = null;
         canvas = null;
+    }
+
+    /**
+     * Draw the physics objects to the canvas
+     * <p>
+     * For simple worlds, this method is enough by itself.  It will need
+     * to be overriden if the world needs fancy backgrounds or the like.
+     * <p>
+     * The method draws all objects in the order that they were added.
+     *
+     * @param dt Number of seconds since last animation frame
+     */
+    public void drawLevelOver() {
+        for (Model obj : objects) {
+            if (obj instanceof Branch || obj instanceof Leaf ||
+                    obj instanceof Water) obj.draw(canvas);
+        }
     }
 
     protected boolean isPaused() {
