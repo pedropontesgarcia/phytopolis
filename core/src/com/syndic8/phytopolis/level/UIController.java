@@ -47,6 +47,7 @@ public class UIController {
     private int flashTime;
     private static final int MAX_FLASH_TIME = 80;
     private final Color yellowColor;
+    private float waterSize;
 
     /**
      * Initializes a UIController.
@@ -82,6 +83,7 @@ public class UIController {
         currNotEnough = false;
         yellowFlash = false;
         yellowColor = new Color(224f,231f,34f, 0f);
+        waterSize = 1.0f;
         initialize();
     }
 
@@ -144,6 +146,9 @@ public class UIController {
         }
         yellowFlash = value;
 
+    }
+    public void setWaterSize(float value){
+        waterSize = value;
     }
 
     public static Pixmap getPixmapFromRegion(TextureRegion region) {
@@ -216,6 +221,10 @@ public class UIController {
         }
         else {
             label.setColor(Color.WHITE);
+        }
+
+        if (waterSize > 1.0f){
+            waterSize -= 0.01f;
         }
         progressBar.setValue(fireProgress);
         progressBar.setVisible(hazardController.findValidFireLocs());
@@ -347,8 +356,8 @@ public class UIController {
         c.drawHud(current,
                   w * 0.075f - txWidthDrawn / 2f,
                   h * 0.85f,
-                  txWidthDrawn,
-                  txHeightDrawn);
+                  txWidthDrawn*waterSize,
+                  txHeightDrawn*waterSize);
         if (progressBar.isVisible()) {
             c.drawHud(fireTexture,
                       w * 0.385f,

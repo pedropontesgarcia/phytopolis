@@ -289,6 +289,7 @@ public class CollisionController implements ContactListener {
             if (w.isFull() && !resourceController.fullWater()) {
                 w.clear();
                 resourceController.pickupWater();
+                uiController.setWaterSize(1.2f);
                 setAddedWater(true);
             }
         }
