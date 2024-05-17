@@ -1143,7 +1143,8 @@ public class PlantController {
                     case BOUNCY:
                         leaf.setBounceTexture(bounceTexture);
                         leaf.setUpgradeTexture(bouncyLeafTexture);
-                        leaf.setFilmStrip(bouncyLeafTexture);
+                        //leaf.setFilmStrip
+                        // (bouncyLeafTexture);
                         break;
                     case NORMAL1:
                         leaf.setFilmStrip(leafTextureOne);

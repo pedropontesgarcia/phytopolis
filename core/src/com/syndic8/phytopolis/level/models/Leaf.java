@@ -18,10 +18,12 @@ public class Leaf extends BoxObject {
     private static final int BOUNCE_FRAMES = 6;
 
     private float bounceFrame;
-    private final int bouncyTimerMax = 10;
+    private float bounceFrame2;
+    private final int bouncyTimerMax = 70;
     private  int bouncyTimer = 0;
 
     private boolean bouncy;
+
 
     private FilmStrip bounceTexture;
     private FilmStrip upgradeTexture;
@@ -109,7 +111,20 @@ public class Leaf extends BoxObject {
         animFrame = 2;
         bounceFrame = 2;
     }
+    public void setBouncyTimer(int value){
+        bouncyTimer = value;
+    }
 
+    /**
+     * Updates the state of this object.
+     * <p>
+     * This method only is only intended to update values that change local state in
+     * well-defined ways, like position or a cooldown value.  It does not handle
+     * collisions (which are determined by the CollisionController).  It is
+     * not intended to interact with other objects in any way at all.
+     *
+     * @param delta Number of seconds since last animation frame
+     */
     /**
      * Updates the state of this object.
      * <p>
@@ -140,40 +155,31 @@ public class Leaf extends BoxObject {
                 }
             }
         }else{
-            if (!sun){
-                if (bouncy && ic.didJump()) {
-                    setFilmStrip(bounceTexture);
-                    bouncyTimer = bouncyTimerMax;
-                    bouncy = false;
+            if (bouncy && ic.didJump()) {
+                setFilmStrip(bounceTexture);
+                bouncyTimer = bouncyTimerMax;
+                bounceFrame2 = 0;
+                bouncy = false;
+            }
+            if (bouncyTimer > 0){
+                if (bounceFrame2 >= BOUNCE_FRAMES) {
+                    bounceFrame2 -= BOUNCE_FRAMES;
                 }
-                if (bouncyTimer > 0){
-                    if (bounceFrame >= BOUNCE_FRAMES) {
-                        bounceFrame -= BOUNCE_FRAMES;
-                    }
-                    if (bounceFrame < BOUNCE_FRAMES) {
-                        bounceFrame +=ANIMATION_SPEED*2;
-                    }
-                }else{
-                    if (bounceFrame < NUM_BOUNCY_FRAMES) {
-                        bounceFrame +=ANIMATION_SPEED;
-                    }
-                    if (bounceFrame >= NUM_BOUNCY_FRAMES) {
-                        bounceFrame -=1;
-                    }
-                }
-                if (!bouncy){
-                    bouncyTimer = Math.max (bouncyTimer-1, 0);
+                if (bounceFrame2 < BOUNCE_FRAMES) {
+                    bounceFrame2 +=ANIMATION_SPEED*2;
                 }
             }else{
                 setFilmStrip(upgradeTexture);
-                if (bounceFrame >= 6){
-                    health = 5;
-                    sun = false;
-                }else if (bounceFrame < 6){
-                    bounceFrame += ANIMATION_SPEED;
+                if (bounceFrame < NUM_BOUNCY_FRAMES) {
+                    bounceFrame +=ANIMATION_SPEED;
+                }
+                if (bounceFrame >= NUM_BOUNCY_FRAMES) {
+                    bounceFrame -=1;
                 }
             }
-
+            if (!bouncy){
+                bouncyTimer = Math.max (bouncyTimer-1, 0);
+            }
 
 
         }
@@ -193,7 +199,12 @@ public class Leaf extends BoxObject {
         float x = texture.getRegionWidth() / 2.0f;
         float y = texture.getRegionHeight() / 2.0f;
         if (getLeafType() == leafType.BOUNCY){
-            getFilmStrip().setFrame((int) bounceFrame);
+            if (bouncyTimer <= 0){
+                getFilmStrip().setFrame((int) bounceFrame);
+            }else{
+                getFilmStrip().setFrame((int) bounceFrame2);
+            }
+
         }else{
             getFilmStrip().setFrame((int) animFrame);
         }
