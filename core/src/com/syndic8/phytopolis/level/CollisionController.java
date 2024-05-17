@@ -269,6 +269,7 @@ public class CollisionController implements ContactListener {
 
             l.setSun(true);
             uiController.setFlash(true);
+            uiController.setLabelSize(1.2f);
             contact.setEnabled(false);
             s.clear();
             worldController.addObject(new Indicator(s.getX(),

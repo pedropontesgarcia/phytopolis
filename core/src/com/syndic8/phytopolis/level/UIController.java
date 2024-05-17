@@ -9,8 +9,8 @@ import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.scenes.scene2d.Stage;
-import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.ProgressBar;
+import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.syndic8.phytopolis.GameCanvas;
 import com.syndic8.phytopolis.InputController;
 import com.syndic8.phytopolis.assets.AssetDirectory;
@@ -22,13 +22,15 @@ import com.syndic8.phytopolis.util.Timer;
 
 public class UIController {
 
+    private static final int MAX_FLASH_TIME = 80;
     private final Stage stage;
-    private final Label label;
+    private final TextButton label;
     private final Vector2 projMousePosCache;
     private final InputController ic;
     private final Timer timer;
     private final GameCanvas canvas;
     private final ProgressBar progressBar;
+    private final Color yellowColor;
     private FilmStrip current;
     private FilmStrip waterdropStrip;
     private FilmStrip waterdropAdd;
@@ -42,12 +44,10 @@ public class UIController {
     private Texture fireTexture;
     private float animProgress;
     private boolean currNotEnough;
-
     private boolean yellowFlash;
     private int flashTime;
-    private static final int MAX_FLASH_TIME = 80;
-    private final Color yellowColor;
     private float waterSize;
+    private float labelSize;
 
     /**
      * Initializes a UIController.
@@ -60,9 +60,10 @@ public class UIController {
         ic = InputController.getInstance();
         stage = new Stage(c.getTextViewport());
         BitmapFont font = SharedAssetContainer.getInstance().getUIFont();
-        Label.LabelStyle labelStyle = new Label.LabelStyle();
+        TextButton.TextButtonStyle labelStyle = new TextButton.TextButtonStyle();
         labelStyle.font = font;
-        label = new Label("00:00", labelStyle);
+        label = new TextButton("00:00", labelStyle);
+        label.setStyle(label.getStyle());
         label.setPosition(c.getTextViewport().getWorldWidth() * 0.925f -
                                   label.getWidth() / 2f,
                           c.getTextViewport().getWorldHeight() * 0.875f);
@@ -82,8 +83,9 @@ public class UIController {
         animProgress = 0;
         currNotEnough = false;
         yellowFlash = false;
-        yellowColor = new Color(224f,231f,34f, 0f);
+        yellowColor = new Color(224f, 231f, 34f, 0f);
         waterSize = 1.0f;
+        labelSize = 1.0f;
         initialize();
     }
 
@@ -140,17 +142,6 @@ public class UIController {
         pixmap.dispose();
     }
 
-    public void setFlash(boolean value){
-        if (value){
-            flashTime = MAX_FLASH_TIME;
-        }
-        yellowFlash = value;
-
-    }
-    public void setWaterSize(float value){
-        waterSize = value;
-    }
-
     public static Pixmap getPixmapFromRegion(TextureRegion region) {
         if (!region.getTexture().getTextureData().isPrepared()) {
             region.getTexture().getTextureData().prepare();
@@ -172,11 +163,9 @@ public class UIController {
         return cursorPixmap;
     }
 
-    /**
-     * Updates the UIController.
-     *
-     * @param waterLvl level of water, in percentage between 0 and 1.
-     */
+    public void setWaterSize(float value) {
+        waterSize = value;
+    }
 
     /**
      * Updates the UIController.
@@ -197,6 +186,7 @@ public class UIController {
                        Tilemap tm) {
         updateCursor(hazardController, resourceController, avatar, tm);
         updateTexture(dt, waterLvl, prevWater, resourceController);
+        updateLabelSize();
         if ((int) timer.time <= 5) {
             label.setColor((int) (timer.time * 8) % 2 == 0 ?
                                    Color.WHITE :
@@ -209,28 +199,36 @@ public class UIController {
             label.setColor((int) (timer.time * 2) % 2 == 0 ?
                                    Color.WHITE :
                                    Color.FIREBRICK);
-        }else if (yellowFlash){
-            label.setColor((int) (timer.time * 4) % 2 == 0?
-                    Color.WHITE :
-                    Color.YELLOW);
+        } else if (yellowFlash) {
+            label.getLabel()
+                    .setColor((int) (timer.time * 4) % 2 == 0 ?
+                                      Color.WHITE :
+                                      Color.GOLD);
             flashTime--;
-            if (flashTime <= 0){
+            if (flashTime <= 0) {
                 flashTime = 0;
                 setFlash(false);
             }
+        } else {
+            label.getLabel().setColor(Color.WHITE);
         }
-        else {
-            label.setColor(Color.WHITE);
-        }
-
-        if (waterSize > 1.0f){
+        if (waterSize > 1.0f) {
             waterSize -= 0.01f;
+        }
+        if (labelSize > 1.0f) {
+            labelSize -= 0.01f;
         }
         progressBar.setValue(fireProgress);
         progressBar.setVisible(hazardController.findValidFireLocs());
         timer.updateTime(dt + timerDeduction); // 1 SEC PER LEAF BITE
         label.setText(timer.toString());
     }
+
+    /**
+     * Updates the UIController.
+     *
+     * @param waterLvl level of water, in percentage between 0 and 1.
+     */
 
     private void updateCursor(HazardController hc,
                               ResourceController rc,
@@ -314,6 +312,25 @@ public class UIController {
         }
     }
 
+    private void updateLabelSize() {
+        label.getLabel()
+                .setFontScale(SharedAssetContainer.getInstance()
+                                      .getUIFont()
+                                      .getScaleX() * labelSize);
+    }
+
+    public void setFlash(boolean value) {
+        if (value) {
+            flashTime = MAX_FLASH_TIME;
+        }
+        yellowFlash = value;
+
+    }
+
+    public void setLabelSize(float s) {
+        labelSize = s;
+    }
+
     public void pauseTimer() {
         timer.pause();
     }
@@ -353,11 +370,13 @@ public class UIController {
         c.endHud();
         stage.draw();
         c.beginHud();
+        float waterWidth = txWidthDrawn * waterSize;
+        float waterHeight = txHeightDrawn * waterSize;
         c.drawHud(current,
-                  w * 0.075f - txWidthDrawn / 2f,
-                  h * 0.85f,
-                  txWidthDrawn*waterSize,
-                  txHeightDrawn*waterSize);
+                  w * 0.075f - waterWidth / 2f,
+                  h * 0.9f - waterHeight / 2f,
+                  waterWidth,
+                  waterHeight);
         if (progressBar.isVisible()) {
             c.drawHud(fireTexture,
                       w * 0.385f,
