@@ -115,6 +115,7 @@ public class PlantController {
     private int destroySound;
     private int leafSound;
     private Texture glowTexture;
+    private int errorSound;
 
     /**
      * Initialize a PlantController with specified height and width
@@ -252,6 +253,7 @@ public class PlantController {
         if (direction == null) return null;
         if (!resourceController.canGrowBranch()) {
             resourceController.setNotEnough(true);
+            SoundController.getInstance().playSound(errorSound);
             return null;
         }
         boolean isAtEnds = (xIndex == 0 && direction == branchDirection.LEFT) ||
@@ -490,6 +492,7 @@ public class PlantController {
             if (!resourceController.canUpgrade()) {
                 //                System.out.println("upgrade");
                 resourceController.setNotEnough(true);
+                SoundController.getInstance().playSound(errorSound);
                 return null;
             }
             plantGrid[xIndex][yIndex].unmakeLeaf();
@@ -537,6 +540,7 @@ public class PlantController {
         if (!resourceController.canGrowLeaf()) {
             //            System.out.println("leaf");
             resourceController.setNotEnough(true);
+            SoundController.getInstance().playSound(errorSound);
             return null;
         }
         if (!plantGrid[xIndex][yIndex].hasLeaf() &&
@@ -930,6 +934,9 @@ public class PlantController {
         SoundEffect leafSoundEffect = directory.getEntry("growleaf",
                                                          SoundEffect.class);
         leafSound = soundController.addSoundEffect(leafSoundEffect);
+        errorSound = soundController.addSoundEffect(directory.getEntry(
+                "errorsound",
+                SoundEffect.class));
     }
 
     /**

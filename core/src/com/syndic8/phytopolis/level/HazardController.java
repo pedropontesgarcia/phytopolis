@@ -127,6 +127,7 @@ public class HazardController {
     private PooledList<Float> powerlineHeights;
     private float fireProgress;
     private int extinguishSound;
+    private int electricShock;
 
     //    /**
     //     * Initializes a HazardController with the given parameters.
@@ -142,7 +143,6 @@ public class HazardController {
      *
      * @param plantController The PlantController instance associated with this HazardController.
      * @param fireFrequency   The frequency at which fires are generated.
-     * @param droneFrequency  The frequency at which drones are generated.
      * @param burnTime        The time duration for which fires burn.
      */
     public HazardController(PlantController plantController,
@@ -381,6 +381,7 @@ public class HazardController {
         if (fireProgress >= 100) {
             findValidFireLocs();
             addList.add(generateFire());
+            SoundController.getInstance().playSound(electricShock);
             fireProgress = 0;
         }
         long currentTime = System.currentTimeMillis();
@@ -682,7 +683,7 @@ public class HazardController {
                 "hazards:arrow-up-green",
                 Texture.class));
         extinguishSound = SoundController.getInstance().addSoundEffect(directory.getEntry("fireextinguish", SoundEffect.class));
-
+        electricShock = SoundController.getInstance().addSoundEffect(directory.getEntry("electricshock", SoundEffect.class));
     }
 
     /**

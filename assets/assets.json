@@ -107,7 +107,7 @@
     "upgradeleaf": "gameplay/audio/UpgradeLeafSFXN.wav",
     "electricshock": "gameplay/audio/ElectricShockSFXN.wav",
     "errorsound": "gameplay/audio/ErrorSoundSFXN.wav",
-    "munchingsound": "gameplay/audio/MunchingSoundSFXN.wav",
+    "munchingsound": "gameplay/audio/MunchingSFXN.wav",
     "suncollectsound": "gameplay/audio/SunCollectSFXN.wav",
     "victorysound": "gameplay/audio/VictorySoundSFXN.wav",
     "warningsound": "gameplay/audio/WarningSoundSFXN.wav",

@@ -125,6 +125,7 @@ public class GameplayMode extends WorldController {
         boingSound = soundController.addSoundEffect(directory.getEntry(
                 "bouncyleafboing",
                 SoundEffect.class));
+
         background = directory.getEntry(tilemap.getBackground(), Texture.class);
 
         if (!gathered) {
