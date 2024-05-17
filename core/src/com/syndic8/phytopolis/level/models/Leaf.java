@@ -139,7 +139,7 @@ public class Leaf extends BoxObject {
         if (getLeafType() != leafType.BOUNCY){
             if (!sun){
                 if (beingEaten) {
-                    health -= delta / 2;
+                    health -= delta / 1.2f;
                 }
                 if (animFrame < 4) {
                     animFrame += ANIMATION_SPEED;

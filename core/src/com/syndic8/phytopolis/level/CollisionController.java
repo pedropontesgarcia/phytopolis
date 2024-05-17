@@ -150,6 +150,15 @@ public class CollisionController implements ContactListener {
     public void preSolve(Contact contact, Manifold manifold) {
         Fixture fix1 = contact.getFixtureA();
         Fixture fix2 = contact.getFixtureB();
+        Object fd1 = fix1.getUserData();
+        Object fd2 = fix2.getUserData();
+        Model bd1 = (Model) fix1.getBody().getUserData();
+        Model bd2 = (Model) fix2.getBody().getUserData();
+        boolean isCollisionBetweenPlayerSensorAndBug =
+                (player.getSensorName().equals(fd2) && player != bd1 &&
+                        bd1.getType() == Model.ModelType.BUG) ||
+                        (player.getSensorName().equals(fd1) && player != bd2 &&
+                                bd2.getType() == Model.ModelType.BUG);
         boolean isCollisionBetweenPlayerAndBug =
                 (fix1.getBody() == player.getBody() &&
                         ((Model) fix2.getBody().getUserData()).getType() ==
@@ -337,10 +346,20 @@ public class CollisionController implements ContactListener {
 
         if (isCollisionBetweenPlayerAndBug) {
             //            System.out.println("BUG");
-            if (!isPlayerGoingDown) {
-                //                System.out.println("BUG DOWN");
-                contact.setEnabled(false);
+            if (isPlayerGoingDown && isCollisionBetweenPlayerSensorAndBug) {
+//                System.out.println("BUG DOWN");
+                Bug b;
+                if (((Model) fix1.getBody().getUserData()).getType() ==
+                        Model.ModelType.BUG) {
+                    b = (Bug) fix1.getBody().getUserData();
+                } else {
+                    b = (Bug) fix2.getBody().getUserData();
+                }
+                hazardController.removeHazard(b);
+                plantController.removeHazardFromNodes(b);
+
             }
+            contact.setEnabled(false);
         }
 
     }

@@ -14,7 +14,8 @@ public class Bug extends Hazard {
      *
      */
     public Bug(Vector2 pos, Vector2 location, int duration, Tilemap tm, float texScl) {
-        super(tm, texScl, pos.set(pos.x, pos.y + 0.5f), location, duration);
+        super(tm, texScl, pos.set(pos.x, pos.y + 0.4f), location, duration);
+        setGravityScale(0);
     }
     @Override
     public ModelType getType() {

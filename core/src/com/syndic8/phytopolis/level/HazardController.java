@@ -421,15 +421,16 @@ public class HazardController {
                     plantController.removeHazardFromNodes(h);
                     continue; // Continue to next hazard after removing
                 }
-            }
-            if (lastUpdateTime == currentTime) {
-                // spread fire if the time is right, otherwise decrement timer
-                if (h.tick()) {
-                    removeHazard(h);
-                    plantController.removeHazardFromNodes(h);
-                    if (h instanceof Fire) {
-                        plantController.destroyAll(hx, hy);
-                        spreadFire(h.getLocation());
+
+                if (lastUpdateTime == currentTime) {
+                    // spread fire if the time is right, otherwise decrement timer
+                    if (h.tick()) {
+                        removeHazard(h);
+                        plantController.removeHazardFromNodes(h);
+                        if (h instanceof Fire) {
+                            plantController.destroyAll(hx, hy);
+                            spreadFire(h.getLocation());
+                        }
                     }
                 }
             }
