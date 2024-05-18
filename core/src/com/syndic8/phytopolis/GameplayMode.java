@@ -187,7 +187,7 @@ public class GameplayMode extends WorldController {
                                                   tilemap);
             hazardController = new HazardController(plantController,
                                                     (int) tilemap.getFireRate(),
-                                                    6,
+                                                    2,
                                                     8,
                                                     6,
                                                     10,
@@ -673,7 +673,7 @@ public class GameplayMode extends WorldController {
                               tilemap);
 
         hazardController.reset((int) tilemap.getFireRate(),
-                               6,
+                               2,
                                8,
                                6,
                                10,
