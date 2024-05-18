@@ -69,7 +69,12 @@ public class UIController {
         label.setPosition(c.getTextViewport().getWorldWidth() * 0.915f -
                                   label.getWidth() / 2f,
                           c.getTextViewport().getWorldHeight() * 0.875f);
-        stage.addActor(label);
+        System.out.println(tilemap.getLevelNumber());
+        if (tilemap.getLevelNumber() != 1) {
+            System.out.println("tilemap.getLevelNumber()");
+            stage.addActor(label);
+        }
+        System.out.println(stage.getActors());
         progressBar = new ProgressBar(0,
                                       100,
                                       0.1f,
@@ -236,8 +241,6 @@ public class UIController {
 
     /**
      * Updates the UIController.
-     *
-     * @param waterLvl level of water, in percentage between 0 and 1.
      */
 
     private void updateCursor(PlantController pc,
