@@ -125,6 +125,7 @@ public class HazardController {
     private TextureRegion greenArrowDownTexture;
     private TextureRegion greenArrowUpTexture;
     private PooledList<Float> powerlineHeights;
+    private PooledList<BugZone> bugZones;
     private float fireProgress;
     private int extinguishSound;
     private int electricShock;
@@ -168,6 +169,11 @@ public class HazardController {
         height = plantController.getHeight();
         width = plantController.getWidth();
         tilemap = tm;
+        powerlineHeights = tm.getPowerlineYVals();
+        bugZones = new PooledList<>();
+//        for (float f : tm.getBugZoneHeights()) {
+//            bugZones.add(new BugZone(f));
+//        }
         fireProgress = 0;
         FIRE_BUFFER_ABOVE = tilemap.getTileHeight() / 2f;
         FIRE_BUFFER_BELOW = FIRE_BUFFER_ABOVE;
@@ -395,11 +401,13 @@ public class HazardController {
         for (Hazard h : plantController.removeDeadLeafBugs()) {
             if (h instanceof Bug) {
 //                spreadBug(h.getLocation());
+                despawningBugs.add((Bug) h);
                 ((Bug) h).setDespawning(true);
             }
         }
         for (Bug b : despawningBugs) {
             if (b.getDoneAnim()) {
+                despawningBugs.remove(b);
                 removeHazard(b);
             }
         }
@@ -823,6 +831,13 @@ public class HazardController {
     //    }
 
     public class BugZone {
+        private float y;
+
+        public BugZone(float f) {
+            y = f;
+        }
+
+
 
     }
 
