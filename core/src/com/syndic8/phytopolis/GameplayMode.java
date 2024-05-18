@@ -509,14 +509,14 @@ public class GameplayMode extends WorldController {
             case "gameplay:lvl1":
             case "gameplay:lvl2":
             case "gameplay:lvl3":
-                return Leaf.leafType.NORMAL;
             case "gameplay:lvl4":
             case "gameplay:lvl5":
             case "gameplay:lvl6":
-                return Leaf.leafType.NORMAL1;
+                return Leaf.leafType.NORMAL;
             case "gameplay:lvl7":
             case "gameplay:lvl8":
             case "gameplay:lvl9":
+                return Leaf.leafType.NORMAL1;
             case "gameplay:lvl10":
             case "gameplay:lvl11":
             case "gameplay:lvl12":
