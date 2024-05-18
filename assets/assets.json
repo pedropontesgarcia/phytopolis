@@ -79,6 +79,7 @@
     "gameplay:lvl6": "gameplay/levels/level6.json",
     "gameplay:lvl7": "gameplay/levels/level7.json",
     "gameplay:lvl8": "gameplay/levels/level8.json",
+    "gameplay:lvl10": "gameplay/levels/level10.json",
     "gameplay:constants": "gameplay/constants.json",
     "tileset.tsx": "gameplay/tileset.json",
     "rsrc.tsx": "gameplay/rsrc.json",

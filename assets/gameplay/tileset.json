@@ -8,7 +8,7 @@
  "margin":0,
  "name":"tileset",
  "spacing":0,
- "tilecount":70,
+ "tilecount":71,
  "tiledversion":"1.10.2",
  "tileheight":400,
  "tiles":[
@@ -1355,6 +1355,17 @@
                      "width":600,
                      "x":0,
                      "y":0
+                    }, 
+                    {
+                     "height":400,
+                     "id":2,
+                     "name":"",
+                     "rotation":0,
+                     "type":"",
+                     "visible":true,
+                     "width":600,
+                     "x":0,
+                     "y":0
                     }],
              "opacity":1,
              "type":"objectgroup",
@@ -1885,6 +1896,18 @@
                  "name":"collidetop",
                  "type":"bool",
                  "value":true
+                }]
+        }, 
+        {
+         "id":72,
+         "image":"blank-tileset2.png",
+         "imageheight":400,
+         "imagewidth":600,
+         "properties":[
+                {
+                 "name":"collidetop",
+                 "type":"bool",
+                 "value":false
                 }]
         }],
  "tilewidth":600,
