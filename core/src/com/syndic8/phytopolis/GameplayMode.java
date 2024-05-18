@@ -685,6 +685,8 @@ public class GameplayMode extends WorldController {
      * This method disposes of the world and creates a new one.
      */
     public void reset() {
+        timeSinceGrow = 1.1f;
+        timeSpent = 0;
         Vector2 gravity = new Vector2(world.getGravity());
         for (Model obj : objects) {
             if (obj instanceof GameObject) {
