@@ -149,6 +149,45 @@ public class GameplayMode extends WorldController {
 
         background = directory.getEntry(tilemap.getBackground(), Texture.class);
 
+        uiController = new UIController(canvas, tilemap);
+        uiController.gatherAssets(directory);
+
+        resourceController = new ResourceController();
+        float branchHeight = tilemap.getTileHeight();
+        int plantNodesPerRow = Math.round(
+                (tilemap.getTilemapWidth() - 2) * (float) Math.sqrt(3));
+        float plantWidth = branchHeight * (float) Math.sqrt(3) *
+                (plantNodesPerRow - 1) / 2;
+        float plantXOrigin = bounds.width / 2 - plantWidth / 2;
+        List<Float> plantXPositions = new ArrayList<Float>();
+        for (int i = 0; i < plantNodesPerRow; i++) {
+            plantXPositions.add(
+                    plantXOrigin + i * plantWidth / (plantNodesPerRow - 1));
+        }
+
+        plantController = new PlantController(plantNodesPerRow,
+                40,
+                tilemap.getTileHeight(),
+                plantXOrigin,
+                0,
+                world,
+                resourceController,
+                tilemap);
+        hazardController = new HazardController(plantController,
+                (int) tilemap.getFireRate(),
+                2,
+                8,
+                6,
+                10,
+                tilemap);
+        sunController = new SunController(5,
+                10,
+                tilemap.getWorldHeight(),
+                plantXPositions);
+        plantController.gatherAssets(directory);
+        hazardController.gatherAssets(directory);
+        sunController.gatherAssets(directory);
+
         if (!gathered) {
             gathered = true;
             avatarTexture = directory.getEntry("gameplay:player",
@@ -175,42 +214,6 @@ public class GameplayMode extends WorldController {
             constants = directory.getEntry("gameplay:constants",
                                            JsonValue.class);
 
-            resourceController = new ResourceController();
-            uiController = new UIController(canvas, tilemap);
-            float branchHeight = tilemap.getTileHeight();
-            int plantNodesPerRow = Math.round(
-                    (tilemap.getTilemapWidth() - 2) * (float) Math.sqrt(3));
-            float plantWidth = branchHeight * (float) Math.sqrt(3) *
-                    (plantNodesPerRow - 1) / 2;
-            float plantXOrigin = bounds.width / 2 - plantWidth / 2;
-            List<Float> plantXPositions = new ArrayList<Float>();
-            for (int i = 0; i < plantNodesPerRow; i++) {
-                plantXPositions.add(
-                        plantXOrigin + i * plantWidth / (plantNodesPerRow - 1));
-            }
-            plantController = new PlantController(plantNodesPerRow,
-                                                  40,
-                                                  tilemap.getTileHeight(),
-                                                  plantXOrigin,
-                                                  0,
-                                                  world,
-                                                  resourceController,
-                                                  tilemap);
-            hazardController = new HazardController(plantController,
-                                                    (int) tilemap.getFireRate(),
-                                                    2,
-                                                    8,
-                                                    6,
-                                                    10,
-                                                    tilemap);
-            sunController = new SunController(5,
-                                              10,
-                                              tilemap.getWorldHeight(),
-                                              plantXPositions);
-            plantController.gatherAssets(directory);
-            hazardController.gatherAssets(directory);
-            uiController.gatherAssets(directory);
-            sunController.gatherAssets(directory);
         }
     }
 
