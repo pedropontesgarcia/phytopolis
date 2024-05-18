@@ -110,13 +110,13 @@
     "click": "gameplay/audio/MenuClickSFXN.wav",
     "upgradeleaf": "gameplay/audio/UpgradeLeafSFXN.wav",
     "electricshock": "gameplay/audio/ElectricShock2SFXN.wav",
-    "errorsound": "gameplay/audio/ErrorSoundSFXLowered.wav",
+    "errorsound": "gameplay/audio/ErrorSoundSFXLoweredMore.wav",
     "munchingsound": "gameplay/audio/MunchingSFXN.wav",
     "suncollectsound": "gameplay/audio/SunCollectSFXN.wav",
     "victorysound": "gameplay/audio/VictorySoundSFXN.wav",
     "warningsound": "gameplay/audio/WarningSoundSFXN.wav",
-    "watercollectsound": "gameplay/audio/WaterCollect2SFXN.wav",
-    "bugstomp": "gameplay/audio/BugStompSFXN.wav"
+    "watercollectsound": "gameplay/audio/WaterCollect3SFXN.wav",
+    "bugstomp": "gameplay/audio/BugStomp2SFXN.wav"
   },
   "fonts": {
     "times": {
