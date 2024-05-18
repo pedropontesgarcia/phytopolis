@@ -272,13 +272,13 @@ public class LevelOverMode extends FadingScreen implements Screen {
             menuContainer.draw(canvas);
             if (won) {
                 float time = gameplayMode.getTimeSpent();
-                String timeText = String.format("Time taken: %02d:%02d:%03d",
+                String timeText = String.format("Time taken: %02d:%02d.%03d",
                         (int) (time / 60),
                         (int) (time % 60),
                         (int) ((time % 60 - (int) (time % 60)) * 1000));
                 thisTimeLabel.setText(timeText);
                 time = gameplayMode.getBestTime();
-                timeText = String.format("Best: %02d:%02d:%03d",
+                timeText = String.format("Best: %02d:%02d.%03d",
                         (int) (time / 60),
                         (int) (time % 60),
                         (int) ((time % 60 - (int) (time % 60)) * 1000));

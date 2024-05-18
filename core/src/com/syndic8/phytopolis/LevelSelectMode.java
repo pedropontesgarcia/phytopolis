@@ -380,7 +380,7 @@ public class LevelSelectMode extends FadingScreen implements Screen {
             if (i - iOff == selectedPot && levelStates[i] != levelState.LOCKED) {
                 canvas.end();
                 float time = saveJson.getFloat("bestTime" + (i + 1));
-                String timeText = "BEST\n" + (time == -1 ? "XX:XX.XXX" : String.format("%02d:%02d:%03d",
+                String timeText = "BEST\n" + (time == -1 ? "XX:XX.XXX" : String.format("%02d:%02d.%03d",
                         (int) (time / 60),
                         (int) (time % 60),
                         (int) ((time % 60 - (int) (time % 60)) * 1000)));
