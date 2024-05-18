@@ -39,6 +39,7 @@ public class LevelOverMode extends FadingScreen implements Screen {
     private final TextButton victoryLabel;
     private final TextButton thisTimeLabel;
     private final TextButton bestTimeLabel;
+    private final TextButton thanksLabel;
     private final Stage stage;
     /**
      * Whether or not this screen is active
@@ -111,6 +112,18 @@ public class LevelOverMode extends FadingScreen implements Screen {
                 c.getTextViewport().getWorldHeight() / 2f -
                         bestTimeLabel.getHeight() / 2f + yOff);
         stage.addActor(bestTimeLabel);
+        yOff *= 2.8f;
+        labelStyle.font = SharedAssetContainer.getInstance().getUIFont(0.5f);
+        timeText = "Thanks for playing!\n" +
+                "Ireanne Cao, Kevin Chang, Alanna Cooney, Shirley Li, Amy Mai,\nTawakalt Bisola Okunola, Pedro Pontes García, Jordan Rudolph";
+        thanksLabel = new TextButton(timeText, labelStyle);
+        thanksLabel.setStyle(thanksLabel.getStyle());
+        thanksLabel.getLabel().setColor(new Color(178/255.0f,216/255.0f,216/255.0f, 1.0f));
+        thanksLabel.setPosition(c.getTextViewport().getWorldWidth() / 2f -
+                        thanksLabel.getWidth() / 2f,
+                c.getTextViewport().getWorldHeight() / 2f -
+                        thanksLabel.getHeight() / 2f + yOff);
+        stage.addActor(thanksLabel);
         gameplayMode = gm;
         canvas = c;
         createMenu();
@@ -121,7 +134,7 @@ public class LevelOverMode extends FadingScreen implements Screen {
         Menu menu = new Menu(1,
                 0,
                 0.3f,
-                -0.3f,
+                -0.25f,
                 1,
                 Align.center,
                 Menu.DEFAULT_WIDTH);
@@ -199,6 +212,7 @@ public class LevelOverMode extends FadingScreen implements Screen {
         victoryLabel.addAction(Actions.alpha(0));
         thisTimeLabel.addAction(Actions.alpha(0));
         bestTimeLabel.addAction(Actions.alpha(0));
+        thanksLabel.addAction(Actions.alpha(0));
     }
 
     @Override
@@ -237,6 +251,7 @@ public class LevelOverMode extends FadingScreen implements Screen {
             victoryLabel.addAction(Actions.alpha(1, 0.5f, Interpolation.linear));
             thisTimeLabel.addAction(Actions.alpha(1, 0.5f, Interpolation.linear));
             bestTimeLabel.addAction(Actions.alpha(1, 0.5f, Interpolation.linear));
+            thanksLabel.addAction(Actions.alpha(1, 0.5f, Interpolation.linear));
         }
     }
 
@@ -268,6 +283,13 @@ public class LevelOverMode extends FadingScreen implements Screen {
                         (int) (time % 60),
                         (int) ((time % 60 - (int) (time % 60)) * 1000));
                 bestTimeLabel.setText(timeText);
+                if (gameplayMode.getTilemap().getLevelNumber() == 12) {
+                    thanksLabel.getLabel().setText("Thanks for playing!\n" +
+                            "Ireanne Cao, Kevin Chang, Alanna Cooney, Shirley Li, Amy Mai,\n" +
+                            "Tawakalt Bisola Okunola, Pedro Pontes García, Jordan Rudolph");
+                } else {
+                    thanksLabel.getLabel().setText("");
+                }
                 stage.draw();
             }
         }

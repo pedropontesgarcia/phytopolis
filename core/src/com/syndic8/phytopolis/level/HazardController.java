@@ -814,9 +814,6 @@ public class HazardController {
         }
 
         public void update(float dt) {
-            System.out.printf("Timer: %.2f, current time: %.2f\n",
-                              timer,
-                              currTime);
             currTime += dt;
             if (currTime >= timer) {
                 changeTimer();

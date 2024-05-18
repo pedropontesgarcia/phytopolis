@@ -307,6 +307,10 @@ public class InputController implements InputProcessor {
         return updateScheduled;
     }
 
+    public boolean didWin() {
+        return Gdx.input.isKeyPressed(Input.Keys.L);
+    }
+
     @Override
     public boolean keyDown(int i) {
         keys.add(i);
