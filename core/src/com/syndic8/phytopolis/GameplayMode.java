@@ -297,7 +297,9 @@ public class GameplayMode extends WorldController {
      * @param dt Number of seconds since last animation frame
      */
     public void update(float dt) {
-        timeSpent += dt;
+        if (!isComplete()) {
+            timeSpent += dt;
+        }
         if (getFadeState() == Fade.FADE_OUT)
             soundController.setActualMusicVolume(
                     super.getVolume() * soundController.getUserMusicVolume());
@@ -685,6 +687,8 @@ public class GameplayMode extends WorldController {
      * This method disposes of the world and creates a new one.
      */
     public void reset() {
+        timeSinceGrow = 1.1f;
+        timeSpent = 0;
         Vector2 gravity = new Vector2(world.getGravity());
         for (Model obj : objects) {
             if (obj instanceof GameObject) {
