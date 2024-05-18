@@ -1,6 +1,7 @@
 package com.syndic8.phytopolis.level.models;
 
 import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Vector2;
 import com.syndic8.phytopolis.GameCanvas;
 import com.syndic8.phytopolis.util.Tilemap;
@@ -16,6 +17,7 @@ public abstract class Hazard extends BoxObject {
      * Time until trigger event
      */
     private int timer;
+    private TextureRegion prevTexture;
 
     /**
      * Creates a hazard object.
@@ -116,4 +118,11 @@ public abstract class Hazard extends BoxObject {
 
     }
 
+    public void setPreviousTexture(TextureRegion warningTex) {
+        prevTexture = warningTex;
+    }
+
+    public TextureRegion previousTex() {
+        return prevTexture;
+    }
 }

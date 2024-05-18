@@ -129,6 +129,7 @@ public class HazardController {
     private int extinguishSound;
     private int electricShock;
     private int errorSound;
+    private int warningSound;
 
     //    /**
     //     * Initializes a HazardController with the given parameters.
@@ -670,6 +671,9 @@ public class HazardController {
         errorSound = SoundController.getInstance()
                 .addSoundEffect(directory.getEntry("errorsound",
                                                    SoundEffect.class));
+        warningSound = SoundController.getInstance()
+                .addSoundEffect(directory.getEntry("warningsound",
+                        SoundEffect.class));
     }
 
     /**
@@ -719,7 +723,8 @@ public class HazardController {
                         (h.getType() == FIRE ?
                                 redWarningFlashTexture :
                                 greenWarningFlashTexture);
-
+                if((warningTex == redWarningTexture && h.previousTex() == redWarningFlashTexture) || (warningTex == greenWarningTexture && h.previousTex() == greenWarningFlashTexture))
+                    SoundController.getInstance().playSound(warningSound);
                 canvas.draw(warningTex,
                             Color.WHITE,
                             warningX,
@@ -732,6 +737,7 @@ public class HazardController {
                             arrowY,
                             arrowScale,
                             arrowScale);
+                h.setPreviousTexture(warningTex);
             }
         }
     }

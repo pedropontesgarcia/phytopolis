@@ -107,6 +107,7 @@ public class CollisionController implements ContactListener {
                 }
                 hazardController.removeHazard(b);
                 plantController.removeHazardFromNodes(b);
+                SoundController.getInstance().playSound(bugStompSound);
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -379,7 +380,6 @@ public class CollisionController implements ContactListener {
                 }
                 hazardController.despawnBug(b);
                 plantController.removeHazardFromNodes(b);
-                SoundController.getInstance().playSound(bugStompSound);
             }
             contact.setEnabled(false);
         }
