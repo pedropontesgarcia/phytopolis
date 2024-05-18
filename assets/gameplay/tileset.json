@@ -1355,6 +1355,17 @@
                      "width":600,
                      "x":0,
                      "y":0
+                    }, 
+                    {
+                     "height":400,
+                     "id":2,
+                     "name":"",
+                     "rotation":0,
+                     "type":"",
+                     "visible":true,
+                     "width":600,
+                     "x":0,
+                     "y":0
                     }],
              "opacity":1,
              "type":"objectgroup",
@@ -1364,39 +1375,9 @@
             },
          "properties":[
                 {
-                 "name":"background",
-                 "type":"string",
-                 "value":"gameplay:background1"
-                }, 
-                {
                  "name":"collidetop",
                  "type":"bool",
                  "value":true
-                }, 
-                {
-                 "name":"firerate",
-                 "type":"float",
-                 "value":3
-                }, 
-                {
-                 "name":"leaftype",
-                 "type":"int",
-                 "value":1
-                }, 
-                {
-                 "name":"levelnumber",
-                 "type":"int",
-                 "value":8
-                }, 
-                {
-                 "name":"time",
-                 "type":"int",
-                 "value":180
-                }, 
-                {
-                 "name":"victory",
-                 "type":"float",
-                 "value":18
                 }]
         }, 
         {
