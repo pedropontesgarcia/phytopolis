@@ -69,12 +69,9 @@ public class UIController {
         label.setPosition(c.getTextViewport().getWorldWidth() * 0.915f -
                                   label.getWidth() / 2f,
                           c.getTextViewport().getWorldHeight() * 0.875f);
-        System.out.println(tilemap.getLevelNumber());
         if (tilemap.getLevelNumber() != 1) {
-            System.out.println("tilemap.getLevelNumber()");
             stage.addActor(label);
         }
-        System.out.println(stage.getActors());
         progressBar = new ProgressBar(0,
                                       100,
                                       0.1f,

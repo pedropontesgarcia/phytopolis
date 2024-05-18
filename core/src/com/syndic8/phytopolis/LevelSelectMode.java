@@ -5,8 +5,11 @@ import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
+import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.JsonReader;
@@ -18,6 +21,7 @@ import com.syndic8.phytopolis.util.menu.Menu;
 import com.syndic8.phytopolis.util.menu.MenuContainer;
 import com.syndic8.phytopolis.util.menu.MenuItem;
 import edu.cornell.gdiac.audio.AudioEngine;
+import org.w3c.dom.Text;
 
 import java.util.Arrays;
 
@@ -65,6 +69,8 @@ public class LevelSelectMode extends FadingScreen implements Screen {
     private Texture easytext;
     private Texture hardtext;
     private MenuItem arrowItem;
+    private TextButton best;
+    private final Stage stage;
 
     public LevelSelectMode(GameCanvas c) {
         canvas = c;
@@ -79,6 +85,12 @@ public class LevelSelectMode extends FadingScreen implements Screen {
         this.levelStates = new levelState[12];
         this.screen1 = true;
         this.swapping = false;
+        stage = new Stage(c.getTextViewport());
+        BitmapFont font = SharedAssetContainer.getInstance().getUIFont(0.5f);
+        TextButton.TextButtonStyle labelStyle = new TextButton.TextButtonStyle();
+        labelStyle.font = font;
+        best = new TextButton("BEST:\n", labelStyle);
+        stage.addActor(best);
         //TODO remove this code for showcase/release
         Arrays.fill(levelStates, levelState.LOCKED);
     }
@@ -365,6 +377,41 @@ public class LevelSelectMode extends FadingScreen implements Screen {
                         0,
                         canvas.getWidth(),
                         canvas.getHeight());
+            if (i - iOff == selectedPot && levelStates[i] != levelState.LOCKED) {
+                canvas.end();
+                float time = saveJson.getFloat("bestTime" + (i + 1));
+                String timeText = "BEST\n" + (time == -1 ? "XX:XX.XXX" : String.format("%02d:%02d:%03d",
+                        (int) (time / 60),
+                        (int) (time % 60),
+                        (int) ((time % 60 - (int) (time % 60)) * 1000)));
+                best.setStyle(best.getStyle());
+                float x, y;
+                switch (selectedPot % 6) {
+                    case 0:
+                        x = 435f;
+                        break;
+                    case 1:
+                        x = 833f;
+                        break;
+                    case 2:
+                        x = 1210f;
+                        break;
+                    case 3:
+                        x = 280f;
+                        break;
+                    case 4:
+                        x = 662f;
+                        break;
+                    default:
+                        x = 1041f;
+                        break;
+                }
+                y = (selectedPot % 6 < 3 ? 490f : 265f);
+                best.setPosition(x, y);
+                best.setText(timeText);
+                stage.draw();
+                canvas.begin();
+            }
         }
 
         //Finally, draw lighting
