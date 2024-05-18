@@ -4,9 +4,9 @@
  "layers":[
         {
          "data":[0, 0, 0, 0, 0, 0,
-            47, 47, 0, 0, 0, 48,
-            48, 48, 44, 0, 0, 45,
-            48, 45, 48, 0, 0, 45,
+            0, 0, 0, 0, 0, 0,
+            0, 0, 0, 0, 0, 0,
+            48, 45, 0, 0, 0, 0,
             47, 47, 45, 2, 3, 47,
             45, 44, 46, 0, 0, 45,
             44, 44, 48, 0, 0, 44,
@@ -126,7 +126,7 @@
         {
          "name":"background",
          "type":"string",
-         "value":"gameplay:background3"
+         "value":"gameplay:background4"
         }, 
         {
          "name":"firerate",
@@ -146,12 +146,12 @@
         {
          "name":"time",
          "type":"int",
-         "value":180
+         "value":240
         }, 
         {
          "name":"victory",
          "type":"float",
-         "value":27
+         "value":25
         }],
  "renderorder":"right-down",
  "tiledversion":"1.10.2",

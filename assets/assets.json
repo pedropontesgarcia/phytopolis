@@ -38,6 +38,7 @@
     "gameplay:background1": "gameplay/2screens_novictoryline.png",
     "gameplay:background2": "gameplay/3screens_novictoryline.png",
     "gameplay:background3": "gameplay/4screens_novictoryline.png",
+    "gameplay:background4": "gameplay/4screens_novictoryline-ext.png",
     "gameplay:victoryline": "gameplay/victoryline.png",
     "hazards:fire": "hazards/fire-filmstrip.png",
     "hazards:bug": "hazards/bug-filmstrip.png",
