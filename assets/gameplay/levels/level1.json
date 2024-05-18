@@ -22,18 +22,18 @@
          "width":5,
          "x":0,
          "y":0
-        },
+        }, 
         {
-         "data":[0, 71, 0, 0, 0,
-            0, 0, 71, 0, 0,
+         "data":[0, 73, 0, 0, 0,
+            0, 0, 73, 0, 0,
             0, 0, 0, 0, 0,
             0, 0, 0, 0, 0,
-            0, 0, 71, 0, 0,
-            72, 71, 0, 0, 72,
+            0, 0, 73, 0, 0,
+            74, 73, 0, 0, 74,
             0, 0, 0, 0, 0,
             0, 0, 0, 0, 0,
             0, 0, 0, 0, 0,
-            72, 0, 0, 0, 0],
+            74, 0, 0, 0, 0],
          "height":10,
          "id":2,
          "name":"resources",
@@ -43,7 +43,7 @@
          "width":5,
          "x":0,
          "y":0
-        },
+        }, 
         {
          "data":[0, 0, 0, 0, 0,
             0, 0, 0, 0, 0,
@@ -73,28 +73,28 @@
          "name":"background",
          "type":"string",
          "value":"gameplay:background1"
-        },
+        }, 
         {
          "name":"firerate",
          "type":"float",
          "value":3
-        },
+        }, 
         {
          "name":"leaftype",
          "type":"int",
          "value":1
-        },
+        }, 
         {
          "name":"levelnumber",
          "type":"int",
          "value":1
-        },
+        }, 
         {
          "name":"time",
          "type":"int",
          "value":120
         },
-
+    
         {
          "name":"victory",
          "type":"float",
@@ -107,9 +107,9 @@
         {
          "firstgid":1,
          "source":"tileset.tsx"
-        },
+        }, 
         {
-         "firstgid":71,
+         "firstgid":73,
          "source":"rsrc.tsx"
         }],
  "tilewidth":600,

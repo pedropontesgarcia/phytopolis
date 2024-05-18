@@ -23,7 +23,7 @@ import com.syndic8.phytopolis.util.Timer;
 public class UIController {
 
     private static final int MAX_FLASH_TIME = 80;
-    private static final float RANGE_SCALE = 1.4f;
+    private static final float RANGE_SCALE = 2.0f;
     private final Stage stage;
     private final TextButton label;
     private final Vector2 projMousePosCache;

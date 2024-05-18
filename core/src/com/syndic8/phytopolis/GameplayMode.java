@@ -137,9 +137,15 @@ public class GameplayMode extends WorldController {
         boingSound = soundController.addSoundEffect(directory.getEntry(
                 "bouncyleafboing",
                 SoundEffect.class));
-        sunSound = SoundController.getInstance().addSoundEffect(directory.getEntry("suncollectsound", SoundEffect.class));
-        waterCollectSound = SoundController.getInstance().addSoundEffect(directory.getEntry("watercollectsound", SoundEffect.class));
-        bugStompSound = SoundController.getInstance().addSoundEffect(directory.getEntry("bugstomp", SoundEffect.class));
+        sunSound = SoundController.getInstance()
+                .addSoundEffect(directory.getEntry("suncollectsound",
+                                                   SoundEffect.class));
+        waterCollectSound = SoundController.getInstance()
+                .addSoundEffect(directory.getEntry("watercollectsound",
+                                                   SoundEffect.class));
+        bugStompSound = SoundController.getInstance()
+                .addSoundEffect(directory.getEntry("bugstomp",
+                                                   SoundEffect.class));
 
         background = directory.getEntry(tilemap.getBackground(), Texture.class);
 
@@ -380,7 +386,8 @@ public class GameplayMode extends WorldController {
             int lastBeaten = Math.max(saveJson.getInt("lastBeaten"),
                                       tilemap.getLevelNumber() - 1);
             saveJson.get("lastBeaten").set(lastBeaten, null);
-            float bestTime = Math.min(saveJson.getFloat("bestTime" + tilemap.getLevelNumber()), timeSpent);
+            float currBest = saveJson.getFloat("bestTime" + tilemap.getLevelNumber());
+            float bestTime = currBest == -1 ? timeSpent : Math.min(currBest, timeSpent);
             saveJson.get("bestTime" + tilemap.getLevelNumber()).set(bestTime, null);
             saveFile.writeString(saveJson.prettyPrint(JsonWriter.OutputType.json,
                                                       0), false);
@@ -399,7 +406,8 @@ public class GameplayMode extends WorldController {
         float avatarX = avatar.getX();
         float avatarY = avatar.getY();
         float distance = unprojMousePos.dst(avatarX, avatarY);
-        if (distance > tilemap.getTileHeight() * uiController.getRangeScale()) return;
+        if (distance > tilemap.getTileHeight() * uiController.getRangeScale())
+            return;
 
         boolean canGrowBranch = ic.didGrowBranch() && ic.isGrowBranchModDown();
         boolean canGrowLeaf = ic.didGrowLeaf() && ic.isGrowLeafModDown();
@@ -423,7 +431,7 @@ public class GameplayMode extends WorldController {
             if (shouldGrowBranch) {
                 if (timeSinceGrow >= 0.25f || numBranchesSinceGrow < 1) {
                     Branch branch = plantController.growBranch(unprojMousePos.x,
-                            unprojMousePos.y);
+                                                               unprojMousePos.y);
                     if (branch != null) {
                         if (timeSinceGrow >= 0.25f) {
                             timeSinceGrow = 0;
@@ -433,10 +441,10 @@ public class GameplayMode extends WorldController {
                         addObject(branch);
                         Vector2 branchCenter = getBranchCenter(branch);
                         addObject(new Indicator(branchCenter.x,
-                                branchCenter.y,
-                                getMinusWaterIndicatorTexture(),
-                                tilemap,
-                                0.5f));
+                                                branchCenter.y,
+                                                getMinusWaterIndicatorTexture(),
+                                                tilemap,
+                                                0.5f));
                         soundController.playSound(plantSound);
                     }
                 }
@@ -536,10 +544,6 @@ public class GameplayMode extends WorldController {
         }
     }
 
-    public float getTimeSpent() {
-        return timeSpent;
-    }
-
     /**
      * Draw the physics objects to the canvas
      * <p>
@@ -611,10 +615,6 @@ public class GameplayMode extends WorldController {
         uiController.pauseTimer();
     }
 
-    public void setCameraVector(Vector2 vector) {
-        cameraVector.set(vector.x, vector.y);
-    }
-
     /**
      * Draw the physics objects to the canvas
      * <p>
@@ -643,23 +643,32 @@ public class GameplayMode extends WorldController {
             float parallaxOffset = y * parallaxFactor;
 
             // Compress the height based on the parallax factor
-            float compressedHeight = getBackgroundHeight() - ((getBackgroundHeight()) * parallaxFactor) + initialCameraY;
+            float compressedHeight = getBackgroundHeight() -
+                    ((getBackgroundHeight()) * parallaxFactor) + initialCameraY;
             canvas.draw(background,
-                    Color.WHITE,
-                    -0.1f,
-                    parallaxOffset,
-                    getBackgroundWidth(),
-                    compressedHeight); // Use compressed height
+                        Color.WHITE,
+                        -0.1f,
+                        parallaxOffset,
+                        getBackgroundWidth(),
+                        compressedHeight); // Use compressed height
         }
+    }
+
+    public float getBackgroundHeight() {
+        return tilemap.getWorldWidth() * background.getHeight() /
+                background.getWidth();
     }
 
     public float getBackgroundWidth() {
         return tilemap.getWorldWidth() * 1.05f;
     }
 
-    public float getBackgroundHeight() {
-        return tilemap.getWorldWidth() * background.getHeight() /
-                background.getWidth();
+    public float getTimeSpent() {
+        return timeSpent;
+    }
+
+    public void setCameraVector(Vector2 vector) {
+        cameraVector.set(vector.x, vector.y);
     }
 
     /**
