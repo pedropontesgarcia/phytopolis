@@ -609,14 +609,21 @@ public class GameplayMode extends WorldController {
         super.draw(canvas);
     }
 
-    private void drawBackground() {
+    public void drawBackground() {
         if (background != null) {
+            float y = cameraVector.y-4.5f;
+            float parallaxFactor = 0.5f; // Adjust this value to control the parallax effect
+            float parallaxOffset = y * parallaxFactor;
+
+            // Calculate the new height of the background to account for parallax
+            float backgroundHeight = getBackgroundHeight() * (1 + Math.abs(parallaxOffset) / getBackgroundHeight());
+
             canvas.draw(background,
-                        Color.WHITE,
-                        -0.1f,
-                        0,
-                        getBackgroundWidth(),
-                        getBackgroundHeight());
+                    Color.WHITE,
+                    -0.1f,
+                    parallaxOffset,
+                    getBackgroundWidth(),
+                    backgroundHeight);
         }
     }
 
