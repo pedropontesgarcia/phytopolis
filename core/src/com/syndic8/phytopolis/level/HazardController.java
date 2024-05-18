@@ -884,7 +884,7 @@ public class HazardController {
             if (!validLeafLocs.isEmpty()) {
                 int randomIndex = random.nextInt(validLeafLocs.size());
                 Vector2 node = validLeafLocs.get(randomIndex);
-//                addList.add(generateHazardAt(BUG, (int)node.x, (int)node.y));
+                addList.add(generateHazard(BUG, (int)node.x, (int)node.y));
             }
         }
 
