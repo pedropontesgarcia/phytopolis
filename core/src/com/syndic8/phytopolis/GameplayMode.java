@@ -603,6 +603,10 @@ public class GameplayMode extends WorldController {
         uiController.pauseTimer();
     }
 
+    public void setCameraVector(Vector2 vector) {
+        cameraVector.set(vector.x, vector.y);
+    }
+
     /**
      * Draw the physics objects to the canvas
      * <p>
@@ -623,19 +627,21 @@ public class GameplayMode extends WorldController {
 
     public void drawBackground() {
         if (background != null) {
-            float y = cameraVector.y-4.5f;
+            float aspectRatio = canvas.getWidth() / canvas.getHeight();
+            float initialCameraY = tilemap.getWorldWidth() / aspectRatio / 2f;
+            float y = cameraVector.y - initialCameraY;
+
             float parallaxFactor = 0.5f; // Adjust this value to control the parallax effect
             float parallaxOffset = y * parallaxFactor;
 
-            // Calculate the new height of the background to account for parallax
-            float backgroundHeight = getBackgroundHeight() * (1 + Math.abs(parallaxOffset) / getBackgroundHeight());
-
+            // Compress the height based on the parallax factor
+            float compressedHeight = getBackgroundHeight() - ((getBackgroundHeight()) * parallaxFactor) + initialCameraY;
             canvas.draw(background,
                     Color.WHITE,
                     -0.1f,
                     parallaxOffset,
                     getBackgroundWidth(),
-                    backgroundHeight);
+                    compressedHeight); // Use compressed height
         }
     }
 

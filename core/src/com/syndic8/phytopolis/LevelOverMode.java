@@ -209,6 +209,7 @@ public class LevelOverMode extends FadingScreen implements Screen {
     public void draw() {
         canvas.cameraUpdate(cameraVector, false);
         canvas.clear();
+        gameplayMode.setCameraVector(cameraVector);
         gameplayMode.drawLevelOver();
         canvas.begin();
         if (!won) canvas.draw(failure,
