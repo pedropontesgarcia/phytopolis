@@ -298,7 +298,6 @@ public class Player extends CapsuleObject {
      * @param canvas Drawing context
      */
     public void draw(GameCanvas canvas) {
-        //        System.out.println(getVY());
         float effect = faceRight ? 1.0f : -1.0f;
 
         float width = tilemap.getTileWidth() * textureSclInTiles;
@@ -321,7 +320,6 @@ public class Player extends CapsuleObject {
                         sclY);
 
         } else if (Math.abs(getVX()) >= 0.1) {
-            //                    System.out.println("--------------------");
             jogAnimator.setFrame((int) animFrame2);
             float x = jogAnimator.getRegionWidth() / 2.0f;
             float y = jogAnimator.getRegionHeight() / 2.0f;
@@ -348,7 +346,6 @@ public class Player extends CapsuleObject {
                         sclX * effect,
                         sclY);
         }
-        //                System.out.println("A");
         //        float width = 16f / 6f;
         //        float height = (320f / 9f) / 20f;
         //        float sclX = width / 600f;

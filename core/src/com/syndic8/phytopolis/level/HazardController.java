@@ -570,7 +570,6 @@ public class HazardController {
                                 eatTime,
                                 tilemap,
                                 0.5f);
-                //                System.out.println("new bug");
                 b.setFilmStrip(bugTexture);
                 plantController.setHazard(hazardWidth, hazardHeight, b);
                 hazards.add(b);
@@ -591,7 +590,6 @@ public class HazardController {
         float distance = mousePos.dst(avatarX, avatarY);
         if (distance > tilemap.getTileHeight() * 2) return;
         if (!resourceController.canExtinguish()) {
-            //            System.out.println("fire");
             SoundController.getInstance().playSound(errorSound);
             resourceController.setNotEnough(true);
             return;

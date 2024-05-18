@@ -360,7 +360,6 @@ public class PlantController {
         else if (angle < 4 * Math.PI / 3) {
             direction = branchDirection.RIGHT;
         } else if (angle < 5 * Math.PI / 3) {
-            //            System.out.println("rawr");
             direction = branchDirection.MIDDLE;
         } else {
             direction = branchDirection.LEFT;
@@ -479,13 +478,11 @@ public class PlantController {
     public Leaf makeLeaf(float x, float y, Leaf.leafType lt, float width) {
         int xIndex = screenCoordToIndex(x, y)[0];
         int yIndex = screenCoordToIndex(x, y)[1];
-        //        System.out.println(xIndex + " " + yIndex);
         if (!inBounds(xIndex, yIndex)) return null;
         if (plantGrid[xIndex][yIndex].hasLeaf() &&
                 plantGrid[xIndex][yIndex].getLeafType() !=
                         Leaf.leafType.BOUNCY) {
             if (!resourceController.canUpgrade()) {
-                //                System.out.println("upgrade");
                 resourceController.setNotEnough(true);
                 SoundController.getInstance().playSound(errorSound);
                 return null;
@@ -539,7 +536,6 @@ public class PlantController {
         boolean lowerNode = xIndex % 2 == 0;
         if (!inBounds(xIndex, yIndex)) return null;
         if (!resourceController.canGrowLeaf()) {
-            //            System.out.println("leaf");
             resourceController.setNotEnough(true);
             SoundController.getInstance().playSound(errorSound);
             return null;
