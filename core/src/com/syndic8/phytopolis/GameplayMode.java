@@ -378,9 +378,9 @@ public class GameplayMode extends WorldController {
         //            timeSinceUIUpdate += 0.05;
         //        }
         // Check for win condition
-        if (ic.didWin() || ((plantController.getMaxPlantHeight() >
+        if ((plantController.getMaxPlantHeight() >
                 tilemap.getVictoryHeight() * tilemap.getTileHeight()) &&
-                !isComplete())) {
+                !isComplete()) {
 
             setComplete(true);
             fadeOut(1f);
