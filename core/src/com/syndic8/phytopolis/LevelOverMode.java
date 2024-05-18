@@ -36,7 +36,9 @@ public class LevelOverMode extends FadingScreen implements Screen {
     private final Vector3 targetCamera;
     private final Vector3 interpolationCache;
     private final float TRANSITION_DURATION = 3f;
-    private final TextButton label;
+    private final TextButton victoryLabel;
+    private final TextButton thisTimeLabel;
+    private final TextButton bestTimeLabel;
     private final Stage stage;
     /**
      * Whether or not this screen is active
@@ -73,14 +75,42 @@ public class LevelOverMode extends FadingScreen implements Screen {
         BitmapFont font = SharedAssetContainer.getInstance().getUIFont(3);
         TextButton.TextButtonStyle labelStyle = new TextButton.TextButtonStyle();
         labelStyle.font = font;
-        label = new TextButton("VICTORY!", labelStyle);
-        label.setStyle(label.getStyle());
+        victoryLabel = new TextButton("VICTORY!", labelStyle);
+        victoryLabel.setStyle(victoryLabel.getStyle());
         float yOff = c.getTextViewport().getWorldHeight() * 0.1f;
-        label.setPosition(c.getTextViewport().getWorldWidth() / 2f -
-                                  label.getWidth() / 2f,
-                          c.getTextViewport().getWorldHeight() / 2f -
-                                  label.getHeight() / 2f + yOff);
-        stage.addActor(label);
+        victoryLabel.setPosition(c.getTextViewport().getWorldWidth() / 2f -
+                        victoryLabel.getWidth() / 2f,
+                c.getTextViewport().getWorldHeight() / 2f -
+                        victoryLabel.getHeight() / 2f + yOff);
+        stage.addActor(victoryLabel);
+        yOff *= -0.75f;
+        labelStyle.font = SharedAssetContainer.getInstance().getUIFont(1.15f);
+        float time = gm.getTimeSpent();
+        String timeText = String.format("Time taken: %02d:%02d:%03d",
+                (int) (time / 60),
+                (int) (time % 60),
+                (int) ((time % 60 - (int) (time % 60)) * 1000));
+        thisTimeLabel = new TextButton(timeText, labelStyle);
+        thisTimeLabel.setStyle(thisTimeLabel.getStyle());
+        thisTimeLabel.setPosition(c.getTextViewport().getWorldWidth() / 2f -
+                        thisTimeLabel.getWidth() / 2f,
+                c.getTextViewport().getWorldHeight() / 2f -
+                        thisTimeLabel.getHeight() / 2f + yOff);
+        stage.addActor(thisTimeLabel);
+        yOff *= 2f;
+        labelStyle.font = SharedAssetContainer.getInstance().getUIFont();
+        time = gm.getBestTime();
+        timeText = String.format("Best: %02d:%02d:%03d",
+                (int) (time / 60),
+                (int) (time % 60),
+                (int) ((time % 60 - (int) (time % 60)) * 1000));
+        bestTimeLabel = new TextButton(timeText, labelStyle);
+        bestTimeLabel.setStyle(bestTimeLabel.getStyle());
+        bestTimeLabel.setPosition(c.getTextViewport().getWorldWidth() / 2f -
+                        bestTimeLabel.getWidth() / 2f,
+                c.getTextViewport().getWorldHeight() / 2f -
+                        bestTimeLabel.getHeight() / 2f + yOff);
+        stage.addActor(bestTimeLabel);
         gameplayMode = gm;
         canvas = c;
         createMenu();
@@ -89,19 +119,19 @@ public class LevelOverMode extends FadingScreen implements Screen {
 
     private void createMenu() {
         Menu menu = new Menu(1,
-                             0,
-                             0.3f,
-                             -0.1f,
-                             1,
-                             Align.center,
-                             Menu.DEFAULT_WIDTH);
+                0,
+                0.3f,
+                -0.3f,
+                1,
+                Align.center,
+                Menu.DEFAULT_WIDTH);
         menuContainer = new MenuContainer(menu, canvas);
         ClickListener exitListener = new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
                 SoundController.getInstance()
                         .playSound(SharedAssetContainer.getInstance()
-                                           .getSound("click"));
+                                .getSound("click"));
                 ready = true;
                 menuContainer.deactivate();
                 fadeOut(0.5f);
@@ -109,11 +139,11 @@ public class LevelOverMode extends FadingScreen implements Screen {
             }
         };
         menu.addItem(new MenuItem("BACK TO\nLEVELS",
-                                  0,
-                                  exitListener,
-                                  menu,
-                                  menuContainer,
-                                  canvas));
+                0,
+                exitListener,
+                menu,
+                menuContainer,
+                canvas));
         menuContainer.populate();
     }
 
@@ -122,7 +152,7 @@ public class LevelOverMode extends FadingScreen implements Screen {
             victory = directory.getEntry("over:victory", Texture.class);
             failure = directory.getEntry("over:failure", Texture.class);
             AudioSource bgm = directory.getEntry("levelcomplete",
-                                                 AudioSource.class);
+                    AudioSource.class);
             victoryMusic = soundController.addMusic(bgm);
             bgm = directory.getEntry("gameover", AudioSource.class);
             lossMusic = soundController.addMusic(bgm);
@@ -166,7 +196,9 @@ public class LevelOverMode extends FadingScreen implements Screen {
         }
         soundController.setLooping(true);
         soundController.playMusic();
-        label.addAction(Actions.alpha(0));
+        victoryLabel.addAction(Actions.alpha(0));
+        thisTimeLabel.addAction(Actions.alpha(0));
+        bestTimeLabel.addAction(Actions.alpha(0));
     }
 
     @Override
@@ -189,8 +221,8 @@ public class LevelOverMode extends FadingScreen implements Screen {
         transitionProgress = Math.min(1, tmr / TRANSITION_DURATION);
         interpolationCache.set(initialCamera);
         interpolationCache.interpolate(targetCamera,
-                                       transitionProgress,
-                                       Interpolation.smooth2);
+                transitionProgress,
+                Interpolation.smooth2);
         cameraVector.set(interpolationCache.x, interpolationCache.y);
         soundController.setActualMusicVolume(
                 super.getVolume() * soundController.getUserMusicVolume());
@@ -202,7 +234,9 @@ public class LevelOverMode extends FadingScreen implements Screen {
         }
         if (transitionProgress == 1 && !transitionDone) {
             transitionDone = true;
-            label.addAction(Actions.alpha(1, 0.5f, Interpolation.linear));
+            victoryLabel.addAction(Actions.alpha(1, 0.5f, Interpolation.linear));
+            thisTimeLabel.addAction(Actions.alpha(1, 0.5f, Interpolation.linear));
+            bestTimeLabel.addAction(Actions.alpha(1, 0.5f, Interpolation.linear));
         }
     }
 
@@ -213,15 +247,29 @@ public class LevelOverMode extends FadingScreen implements Screen {
         gameplayMode.drawLevelOver();
         canvas.begin();
         if (!won) canvas.draw(failure,
-                              Color.WHITE,
-                              0,
-                              0,
-                              canvas.getWidth(),
-                              canvas.getHeight());
+                Color.WHITE,
+                0,
+                0,
+                canvas.getWidth(),
+                canvas.getHeight());
         canvas.end();
         if (transitionProgress == 1 || !won) {
             menuContainer.draw(canvas);
-            if (won) stage.draw();
+            if (won) {
+                float time = gameplayMode.getTimeSpent();
+                String timeText = String.format("Time taken: %02d:%02d:%03d",
+                        (int) (time / 60),
+                        (int) (time % 60),
+                        (int) ((time % 60 - (int) (time % 60)) * 1000));
+                thisTimeLabel.setText(timeText);
+                time = gameplayMode.getBestTime();
+                timeText = String.format("Best: %02d:%02d:%03d",
+                        (int) (time / 60),
+                        (int) (time % 60),
+                        (int) ((time % 60 - (int) (time % 60)) * 1000));
+                bestTimeLabel.setText(timeText);
+                stage.draw();
+            }
         }
         super.draw(canvas);
     }
