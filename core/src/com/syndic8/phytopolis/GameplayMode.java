@@ -416,11 +416,11 @@ public class GameplayMode extends WorldController {
 
         if (!hazardController.hasFire(unprojMousePos)) {
             if (shouldGrowBranch) {
-                if (timeSinceGrow >= 1.0f || numBranchesSinceGrow < 1) {
+                if (timeSinceGrow >= 2.0f || numBranchesSinceGrow < 3) {
                     Branch branch = plantController.growBranch(unprojMousePos.x,
                             unprojMousePos.y);
                     if (branch != null) {
-                        if (timeSinceGrow >= 1.0f) {
+                        if (timeSinceGrow >= 2.0f) {
                             System.out.println("BRANCH LIMIT RESET");
                             timeSinceGrow = 0;
                             numBranchesSinceGrow = 0;
