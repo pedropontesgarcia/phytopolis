@@ -55,18 +55,20 @@ public class SunController {
     }
 
     public Sun spawnSuns(float delta, Tilemap tm) {
-        timer += delta;
-        if (timer >= currentDelay) {
-            generateDelay();
-            return new Sun(xGeneration,
-                           yGeneration,
-                           tm.getTileWidth() * 0.5f,
-                           tm.getTileHeight() * 0.5f,
-                           sunCircle,
-                           sunRay,
-                           sunSwirl,
-                           tm,
-                           1);
+        if (tm.getLevelNumber() != 1) {
+            timer += delta;
+            if (timer >= currentDelay) {
+                generateDelay();
+                return new Sun(xGeneration,
+                        yGeneration,
+                        tm.getTileWidth() * 0.5f,
+                        tm.getTileHeight() * 0.5f,
+                        sunCircle,
+                        sunRay,
+                        sunSwirl,
+                        tm,
+                        1);
+            }
         }
         return null;
     }
