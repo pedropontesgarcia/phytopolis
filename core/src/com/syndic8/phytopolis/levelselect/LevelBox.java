@@ -61,7 +61,6 @@ public class LevelBox {
                         0f,
                         0.01f,
                         0.01f);
-            //            System.out.println("X: " + x + " Y: " + y);
         }
     }
 
