@@ -4,6 +4,7 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.utils.ObjectSet;
 import com.syndic8.phytopolis.GameCanvas;
 import com.syndic8.phytopolis.SoundController;
 import com.syndic8.phytopolis.assets.AssetDirectory;
@@ -223,7 +224,6 @@ public class HazardController {
      */
     public PooledList<Hazard> updateHazards(float dt) {
         addList.clear();
-        // TODO: UPDATE BUGS
         for (Bug b : plantController.removeDeadLeafBugs()) {
             bugZones[b.getZoneIndex()].spreadBug(b.getLocation());
             despawnBug(b);
@@ -280,6 +280,12 @@ public class HazardController {
         }
         addList.removeAll(Collections.singleton(null));
         return addList;
+    }
+
+    public void deleteFireBugs(ObjectSet<Bug> bugs) {
+        for (Bug b : bugs) {
+            removeHazard(b);
+        }
     }
 
     /**

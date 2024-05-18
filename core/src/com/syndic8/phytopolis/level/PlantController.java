@@ -583,7 +583,8 @@ public class PlantController {
      * method to destroy branches no longer attatched to the plant,
      * should be called every frame
      */
-    public void propagateDestruction() {
+    public ObjectSet<Bug> propagateDestruction() {
+        removedHazards.clear();
         if (plantCoyoteTimeRemaining == 0 && !destructionQueue.isEmpty()) {
             int[] currentNode = destructionQueue.removeFirst();
 
@@ -606,6 +607,7 @@ public class PlantController {
         } else {
             plantCoyoteTimeRemaining--;
         }
+        return removedHazards;
     }
 
     /**
@@ -616,6 +618,12 @@ public class PlantController {
      */
     public void destroyAll(int xArg, int yArg) {
         PlantNode nodeToDestroy = plantGrid[xArg][yArg];
+        if (plantGrid[xArg][yArg].hasHazard()) {
+            Hazard h = getHazard(xArg, yArg);
+            if (h instanceof Bug) {
+                removedHazards.add((Bug) h);
+            }
+        }
         nodeToDestroy.unmakeLeaf();
         soundController.playSound(destroySound);
         if (!canGrowAtIndex(xArg, yArg) ||

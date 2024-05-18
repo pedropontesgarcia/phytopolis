@@ -354,7 +354,7 @@ public class GameplayMode extends WorldController {
         if (ic.didMousePress() && hazardController.hasFire(unprojMousePos)) {
             hazardController.extinguishFire(unprojMousePos, avatar);
         }
-        plantController.propagateDestruction();
+        hazardController.deleteFireBugs(plantController.propagateDestruction());
 
         //        if (timeSinceUIUpdate >= 1) {
         uiController.update(dt,
