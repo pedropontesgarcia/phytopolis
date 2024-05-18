@@ -23,6 +23,7 @@ import com.syndic8.phytopolis.util.Timer;
 public class UIController {
 
     private static final int MAX_FLASH_TIME = 80;
+    private static final float RANGE_SCALE = 1.3f;
     private final Stage stage;
     private final TextButton label;
     private final Vector2 projMousePosCache;
@@ -256,7 +257,7 @@ public class UIController {
                                                  unprojMousePos.y + 0.5f *
                                                          tm.getTileHeight());
             boolean enabled = pc.isNodeEnabled(indices[0], indices[1]);
-            if (distance > tm.getTileHeight() * 2 || !enabled) {
+            if (distance > tm.getTileHeight() * RANGE_SCALE || !enabled) {
                 Gdx.graphics.setCursor(normalCursor);
             } else {
                 if (hc.hasFire(unprojMousePos)) {
@@ -282,6 +283,10 @@ public class UIController {
                 }
             }
         }
+    }
+
+    public float getRangeScale() {
+        return RANGE_SCALE;
     }
 
     private void updateTexture(float dt,

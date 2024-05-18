@@ -390,7 +390,7 @@ public class GameplayMode extends WorldController {
         float avatarX = avatar.getX();
         float avatarY = avatar.getY();
         float distance = unprojMousePos.dst(avatarX, avatarY);
-        if (distance > tilemap.getTileHeight() * 1.3f) return;
+        if (distance > tilemap.getTileHeight() * uiController.getRangeScale()) return;
 
         boolean canGrowBranch = ic.didGrowBranch() && ic.isGrowBranchModDown();
         boolean canGrowLeaf = ic.didGrowLeaf() && ic.isGrowLeafModDown();
