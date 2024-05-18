@@ -126,7 +126,7 @@ public class DesktopLauncher {
         if (!(saveJson.has("lastBeaten"))) {
             throw new IOException();
         }
-        for (int i = 1; i <= 8; i++) {
+        for (int i = 1; i <= 12; i++) {
             if (!(saveJson.has("bestTime" + i))) {
                 throw new IOException();
             }
