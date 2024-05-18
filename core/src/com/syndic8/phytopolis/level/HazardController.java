@@ -173,7 +173,7 @@ public class HazardController {
 
 //        bugZones = new BugZone[tm.getBugZoneHeights().length];
 //        for (int i = 0; i < tm.getBugZoneHeights().length; i++) {
-//            bugZones.add(new BugZone(tm.getBugZoneHeights().get(i), i));
+//            bugZones[i] = new BugZone(tm.getBugZoneHeights().get(i), i);
 //        }
         fireProgress = 0;
         FIRE_BUFFER_ABOVE = tilemap.getTileHeight() / 2f;
@@ -396,12 +396,15 @@ public class HazardController {
      *
      * @return list of new Fire objects to add
      */
-    public PooledList<Hazard> updateHazards() {
+    public PooledList<Hazard> updateHazards(float dt) {
         addList.clear();
         // TODO: UPDATE BUGS
         for (Bug b : plantController.removeDeadLeafBugs()) {
             bugZones[b.getZoneIndex()].spreadBug(b.getLocation());
             despawnBug(b);
+        }
+        for (int i = 0; i < bugZones.length; i++) {
+            bugZones[i].update(dt);
         }
         if (fireProgress >= 100) {
             findValidFireLocs();
