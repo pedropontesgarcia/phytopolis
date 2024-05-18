@@ -380,7 +380,8 @@ public class GameplayMode extends WorldController {
             int lastBeaten = Math.max(saveJson.getInt("lastBeaten"),
                                       tilemap.getLevelNumber() - 1);
             saveJson.get("lastBeaten").set(lastBeaten, null);
-            float bestTime = Math.min(saveJson.getFloat("bestTime" + tilemap.getLevelNumber()), timeSpent);
+            float currBest = saveJson.getFloat("bestTime" + tilemap.getLevelNumber());
+            float bestTime = currBest == -1 ? timeSpent : Math.min(currBest, timeSpent);
             saveJson.get("bestTime" + tilemap.getLevelNumber()).set(bestTime, null);
             saveFile.writeString(saveJson.prettyPrint(JsonWriter.OutputType.json,
                                                       0), false);
