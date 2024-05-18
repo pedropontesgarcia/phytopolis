@@ -421,6 +421,7 @@ public class GameplayMode extends WorldController {
                             unprojMousePos.y);
                     if (branch != null) {
                         if (timeSinceGrow >= 1.0f) {
+                            System.out.println("BRANCH LIMIT RESET");
                             timeSinceGrow = 0;
                             numBranchesSinceGrow = 0;
                         }
