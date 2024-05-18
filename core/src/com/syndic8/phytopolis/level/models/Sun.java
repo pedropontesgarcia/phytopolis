@@ -17,6 +17,7 @@ public class Sun extends Resource {
     private final Texture sunSwirl;
     private float maxLeafHeight = -1;
     private float angle;
+    private boolean fading;
 
     public Sun(float x,
                float y,
@@ -36,6 +37,7 @@ public class Sun extends Resource {
         this.sunCircle = sc;
         this.sunRay = sr;
         this.sunSwirl = ss;
+        fading = false;
     }
 
     @Override
@@ -55,6 +57,7 @@ public class Sun extends Resource {
 
     public void startFade(float f) {
         maxLeafHeight = f;
+        fading = true;
     }
 
     public boolean belowScreen() {
@@ -64,6 +67,10 @@ public class Sun extends Resource {
     public void clear() {
         bodyinfo.type = BodyDef.BodyType.StaticBody;
         markRemoved(true);
+    }
+
+    public boolean isFading() {
+        return fading;
     }
 
     public void draw(GameCanvas canvas) {

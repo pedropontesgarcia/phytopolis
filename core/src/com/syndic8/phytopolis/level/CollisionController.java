@@ -88,7 +88,8 @@ public class CollisionController implements ContactListener {
             boolean isCollisionBetweenPlayerAndBug =
                     (player.getSensorName().equals(fd2) && player != bd1 &&
                             bd1.getType() == Model.ModelType.BUG) ||
-                            (player.getSensorName().equals(fd1) && player != bd2 &&
+                            (player.getSensorName().equals(fd1) &&
+                                    player != bd2 &&
                                     bd2.getType() == Model.ModelType.BUG);
             if (isCollisionBetweenPlayerAndBug) {
                 Bug b;
@@ -262,6 +263,19 @@ public class CollisionController implements ContactListener {
                 isCollisionBetweenTileAndSun || isCollisionBetweenWaterAndSun) {
             contact.setEnabled(false);
         }
+        if (isCollisionBetweenTileAndSun) {
+            Sun s;
+            Tile t;
+            if (fix1.getBody().getUserData() instanceof Sun) {
+                s = (Sun) fix1.getBody().getUserData();
+                t = (Tile) fix2.getBody().getUserData();
+            } else {
+                s = (Sun) fix2.getBody().getUserData();
+                t = (Tile) fix1.getBody().getUserData();
+            }
+            if (t.getType() == Model.ModelType.TILE_FULL && !s.isFading())
+                s.startFade(s.getY());
+        }
         if (isCollisionBetweenBugAndBouncy) {
             Bug b;
             Leaf l;
@@ -347,7 +361,7 @@ public class CollisionController implements ContactListener {
         if (isCollisionBetweenPlayerAndBug) {
             //            System.out.println("BUG");
             if (isPlayerGoingDown && isCollisionBetweenPlayerSensorAndBug) {
-//                System.out.println("BUG DOWN");
+                //                System.out.println("BUG DOWN");
                 Bug b;
                 if (((Model) fix1.getBody().getUserData()).getType() ==
                         Model.ModelType.BUG) {
