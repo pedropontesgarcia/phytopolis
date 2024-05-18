@@ -73,6 +73,8 @@ public class GameplayMode extends WorldController {
     private int sunSound;
     private int waterCollectSound;
     private int bugStompSound;
+    private float timeSinceGrow;
+    private int numBranchesSinceGrow;
 
     /**
      * Creates and initialize a new instance of the game.
@@ -86,6 +88,7 @@ public class GameplayMode extends WorldController {
         canvas = c;
         this.soundController = SoundController.getInstance();
         this.backgroundMusic = -1;
+        timeSinceGrow = 1.1f;
     }
 
     public void setLevel(String lvl) {
@@ -293,6 +296,7 @@ public class GameplayMode extends WorldController {
         if (ic.getHorizontal() != 0 || ic.didJump() || ic.isDropKeyDown()) {
             ic.resetScrolled();
         }
+        timeSinceGrow += dt;
         processPlantGrowth();
 
         avatar.applyForce();
@@ -333,7 +337,7 @@ public class GameplayMode extends WorldController {
         }
         Sun s = sunController.spawnSuns(dt, tilemap);
         if (s != null) addObject(s);
-        for (Hazard h : hazardController.updateHazards()) {
+        for (Hazard h : hazardController.updateHazards(dt)) {
             addObject(h);
         }
         projMousePosCache.set(ic.getMouseX(), ic.getMouseY());
@@ -390,7 +394,7 @@ public class GameplayMode extends WorldController {
         float avatarX = avatar.getX();
         float avatarY = avatar.getY();
         float distance = unprojMousePos.dst(avatarX, avatarY);
-        if (distance > tilemap.getTileHeight() * 2) return;
+        if (distance > tilemap.getTileHeight() * uiController.getRangeScale()) return;
 
         boolean canGrowBranch = ic.didGrowBranch() && ic.isGrowBranchModDown();
         boolean canGrowLeaf = ic.didGrowLeaf() && ic.isGrowLeafModDown();
@@ -412,17 +416,25 @@ public class GameplayMode extends WorldController {
 
         if (!hazardController.hasFire(unprojMousePos)) {
             if (shouldGrowBranch) {
-                Branch branch = plantController.growBranch(unprojMousePos.x,
-                                                           unprojMousePos.y);
-                if (branch != null) {
-                    addObject(branch);
-                    Vector2 branchCenter = getBranchCenter(branch);
-                    addObject(new Indicator(branchCenter.x,
-                                            branchCenter.y,
-                                            getMinusWaterIndicatorTexture(),
-                                            tilemap,
-                                            0.5f));
-                    soundController.playSound(plantSound);
+                if (timeSinceGrow >= 1.0f || numBranchesSinceGrow < 3) {
+                    Branch branch = plantController.growBranch(unprojMousePos.x,
+                            unprojMousePos.y);
+                    if (branch != null) {
+                        if (timeSinceGrow >= 1.0f) {
+                            System.out.println("BRANCH LIMIT RESET");
+                            timeSinceGrow = 0;
+                            numBranchesSinceGrow = 0;
+                        }
+                        numBranchesSinceGrow++;
+                        addObject(branch);
+                        Vector2 branchCenter = getBranchCenter(branch);
+                        addObject(new Indicator(branchCenter.x,
+                                branchCenter.y,
+                                getMinusWaterIndicatorTexture(),
+                                tilemap,
+                                0.5f));
+                        soundController.playSound(plantSound);
+                    }
                 }
             }
             if (shouldGrowLeaf) {
