@@ -75,6 +75,7 @@ public class GameplayMode extends WorldController {
     private int bugStompSound;
     private float timeSinceGrow;
     private int numBranchesSinceGrow;
+    private float timeSpent;
 
     /**
      * Creates and initialize a new instance of the game.
@@ -89,6 +90,7 @@ public class GameplayMode extends WorldController {
         this.soundController = SoundController.getInstance();
         this.backgroundMusic = -1;
         timeSinceGrow = 1.1f;
+        timeSpent = 0;
     }
 
     public void setLevel(String lvl) {
@@ -285,6 +287,7 @@ public class GameplayMode extends WorldController {
      * @param dt Number of seconds since last animation frame
      */
     public void update(float dt) {
+        timeSpent += dt;
         if (getFadeState() == Fade.FADE_OUT)
             soundController.setActualMusicVolume(
                     super.getVolume() * soundController.getUserMusicVolume());
@@ -377,6 +380,8 @@ public class GameplayMode extends WorldController {
             int lastBeaten = Math.max(saveJson.getInt("lastBeaten"),
                                       tilemap.getLevelNumber() - 1);
             saveJson.get("lastBeaten").set(lastBeaten, null);
+            float bestTime = Math.min(saveJson.getFloat("bestTime" + tilemap.getLevelNumber()), timeSpent);
+            saveJson.get("bestTime" + tilemap.getLevelNumber()).set(bestTime, null);
             saveFile.writeString(saveJson.prettyPrint(JsonWriter.OutputType.json,
                                                       0), false);
         }
@@ -421,7 +426,6 @@ public class GameplayMode extends WorldController {
                             unprojMousePos.y);
                     if (branch != null) {
                         if (timeSinceGrow >= 0.25f) {
-                            System.out.println("BRANCH LIMIT RESET");
                             timeSinceGrow = 0;
                             numBranchesSinceGrow = 0;
                         }
@@ -530,6 +534,10 @@ public class GameplayMode extends WorldController {
             default:
                 return lvl1LeafWidth;
         }
+    }
+
+    public float getTimeSpent() {
+        return timeSpent;
     }
 
     /**
