@@ -724,11 +724,11 @@ public class HazardController {
                         (h.getType() == FIRE ?
                                 redWarningFlashTexture :
                                 greenWarningFlashTexture);
-                if ((warningTex == redWarningTexture &&
-                        h.previousTex() == redWarningFlashTexture) ||
-                        (warningTex == greenWarningTexture &&
-                                h.previousTex() == greenWarningFlashTexture))
-                    SoundController.getInstance().playSound(warningSound);
+//                if ((warningTex == redWarningTexture &&
+//                        h.previousTex() == redWarningFlashTexture) ||
+//                        (warningTex == greenWarningTexture &&
+//                                h.previousTex() == greenWarningFlashTexture))
+//                    SoundController.getInstance().playSound(warningSound);
                 canvas.draw(warningTex,
                             Color.WHITE,
                             warningX,
