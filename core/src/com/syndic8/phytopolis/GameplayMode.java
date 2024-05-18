@@ -76,6 +76,7 @@ public class GameplayMode extends WorldController {
     private float timeSinceGrow;
     private int numBranchesSinceGrow;
     private float timeSpent;
+    private float bestTime;
 
     /**
      * Creates and initialize a new instance of the game.
@@ -390,7 +391,7 @@ public class GameplayMode extends WorldController {
                                       tilemap.getLevelNumber() - 1);
             saveJson.get("lastBeaten").set(lastBeaten, null);
             float currBest = saveJson.getFloat("bestTime" + tilemap.getLevelNumber());
-            float bestTime = currBest == -1 ? timeSpent : Math.min(currBest, timeSpent);
+            bestTime = currBest == -1 ? timeSpent : Math.min(currBest, timeSpent);
             saveJson.get("bestTime" + tilemap.getLevelNumber()).set(bestTime, null);
             saveFile.writeString(saveJson.prettyPrint(JsonWriter.OutputType.json,
                                                       0), false);
@@ -668,6 +669,10 @@ public class GameplayMode extends WorldController {
 
     public float getTimeSpent() {
         return timeSpent;
+    }
+
+    public float getBestTime() {
+        return bestTime;
     }
 
     public void setCameraVector(Vector2 vector) {
