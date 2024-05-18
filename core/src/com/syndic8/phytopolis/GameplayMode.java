@@ -297,7 +297,9 @@ public class GameplayMode extends WorldController {
      * @param dt Number of seconds since last animation frame
      */
     public void update(float dt) {
-        timeSpent += dt;
+        if (!isComplete()) {
+            timeSpent += dt;
+        }
         if (getFadeState() == Fade.FADE_OUT)
             soundController.setActualMusicVolume(
                     super.getVolume() * soundController.getUserMusicVolume());
