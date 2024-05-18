@@ -8,7 +8,7 @@
  "margin":0,
  "name":"tileset",
  "spacing":0,
- "tilecount":70,
+ "tilecount":71,
  "tiledversion":"1.10.2",
  "tileheight":400,
  "tiles":[
@@ -1364,9 +1364,39 @@
             },
          "properties":[
                 {
+                 "name":"background",
+                 "type":"string",
+                 "value":"gameplay:background1"
+                }, 
+                {
                  "name":"collidetop",
                  "type":"bool",
                  "value":true
+                }, 
+                {
+                 "name":"firerate",
+                 "type":"float",
+                 "value":3
+                }, 
+                {
+                 "name":"leaftype",
+                 "type":"int",
+                 "value":1
+                }, 
+                {
+                 "name":"levelnumber",
+                 "type":"int",
+                 "value":8
+                }, 
+                {
+                 "name":"time",
+                 "type":"int",
+                 "value":180
+                }, 
+                {
+                 "name":"victory",
+                 "type":"float",
+                 "value":18
                 }]
         }, 
         {
@@ -1885,6 +1915,18 @@
                  "name":"collidetop",
                  "type":"bool",
                  "value":true
+                }]
+        }, 
+        {
+         "id":72,
+         "image":"blank-tileset2.png",
+         "imageheight":400,
+         "imagewidth":600,
+         "properties":[
+                {
+                 "name":"collidetop",
+                 "type":"bool",
+                 "value":false
                 }]
         }],
  "tilewidth":600,
