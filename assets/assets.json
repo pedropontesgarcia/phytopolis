@@ -109,7 +109,7 @@
     "landingleaf": "gameplay/audio/LandingOnLeafSFXN.wav",
     "click": "gameplay/audio/MenuClickSFXN.wav",
     "upgradeleaf": "gameplay/audio/UpgradeLeafSFXN.wav",
-    "electricshock": "gameplay/audio/ElectricShockSFXN.wav",
+    "electricshock": "gameplay/audio/ElectricShock2SFXN.wav",
     "errorsound": "gameplay/audio/ErrorSoundSFXLowered.wav",
     "munchingsound": "gameplay/audio/MunchingSFXN.wav",
     "suncollectsound": "gameplay/audio/SunCollectSFXN.wav",
