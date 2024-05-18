@@ -115,7 +115,7 @@
         {
          "name":"victory",
          "type":"float",
-         "value":15
+         "value":14
         }],
  "renderorder":"right-down",
  "tiledversion":"1.10.2",
