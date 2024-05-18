@@ -20,6 +20,7 @@ public class Tilemap {
     private static final String HAZARDS_TILESET = "hazards.tsx";
     private final GameCanvas canvas;
     private final PooledList<Float> powerlineYVals;
+    private final PooledList<Float> bugYVals;
     PooledList<Tile> tiles;
     AssetDirectory directory;
     JsonValue tilemap;
@@ -51,6 +52,7 @@ public class Tilemap {
         tilemap = tm;
         canvas = c;
         powerlineYVals = new PooledList<>();
+        bugYVals = new PooledList<>();
     }
 
     public float getWorldHeight() {
@@ -326,8 +328,18 @@ public class Tilemap {
                     Texture tx = new Texture(
                             "gameplay/tiles/" + tileJson.getString("image"));
                     Tile tile = new Tile(this, new Vector2(x0, y0), false, tx);
-                    if (!powerlineYVals.contains(y0))
-                        powerlineYVals.add(y0 + 0.5f * tileHeight);
+                    if (tileJson.get("properties")
+                            .get(0)
+                            .getString("value")
+                            .equals("powerline")) {
+                        if (!powerlineYVals.contains(y0 + 0.5f * tileHeight))
+                            powerlineYVals.add(y0 + 0.5f * tileHeight);
+                    } else if (tileJson.get("properties")
+                            .get(0)
+                            .getString("value")
+                            .equals("bug"))
+                        if (!bugYVals.contains(y0 + 0.5f * tileHeight))
+                            bugYVals.add(y0 + 0.5f * tileHeight);
                     tiles.add(tile);
                 }
             }
@@ -362,6 +374,10 @@ public class Tilemap {
 
     public PooledList<Float> getPowerlineYVals() {
         return powerlineYVals;
+    }
+
+    public PooledList<Float> getBugYVals() {
+        return bugYVals;
     }
 
 }

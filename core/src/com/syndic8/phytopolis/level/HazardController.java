@@ -78,6 +78,7 @@ public class HazardController {
     ArrayList<Integer> bugNodes;
     PooledList<Hazard> addList;
     PooledList<Vector2> bugSpreadNodes;
+    private BugZone[] bugZones;
     /**
      * The frequency at which fires are generated (probability = 1 / fireFrequency) every second.
      */
@@ -124,7 +125,6 @@ public class HazardController {
     private TextureRegion greenArrowDownTexture;
     private TextureRegion greenArrowUpTexture;
     private PooledList<Float> powerlineHeights;
-    private BugZone[] bugZones;
     private float fireProgress;
     private int extinguishSound;
     private int electricShock;
@@ -169,12 +169,6 @@ public class HazardController {
         height = plantController.getHeight();
         width = plantController.getWidth();
         tilemap = tm;
-        powerlineHeights = tm.getPowerlineYVals();
-        bugZones = new BugZone[]{};
-//        bugZones = new BugZone[tm.getBugZoneHeights().length];
-//        for (int i = 0; i < tm.getBugZoneHeights().length; i++) {
-//            bugZones[i] = new BugZone(tm.getBugZoneHeights().get(i), i);
-//        }
         fireProgress = 0;
         FIRE_BUFFER_ABOVE = tilemap.getTileHeight() / 2f;
         FIRE_BUFFER_BELOW = FIRE_BUFFER_ABOVE;
@@ -194,6 +188,10 @@ public class HazardController {
         hazards = new ArrayList<>();
         fireNodes = new ArrayList<>();
         bugNodes = new ArrayList<>();
+        bugZones = new BugZone[tm.getBugYVals().size()];
+        for (int i = 0; i < tm.getBugYVals().size(); i++) {
+            bugZones[i] = new BugZone(tm.getBugYVals().get(i), i);
+        }
         addList = new PooledList<>();
         bugSpreadNodes = new PooledList<>();
         height = plantController.getHeight();
@@ -203,138 +201,164 @@ public class HazardController {
         fireProgress = 0;
     }
 
-//    public Hazard generateHazard(Model.ModelType type) {
-//        int hazardHeight = generateHazardHeight(type);
-//        if (hazardHeight == -1) return null;
-//        int hazardWidth = generateHazardWidth(hazardHeight, type);
-//        if (hazardWidth == -1) return null;
-//        return generateHazard(type, hazardWidth, hazardHeight);
-//    }
-
-    /**
-     * Generates a hazard at random node at a generated height if the time is right.
-     *
-     * @param type The type of hazard.
-     * @return the generated hazard (null if none)
-     */
-    public Hazard generateHazard(Model.ModelType type, int x, int y) {
-        switch (type) {
-            case FIRE:
-                if (isValidFireLocation(x, y)) {
-                    return generateHazardAt(type, x, y);
-                }
-                break;
-            case BUG:
-                if (plantController.hasLeaf(x, y) &&
-                        !plantController.hasHazard(x, y)) {
-                    return generateHazardAt(type, x, y);
-                }
-                break;
-        }
-        return null;
-    }
-
-    public boolean isValidFireLocation(int x, int y) {
-        return (plantController.inBounds(x, y) &&
-                !plantController.hasHazard(x, y)) &&
-                ((plantController.inBounds(x - 1, y - 1) &&
-                        plantController.branchExists(x - 1,
-                                                     y - 1,
-                                                     PlantController.branchDirection.RIGHT)) ||
-                        (plantController.inBounds(x + 1, y - 1) &&
-                                plantController.branchExists(x + 1,
-                                                             y - 1,
-                                                             PlantController.branchDirection.LEFT)) ||
-                        (plantController.inBounds(x, y - 1) &&
-                                plantController.branchExists(x,
-                                                             y - 1,
-                                                             PlantController.branchDirection.MIDDLE)) ||
-                        (plantController.inBounds(x, y) &&
-                                !plantController.nodeIsEmpty(x, y)));
-    }
+    //    public Hazard generateHazard(Model.ModelType type) {
+    //        int hazardHeight = generateHazardHeight(type);
+    //        if (hazardHeight == -1) return null;
+    //        int hazardWidth = generateHazardWidth(hazardHeight, type);
+    //        if (hazardWidth == -1) return null;
+    //        return generateHazard(type, hazardWidth, hazardHeight);
+    //    }
 
     public boolean isValidBugLocation(int x, int y) {
-        return plantController.hasLeaf(x, y) && !plantController.hasHazard(x, y);
+        return plantController.hasLeaf(x, y) &&
+                !plantController.hasHazard(x, y);
     }
-
-//    /**
-//     * Generates a random height for a hazard based on the frequency.
-//     *
-//     * @return The height at which the hazard is generated, or -1 if no hazard is generated.
-//     */
-//    private int generateHazardHeight(Model.ModelType type) {
-//        int hazardHeight = -1;
-//        switch (type) {
-//            case FIRE:
-//                if (random.nextDouble() < 1.0 / fireFrequency)
-//                    hazardHeight = random.nextInt(height);
-//                break;
-//            case BUG:
-//                if (random.nextDouble() < 1.0 / bugFrequency)
-//                    hazardHeight = random.nextInt(height);
-//                break;
-//            default:
-//                break;
-//        }
-//        hazardHeight = hazardHeight == -1 ? -1 : hazardHeight + 1;
-//        return Math.min(hazardHeight, height - 1);
-//    }
-
-//    /**
-//     * Generates a random width for a hazard based on the frequency.
-//     *
-//     * @return The width at which the hazard is generated, or -1 if no plant at that height.
-//     */
-//    private int generateHazardWidth(int hazardHeight, Model.ModelType type) {
-//        switch (type) {
-//            case FIRE:
-//                fireNodes.clear();
-//                // Check if the plant node exists and append to effected nodes
-//                for (int w = 0; w < width; w++) {
-//                    if (!plantController.nodeIsEmpty(w, hazardHeight)) {
-//                        fireNodes.add(w);
-//                    }
-//                }
-//                // Choose a node at random to destroy from effectedNodes
-//                if (!fireNodes.isEmpty()) {
-//                    int randomIndex = random.nextInt(fireNodes.size());
-//                    return fireNodes.get(randomIndex);
-//                }
-//                break;
-//            case BUG:
-//                bugNodes.clear();
-//                // Check if the plant node has a leaf and append to bugNodes
-//                for (int w = 0; w < width; w++) {
-//                    if (plantController.hasLeaf(w, hazardHeight)) {
-//                        bugNodes.add(w);
-//                    }
-//                }
-//                // Choose a node at random to destroy from bugNodes
-//                if (!bugNodes.isEmpty()) {
-//                    int randomIndex = random.nextInt(bugNodes.size());
-//                    return bugNodes.get(randomIndex);
-//                }
-//                break;
-//        }
-//        return -1;
-//    }
 
     /**
-     * Generates a fire at a random node if the time is right.
+     * Updates the hazards for the current state of the game. This method is responsible
+     * for generating and managing both fire and drone hazards, including their effects
+     * on plant nodes.
      *
-     * @return the generated fire (null if none)
+     * @return list of new Fire objects to add
      */
-    public Fire generateFire() {
-        if (!validFireLocs.isEmpty()) {
-            int index = random.nextInt(validFireLocs.size());
-            Vector2 fireLoc = validFireLocs.get(index);
-            Hazard h = generateHazard(FIRE, (int) fireLoc.x, (int) fireLoc.y);
-            if (h != null) {
-                return (Fire) h;
-            }
+    public PooledList<Hazard> updateHazards(float dt) {
+        addList.clear();
+        // TODO: UPDATE BUGS
+        for (Bug b : plantController.removeDeadLeafBugs()) {
+            bugZones[b.getZoneIndex()].spreadBug(b.getLocation());
+            despawnBug(b);
         }
-        return null;
+        for (int i = 0; i < bugZones.length; i++) {
+            bugZones[i].update(dt);
+        }
+        if (fireProgress >= 100) {
+            findValidFireLocs();
+            Fire fire = generateFire();
+            addList.add(fire);
+            if (fire != null)
+                SoundController.getInstance().playSound(electricShock);
+            else SoundController.getInstance().playSound(extinguishSound);
+            fireProgress = 0;
+        }
+        long currentTime = System.currentTimeMillis();
+        if (currentTime - lastUpdateTime >=
+                1000) { // Check if one second has passed
+            lastUpdateTime = currentTime; // Reset the last update time
+            //            addList.add(generateDrone());
+            //            addList.add(generateBug());
+        }
+        int i = 0;
+        while (i < hazards.size()) {
+            Hazard h = hazards.get(i);
+            int hx = (int) h.getLocation().x;
+            int hy = (int) h.getLocation().y;
+            if (h instanceof Fire) {
+                Fire f = (Fire) h;
+                // check if branch is still there (floating fire bug)
+
+                if (plantController.nodeIsEmpty(hx, hy) &&
+                        !plantController.canGrowAtIndex(hx, hy)) {
+                    removeHazard(h);
+                    plantController.removeHazardFromNodes(h);
+                    continue; // Continue to next hazard after removing
+                }
+
+                if (lastUpdateTime == currentTime) {
+                    // spread fire if the time is right, otherwise decrement timer
+                    if (h.tick()) {
+                        removeHazard(h);
+                        plantController.removeHazardFromNodes(h);
+                        if (h instanceof Fire) {
+                            plantController.destroyAll(hx, hy);
+                            spreadFire(h.getLocation());
+                        }
+                    }
+                }
+            }
+
+            i++;
+        }
+        addList.removeAll(Collections.singleton(null));
+        return addList;
     }
+
+    /**
+     * Generates a drone at a random node if the time is right.
+     *
+     * @return the generated drone (null if none)
+     */
+    //    public Drone generateDrone() {
+    //        Hazard h = generateHazard(Model.ModelType.DRONE);
+    //        if (h != null) {
+    //            return (Drone) h;
+    //        }
+    //        return null;
+    //    }
+    public void despawnBug(Bug b) {
+        bugZones[b.getZoneIndex()].despawnBug(b);
+    }
+
+    //    /**
+    //     * Generates a random height for a hazard based on the frequency.
+    //     *
+    //     * @return The height at which the hazard is generated, or -1 if no hazard is generated.
+    //     */
+    //    private int generateHazardHeight(Model.ModelType type) {
+    //        int hazardHeight = -1;
+    //        switch (type) {
+    //            case FIRE:
+    //                if (random.nextDouble() < 1.0 / fireFrequency)
+    //                    hazardHeight = random.nextInt(height);
+    //                break;
+    //            case BUG:
+    //                if (random.nextDouble() < 1.0 / bugFrequency)
+    //                    hazardHeight = random.nextInt(height);
+    //                break;
+    //            default:
+    //                break;
+    //        }
+    //        hazardHeight = hazardHeight == -1 ? -1 : hazardHeight + 1;
+    //        return Math.min(hazardHeight, height - 1);
+    //    }
+
+    //    /**
+    //     * Generates a random width for a hazard based on the frequency.
+    //     *
+    //     * @return The width at which the hazard is generated, or -1 if no plant at that height.
+    //     */
+    //    private int generateHazardWidth(int hazardHeight, Model.ModelType type) {
+    //        switch (type) {
+    //            case FIRE:
+    //                fireNodes.clear();
+    //                // Check if the plant node exists and append to effected nodes
+    //                for (int w = 0; w < width; w++) {
+    //                    if (!plantController.nodeIsEmpty(w, hazardHeight)) {
+    //                        fireNodes.add(w);
+    //                    }
+    //                }
+    //                // Choose a node at random to destroy from effectedNodes
+    //                if (!fireNodes.isEmpty()) {
+    //                    int randomIndex = random.nextInt(fireNodes.size());
+    //                    return fireNodes.get(randomIndex);
+    //                }
+    //                break;
+    //            case BUG:
+    //                bugNodes.clear();
+    //                // Check if the plant node has a leaf and append to bugNodes
+    //                for (int w = 0; w < width; w++) {
+    //                    if (plantController.hasLeaf(w, hazardHeight)) {
+    //                        bugNodes.add(w);
+    //                    }
+    //                }
+    //                // Choose a node at random to destroy from bugNodes
+    //                if (!bugNodes.isEmpty()) {
+    //                    int randomIndex = random.nextInt(bugNodes.size());
+    //                    return bugNodes.get(randomIndex);
+    //                }
+    //                break;
+    //        }
+    //        return -1;
+    //    }
 
     public boolean findValidFireLocs() {
         validFireLocs.clear();
@@ -373,88 +397,20 @@ public class HazardController {
     }
 
     /**
-     * Generates a drone at a random node if the time is right.
+     * Generates a fire at a random node if the time is right.
      *
-     * @return the generated drone (null if none)
+     * @return the generated fire (null if none)
      */
-//    public Drone generateDrone() {
-//        Hazard h = generateHazard(Model.ModelType.DRONE);
-//        if (h != null) {
-//            return (Drone) h;
-//        }
-//        return null;
-//    }
-
-    public void despawnBug(Bug b) {
-        bugZones[b.getZoneIndex()].despawnBug(b);
-    }
-
-    /**
-     * Updates the hazards for the current state of the game. This method is responsible
-     * for generating and managing both fire and drone hazards, including their effects
-     * on plant nodes.
-     *
-     * @return list of new Fire objects to add
-     */
-    public PooledList<Hazard> updateHazards(float dt) {
-        addList.clear();
-        // TODO: UPDATE BUGS
-        for (Bug b : plantController.removeDeadLeafBugs()) {
-            bugZones[b.getZoneIndex()].spreadBug(b.getLocation());
-            despawnBug(b);
-        }
-        for (int i = 0; i < bugZones.length; i++) {
-            bugZones[i].update(dt);
-        }
-        if (fireProgress >= 100) {
-            findValidFireLocs();
-            Fire fire = generateFire();
-            addList.add(fire);
-            if (fire != null)
-                SoundController.getInstance().playSound(electricShock);
-            else SoundController.getInstance().playSound(extinguishSound);
-            fireProgress = 0;
-        }
-        long currentTime = System.currentTimeMillis();
-        if (currentTime - lastUpdateTime >=
-                1000) { // Check if one second has passed
-            lastUpdateTime = currentTime; // Reset the last update time
-//            addList.add(generateDrone());
-//            addList.add(generateBug());
-        }
-        int i = 0;
-        while (i < hazards.size()) {
-            Hazard h = hazards.get(i);
-            int hx = (int) h.getLocation().x;
-            int hy = (int) h.getLocation().y;
-            if (h instanceof Fire) {
-                Fire f = (Fire) h;
-                // check if branch is still there (floating fire bug)
-
-                if (plantController.nodeIsEmpty(hx, hy) &&
-                        !plantController.canGrowAtIndex(hx, hy)) {
-                    removeHazard(h);
-                    plantController.removeHazardFromNodes(h);
-                    continue; // Continue to next hazard after removing
-                }
-
-                if (lastUpdateTime == currentTime) {
-                    // spread fire if the time is right, otherwise decrement timer
-                    if (h.tick()) {
-                        removeHazard(h);
-                        plantController.removeHazardFromNodes(h);
-                        if (h instanceof Fire) {
-                            plantController.destroyAll(hx, hy);
-                            spreadFire(h.getLocation());
-                        }
-                    }
-                }
+    public Fire generateFire() {
+        if (!validFireLocs.isEmpty()) {
+            int index = random.nextInt(validFireLocs.size());
+            Vector2 fireLoc = validFireLocs.get(index);
+            Hazard h = generateHazard(FIRE, (int) fireLoc.x, (int) fireLoc.y);
+            if (h != null) {
+                return (Fire) h;
             }
-
-            i++;
         }
-        addList.removeAll(Collections.singleton(null));
-        return addList;
+        return null;
     }
 
     public void removeHazard(Hazard h) {
@@ -522,37 +478,46 @@ public class HazardController {
         }
     }
 
+    public boolean isValidFireLocation(int x, int y) {
+        return (plantController.inBounds(x, y) &&
+                !plantController.hasHazard(x, y)) &&
+                ((plantController.inBounds(x - 1, y - 1) &&
+                        plantController.branchExists(x - 1,
+                                                     y - 1,
+                                                     PlantController.branchDirection.RIGHT)) ||
+                        (plantController.inBounds(x + 1, y - 1) &&
+                                plantController.branchExists(x + 1,
+                                                             y - 1,
+                                                             PlantController.branchDirection.LEFT)) ||
+                        (plantController.inBounds(x, y - 1) &&
+                                plantController.branchExists(x,
+                                                             y - 1,
+                                                             PlantController.branchDirection.MIDDLE)) ||
+                        (plantController.inBounds(x, y) &&
+                                !plantController.nodeIsEmpty(x, y)));
+    }
+
     /**
-     * Extinguish fire at the given mouse position.
+     * Generates a hazard at random node at a generated height if the time is right.
      *
-     * @param mousePos mouse position
+     * @param type The type of hazard.
+     * @return the generated hazard (null if none)
      */
-    public void extinguishFire(Vector2 mousePos, Player avatar) {
-        float avatarX = avatar.getX();
-        float avatarY = avatar.getY();
-        float distance = mousePos.dst(avatarX, avatarY);
-        if (distance > tilemap.getTileHeight() * 2) return;
-        if (!resourceController.canExtinguish()) {
-            //            System.out.println("fire");
-            SoundController.getInstance().playSound(errorSound);
-            resourceController.setNotEnough(true);
-            return;
-        }
-        SoundController.getInstance().playSound(extinguishSound);
-        for (Hazard h : hazards) {
-            if (h.getType().equals(FIRE)) {
-                Vector2 hazPos = plantController.indexToWorldCoord((int) h.getLocation().x,
-                                                                   (int) h.getLocation().y);
-                if (Math.abs(mousePos.x - hazPos.x) < .5 &&
-                        Math.abs(mousePos.y - hazPos.y) < .5) {
-                    hazards.remove(h);
-                    h.markRemoved(true);
-                    resourceController.decrementExtinguish();
-                    plantController.removeHazardFromNodes(h);
-                    break;
+    public Hazard generateHazard(Model.ModelType type, int x, int y) {
+        switch (type) {
+            case FIRE:
+                if (isValidFireLocation(x, y)) {
+                    return generateHazardAt(type, x, y);
                 }
-            }
+                break;
+            case BUG:
+                if (plantController.hasLeaf(x, y) &&
+                        !plantController.hasHazard(x, y)) {
+                    return generateHazardAt(type, x, y);
+                }
+                break;
         }
+        return null;
     }
 
     /**
@@ -606,6 +571,39 @@ public class HazardController {
                 return b;
             default:
                 return null;
+        }
+    }
+
+    /**
+     * Extinguish fire at the given mouse position.
+     *
+     * @param mousePos mouse position
+     */
+    public void extinguishFire(Vector2 mousePos, Player avatar) {
+        float avatarX = avatar.getX();
+        float avatarY = avatar.getY();
+        float distance = mousePos.dst(avatarX, avatarY);
+        if (distance > tilemap.getTileHeight() * 2) return;
+        if (!resourceController.canExtinguish()) {
+            //            System.out.println("fire");
+            SoundController.getInstance().playSound(errorSound);
+            resourceController.setNotEnough(true);
+            return;
+        }
+        SoundController.getInstance().playSound(extinguishSound);
+        for (Hazard h : hazards) {
+            if (h.getType().equals(FIRE)) {
+                Vector2 hazPos = plantController.indexToWorldCoord((int) h.getLocation().x,
+                                                                   (int) h.getLocation().y);
+                if (Math.abs(mousePos.x - hazPos.x) < .5 &&
+                        Math.abs(mousePos.y - hazPos.y) < .5) {
+                    hazards.remove(h);
+                    h.markRemoved(true);
+                    resourceController.decrementExtinguish();
+                    plantController.removeHazardFromNodes(h);
+                    break;
+                }
+            }
         }
     }
 
@@ -676,7 +674,7 @@ public class HazardController {
                                                    SoundEffect.class));
         warningSound = SoundController.getInstance()
                 .addSoundEffect(directory.getEntry("warningsound",
-                        SoundEffect.class));
+                                                   SoundEffect.class));
     }
 
     /**
@@ -726,7 +724,10 @@ public class HazardController {
                         (h.getType() == FIRE ?
                                 redWarningFlashTexture :
                                 greenWarningFlashTexture);
-                if((warningTex == redWarningTexture && h.previousTex() == redWarningFlashTexture) || (warningTex == greenWarningTexture && h.previousTex() == greenWarningFlashTexture))
+                if ((warningTex == redWarningTexture &&
+                        h.previousTex() == redWarningFlashTexture) ||
+                        (warningTex == greenWarningTexture &&
+                                h.previousTex() == greenWarningFlashTexture))
                     SoundController.getInstance().playSound(warningSound);
                 canvas.draw(warningTex,
                             Color.WHITE,
@@ -746,7 +747,7 @@ public class HazardController {
     }
 
     public void update(float dt) {
-        fireProgress += dt * 2 * Math.sqrt(powerlinesTouching());
+        fireProgress += dt * 5 * Math.sqrt(powerlinesTouching());
     }
 
     public int powerlinesTouching() {
@@ -772,51 +773,60 @@ public class HazardController {
     //    }
 
     public class BugZone {
-        private float y;
-        private int index;
+
         private final float WIDTH = tilemap.getTileHeight();
-        private float currTime;
         private final float LOWER_LIMIT = 5.0f;
         private final float UPPER_LIMIT = 10.0f;
         private final float ZONE_BUFFER_ABOVE = tilemap.getTileHeight() / 2.0f;
         private final float ZONE_BUFFER_BELOW = ZONE_BUFFER_ABOVE;
-        private float timer;
-        private int max;
-        private int min;
-        private PooledList<Vector2> validLeafLocs;
+        private final float y;
+        private final int index;
+        private final int max;
+        private final int min;
+        private final PooledList<Vector2> validLeafLocs;
         PooledList<Bug> despawningBugs;
-
+        private float currTime;
+        private float timer;
 
         public BugZone(float f, int ind) {
             y = f;
             index = ind;
             max = plantController.screenCoordToIndex(0,
-                    y +
-                            ZONE_BUFFER_ABOVE +
-                            0.5f *
-                                    tilemap.getTileHeight())[1];
+                                                     y + ZONE_BUFFER_ABOVE +
+                                                             0.5f *
+                                                                     tilemap.getTileHeight())[1];
             min = plantController.screenCoordToIndex(0,
-                    y -
-                            ZONE_BUFFER_BELOW +
-                            0.5f *
-                                    tilemap.getTileHeight())[1];
+                                                     y - ZONE_BUFFER_BELOW +
+                                                             0.5f *
+                                                                     tilemap.getTileHeight())[1];
             validLeafLocs = new PooledList<>();
             despawningBugs = new PooledList<>();
             changeTimer();
         }
 
+        public void changeTimer() {
+            currTime = 0;
+            timer = RandomController.rollFloat(LOWER_LIMIT, UPPER_LIMIT);
+        }
+
         public void update(float dt) {
+            System.out.printf("Timer: %.2f, current time: %.2f\n",
+                              timer,
+                              currTime);
             currTime += dt;
             if (currTime >= timer) {
                 changeTimer();
                 // spawn bug within zone
                 findValidLeafLocs();
                 Bug b = generateBug();
-                b.setZoneIndex(index);
-                addList.add(b);
-//                if (b != null)
-//                    SoundController.getInstance().playSound(electricShock);
-//                else SoundController.getInstance().playSound(extinguishSound);
+                if (b != null) {
+                    b.setZoneIndex(index);
+                    addList.add(b);
+                }
+
+                //                if (b != null)
+                //                    SoundController.getInstance().playSound(electricShock);
+                //                else SoundController.getInstance().playSound(extinguishSound);
             }
             for (Bug b : despawningBugs) {
                 if (b.getDoneAnim()) {
@@ -826,13 +836,37 @@ public class HazardController {
             }
         }
 
-        public void changeTimer() {
-            currTime = 0;
-            timer = random.nextFloat(LOWER_LIMIT, UPPER_LIMIT);
+        public void findValidLeafLocs() {
+            validLeafLocs.clear();
+            for (int i = min; i <= max; i++) {
+                if (i != 0) {
+                    for (int width = 0;
+                         width < plantController.getWidth();
+                         width++) {
+                        int idx = i;
+                        if (i == max && plantController.isColumnOffset(width))
+                            continue; // If the node is at the max height
+                        // and it's offset then it's too far visually
+                        if (isValidBugLocation(width, i)) {
+                            validLeafLocs.add(new Vector2(width, i));
+                        }
+                    }
+                }
+            }
         }
 
-        public boolean inBounds(int y) {
-            return y >= min && y <= max;
+        public Bug generateBug() {
+            if (!validLeafLocs.isEmpty()) {
+                int index = random.nextInt(validLeafLocs.size());
+                Vector2 fireLoc = validLeafLocs.get(index);
+                Hazard h = generateHazard(BUG,
+                                          (int) fireLoc.x,
+                                          (int) fireLoc.y);
+                if (h != null) {
+                    return (Bug) h;
+                }
+            }
+            return null;
         }
 
         public void spreadBug(Vector2 loc) {
@@ -884,48 +918,19 @@ public class HazardController {
             if (!validLeafLocs.isEmpty()) {
                 int randomIndex = random.nextInt(validLeafLocs.size());
                 Vector2 node = validLeafLocs.get(randomIndex);
+                //                addList.add(generateHazardAt(BUG, (int)node.x, (int)node.y));
                 addList.add(generateHazard(BUG, (int)node.x, (int)node.y));
             }
         }
 
-        public void findValidLeafLocs() {
-            validLeafLocs.clear();
-            for (int i = min; i <= max; i++) {
-                if (i != 0) {
-                    for (int width = 0;
-                         width < plantController.getWidth();
-                         width++) {
-                        int idx = i;
-                        if (i == max &&
-                                plantController.isColumnOffset(width))
-                            continue; // If the node is at the max height
-                        // and it's offset then it's too far visually
-                        if (isValidBugLocation(width, i)) {
-                            validLeafLocs.add(new Vector2(width, i));
-                        }
-                    }
-                }
-            }
-        }
-
-        public Bug generateBug() {
-            if (!validLeafLocs.isEmpty()) {
-                int index = random.nextInt(validLeafLocs.size());
-                Vector2 fireLoc = validLeafLocs.get(index);
-                Hazard h = generateHazard(BUG, (int) fireLoc.x, (int) fireLoc.y);
-                if (h != null) {
-                    return (Bug) h;
-                }
-            }
-            return null;
+        public boolean inBounds(int y) {
+            return y >= min && y <= max;
         }
 
         public void despawnBug(Bug b) {
             despawningBugs.add(b);
             b.setDespawning(true);
         }
-
-
 
     }
 
