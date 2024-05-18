@@ -4,7 +4,10 @@ import com.badlogic.gdx.physics.box2d.*;
 import com.badlogic.gdx.utils.ObjectSet;
 import com.syndic8.phytopolis.GameplayMode;
 import com.syndic8.phytopolis.InputController;
+import com.syndic8.phytopolis.SoundController;
+import com.syndic8.phytopolis.assets.AssetDirectory;
 import com.syndic8.phytopolis.level.models.*;
+import edu.cornell.gdiac.audio.SoundEffect;
 
 import static com.syndic8.phytopolis.level.PlantController.PlantNode.LEAF_HEIGHT;
 
@@ -19,6 +22,9 @@ public class CollisionController implements ContactListener {
     private final GameplayMode worldController;
     protected ObjectSet<Fixture> sensorFixtures;
     private boolean addedWater;
+    private int sunSound;
+    private int waterCollectSound;
+    private int bugStompSound;
 
     public CollisionController(GameplayMode c,
                                Player p,
@@ -301,6 +307,7 @@ public class CollisionController implements ContactListener {
                                                     worldController.getSunIndicatorTexture(),
                                                     worldController.getTilemap()));
             uiController.addTime();
+            SoundController.getInstance().playSound(sunSound);
         }
         if (isCollisionBetweenPlayerAndWater) {
             contact.setEnabled(false);
@@ -314,6 +321,7 @@ public class CollisionController implements ContactListener {
             if (w.isFull() && !resourceController.fullWater()) {
                 w.clear();
                 resourceController.pickupWater();
+                SoundController.getInstance().playSound(waterCollectSound);
                 uiController.setWaterSize(1.2f);
                 setAddedWater(true);
                 worldController.addObject(new Indicator(w.getX(),
@@ -357,7 +365,7 @@ public class CollisionController implements ContactListener {
                 }
                 hazardController.removeHazard(b);
                 plantController.removeHazardFromNodes(b);
-
+                SoundController.getInstance().playSound(bugStompSound);
             }
             contact.setEnabled(false);
         }
@@ -368,5 +376,21 @@ public class CollisionController implements ContactListener {
     public void postSolve(Contact contact, ContactImpulse contactImpulse) {
 
     }
+
+//    public void gatherAssets(AssetDirectory directory){
+//        sunSound = SoundController.getInstance().addSoundEffect(directory.getEntry("suncollectsound", SoundEffect.class));
+//        waterCollectSound = SoundController.getInstance().addSoundEffect(directory.getEntry("watercollectsound", SoundEffect.class));
+//        bugStompSound = SoundController.getInstance().addSoundEffect(directory.getEntry("bugstomp", SoundEffect.class));
+//    }
+    public void setSunSound(int i){
+        sunSound = i;
+    }
+    public void setWaterCollectSound(int i){
+        waterCollectSound = i;
+    }
+    public void setBugStompSound(int i){
+        bugStompSound = i;
+    }
+
 
 }
