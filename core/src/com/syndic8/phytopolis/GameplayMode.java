@@ -416,7 +416,7 @@ public class GameplayMode extends WorldController {
 
         if (!hazardController.hasFire(unprojMousePos)) {
             if (shouldGrowBranch) {
-                if (timeSinceGrow >= 1.0f || numBranchesSinceGrow < 4) {
+                if (timeSinceGrow >= 1.0f || numBranchesSinceGrow < 3) {
                     Branch branch = plantController.growBranch(unprojMousePos.x,
                             unprojMousePos.y);
                     if (branch != null) {
