@@ -389,6 +389,11 @@ public class HazardController {
         return null;
     }
 
+    public void despawnBug(Bug b) {
+        despawningBugs.add(b);
+        b.setDespawning(true);
+    }
+
     /**
      * Updates the hazards for the current state of the game. This method is responsible
      * for generating and managing both fire and drone hazards, including their effects
@@ -401,8 +406,7 @@ public class HazardController {
         for (Hazard h : plantController.removeDeadLeafBugs()) {
             if (h instanceof Bug) {
 //                spreadBug(h.getLocation());
-                despawningBugs.add((Bug) h);
-                ((Bug) h).setDespawning(true);
+                despawnBug((Bug) h);
             }
         }
         for (Bug b : despawningBugs) {
@@ -832,6 +836,7 @@ public class HazardController {
 
     public class BugZone {
         private float y;
+        private final float WIDTH = 0;
 
         public BugZone(float f) {
             y = f;

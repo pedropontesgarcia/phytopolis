@@ -377,7 +377,7 @@ public class CollisionController implements ContactListener {
                 } else {
                     b = (Bug) fix2.getBody().getUserData();
                 }
-                hazardController.removeHazard(b);
+                hazardController.despawnBug(b);
                 plantController.removeHazardFromNodes(b);
                 SoundController.getInstance().playSound(bugStompSound);
             }
