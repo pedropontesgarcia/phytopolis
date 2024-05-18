@@ -16,7 +16,7 @@ import java.util.ArrayList;
 
 public class SoundController {
 
-    private static final float FXSCALE = 0.25f;
+    private static final float FXSCALE = 0.3f;
     private static SoundController soundControllerInstance;
 
     private final FileHandle configFile;
