@@ -80,37 +80,41 @@ public class LevelOverMode extends FadingScreen implements Screen {
         victoryLabel.setStyle(victoryLabel.getStyle());
         float yOff = c.getTextViewport().getWorldHeight() * 0.1f;
         victoryLabel.setPosition(c.getTextViewport().getWorldWidth() / 2f -
-                        victoryLabel.getWidth() / 2f,
-                c.getTextViewport().getWorldHeight() / 2f -
-                        victoryLabel.getHeight() / 2f + yOff);
+                                         victoryLabel.getWidth() / 2f,
+                                 c.getTextViewport().getWorldHeight() / 2f -
+                                         victoryLabel.getHeight() / 2f + yOff);
         stage.addActor(victoryLabel);
         yOff *= -0.75f;
         labelStyle.font = SharedAssetContainer.getInstance().getUIFont(1.15f);
         float time = gm.getTimeSpent();
         String timeText = String.format("Time taken: %02d:%02d:%03d",
-                (int) (time / 60),
-                (int) (time % 60),
-                (int) ((time % 60 - (int) (time % 60)) * 1000));
+                                        (int) (time / 60),
+                                        (int) (time % 60),
+                                        (int) ((time % 60 - (int) (time % 60)) *
+                                                1000));
         thisTimeLabel = new TextButton(timeText, labelStyle);
         thisTimeLabel.setStyle(thisTimeLabel.getStyle());
         thisTimeLabel.setPosition(c.getTextViewport().getWorldWidth() / 2f -
-                        thisTimeLabel.getWidth() / 2f,
-                c.getTextViewport().getWorldHeight() / 2f -
-                        thisTimeLabel.getHeight() / 2f + yOff);
+                                          thisTimeLabel.getWidth() / 2f,
+                                  c.getTextViewport().getWorldHeight() / 2f -
+                                          thisTimeLabel.getHeight() / 2f +
+                                          yOff);
         stage.addActor(thisTimeLabel);
         yOff *= 2f;
         labelStyle.font = SharedAssetContainer.getInstance().getUIFont();
         time = gm.getBestTime();
         timeText = String.format("Best: %02d:%02d:%03d",
-                (int) (time / 60),
-                (int) (time % 60),
-                (int) ((time % 60 - (int) (time % 60)) * 1000));
+                                 (int) (time / 60),
+                                 (int) (time % 60),
+                                 (int) ((time % 60 - (int) (time % 60)) *
+                                         1000));
         bestTimeLabel = new TextButton(timeText, labelStyle);
         bestTimeLabel.setStyle(bestTimeLabel.getStyle());
         bestTimeLabel.setPosition(c.getTextViewport().getWorldWidth() / 2f -
-                        bestTimeLabel.getWidth() / 2f,
-                c.getTextViewport().getWorldHeight() / 2f -
-                        bestTimeLabel.getHeight() / 2f + yOff);
+                                          bestTimeLabel.getWidth() / 2f,
+                                  c.getTextViewport().getWorldHeight() / 2f -
+                                          bestTimeLabel.getHeight() / 2f +
+                                          yOff);
         stage.addActor(bestTimeLabel);
         yOff *= 2.8f;
         labelStyle.font = SharedAssetContainer.getInstance().getUIFont(0.5f);
@@ -118,11 +122,15 @@ public class LevelOverMode extends FadingScreen implements Screen {
                 "Ireanne Cao, Kevin Chang, Alanna Cooney, Shirley Li, Amy Mai,\nTawakalt Bisola Okunola, Pedro Pontes García, Jordan Rudolph";
         thanksLabel = new TextButton(timeText, labelStyle);
         thanksLabel.setStyle(thanksLabel.getStyle());
-        thanksLabel.getLabel().setColor(new Color(178/255.0f,216/255.0f,216/255.0f, 1.0f));
+        //        thanksLabel.getLabel()
+        //                .setColor(new Color(178 / 255.0f,
+        //                                    216 / 255.0f,
+        //                                    216 / 255.0f,
+        //                                    1.0f));
         thanksLabel.setPosition(c.getTextViewport().getWorldWidth() / 2f -
-                        thanksLabel.getWidth() / 2f,
-                c.getTextViewport().getWorldHeight() / 2f -
-                        thanksLabel.getHeight() / 2f + yOff);
+                                        thanksLabel.getWidth() / 2f,
+                                c.getTextViewport().getWorldHeight() / 2f -
+                                        thanksLabel.getHeight() / 2f + yOff);
         stage.addActor(thanksLabel);
         gameplayMode = gm;
         canvas = c;
@@ -132,19 +140,19 @@ public class LevelOverMode extends FadingScreen implements Screen {
 
     private void createMenu() {
         Menu menu = new Menu(1,
-                0,
-                0.3f,
-                -0.25f,
-                1,
-                Align.center,
-                Menu.DEFAULT_WIDTH);
+                             0,
+                             0.3f,
+                             -0.25f,
+                             1,
+                             Align.center,
+                             Menu.DEFAULT_WIDTH);
         menuContainer = new MenuContainer(menu, canvas);
         ClickListener exitListener = new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
                 SoundController.getInstance()
                         .playSound(SharedAssetContainer.getInstance()
-                                .getSound("click"));
+                                           .getSound("click"));
                 ready = true;
                 menuContainer.deactivate();
                 fadeOut(0.5f);
@@ -152,11 +160,11 @@ public class LevelOverMode extends FadingScreen implements Screen {
             }
         };
         menu.addItem(new MenuItem("BACK TO\nLEVELS",
-                0,
-                exitListener,
-                menu,
-                menuContainer,
-                canvas));
+                                  0,
+                                  exitListener,
+                                  menu,
+                                  menuContainer,
+                                  canvas));
         menuContainer.populate();
     }
 
@@ -165,7 +173,7 @@ public class LevelOverMode extends FadingScreen implements Screen {
             victory = directory.getEntry("over:victory", Texture.class);
             failure = directory.getEntry("over:failure", Texture.class);
             AudioSource bgm = directory.getEntry("levelcomplete",
-                    AudioSource.class);
+                                                 AudioSource.class);
             victoryMusic = soundController.addMusic(bgm);
             bgm = directory.getEntry("gameover", AudioSource.class);
             lossMusic = soundController.addMusic(bgm);
@@ -235,8 +243,8 @@ public class LevelOverMode extends FadingScreen implements Screen {
         transitionProgress = Math.min(1, tmr / TRANSITION_DURATION);
         interpolationCache.set(initialCamera);
         interpolationCache.interpolate(targetCamera,
-                transitionProgress,
-                Interpolation.smooth2);
+                                       transitionProgress,
+                                       Interpolation.smooth2);
         cameraVector.set(interpolationCache.x, interpolationCache.y);
         soundController.setActualMusicVolume(
                 super.getVolume() * soundController.getUserMusicVolume());
@@ -248,9 +256,15 @@ public class LevelOverMode extends FadingScreen implements Screen {
         }
         if (transitionProgress == 1 && !transitionDone) {
             transitionDone = true;
-            victoryLabel.addAction(Actions.alpha(1, 0.5f, Interpolation.linear));
-            thisTimeLabel.addAction(Actions.alpha(1, 0.5f, Interpolation.linear));
-            bestTimeLabel.addAction(Actions.alpha(1, 0.5f, Interpolation.linear));
+            victoryLabel.addAction(Actions.alpha(1,
+                                                 0.5f,
+                                                 Interpolation.linear));
+            thisTimeLabel.addAction(Actions.alpha(1,
+                                                  0.5f,
+                                                  Interpolation.linear));
+            bestTimeLabel.addAction(Actions.alpha(1,
+                                                  0.5f,
+                                                  Interpolation.linear));
             thanksLabel.addAction(Actions.alpha(1, 0.5f, Interpolation.linear));
         }
     }
@@ -259,34 +273,38 @@ public class LevelOverMode extends FadingScreen implements Screen {
         canvas.cameraUpdate(cameraVector, false);
         canvas.clear();
         gameplayMode.setCameraVector(cameraVector);
-        gameplayMode.drawLevelOver();
+        gameplayMode.drawLevelOver(((1 - transitionProgress) / 4f) + 0.75f);
         canvas.begin();
         if (!won) canvas.draw(failure,
-                Color.WHITE,
-                0,
-                0,
-                canvas.getWidth(),
-                canvas.getHeight());
+                              Color.WHITE,
+                              0,
+                              0,
+                              canvas.getWidth(),
+                              canvas.getHeight());
         canvas.end();
         if (transitionProgress == 1 || !won) {
             menuContainer.draw(canvas);
             if (won) {
                 float time = gameplayMode.getTimeSpent();
                 String timeText = String.format("Time taken: %02d:%02d:%03d",
-                        (int) (time / 60),
-                        (int) (time % 60),
-                        (int) ((time % 60 - (int) (time % 60)) * 1000));
+                                                (int) (time / 60),
+                                                (int) (time % 60),
+                                                (int) ((time % 60 -
+                                                        (int) (time % 60)) *
+                                                        1000));
                 thisTimeLabel.setText(timeText);
                 time = gameplayMode.getBestTime();
                 timeText = String.format("Best: %02d:%02d:%03d",
-                        (int) (time / 60),
-                        (int) (time % 60),
-                        (int) ((time % 60 - (int) (time % 60)) * 1000));
+                                         (int) (time / 60),
+                                         (int) (time % 60),
+                                         (int) ((time % 60 -
+                                                 (int) (time % 60)) * 1000));
                 bestTimeLabel.setText(timeText);
                 if (gameplayMode.getTilemap().getLevelNumber() == 12) {
-                    thanksLabel.getLabel().setText("Thanks for playing!\n" +
-                            "Ireanne Cao, Kevin Chang, Alanna Cooney, Shirley Li, Amy Mai,\n" +
-                            "Tawakalt Bisola Okunola, Pedro Pontes García, Jordan Rudolph");
+                    thanksLabel.getLabel()
+                            .setText("Thanks for playing!\n" +
+                                             "Ireanne Cao, Kevin Chang, Alanna Cooney, Shirley Li, Amy Mai,\n" +
+                                             "Tawakalt Bisola Okunola, Pedro Pontes García, Jordan Rudolph");
                 } else {
                     thanksLabel.getLabel().setText("");
                 }

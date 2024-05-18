@@ -45,6 +45,7 @@ public class GameplayMode extends WorldController {
     private final float lvl3LeafWidth = 0.9f;
     private final SoundController soundController;
     private final float timeSinceUIUpdate = 0;
+    private final Color bgColor = new Color(Color.WHITE);
     protected Texture jumpTexture;
     private PlantController plantController;
     private HazardController hazardController;
@@ -157,8 +158,9 @@ public class GameplayMode extends WorldController {
         float branchHeight = tilemap.getTileHeight();
         int plantNodesPerRow = Math.round(
                 (tilemap.getTilemapWidth() - 2) * (float) Math.sqrt(3));
-        float plantWidth = branchHeight * (float) Math.sqrt(3) *
-                (plantNodesPerRow - 1) / 2;
+        float plantWidth =
+                branchHeight * (float) Math.sqrt(3) * (plantNodesPerRow - 1) /
+                        2;
         float plantXOrigin = bounds.width / 2 - plantWidth / 2;
         List<Float> plantXPositions = new ArrayList<Float>();
         for (int i = 0; i < plantNodesPerRow; i++) {
@@ -167,24 +169,24 @@ public class GameplayMode extends WorldController {
         }
 
         plantController = new PlantController(plantNodesPerRow,
-                40,
-                tilemap.getTileHeight(),
-                plantXOrigin,
-                0,
-                world,
-                resourceController,
-                tilemap);
+                                              40,
+                                              tilemap.getTileHeight(),
+                                              plantXOrigin,
+                                              0,
+                                              world,
+                                              resourceController,
+                                              tilemap);
         hazardController = new HazardController(plantController,
-                (int) tilemap.getFireRate(),
-                2,
-                8,
-                6,
-                10,
-                tilemap);
+                                                (int) tilemap.getFireRate(),
+                                                2,
+                                                8,
+                                                6,
+                                                10,
+                                                tilemap);
         sunController = new SunController(5,
-                10,
-                tilemap.getWorldHeight(),
-                plantXPositions);
+                                          10,
+                                          tilemap.getWorldHeight(),
+                                          plantXPositions);
         plantController.gatherAssets(directory);
         hazardController.gatherAssets(directory);
         sunController.gatherAssets(directory);
@@ -392,9 +394,12 @@ public class GameplayMode extends WorldController {
             int lastBeaten = Math.max(saveJson.getInt("lastBeaten"),
                                       tilemap.getLevelNumber() - 1);
             saveJson.get("lastBeaten").set(lastBeaten, null);
-            float currBest = saveJson.getFloat("bestTime" + tilemap.getLevelNumber());
-            bestTime = currBest == -1 ? timeSpent : Math.min(currBest, timeSpent);
-            saveJson.get("bestTime" + tilemap.getLevelNumber()).set(bestTime, null);
+            float currBest = saveJson.getFloat(
+                    "bestTime" + tilemap.getLevelNumber());
+            bestTime =
+                    currBest == -1 ? timeSpent : Math.min(currBest, timeSpent);
+            saveJson.get("bestTime" + tilemap.getLevelNumber())
+                    .set(bestTime, null);
             saveFile.writeString(saveJson.prettyPrint(JsonWriter.OutputType.json,
                                                       0), false);
         }
@@ -621,24 +626,6 @@ public class GameplayMode extends WorldController {
         uiController.pauseTimer();
     }
 
-    /**
-     * Draw the physics objects to the canvas
-     * <p>
-     * For simple worlds, this method is enough by itself.  It will need
-     * to be overriden if the world needs fancy backgrounds or the like.
-     * <p>
-     * The method draws all objects in the order that they were added.
-     */
-    public void drawLevelOver() {
-        canvas.clear();
-        canvas.beginGame();
-        drawBackground();
-        tilemap.drawLevelOver(canvas);
-        super.drawLevelOver();
-        canvas.end();
-        super.draw(canvas);
-    }
-
     public void drawBackground() {
         if (background != null) {
             float aspectRatio = canvas.getWidth() / canvas.getHeight();
@@ -667,6 +654,46 @@ public class GameplayMode extends WorldController {
 
     public float getBackgroundWidth() {
         return tilemap.getWorldWidth() * 1.05f;
+    }
+
+    /**
+     * Draw the physics objects to the canvas
+     * <p>
+     * For simple worlds, this method is enough by itself.  It will need
+     * to be overriden if the world needs fancy backgrounds or the like.
+     * <p>
+     * The method draws all objects in the order that they were added.
+     */
+    public void drawLevelOver(float bgAlpha) {
+        canvas.clear();
+        canvas.beginGame();
+        drawBackground(bgAlpha);
+        tilemap.drawLevelOver(canvas);
+        super.drawLevelOver();
+        canvas.end();
+        super.draw(canvas);
+    }
+
+    public void drawBackground(float bgAlpha) {
+        if (background != null) {
+            float aspectRatio = canvas.getWidth() / canvas.getHeight();
+            float initialCameraY = tilemap.getWorldWidth() / aspectRatio / 2f;
+            float y = cameraVector.y - initialCameraY;
+
+            float parallaxFactor = 0.5f; // Adjust this value to control the parallax effect
+            float parallaxOffset = y * parallaxFactor;
+
+            // Compress the height based on the parallax factor
+            float compressedHeight = getBackgroundHeight() -
+                    ((getBackgroundHeight()) * parallaxFactor) + initialCameraY;
+            bgColor.set(bgColor.r, bgColor.g, bgColor.b, bgAlpha);
+            canvas.draw(background,
+                        bgColor,
+                        -0.1f,
+                        parallaxOffset,
+                        getBackgroundWidth(),
+                        compressedHeight); // Use compressed height
+        }
     }
 
     public float getTimeSpent() {
