@@ -92,7 +92,7 @@
     "sunrise": "gameplay/SunriseEXP2OGG.ogg",
     "katabasis": "gameplay/KatabasisEXP1OGG.ogg",
     "gameover": "gameplay/GameOverEXP1OGG.ogg",
-    "levelcomplete": "gameplay/LevelCompleteEXP2OGG.ogg"
+    "levelcomplete": "gameplay/LevelCompleteEXP3OGG.ogg"
   },
   "soundfx": {
     "plant": "gameplay/audio/plant.wav",
@@ -109,13 +109,14 @@
     "landingleaf": "gameplay/audio/LandingOnLeafSFXN.wav",
     "click": "gameplay/audio/MenuClickSFXN.wav",
     "upgradeleaf": "gameplay/audio/UpgradeLeafSFXN.wav",
-    "electricshock": "gameplay/audio/ElectricShockSFXN.wav",
-    "errorsound": "gameplay/audio/ErrorSoundSFXN.wav",
+    "electricshock": "gameplay/audio/ElectricShock2SFXN.wav",
+    "errorsound": "gameplay/audio/ErrorSoundSFXLowered.wav",
     "munchingsound": "gameplay/audio/MunchingSFXN.wav",
     "suncollectsound": "gameplay/audio/SunCollectSFXN.wav",
     "victorysound": "gameplay/audio/VictorySoundSFXN.wav",
     "warningsound": "gameplay/audio/WarningSoundSFXN.wav",
-    "watercollectsound": "gameplay/audio/WaterCollectSFXN.wav"
+    "watercollectsound": "gameplay/audio/WaterCollect2SFXN.wav",
+    "bugstomp": "gameplay/audio/BugStompSFXN.wav"
   },
   "fonts": {
     "times": {

@@ -70,6 +70,9 @@ public class GameplayMode extends WorldController {
     private Texture sunIndicatorTexture;
     private Texture waterIndicatorTexture;
     private Texture minusWaterIndicatorTexture;
+    private int sunSound;
+    private int waterCollectSound;
+    private int bugStompSound;
 
     /**
      * Creates and initialize a new instance of the game.
@@ -129,6 +132,9 @@ public class GameplayMode extends WorldController {
         boingSound = soundController.addSoundEffect(directory.getEntry(
                 "bouncyleafboing",
                 SoundEffect.class));
+        sunSound = SoundController.getInstance().addSoundEffect(directory.getEntry("suncollectsound", SoundEffect.class));
+        waterCollectSound = SoundController.getInstance().addSoundEffect(directory.getEntry("watercollectsound", SoundEffect.class));
+        bugStompSound = SoundController.getInstance().addSoundEffect(directory.getEntry("bugstomp", SoundEffect.class));
 
         background = directory.getEntry(tilemap.getBackground(), Texture.class);
 
@@ -758,6 +764,9 @@ public class GameplayMode extends WorldController {
                                                       plantController,
                                                       hazardController);
         world.setContactListener(collisionController);
+        collisionController.setSunSound(sunSound);
+        collisionController.setWaterCollectSound(waterCollectSound);
+        collisionController.setBugStompSound(bugStompSound);
     }
 
     public Texture getWaterIndicatorTexture() {
