@@ -333,7 +333,7 @@ public class GameplayMode extends WorldController {
         }
         Sun s = sunController.spawnSuns(dt, tilemap);
         if (s != null) addObject(s);
-        for (Hazard h : hazardController.updateHazards()) {
+        for (Hazard h : hazardController.updateHazards(dt)) {
             addObject(h);
         }
         projMousePosCache.set(ic.getMouseX(), ic.getMouseY());
@@ -390,7 +390,7 @@ public class GameplayMode extends WorldController {
         float avatarX = avatar.getX();
         float avatarY = avatar.getY();
         float distance = unprojMousePos.dst(avatarX, avatarY);
-        if (distance > tilemap.getTileHeight() * 2) return;
+        if (distance > tilemap.getTileHeight() * 1.3f) return;
 
         boolean canGrowBranch = ic.didGrowBranch() && ic.isGrowBranchModDown();
         boolean canGrowLeaf = ic.didGrowLeaf() && ic.isGrowLeafModDown();
