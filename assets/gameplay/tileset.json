@@ -1867,13 +1867,25 @@
          "id":70,
          "image":"bugbtm.png",
          "imageheight":400,
-         "imagewidth":600
+         "imagewidth":600,
+         "properties":[
+                {
+                 "name":"collidetop",
+                 "type":"bool",
+                 "value":true
+                }]
         }, 
         {
          "id":71,
          "image":"bugtop.png",
          "imageheight":400,
-         "imagewidth":600
+         "imagewidth":600,
+         "properties":[
+                {
+                 "name":"collidetop",
+                 "type":"bool",
+                 "value":true
+                }]
         }],
  "tilewidth":600,
  "type":"tileset",
