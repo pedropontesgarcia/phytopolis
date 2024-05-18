@@ -30,7 +30,7 @@ Download the [latest release](https://github.coecis.cornell.edu/pp457/phytopolis
 ## Authorship
 
 Phytopolis is developed by Syndic8, a team composed of the following members:
-- Jordan Rudolph, team lead and programmer
+- Jordan Rudolph, team lead, programmer, and composer
 - Pedro Pontes García, programming lead and programmer
 - Alanna Cooney, design lead, artist and UX designer
 - Ireanne Cao, programmer

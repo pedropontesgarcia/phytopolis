@@ -72,7 +72,7 @@ public class UIController {
         stage.addActor(label);
         progressBar = new ProgressBar(0,
                                       100,
-                                      0.5f,
+                                      0.1f,
                                       false,
                                       SharedAssetContainer.getInstance()
                                               .getProgressBarSkin());
@@ -275,7 +275,8 @@ public class UIController {
                         if (rc.canUpgrade()) Gdx.graphics.setCursor(leafCursor);
                         else Gdx.graphics.setCursor(noWaterCursor);
                     } else {
-                        if (rc.canGrowLeaf()) Gdx.graphics.setCursor(leafCursor);
+                        if (rc.canGrowLeaf())
+                            Gdx.graphics.setCursor(leafCursor);
                         else Gdx.graphics.setCursor(noWaterCursor);
                     }
                 } else {
@@ -283,10 +284,6 @@ public class UIController {
                 }
             }
         }
-    }
-
-    public float getRangeScale() {
-        return RANGE_SCALE;
     }
 
     private void updateTexture(float dt,
@@ -349,6 +346,10 @@ public class UIController {
         }
         yellowFlash = value;
 
+    }
+
+    public float getRangeScale() {
+        return RANGE_SCALE;
     }
 
     public void setLabelSize(float s) {
