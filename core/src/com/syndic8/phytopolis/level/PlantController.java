@@ -98,7 +98,7 @@ public class PlantController {
     private World world;
     private Tilemap tilemap;
     private Vector2 maxPlantIndex;
-    private ObjectSet<Hazard> removedHazards;
+    private ObjectSet<Bug> removedHazards;
     /**
      * how many more frames until the next propagation of destruction
      */
@@ -687,15 +687,18 @@ public class PlantController {
         }
     }
 
-    public ObjectSet<Hazard> removeDeadLeafBugs() {
+    public ObjectSet<Bug> removeDeadLeafBugs() {
         removedHazards.clear();
         for (int x = 0; x < width; x++) {
             for (int y = 0; y < height; y++) {
                 if (plantGrid[x][y].hasLeaf() &&
                         plantGrid[x][y].getLeaf().fullyEaten()) {
-                    removedHazards.add(plantGrid[x][y].getHazard());
-                    plantGrid[x][y].removeHazard();
-                    plantGrid[x][y].unmakeLeaf();
+                    Hazard h = plantGrid[x][y].getHazard();
+                    if (h instanceof Bug){
+                        removedHazards.add((Bug) h);
+                        plantGrid[x][y].removeHazard();
+                        plantGrid[x][y].unmakeLeaf();
+                    }
                 }
             }
         }

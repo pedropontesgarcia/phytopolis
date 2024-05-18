@@ -13,6 +13,7 @@ public class Bug extends Hazard {
     private boolean despawning;
     private boolean doneAnim;
     private float ANIMATION_SPEED = 10.0f/3.0f;
+    private int zoneIndex;
 
     /**
      * Constructs a Bug object with a specified location and duration.
@@ -23,6 +24,14 @@ public class Bug extends Hazard {
         setGravityScale(0);
         despawning = false;
         doneAnim = false;
+    }
+
+    public int getZoneIndex() {
+        return zoneIndex;
+    }
+
+    public void setZoneIndex(int value) {
+        zoneIndex = value;
     }
     @Override
     public ModelType getType() {

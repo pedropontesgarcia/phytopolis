@@ -78,7 +78,6 @@ public class HazardController {
     ArrayList<Integer> bugNodes;
     PooledList<Hazard> addList;
     PooledList<Vector2> bugSpreadNodes;
-    PooledList<Bug> despawningBugs;
     /**
      * The frequency at which fires are generated (probability = 1 / fireFrequency) every second.
      */
@@ -125,7 +124,7 @@ public class HazardController {
     private TextureRegion greenArrowDownTexture;
     private TextureRegion greenArrowUpTexture;
     private PooledList<Float> powerlineHeights;
-    private PooledList<BugZone> bugZones;
+    private BugZone[] bugZones;
     private float fireProgress;
     private int extinguishSound;
     private int electricShock;
@@ -170,9 +169,10 @@ public class HazardController {
         width = plantController.getWidth();
         tilemap = tm;
         powerlineHeights = tm.getPowerlineYVals();
-        bugZones = new PooledList<>();
-//        for (float f : tm.getBugZoneHeights()) {
-//            bugZones.add(new BugZone(f));
+
+//        bugZones = new BugZone[tm.getBugZoneHeights().length];
+//        for (int i = 0; i < tm.getBugZoneHeights().length; i++) {
+//            bugZones.add(new BugZone(tm.getBugZoneHeights().get(i), i));
 //        }
         fireProgress = 0;
         FIRE_BUFFER_ABOVE = tilemap.getTileHeight() / 2f;
@@ -195,7 +195,6 @@ public class HazardController {
         bugNodes = new ArrayList<>();
         addList = new PooledList<>();
         bugSpreadNodes = new PooledList<>();
-        despawningBugs = new PooledList<>();
         height = plantController.getHeight();
         width = plantController.getWidth();
         powerlineHeights = tm.getPowerlineYVals();
@@ -203,13 +202,13 @@ public class HazardController {
         fireProgress = 0;
     }
 
-    public Hazard generateHazard(Model.ModelType type) {
-        int hazardHeight = generateHazardHeight(type);
-        if (hazardHeight == -1) return null;
-        int hazardWidth = generateHazardWidth(hazardHeight, type);
-        if (hazardWidth == -1) return null;
-        return generateHazard(type, hazardWidth, hazardHeight);
-    }
+//    public Hazard generateHazard(Model.ModelType type) {
+//        int hazardHeight = generateHazardHeight(type);
+//        if (hazardHeight == -1) return null;
+//        int hazardWidth = generateHazardWidth(hazardHeight, type);
+//        if (hazardWidth == -1) return null;
+//        return generateHazard(type, hazardWidth, hazardHeight);
+//    }
 
     /**
      * Generates a hazard at random node at a generated height if the time is right.
@@ -253,67 +252,71 @@ public class HazardController {
                                 !plantController.nodeIsEmpty(x, y)));
     }
 
-    /**
-     * Generates a random height for a hazard based on the frequency.
-     *
-     * @return The height at which the hazard is generated, or -1 if no hazard is generated.
-     */
-    private int generateHazardHeight(Model.ModelType type) {
-        int hazardHeight = -1;
-        switch (type) {
-            case FIRE:
-                if (random.nextDouble() < 1.0 / fireFrequency)
-                    hazardHeight = random.nextInt(height);
-                break;
-            case BUG:
-                if (random.nextDouble() < 1.0 / bugFrequency)
-                    hazardHeight = random.nextInt(height);
-                break;
-            default:
-                break;
-        }
-        hazardHeight = hazardHeight == -1 ? -1 : hazardHeight + 1;
-        return Math.min(hazardHeight, height - 1);
+    public boolean isValidBugLocation(int x, int y) {
+        return plantController.hasLeaf(x, y) && !plantController.hasHazard(x, y);
     }
 
-    /**
-     * Generates a random width for a hazard based on the frequency.
-     *
-     * @return The width at which the hazard is generated, or -1 if no plant at that height.
-     */
-    private int generateHazardWidth(int hazardHeight, Model.ModelType type) {
-        switch (type) {
-            case FIRE:
-                fireNodes.clear();
-                // Check if the plant node exists and append to effected nodes
-                for (int w = 0; w < width; w++) {
-                    if (!plantController.nodeIsEmpty(w, hazardHeight)) {
-                        fireNodes.add(w);
-                    }
-                }
-                // Choose a node at random to destroy from effectedNodes
-                if (!fireNodes.isEmpty()) {
-                    int randomIndex = random.nextInt(fireNodes.size());
-                    return fireNodes.get(randomIndex);
-                }
-                break;
-            case BUG:
-                bugNodes.clear();
-                // Check if the plant node has a leaf and append to bugNodes
-                for (int w = 0; w < width; w++) {
-                    if (plantController.hasLeaf(w, hazardHeight)) {
-                        bugNodes.add(w);
-                    }
-                }
-                // Choose a node at random to destroy from bugNodes
-                if (!bugNodes.isEmpty()) {
-                    int randomIndex = random.nextInt(bugNodes.size());
-                    return bugNodes.get(randomIndex);
-                }
-                break;
-        }
-        return -1;
-    }
+//    /**
+//     * Generates a random height for a hazard based on the frequency.
+//     *
+//     * @return The height at which the hazard is generated, or -1 if no hazard is generated.
+//     */
+//    private int generateHazardHeight(Model.ModelType type) {
+//        int hazardHeight = -1;
+//        switch (type) {
+//            case FIRE:
+//                if (random.nextDouble() < 1.0 / fireFrequency)
+//                    hazardHeight = random.nextInt(height);
+//                break;
+//            case BUG:
+//                if (random.nextDouble() < 1.0 / bugFrequency)
+//                    hazardHeight = random.nextInt(height);
+//                break;
+//            default:
+//                break;
+//        }
+//        hazardHeight = hazardHeight == -1 ? -1 : hazardHeight + 1;
+//        return Math.min(hazardHeight, height - 1);
+//    }
+
+//    /**
+//     * Generates a random width for a hazard based on the frequency.
+//     *
+//     * @return The width at which the hazard is generated, or -1 if no plant at that height.
+//     */
+//    private int generateHazardWidth(int hazardHeight, Model.ModelType type) {
+//        switch (type) {
+//            case FIRE:
+//                fireNodes.clear();
+//                // Check if the plant node exists and append to effected nodes
+//                for (int w = 0; w < width; w++) {
+//                    if (!plantController.nodeIsEmpty(w, hazardHeight)) {
+//                        fireNodes.add(w);
+//                    }
+//                }
+//                // Choose a node at random to destroy from effectedNodes
+//                if (!fireNodes.isEmpty()) {
+//                    int randomIndex = random.nextInt(fireNodes.size());
+//                    return fireNodes.get(randomIndex);
+//                }
+//                break;
+//            case BUG:
+//                bugNodes.clear();
+//                // Check if the plant node has a leaf and append to bugNodes
+//                for (int w = 0; w < width; w++) {
+//                    if (plantController.hasLeaf(w, hazardHeight)) {
+//                        bugNodes.add(w);
+//                    }
+//                }
+//                // Choose a node at random to destroy from bugNodes
+//                if (!bugNodes.isEmpty()) {
+//                    int randomIndex = random.nextInt(bugNodes.size());
+//                    return bugNodes.get(randomIndex);
+//                }
+//                break;
+//        }
+//        return -1;
+//    }
 
     /**
      * Generates a fire at a random node if the time is right.
@@ -373,25 +376,16 @@ public class HazardController {
      *
      * @return the generated drone (null if none)
      */
-    public Drone generateDrone() {
-        Hazard h = generateHazard(Model.ModelType.DRONE);
-        if (h != null) {
-            return (Drone) h;
-        }
-        return null;
-    }
-
-    public Bug generateBug() {
-        Hazard h = generateHazard(BUG);
-        if (h != null) {
-            return (Bug) h;
-        }
-        return null;
-    }
+//    public Drone generateDrone() {
+//        Hazard h = generateHazard(Model.ModelType.DRONE);
+//        if (h != null) {
+//            return (Drone) h;
+//        }
+//        return null;
+//    }
 
     public void despawnBug(Bug b) {
-        despawningBugs.add(b);
-        b.setDespawning(true);
+        bugZones[b.getZoneIndex()].despawnBug(b);
     }
 
     /**
@@ -403,17 +397,10 @@ public class HazardController {
      */
     public PooledList<Hazard> updateHazards() {
         addList.clear();
-        for (Hazard h : plantController.removeDeadLeafBugs()) {
-            if (h instanceof Bug) {
-//                spreadBug(h.getLocation());
-                despawnBug((Bug) h);
-            }
-        }
-        for (Bug b : despawningBugs) {
-            if (b.getDoneAnim()) {
-                despawningBugs.remove(b);
-                removeHazard(b);
-            }
+        // TODO: UPDATE BUGS
+        for (Bug b : plantController.removeDeadLeafBugs()) {
+            bugZones[b.getZoneIndex()].spreadBug(b.getLocation());
+            despawnBug(b);
         }
         if (fireProgress >= 100) {
             findValidFireLocs();
@@ -428,8 +415,8 @@ public class HazardController {
         if (currentTime - lastUpdateTime >=
                 1000) { // Check if one second has passed
             lastUpdateTime = currentTime; // Reset the last update time
-            addList.add(generateDrone());
-            addList.add(generateBug());
+//            addList.add(generateDrone());
+//            addList.add(generateBug());
         }
         int i = 0;
         while (i < hazards.size()) {
@@ -470,65 +457,6 @@ public class HazardController {
         hazards.remove(h);
         plantController.removeHazardFromNodes(h);
         h.markRemoved(true);
-    }
-
-    public void spreadBug(Vector2 loc) {
-        bugSpreadNodes.clear();
-        int x = (int) loc.x;
-        int y = (int) loc.y;
-        if (y + 1 <= height) {
-            // check top left
-            if (plantController.inBounds(x - 1, y + 1)) {
-                if (!plantController.hasLeaf(x - 1, y + 1) &&
-                        !plantController.hasHazard(x - 1, y + 1)) {
-                    bugSpreadNodes.add(new Vector2(x - 1, y + 1));
-                }
-            }
-            // check top right
-            if (plantController.inBounds(x + 1, y + 1)) {
-                if (!plantController.hasLeaf(x + 1, y + 1) &&
-                        !plantController.hasHazard(x + 1, y + 1)) {
-                    bugSpreadNodes.add(new Vector2(x + 1, y + 1));
-                }
-            }
-            // check top middle
-            if (plantController.inBounds(x, y + 1)) {
-                if (!plantController.hasLeaf(x, y + 1) &&
-                        !plantController.hasHazard(x, y + 1)) {
-                    bugSpreadNodes.add(new Vector2(x, y + 1));
-                }
-            }
-        }
-
-        if (y - 1 >= 0) {
-            // check bottom left
-            if (plantController.inBounds(x - 1, y - 1)) {
-                if (!plantController.hasLeaf(x - 1, y - 1) &&
-                        !plantController.hasHazard(x, y + 1)) {
-                    bugSpreadNodes.add(new Vector2(x - 1, y - 1));
-                }
-            }
-            // check bottom right
-            if (plantController.inBounds(x + 1, y - 1)) {
-                if (!plantController.hasLeaf(x + 1, y - 1) &&
-                        !plantController.hasHazard(x, y + 1)) {
-                    bugSpreadNodes.add(new Vector2(x + 1, y - 1));
-                }
-            }
-            // check bottom middle
-            if (plantController.inBounds(x, y - 1)) {
-                if (!plantController.hasLeaf(x, y - 1) &&
-                        !plantController.hasHazard(x, y + 1)) {
-                    bugSpreadNodes.add(new Vector2(x, y - 1));
-                }
-            }
-        }
-
-        if (!bugSpreadNodes.isEmpty()) {
-            int randomIndex = random.nextInt(bugSpreadNodes.size());
-            Vector2 node = bugSpreadNodes.get(randomIndex);
-            addList.add(generateHazardAt(BUG, (int)node.x, (int)node.y));
-        }
     }
 
     /**
@@ -836,10 +764,156 @@ public class HazardController {
 
     public class BugZone {
         private float y;
-        private final float WIDTH = 0;
+        private int index;
+        private final float WIDTH = tilemap.getTileHeight();
+        private float currTime;
+        private final float LOWER_LIMIT = 5.0f;
+        private final float UPPER_LIMIT = 10.0f;
+        private final float ZONE_BUFFER_ABOVE = tilemap.getTileHeight() / 2.0f;
+        private final float ZONE_BUFFER_BELOW = ZONE_BUFFER_ABOVE;
+        private float timer;
+        private int max;
+        private int min;
+        private PooledList<Vector2> validLeafLocs;
+        PooledList<Bug> despawningBugs;
 
-        public BugZone(float f) {
+
+        public BugZone(float f, int ind) {
             y = f;
+            index = ind;
+            max = plantController.screenCoordToIndex(0,
+                    y +
+                            ZONE_BUFFER_ABOVE +
+                            0.5f *
+                                    tilemap.getTileHeight())[1];
+            min = plantController.screenCoordToIndex(0,
+                    y -
+                            ZONE_BUFFER_BELOW +
+                            0.5f *
+                                    tilemap.getTileHeight())[1];
+            validLeafLocs = new PooledList<>();
+            despawningBugs = new PooledList<>();
+            changeTimer();
+        }
+
+        public void update(float dt) {
+            currTime += dt;
+            if (currTime >= timer) {
+                changeTimer();
+                // spawn bug within zone
+                findValidLeafLocs();
+                Bug b = generateBug();
+                b.setZoneIndex(index);
+                addList.add(b);
+//                if (b != null)
+//                    SoundController.getInstance().playSound(electricShock);
+//                else SoundController.getInstance().playSound(extinguishSound);
+            }
+            for (Bug b : despawningBugs) {
+                if (b.getDoneAnim()) {
+                    despawningBugs.remove(b);
+                    removeHazard(b);
+                }
+            }
+        }
+
+        public void changeTimer() {
+            currTime = 0;
+            timer = random.nextFloat(LOWER_LIMIT, UPPER_LIMIT);
+        }
+
+        public boolean inBounds(int y) {
+            return y >= min && y <= max;
+        }
+
+        public void spreadBug(Vector2 loc) {
+            validLeafLocs.clear();
+            int x = (int) loc.x;
+            int y = (int) loc.y;
+            if (y + 1 <= height && inBounds(y + 1)) {
+                // check top left
+                if (plantController.inBounds(x - 1, y + 1)) {
+                    if (isValidBugLocation(x - 1, y + 1)) {
+                        validLeafLocs.add(new Vector2(x - 1, y + 1));
+                    }
+                }
+                // check top right
+                if (plantController.inBounds(x + 1, y + 1)) {
+                    if (isValidBugLocation(x + 1, y + 1)) {
+                        validLeafLocs.add(new Vector2(x + 1, y + 1));
+                    }
+                }
+                // check top middle
+                if (plantController.inBounds(x, y + 1)) {
+                    if (isValidBugLocation(x, y + 1)) {
+                        validLeafLocs.add(new Vector2(x, y + 1));
+                    }
+                }
+            }
+
+            if (y - 1 >= 0 && inBounds(y - 1)) {
+                // check bottom left
+                if (plantController.inBounds(x - 1, y - 1)) {
+                    if (isValidBugLocation(x - 1, y - 1)) {
+                        validLeafLocs.add(new Vector2(x - 1, y - 1));
+                    }
+                }
+                // check bottom right
+                if (plantController.inBounds(x + 1, y - 1)) {
+                    if (isValidBugLocation(x + 1, y - 1)) {
+                        validLeafLocs.add(new Vector2(x + 1, y - 1));
+                    }
+                }
+                // check bottom middle
+                if (plantController.inBounds(x, y - 1)) {
+                    if (isValidBugLocation(x, y - 1)) {
+                        validLeafLocs.add(new Vector2(x, y - 1));
+                    }
+                }
+            }
+
+            if (!validLeafLocs.isEmpty()) {
+                int randomIndex = random.nextInt(validLeafLocs.size());
+                Vector2 node = validLeafLocs.get(randomIndex);
+//                addList.add(generateHazardAt(BUG, (int)node.x, (int)node.y));
+            }
+        }
+
+        public void findValidLeafLocs() {
+            validLeafLocs.clear();
+            for (int i = min; i <= max; i++) {
+                if (i != 0) {
+                    for (int width = 0;
+                         width < plantController.getWidth();
+                         width++) {
+                        int idx = i;
+                        if (i == max &&
+                                plantController.isColumnOffset(width))
+                            continue; // If the node is at the max height
+                        // and it's offset then it's too far visually
+                        if (isValidBugLocation(width, i)) {
+                            validLeafLocs.add(new Vector2(width, i));
+                        }
+                    }
+                }
+            }
+        }
+
+        public Bug generateBug() {
+            if (!validLeafLocs.isEmpty()) {
+                int index = random.nextInt(validLeafLocs.size());
+                Vector2 fireLoc = validLeafLocs.get(index);
+                Hazard h = generateHazard(BUG, (int) fireLoc.x, (int) fireLoc.y);
+                if (h != null) {
+                    return (Bug) h;
+                }
+            }
+            return null;
+        }
+
+        public void despawnBug(Bug b) {
+            despawningBugs.add(b);
+            b.setDespawning(true);
         }
 
 
