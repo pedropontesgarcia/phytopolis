@@ -170,7 +170,7 @@ public class HazardController {
         width = plantController.getWidth();
         tilemap = tm;
         powerlineHeights = tm.getPowerlineYVals();
-
+        bugZones = new BugZone[]{};
 //        bugZones = new BugZone[tm.getBugZoneHeights().length];
 //        for (int i = 0; i < tm.getBugZoneHeights().length; i++) {
 //            bugZones[i] = new BugZone(tm.getBugZoneHeights().get(i), i);
