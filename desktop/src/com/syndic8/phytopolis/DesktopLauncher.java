@@ -30,6 +30,11 @@ public class DesktopLauncher {
         config.height = Lwjgl3ApplicationConfiguration.getDisplayMode().height;
         config.title = "Phytopolis";
         config.getLwjgl3Configuration()
+                .setWindowIcon("icons/icon.png",
+                               "icons/icon2.png",
+                               "icons/icon3.png",
+                               "icons/icon4.png");
+        config.getLwjgl3Configuration()
                 .setWindowedMode(Lwjgl3ApplicationConfiguration.getDisplayMode().width,
                                  Lwjgl3ApplicationConfiguration.getDisplayMode().height);
         DisplayMode[] displayModes = Lwjgl3ApplicationConfiguration.getDisplayModes();
