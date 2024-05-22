@@ -578,15 +578,14 @@ public class PlantController {
         currentQueue.clear();
         destructionQueue.forEach(v -> currentQueue.addLast(v));
         for (IntVector2 n : currentQueue) {
-            Bug b = destroyAt(n.x, n.y);
-            if (b != null) removedHazards.add(b);
+            destroyRecursivelyAt(n.x, n.y);
             destructionQueue.removeValue(n, true);
         }
         return removedHazards;
     }
 
     /**
-     * Queues destruction of the plant upwards from a certain node, populating
+     * Recursively destroys the plant upwards from a certain node, populating
      * the destruction queue so that the unsupported section of the plant
      * going upwards will be destroyed progressively using the coyote time
      * constants. Does <b>not</b> recalculate the maximum plant index; this
@@ -595,14 +594,13 @@ public class PlantController {
      *
      * @param xIndex the x-index of the node.
      * @param yIndex the y-index of the node.
-     * @return a bug if its leaf was destroyed, null otherwise.
      */
-    public Bug destroyAt(int xIndex, int yIndex) {
-        Bug b = null;
-        if (!inBounds(xIndex, yIndex) || nodeIsEmpty(xIndex, yIndex)) return b;
+    private void destroyRecursivelyAt(int xIndex, int yIndex) {
+        if (!inBounds(xIndex, yIndex) || nodeIsEmpty(xIndex, yIndex)) return;
         PlantNode n = plantGrid[xIndex][yIndex];
-        if (n.getHazard() instanceof Bug bug) b = bug;
+        if (n.getHazard() instanceof Bug bug) removedHazards.add(bug);
         n.unmakeLeaf();
+        n.removeHazard();
         for (BranchDirection d : BranchDirection.values()) {
             if (n.hasBranchInDirection(d)) {
                 n.unmakeBranch(d);
@@ -614,7 +612,6 @@ public class PlantController {
             }
         }
         soundController.playSound(destroySound);
-        return b;
     }
 
     /**
@@ -648,6 +645,18 @@ public class PlantController {
                 return cacheIntVector.set(xIndex, yIndex + 1);
         }
         return null;
+    }
+
+    /**
+     * Schedules destruction of the given node by adding it to the
+     * destruction queue.
+     *
+     * @param xIndex x-index of the node.
+     * @param yIndex y-index of the node.
+     */
+    public void scheduleDestruction(int xIndex, int yIndex) {
+        destructionQueue.addFirst(new IntVector2(xIndex, yIndex));
+        plantCoyoteTimeRemaining = PLANT_COYOTE_TIME;
     }
 
     /**
@@ -755,8 +764,9 @@ public class PlantController {
                 if (plantGrid[x][y].hasLeaf() &&
                         plantGrid[x][y].getLeaf().fullyEaten()) {
                     Hazard h = plantGrid[x][y].getHazard();
-                    if (h instanceof Bug) {
-                        removedHazards.add((Bug) h);
+                    if (h instanceof Bug b) {
+                        System.out.println("Bug removed!");
+                        removedHazards.add(b);
                         plantGrid[x][y].removeHazard();
                         plantGrid[x][y].unmakeLeaf();
                     }
@@ -1391,10 +1401,10 @@ public class PlantController {
         }
 
         /**
-         * Removes any hazards from this node.
+         * Removes any hazards from this node. Does not remove them from the
+         * world.
          */
         public void removeHazard() {
-            if (hazard != null) hazard.markRemoved(true);
             hazard = null;
             if (leaf != null) {
                 leaf.setBeingEaten(false);

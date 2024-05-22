@@ -328,7 +328,9 @@ public class GameplayMode extends WorldController {
         //                                           avatar.getY()) + ic.getScrolled()));
         cameraVector.set(tilemap.getWorldWidth() / 2f,
                          Math.max(cameraHeight / 2f,
-                                  avatar.getY() + ic.getScrolled()));
+                                  Math.min(avatar.getY() + ic.getScrolled(),
+                                           tilemap.getWorldHeight() -
+                                                   cameraHeight / 2f)));
 
         // generate hazards please
         for (Model m : objects) {
@@ -716,7 +718,7 @@ public class GameplayMode extends WorldController {
         world = new World(gravity, false);
         tilemap.populateLevel(this);
         tilemapParams = tilemap.getTilemapParams();
-        populateLevel();
+        populateBoundaryWalls();
         float branchHeight = tilemap.getTileHeight();
         int plantNodesPerRow = Math.round(
                 (tilemap.getTilemapWidth() - 2) * (float) Math.sqrt(3));
@@ -739,9 +741,9 @@ public class GameplayMode extends WorldController {
     }
 
     /**
-     * Lays out the game geography.
+     * Lays out the boundary walls around the level.
      */
-    private void populateLevel() {
+    private void populateBoundaryWalls() {
         JsonValue defaults = constants.get("defaults");
 
         // Add floor
@@ -763,9 +765,9 @@ public class GameplayMode extends WorldController {
 
         // Add left wall
         obj = new PolygonObject(new float[]{-1,
-                tilemap.getWorldHeight(),
+                tilemap.getWorldHeight() * 1.5f,
                 0,
-                tilemap.getWorldHeight(),
+                tilemap.getWorldHeight() * 1.5f,
                 0,
                 0,
                 -1,
@@ -779,9 +781,9 @@ public class GameplayMode extends WorldController {
 
         // Add right wall
         obj = new PolygonObject(new float[]{tilemap.getWorldWidth(),
-                tilemap.getWorldHeight(),
+                tilemap.getWorldHeight() * 1.5f,
                 tilemap.getWorldWidth() + 1,
-                tilemap.getWorldHeight(),
+                tilemap.getWorldHeight() * 1.5f,
                 tilemap.getWorldWidth() + 1,
                 0,
                 tilemap.getWorldWidth(),

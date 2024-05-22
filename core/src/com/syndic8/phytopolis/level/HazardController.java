@@ -268,7 +268,7 @@ public class HazardController {
                         removeHazard(h);
                         plantController.removeHazardFromNodes(h);
                         if (h instanceof Fire) {
-                            plantController.destroyAt(hx, hy);
+                            plantController.scheduleDestruction(hx, hy);
                             plantController.recalculateMaxPlantIndex();
                             spreadFire(h.getLocation());
                         }
