@@ -252,8 +252,7 @@ public class HazardController {
             Hazard h = hazards.get(i);
             int hx = (int) h.getLocation().x;
             int hy = (int) h.getLocation().y;
-            if (h instanceof Fire) {
-                Fire f = (Fire) h;
+            if (h instanceof Fire f) {
                 // check if branch is still there (floating fire bug)
 
                 if (plantController.nodeIsEmpty(hx, hy) &&
@@ -269,7 +268,8 @@ public class HazardController {
                         removeHazard(h);
                         plantController.removeHazardFromNodes(h);
                         if (h instanceof Fire) {
-                            plantController.destroyAll(hx, hy);
+                            plantController.destroyAt(hx, hy);
+                            plantController.recalculateMaxPlantIndex();
                             spreadFire(h.getLocation());
                         }
                     }
@@ -282,26 +282,44 @@ public class HazardController {
         return addList;
     }
 
-    public void deleteFireBugs(ObjectSet<Bug> bugs) {
-        for (Bug b : bugs) {
-            removeHazard(b);
-        }
-    }
-
-    /**
-     * Generates a drone at a random node if the time is right.
-     *
-     * @return the generated drone (null if none)
-     */
-    //    public Drone generateDrone() {
-    //        Hazard h = generateHazard(Model.ModelType.DRONE);
-    //        if (h != null) {
-    //            return (Drone) h;
-    //        }
-    //        return null;
-    //    }
     public void despawnBug(Bug b) {
         bugZones[b.getZoneIndex()].despawnBug(b);
+    }
+
+    public boolean findValidFireLocs() {
+        validFireLocs.clear();
+        for (float height : powerlineHeights) {
+            if (plantController.getMaxPlantHeight() >=
+                    height - 0.5f * tilemap.getTileHeight()) {
+                int max = plantController.coordToIndex(0,
+                                                       height +
+                                                               FIRE_BUFFER_ABOVE +
+                                                               0.5f *
+                                                                       tilemap.getTileHeight()).y;
+                int min = plantController.coordToIndex(0,
+                                                       height -
+                                                               FIRE_BUFFER_BELOW +
+                                                               0.5f *
+                                                                       tilemap.getTileHeight()).y;
+                for (int i = min; i <= max; i++) {
+                    if (i != 0) {
+                        for (int width = 0;
+                             width < plantController.getWidth();
+                             width++) {
+                            int idx = i;
+                            if (i == max &&
+                                    plantController.isColumnOffset(width))
+                                continue; // If the node is at the max height
+                            // and it's offset then it's too far visually
+                            if (isValidFireLocation(width, i)) {
+                                validFireLocs.add(new Vector2(width, i));
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        return !validFireLocs.isEmpty();
     }
 
     //    /**
@@ -366,42 +384,6 @@ public class HazardController {
     //        return -1;
     //    }
 
-    public boolean findValidFireLocs() {
-        validFireLocs.clear();
-        for (float height : powerlineHeights) {
-            if (plantController.getMaxPlantHeight() >=
-                    height - 0.5f * tilemap.getTileHeight()) {
-                int max = plantController.screenCoordToIndex(0,
-                                                             height +
-                                                                     FIRE_BUFFER_ABOVE +
-                                                                     0.5f *
-                                                                             tilemap.getTileHeight())[1];
-                int min = plantController.screenCoordToIndex(0,
-                                                             height -
-                                                                     FIRE_BUFFER_BELOW +
-                                                                     0.5f *
-                                                                             tilemap.getTileHeight())[1];
-                for (int i = min; i <= max; i++) {
-                    if (i != 0) {
-                        for (int width = 0;
-                             width < plantController.getWidth();
-                             width++) {
-                            int idx = i;
-                            if (i == max &&
-                                    plantController.isColumnOffset(width))
-                                continue; // If the node is at the max height
-                            // and it's offset then it's too far visually
-                            if (isValidFireLocation(width, i)) {
-                                validFireLocs.add(new Vector2(width, i));
-                            }
-                        }
-                    }
-                }
-            }
-        }
-        return !validFireLocs.isEmpty();
-    }
-
     /**
      * Generates a fire at a random node if the time is right.
      *
@@ -460,7 +442,7 @@ public class HazardController {
             if (plantController.inBounds(x - 1, y - 1)) {
                 if (plantController.branchExists(x - 1,
                                                  y - 1,
-                                                 PlantController.branchDirection.RIGHT) &&
+                                                 PlantController.BranchDirection.RIGHT) &&
                         !plantController.hasHazard(x - 1, y + 1)) {
                     addList.add(generateHazardAt(FIRE, x - 1, y - 1));
                 }
@@ -469,7 +451,7 @@ public class HazardController {
             if (plantController.inBounds(x + 1, y - 1)) {
                 if (plantController.branchExists(x + 1,
                                                  y - 1,
-                                                 PlantController.branchDirection.LEFT)) {
+                                                 PlantController.BranchDirection.LEFT)) {
                     addList.add(generateHazardAt(FIRE, x + 1, y - 1));
                 }
             }
@@ -477,7 +459,7 @@ public class HazardController {
             if (plantController.inBounds(x, y - 1)) {
                 if (plantController.branchExists(x,
                                                  y - 1,
-                                                 PlantController.branchDirection.MIDDLE)) {
+                                                 PlantController.BranchDirection.MIDDLE)) {
                     addList.add(generateHazardAt(FIRE, x, y - 1));
                 }
             }
@@ -490,15 +472,15 @@ public class HazardController {
                 ((plantController.inBounds(x - 1, y - 1) &&
                         plantController.branchExists(x - 1,
                                                      y - 1,
-                                                     PlantController.branchDirection.RIGHT)) ||
+                                                     PlantController.BranchDirection.RIGHT)) ||
                         (plantController.inBounds(x + 1, y - 1) &&
                                 plantController.branchExists(x + 1,
                                                              y - 1,
-                                                             PlantController.branchDirection.LEFT)) ||
+                                                             PlantController.BranchDirection.LEFT)) ||
                         (plantController.inBounds(x, y - 1) &&
                                 plantController.branchExists(x,
                                                              y - 1,
-                                                             PlantController.branchDirection.MIDDLE)) ||
+                                                             PlantController.BranchDirection.MIDDLE)) ||
                         (plantController.inBounds(x, y) &&
                                 !plantController.nodeIsEmpty(x, y)));
     }
@@ -546,7 +528,7 @@ public class HazardController {
                                                                     hazardHeight),
                                   new Vector2(hazardWidth, hazardHeight),
                                   burnTime,
-                                  tilemap,
+                                  tilemap.getTilemapParams(),
                                   0.5f);
                 f.setFilmStrip(fireTexture);
                 plantController.setHazard(hazardWidth, hazardHeight, f);
@@ -558,7 +540,7 @@ public class HazardController {
                         hazardHeight),
                                     new Vector2(hazardWidth, hazardHeight),
                                     explodeTime,
-                                    tilemap,
+                                    tilemap.getTilemapParams(),
                                     0.5f);
                 d.setTexture(droneTexture);
                 hazards.add(d);
@@ -568,7 +550,7 @@ public class HazardController {
                                                                   hazardHeight),
                                 new Vector2(hazardWidth, hazardHeight),
                                 eatTime,
-                                tilemap,
+                                tilemap.getTilemapParams(),
                                 0.5f);
                 b.setFilmStrip(bugTexture);
                 plantController.setHazard(hazardWidth, hazardHeight, b);
@@ -576,6 +558,12 @@ public class HazardController {
                 return b;
             default:
                 return null;
+        }
+    }
+
+    public void deleteFireBugs(ObjectSet<Bug> bugs) {
+        for (Bug b : bugs) {
+            removeHazard(b);
         }
     }
 
@@ -728,11 +716,11 @@ public class HazardController {
                         (h.getType() == FIRE ?
                                 redWarningFlashTexture :
                                 greenWarningFlashTexture);
-//                if ((warningTex == redWarningTexture &&
-//                        h.previousTex() == redWarningFlashTexture) ||
-//                        (warningTex == greenWarningTexture &&
-//                                h.previousTex() == greenWarningFlashTexture))
-//                    SoundController.getInstance().playSound(warningSound);
+                //                if ((warningTex == redWarningTexture &&
+                //                        h.previousTex() == redWarningFlashTexture) ||
+                //                        (warningTex == greenWarningTexture &&
+                //                                h.previousTex() == greenWarningFlashTexture))
+                //                    SoundController.getInstance().playSound(warningSound);
                 canvas.draw(warningTex,
                             Color.WHITE,
                             warningX,
@@ -795,14 +783,12 @@ public class HazardController {
         public BugZone(float f, int ind) {
             y = f;
             index = ind;
-            max = plantController.screenCoordToIndex(0,
-                                                     y + ZONE_BUFFER_ABOVE +
-                                                             0.5f *
-                                                                     tilemap.getTileHeight())[1];
-            min = plantController.screenCoordToIndex(0,
-                                                     y - ZONE_BUFFER_BELOW +
-                                                             0.5f *
-                                                                     tilemap.getTileHeight())[1];
+            max = plantController.coordToIndex(0,
+                                               y + ZONE_BUFFER_ABOVE + 0.5f *
+                                                       tilemap.getTileHeight()).y;
+            min = plantController.coordToIndex(0,
+                                               y - ZONE_BUFFER_BELOW + 0.5f *
+                                                       tilemap.getTileHeight()).y;
             validLeafLocs = new PooledList<>();
             despawningBugs = new PooledList<>();
             changeTimer();
@@ -920,7 +906,7 @@ public class HazardController {
                 int randomIndex = random.nextInt(validLeafLocs.size());
                 Vector2 node = validLeafLocs.get(randomIndex);
                 //                addList.add(generateHazardAt(BUG, (int)node.x, (int)node.y));
-                addList.add(generateHazard(BUG, (int)node.x, (int)node.y));
+                addList.add(generateHazard(BUG, (int) node.x, (int) node.y));
             }
         }
 

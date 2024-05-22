@@ -12,9 +12,9 @@ public class Fire extends Hazard {
 
     private final int NUM_FRAMES = 16;
     private final float growthRate = 0.0001f; // Growth rate per second
+    private final float ANIMATION_SPEED = 10.0f / 3.0f;
     private float size = .4f; // Initial size
     private float elapsedTime = 0.0f; // Elapsed time since last update
-    private float ANIMATION_SPEED = 10.0f/3.0f;
 
     /**
      * Constructs a Fire object with a specified location and duration.
@@ -25,9 +25,9 @@ public class Fire extends Hazard {
     public Fire(Vector2 pos,
                 Vector2 location,
                 int duration,
-                Tilemap tm,
+                Tilemap.TilemapParams tmp,
                 float texScl) {
-        super(tm, texScl, pos, location, duration);
+        super(tmp, texScl, pos, location, duration);
     }
 
     /**
@@ -56,8 +56,8 @@ public class Fire extends Hazard {
     }
 
     public void draw(GameCanvas canvas) {
-        float width = tilemap.getTileWidth() * textureSclInTiles;
-        float height = tilemap.getTileHeight() * textureSclInTiles;
+        float width = tilemapParams.tileWidth() * textureSclInTiles;
+        float height = tilemapParams.tileHeight() * textureSclInTiles;
         float sclX = width / texture.getRegionWidth();
         float sclY = height / texture.getRegionHeight();
 

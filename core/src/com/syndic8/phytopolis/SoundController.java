@@ -12,7 +12,9 @@ import edu.cornell.gdiac.audio.MusicQueue;
 import edu.cornell.gdiac.audio.SoundEffect;
 
 import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
 import java.util.ArrayList;
+import java.util.Locale;
 
 public class SoundController {
 
@@ -22,11 +24,16 @@ public class SoundController {
     private final FileHandle configFile;
     private final JsonValue settingsJson;
     private final float masterVolume;
+    private final DecimalFormat decimalFormat;
     MusicQueue music;
     ArrayList<SoundEffect> sounds;
     private float fxVolume;
     private float musicVolume;
     private int musicQueuePos;
+
+    public enum SoundOption {
+        MUSIC_VOLUME, FX_VOLUME
+    }
 
     public SoundController() {
         configFile = Gdx.files.absolute(OSUtils.getConfigFile());
@@ -40,6 +47,8 @@ public class SoundController {
         music = engine.newMusicBuffer(false, 44100);
         music.setVolume(musicVolume);
         sounds = new ArrayList<>();
+        DecimalFormatSymbols symbols = new DecimalFormatSymbols(Locale.US);
+        decimalFormat = new DecimalFormat("#.000", symbols);
     }
 
     public static SoundController getInstance() {
@@ -153,20 +162,21 @@ public class SoundController {
                 saveOptions();
                 break;
             case FX_VOLUME:
-                saveOptions();
                 fxVolume = val;
+                saveOptions();
                 break;
         }
     }
 
     private void saveOptions() {
-        DecimalFormat df = new DecimalFormat("#.000");
         settingsJson.get("masterVolume")
-                .set(Double.parseDouble(df.format(masterVolume)), null);
+                .set(Double.parseDouble(decimalFormat.format(masterVolume)),
+                     null);
         settingsJson.get("musicVolume")
-                .set(Double.parseDouble(df.format(musicVolume)), null);
+                .set(Double.parseDouble(decimalFormat.format(musicVolume)),
+                     null);
         settingsJson.get("fxVolume")
-                .set(Double.parseDouble(df.format(fxVolume)), null);
+                .set(Double.parseDouble(decimalFormat.format(fxVolume)), null);
         configFile.writeString(settingsJson.prettyPrint(JsonWriter.OutputType.json,
                                                         0), false);
     }
@@ -181,10 +191,6 @@ public class SoundController {
         return 0;
     }
 
-    public boolean getIsLooping() {
-        return music.isLooping();
-    }
-
     //    public String getOptionValueString(SoundOption opn) {
     //        switch (opn) {
     //            case MASTER_VOLUME:
@@ -197,8 +203,8 @@ public class SoundController {
     //        return "ERROR";
     //    }
 
-    public enum SoundOption {
-        MUSIC_VOLUME, FX_VOLUME
+    public boolean getIsLooping() {
+        return music.isLooping();
     }
 
 }

@@ -8,8 +8,8 @@ import com.syndic8.phytopolis.util.Tilemap;
 
 public abstract class Model {
 
-    protected final Tilemap tilemap;
-    protected final float textureSclInTiles;
+    protected Tilemap.TilemapParams tilemapParams;
+    protected float textureSclInTiles;
     /**
      * Object position (centered on the texture middle)
      */
@@ -29,9 +29,63 @@ public abstract class Model {
     protected float animFrame;
     protected int zIndex;
 
-    public Model(float x, float y, Tilemap tilemap, float textureSclInTiles) {
+    public enum ModelType {
+        /**
+         * The player
+         */
+        PLAYER,
+        /**
+         * A leaf
+         */
+        LEAF,
+        /**
+         * A branch
+         */
+        BRANCH,
+        /**
+         * A drone
+         */
+        DRONE,
+        /**
+         * A fire
+         */
+        FIRE,
+        /**
+         * Water resource
+         */
+        WATER,
+        /**
+         * Sun resource
+         */
+        SUN,
+        /**
+         * Platform
+         */
+        PLATFORM,
+        /**
+         * Full tile
+         */
+        TILE_FULL,
+        /**
+         * Tile without a top
+         */
+        TILE_NOTOP,
+        /**
+         * Bug hazard
+         */
+        BUG,
+        /**
+         * UI indicator
+         */
+        INDICATOR
+    }
+
+    public Model(float x,
+                 float y,
+                 Tilemap.TilemapParams tmp,
+                 float textureSclInTiles) {
         position = new Vector2(x, y);
-        this.tilemap = tilemap;
+        this.tilemapParams = tmp;
         this.textureSclInTiles = textureSclInTiles;
         // Object has yet to be deactivated
         toRemove = false;
@@ -105,6 +159,8 @@ public abstract class Model {
         position.y = value;
     }
 
+    /// Garbage Collection Methods
+
     /**
      * Returns true if our object has been flagged for garbage collection
      * <p>
@@ -116,8 +172,6 @@ public abstract class Model {
     public boolean isRemoved() {
         return toRemove;
     }
-
-    /// Garbage Collection Methods
 
     /**
      * Sets whether our object has been flagged for garbage collection
@@ -165,56 +219,5 @@ public abstract class Model {
      * @param canvas The drawing context
      */
     public abstract void draw(GameCanvas canvas);
-
-    public enum ModelType {
-        /**
-         * The player
-         */
-        PLAYER,
-        /**
-         * A leaf
-         */
-        LEAF,
-        /**
-         * A branch
-         */
-        BRANCH,
-        /**
-         * A drone
-         */
-        DRONE,
-        /**
-         * A fire
-         */
-        FIRE,
-        /**
-         * Water resource
-         */
-        WATER,
-        /**
-         * Sun resource
-         */
-        SUN,
-        /**
-         * Platform
-         */
-        PLATFORM,
-        /**
-         * Full tile
-         */
-        TILE_FULL,
-        /**
-         * Tile without a top
-         */
-        TILE_NOTOP,
-        /**
-         * Bug hazard
-         */
-        BUG,
-        /**
-         * UI indicator
-         */
-        INDICATOR
-    }
 
 }

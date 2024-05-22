@@ -6,19 +6,27 @@ import com.syndic8.phytopolis.util.Tilemap;
 
 public class Branch extends Model {
 
-    private static final float ANIMATION_SPEED = 1 / 6.0f;
-    private final float angle;
+    /**
+     * Animation speed in frames per second.
+     */
+    private static final float ANIMATION_SPEED = 10;
     private final Color ghostColor = new Color(1, 1, 1, .5f);
-    private branchType type;
+    private float angle;
+    private BranchType type;
     private float animFrame;
+
+    /**
+     * enum containing possible branch types
+     */
+    public enum BranchType {NORMAL, REINFORCED}
 
     public Branch(float x,
                   float y,
                   float angle,
-                  branchType type,
-                  Tilemap tm,
+                  BranchType type,
+                  Tilemap.TilemapParams tmp,
                   float texScl) {
-        super(x, y, tm, texScl);
+        super(x, y, tmp, texScl);
         this.angle = angle;
         this.type = type;
         this.animFrame = 0;
@@ -27,6 +35,10 @@ public class Branch extends Model {
 
     public float getAngle() {
         return angle;
+    }
+
+    public void setAngle(float a) {
+        angle = a;
     }
 
     /**
@@ -49,11 +61,11 @@ public class Branch extends Model {
      * collisions (which are determined by the CollisionController).  It is
      * not intended to interact with other objects in any way at all.
      *
-     * @param delta Number of seconds since last animation frame
+     * @param dt Number of seconds since last animation frame
      */
-    public void update(float delta) {
+    public void update(float dt) {
         if (animFrame < getFilmStrip().getSize() - 1) {
-            animFrame += ANIMATION_SPEED;
+            animFrame += ANIMATION_SPEED * dt;
         } else if (animFrame >= getFilmStrip().getSize()) {
             animFrame = getFilmStrip().getSize() - 1;
         }
@@ -65,8 +77,8 @@ public class Branch extends Model {
      * @param canvas The drawing context
      */
     public void draw(GameCanvas canvas) {
-        float width = tilemap.getTileWidth() * textureSclInTiles;
-        float height = tilemap.getTileHeight() * textureSclInTiles;
+        float width = tilemapParams.tileWidth() * textureSclInTiles;
+        float height = tilemapParams.tileHeight() * textureSclInTiles;
         float sclX = width / texture.getRegionWidth();
         float sclY = height / texture.getRegionHeight();
         float x = texture.getRegionWidth() / 2.0f;
@@ -88,16 +100,27 @@ public class Branch extends Model {
      *
      * @return the type of branch
      */
-    public branchType getBranchType() {
+    public BranchType getBranchType() {
         return type;
     }
+
+    /**
+     * Draws the outline of the physics body.
+     * <p>
+     * This method can be helpful for understanding issues with collisions.
+     *
+     * @param canvas Drawing context
+     */
+    //    public void drawDebug(GameCanvas canvas) {
+    //        draw(canvas);
+    //    }
 
     /**
      * changes the branch type to the given value
      *
      * @param t the new branch type to be assigned to this branch
      */
-    public void setBranchType(branchType t) {
+    public void setBranchType(BranchType t) {
         type = t;
     }
 
@@ -107,8 +130,8 @@ public class Branch extends Model {
      * @param canvas The drawing context
      */
     public void drawGhost(GameCanvas canvas) {
-        float width = tilemap.getTileWidth() * textureSclInTiles;
-        float height = tilemap.getTileHeight() * textureSclInTiles;
+        float width = tilemapParams.tileWidth() * textureSclInTiles;
+        float height = tilemapParams.tileHeight() * textureSclInTiles;
         float sclX = width / texture.getRegionWidth();
         float sclY = height / texture.getRegionHeight();
         float x = texture.getRegionWidth() / 2.0f;
@@ -124,21 +147,5 @@ public class Branch extends Model {
                     sclX,
                     sclY);
     }
-
-    /**
-     * Draws the outline of the physics body.
-     * <p>
-     * This method can be helpful for understanding issues with collisions.
-     *
-     * @param canvas Drawing context
-     */
-    //    public void drawDebug(GameCanvas canvas) {
-    //        draw(canvas);
-    //    }
-
-    /**
-     * enum containing possible branch types
-     */
-    public enum branchType {NORMAL, REINFORCED}
 
 }

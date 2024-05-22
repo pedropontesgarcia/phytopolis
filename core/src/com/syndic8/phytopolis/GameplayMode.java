@@ -78,6 +78,7 @@ public class GameplayMode extends WorldController {
     private int numBranchesSinceGrow;
     private float timeSpent;
     private float bestTime;
+    private Tilemap.TilemapParams tilemapParams;
 
     /**
      * Creates and initialize a new instance of the game.
@@ -168,14 +169,7 @@ public class GameplayMode extends WorldController {
                     plantXOrigin + i * plantWidth / (plantNodesPerRow - 1));
         }
 
-        plantController = new PlantController(plantNodesPerRow,
-                                              40,
-                                              tilemap.getTileHeight(),
-                                              plantXOrigin,
-                                              0,
-                                              world,
-                                              resourceController,
-                                              tilemap);
+        plantController = new PlantController(resourceController);
         hazardController = new HazardController(plantController,
                                                 (int) tilemap.getFireRate(),
                                                 2,
@@ -299,6 +293,7 @@ public class GameplayMode extends WorldController {
      * @param dt Number of seconds since last animation frame
      */
     public void update(float dt) {
+        //        if (dt > 0.02f) System.out.println(dt);
         if (!isComplete()) {
             timeSpent += dt;
         }
@@ -338,7 +333,7 @@ public class GameplayMode extends WorldController {
         // generate hazards please
         for (Model m : objects) {
             if (m instanceof Water) {
-                ((Water) m).regenerate();
+                ((Water) m).regenerate(dt);
                 m.update(dt);
             }
             if (m instanceof Sun) {
@@ -362,7 +357,7 @@ public class GameplayMode extends WorldController {
         if (ic.didMousePress() && hazardController.hasFire(unprojMousePos)) {
             hazardController.extinguishFire(unprojMousePos, avatar);
         }
-        hazardController.deleteFireBugs(plantController.propagateDestruction());
+        hazardController.deleteFireBugs(plantController.propagateDestruction(dt));
 
         //        if (timeSinceUIUpdate >= 1) {
         uiController.update(dt,
@@ -454,32 +449,16 @@ public class GameplayMode extends WorldController {
                         addObject(new Indicator(branchCenter.x,
                                                 branchCenter.y,
                                                 getMinusWaterIndicatorTexture(),
-                                                tilemap,
+                                                tilemap.getTilemapParams(),
                                                 0.5f));
                         soundController.playSound(plantSound);
                     }
                 }
             }
             if (shouldGrowLeaf) {
-                // don't grow if there's a fire there (prioritize fire)
-
                 Leaf.leafType lt = getLevelLeafType();
                 float width = getLevelLeafWidth();
-                //                switch (lvl) {
-                //                    case "gameplay:lvl1":
-                //                        lt = Leaf.leafType.NORMAL;
-                //                        width = lvl1LeafWidth;
-                //                        break;
-                //                    case "gameplay:lvl2":
-                //                        lt = Leaf.leafType.NORMAL1;
-                //                        width = lvl2LeafWidth;
-                //                        break;
-                //                    case "gameplay:lvl3":
-                //                        lt = Leaf.leafType.NORMAL2;
-                //                        width = lvl3LeafWidth;
-                //                        break;
-                //                }
-                Model newLeaf = plantController.makeLeaf(unprojMousePos.x,
+                Model newLeaf = plantController.growLeaf(unprojMousePos.x,
                                                          unprojMousePos.y +
                                                                  0.5f *
                                                                          tilemap.getTileHeight(),
@@ -490,9 +469,8 @@ public class GameplayMode extends WorldController {
                     addObject(new Indicator(newLeaf.getX(),
                                             newLeaf.getY(),
                                             getMinusWaterIndicatorTexture(),
-                                            tilemap,
+                                            tilemap.getTilemapParams(),
                                             0.5f));
-                    //soundController.playSound(leafSound);
                 }
 
             }
@@ -737,6 +715,7 @@ public class GameplayMode extends WorldController {
 
         world = new World(gravity, false);
         tilemap.populateLevel(this);
+        tilemapParams = tilemap.getTilemapParams();
         populateLevel();
         float branchHeight = tilemap.getTileHeight();
         int plantNodesPerRow = Math.round(
@@ -745,13 +724,7 @@ public class GameplayMode extends WorldController {
                 branchHeight * (float) Math.sqrt(3) * (plantNodesPerRow - 1) /
                         2;
         float plantXOrigin = bounds.width / 2 - plantWidth / 2;
-        plantController.reset(plantNodesPerRow,
-                              40,
-                              tilemap.getTileHeight(),
-                              plantXOrigin,
-                              0,
-                              world,
-                              tilemap);
+        plantController.reset(world, tilemapParams);
 
         hazardController.reset((int) tilemap.getFireRate(),
                                2,
@@ -759,12 +732,8 @@ public class GameplayMode extends WorldController {
                                6,
                                10,
                                tilemap);
-        List<Float> plantXPositions = new ArrayList<Float>();
-        for (int i = 0; i < plantNodesPerRow; i++) {
-            plantXPositions.add(
-                    plantXOrigin + i * plantWidth / (plantNodesPerRow - 1));
-        }
-        sunController.reset(tilemap.getWorldHeight(), plantXPositions);
+        sunController.reset(tilemap.getWorldHeight(),
+                            plantController.getPlantXPositions());
         setComplete(false);
         setFailure(false);
     }
@@ -784,7 +753,7 @@ public class GameplayMode extends WorldController {
                 tilemap.getWorldWidth(),
                 -1,
                 0,
-                -1}, 0, 0, tilemap, 1);
+                -1}, 0, 0, tilemapParams, 1);
         obj.setBodyType(BodyDef.BodyType.StaticBody);
         obj.setDensity(0);
         obj.setFriction(0);
@@ -800,7 +769,7 @@ public class GameplayMode extends WorldController {
                 0,
                 0,
                 -1,
-                0}, 0, 0, tilemap, 1);
+                0}, 0, 0, tilemapParams, 1);
         obj.setBodyType(BodyDef.BodyType.StaticBody);
         obj.setDensity(0);
         obj.setFriction(0);
@@ -816,7 +785,7 @@ public class GameplayMode extends WorldController {
                 tilemap.getWorldWidth() + 1,
                 0,
                 tilemap.getWorldWidth(),
-                0}, 0, 0, tilemap, 1);
+                0}, 0, 0, tilemapParams, 1);
         obj.setBodyType(BodyDef.BodyType.StaticBody);
         obj.setDensity(0);
         obj.setFriction(0);
@@ -831,7 +800,7 @@ public class GameplayMode extends WorldController {
                             jumpAnimator,
                             jogAnimator,
                             idleAnimator,
-                            tilemap,
+                            tilemapParams,
                             0.9f);
 
         avatar.setBoingSound(boingSound);

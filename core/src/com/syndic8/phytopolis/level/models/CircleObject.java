@@ -29,9 +29,9 @@ public abstract class CircleObject extends GameObject {
     public CircleObject(float x,
                         float y,
                         float radius,
-                        Tilemap tm,
+                        Tilemap.TilemapParams tmp,
                         float texScl) {
-        super(x, y, tm, texScl);
+        super(x, y, tmp, texScl);
         shape = new CircleShape();
         shape.setRadius(radius);
     }

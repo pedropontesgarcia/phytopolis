@@ -27,7 +27,7 @@ import com.badlogic.gdx.utils.GdxRuntimeException;
 import com.syndic8.phytopolis.util.FilmStrip;
 
 /**
- * This class is an {@link AssetLoader} to load {@link edu.cornell.gdiac.util.FilmStrip} assets.
+ * This class is an {@link AssetLoader} to load {@link FilmStrip} assets.
  * <p>
  * A film strip asset should be specified by filename:name where name is a unique
  * name for the region.  Note that, unlike textures, film strips are not really

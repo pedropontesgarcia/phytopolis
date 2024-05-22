@@ -286,8 +286,6 @@ public abstract class WorldController extends FadingScreen implements Screen {
      * to be overriden if the world needs fancy backgrounds or the like.
      * <p>
      * The method draws all objects in the order that they were added.
-     *
-     * @param dt Number of seconds since last animation frame
      */
     public void draw() {
         for (Model obj : objects) {
@@ -398,7 +396,6 @@ public abstract class WorldController extends FadingScreen implements Screen {
      * This is usually when it regains focus.
      */
     public void resume() {
-        // TODO Auto-generated method stub
     }
 
     /**
@@ -436,8 +433,6 @@ public abstract class WorldController extends FadingScreen implements Screen {
      * to be overriden if the world needs fancy backgrounds or the like.
      * <p>
      * The method draws all objects in the order that they were added.
-     *
-     * @param dt Number of seconds since last animation frame
      */
     public void drawLevelOver() {
         for (Model obj : objects) {

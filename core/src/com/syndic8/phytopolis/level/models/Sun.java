@@ -26,9 +26,9 @@ public class Sun extends Resource {
                Texture sc,
                Texture sr,
                Texture ss,
-               Tilemap tm,
+               Tilemap.TilemapParams tmp,
                float texScl) {
-        super(x, y, w, h, tm, texScl);
+        super(x, y, w, h, tmp, texScl);
         bodyinfo.gravityScale = 0;
         //sunFilmstrip = sf;
         color = new Color(1.0F, 1.0F, 1.0F, 1.0F);

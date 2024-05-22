@@ -44,9 +44,9 @@ public abstract class BoxObject extends GameObject {
                      float y,
                      float width,
                      float height,
-                     Tilemap tm,
+                     Tilemap.TilemapParams tmp,
                      float texScl) {
-        super(x, y, tm, texScl);
+        super(x, y, tmp, texScl);
         dimension = new Vector2(width, height);
         sizeCache = new Vector2();
         shape = new PolygonShape();

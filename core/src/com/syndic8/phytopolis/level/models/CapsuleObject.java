@@ -48,6 +48,10 @@ public abstract class CapsuleObject extends GameObject {
      */
     private final float[] vertices;
     /**
+     * The seam offset of the core rectangle
+     */
+    private final float seamEpsilon;
+    /**
      * Shape information for this box
      */
     protected PolygonShape shape;
@@ -79,10 +83,36 @@ public abstract class CapsuleObject extends GameObject {
      * The capsule orientation
      */
     private Orientation orient;
+
     /**
-     * The seam offset of the core rectangle
+     * Enum to specify the capsule orientiation
      */
-    private final float seamEpsilon;
+    public enum Orientation {
+        /**
+         * A half-capsule with a rounded end at the top
+         */
+        TOP,
+        /**
+         * A full capsule with a rounded ends at the top and bottom
+         */
+        VERTICAL,
+        /**
+         * A half-capsule with a rounded end at the bottom
+         */
+        BOTTOM,
+        /**
+         * A half-capsule with a rounded end at the left
+         */
+        LEFT,
+        /**
+         * A full capsule with a rounded ends at the left and right
+         */
+        HORIZONTAL,
+        /**
+         * A half-capsule with a rounded end at the right
+         */
+        RIGHT
+    }
 
     /**
      * Creates a new capsule object.
@@ -104,14 +134,14 @@ public abstract class CapsuleObject extends GameObject {
                          float y,
                          float width,
                          float height,
-                         Tilemap tm,
+                         Tilemap.TilemapParams tmp,
                          float texScl) {
         this(x,
              y,
              width,
              height,
              (width > height ? Orientation.HORIZONTAL : Orientation.VERTICAL),
-             tm,
+             tmp,
              texScl);
     }
 
@@ -132,9 +162,9 @@ public abstract class CapsuleObject extends GameObject {
                          float width,
                          float height,
                          Orientation o,
-                         Tilemap tm,
+                         Tilemap.TilemapParams tmp,
                          float texScl) {
-        super(x, y, tm, texScl);
+        super(x, y, tmp, texScl);
         dimension = new Vector2();
         sizeCache = new Vector2();
         shape = new PolygonShape();
@@ -280,27 +310,6 @@ public abstract class CapsuleObject extends GameObject {
     }
 
     /**
-     * Sets the density of this body
-     * <p>
-     * The density is typically measured in usually in kg/m^2. The density can be zero or
-     * positive. You should generally use similar densities for all your fixtures. This
-     * will improve stacking stability.
-     *
-     * @param value the density of this body
-     */
-    public void setDensity(float value) {
-        fixture.density = value;
-        if (body != null) {
-            core.setDensity(value);
-            cap1.setDensity(value / 2.0f);
-            cap2.setDensity(value / 2.0f);
-            if (!masseffect) {
-                body.resetMassData();
-            }
-        }
-    }
-
-    /**
      * Create new fixtures for this body, defining the shape
      * <p>
      * This is the primary method to override for custom physics objects
@@ -373,6 +382,27 @@ public abstract class CapsuleObject extends GameObject {
     }
 
     /**
+     * Sets the density of this body
+     * <p>
+     * The density is typically measured in usually in kg/m^2. The density can be zero or
+     * positive. You should generally use similar densities for all your fixtures. This
+     * will improve stacking stability.
+     *
+     * @param value the density of this body
+     */
+    public void setDensity(float value) {
+        fixture.density = value;
+        if (body != null) {
+            core.setDensity(value);
+            cap1.setDensity(value / 2.0f);
+            cap2.setDensity(value / 2.0f);
+            if (!masseffect) {
+                body.resetMassData();
+            }
+        }
+    }
+
+    /**
      * Release the fixtures for this body, reseting the shape
      * <p>
      * This is the primary method to override for custom physics objects
@@ -390,36 +420,6 @@ public abstract class CapsuleObject extends GameObject {
             body.destroyFixture(cap2);
             cap2 = null;
         }
-    }
-
-    /**
-     * Enum to specify the capsule orientiation
-     */
-    public enum Orientation {
-        /**
-         * A half-capsule with a rounded end at the top
-         */
-        TOP,
-        /**
-         * A full capsule with a rounded ends at the top and bottom
-         */
-        VERTICAL,
-        /**
-         * A half-capsule with a rounded end at the bottom
-         */
-        BOTTOM,
-        /**
-         * A half-capsule with a rounded end at the left
-         */
-        LEFT,
-        /**
-         * A full capsule with a rounded ends at the left and right
-         */
-        HORIZONTAL,
-        /**
-         * A half-capsule with a rounded end at the right
-         */
-        RIGHT
     }
 
 }

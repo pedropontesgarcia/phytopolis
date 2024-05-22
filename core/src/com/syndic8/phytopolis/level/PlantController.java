@@ -12,7 +12,10 @@ import com.syndic8.phytopolis.GameCanvas;
 import com.syndic8.phytopolis.SoundController;
 import com.syndic8.phytopolis.assets.AssetDirectory;
 import com.syndic8.phytopolis.level.models.*;
+import com.syndic8.phytopolis.math.IntVector2;
 import com.syndic8.phytopolis.util.FilmStrip;
+import com.syndic8.phytopolis.util.PooledList;
+import com.syndic8.phytopolis.util.RandomController;
 import com.syndic8.phytopolis.util.Tilemap;
 import edu.cornell.gdiac.audio.SoundEffect;
 
@@ -21,134 +24,162 @@ import java.util.Random;
 public class PlantController {
 
     /**
-     * conversion ratio from world units to pixels
+     * Buffer of nodes above the top of the world.
      */
-    private final float worldToPixelConversionRatio;
+    private static final int HEIGHT_BUFFER = 2;
     /**
-     * how many frames between propagations of destruction
+     * Time between propagations of destruction.
      */
-    private final int plantCoyoteTime = 15;
-    private final Queue<int[]> destructionQueue = new Queue<>();
+    private static final float PLANT_COYOTE_TIME = 0.25f;
     /**
-     * Reference to the ResourceController
+     * The sun controller gets valid x-coordinates from enabled nodes at a
+     * certain height. That height is calculated to be the top row minus this
+     * buffer.
+     */
+    private static final int SUN_SPAWN_BUFFER = 4;
+    /**
+     * The destruction queue. It is populated when a node is destroyed, and
+     * then slowly cleared as the now-unsupported plant structure above is
+     * progressively destroyed.
+     */
+    private final Queue<IntVector2> destructionQueue = new Queue<>(3);
+    /**
+     * A temporary queue used to copy over values from the destruction queue
+     * to prevent that changes to the destruction queue affect iteration.
+     * Necessary for a proper BFS destruction.
+     */
+    private final Queue<IntVector2> currentQueue = new Queue<>(3);
+    /**
+     * A temporary list of next nodes to be checked for potential addition to
+     * the destruction queue.
+     */
+    private final PooledList<IntVector2> nextNodes = new PooledList<>();
+    /**
+     * Reference to the ResourceController.
      */
     private final ResourceController resourceController;
+    /**
+     * The singleton instance of the sound controller.
+     */
     private final SoundController soundController;
+    /**
+     * A random number generator to aid with choosing random branch textures.
+     */
     private final Random branchChoice;
+    /**
+     * A temporary set of removed hazards.
+     */
+    private final ObjectSet<Bug> removedHazards;
+    /**
+     * Cached vector for miscellaneous use.
+     */
+    private final Vector2 cacheVector = new Vector2();
+    /**
+     * Cached integer vector for miscellaneous use.
+     */
+    private final IntVector2 cacheIntVector = new IntVector2();
+
+    // Begin leaf textures
     public FilmStrip bounceTexture;
-    /**
-     * node texture
-     */
-    protected Texture nodeTexture;
-    /**
-     * branch texture
-     */
+    protected FilmStrip leafTexture;
+    protected FilmStrip bouncyLeafTexture;
+    protected FilmStrip leafTextureOne;
+    protected FilmStrip leafTextureTwo;
+    // End leaf textures
+
+    // Begin branch textures
     protected FilmStrip branchTexture;
     protected FilmStrip firstBranchTexture;
     protected FilmStrip secondBranchTexture;
     protected FilmStrip thirdBranchTexture;
-    /**
-     * static branch texture
-     */
     protected FilmStrip staticBranchTexture;
-    /**
-     * leaf texture
-     */
-    protected FilmStrip leafTexture;
-    /**
-     * reinforced upwards branch texture
-     */
     protected Texture enBranchTextureUp;
-    /**
-     * bouncy leaf texture
-     */
-    protected FilmStrip bouncyLeafTexture;
-    /**
-     * the grid containing all possible nodes for a branch to grow from
-     */
+    //End branch textures
 
+    /**
+     * Indices of the highest plant position.
+     */
+    private IntVector2 maxPlantIndex;
+    /**
+     * Ghost leaf for growth previews.
+     */
+    private Leaf ghostLeaf;
+    /**
+     * Ghost branch for growth previews.
+     */
+    private Branch ghostBranch;
+    /**
+     * Number of frames left until the next propagation of destruction.
+     */
+    private float plantCoyoteTimeRemaining = 0;
+    /**
+     * The plant grid, in column-major order. All branches and leaves grow on
+     * plant nodes inside the grid.
+     */
     private PlantNode[][] plantGrid;
     /**
-     * width of the plant grid
+     * Width of the plant grid.
      */
     private int width;
     /**
-     * height of the plant grid
+     * Height of the plant grid.
      */
     private int height;
     /**
-     * how far apart to space each node on screen
+     * Vertical spacing between rows of nodes.
      */
-    private float gridSpacing;
+    private float branchLength;
     /**
-     * how far apart each node is on the x axis
+     * Horizontal spacing between columns of nodes.
      */
-    private float xSpacing;
+    private float horizontalSpacing;
     /**
-     * x coordinate of the origin of this plant
+     * x-coordinate of the origion of this plant.
      */
     private float xOrigin;
     /**
-     * y coordinate of the origin of this plant
+     * y-coordinate of the origin of this plant.
      */
     private float yOrigin;
     /**
-     * world used for storing physics objects
+     * Record containing level parameters.
      */
-    private World world;
-    private Tilemap tilemap;
-    private Vector2 maxPlantIndex;
-    private ObjectSet<Bug> removedHazards;
-    /**
-     * how many more frames until the next propagation of destruction
-     */
-    private int plantCoyoteTimeRemaining = 0;
-    private FilmStrip leafTextureOne;
-    private FilmStrip leafTextureTwo;
+    private Tilemap.TilemapParams tilemapParams;
+
+    // Begin sounds
     private int upgradeSound;
     private int destroySound;
     private int leafSound;
-    private Texture glowTexture;
     private int errorSound;
+    // End sounds
 
     /**
-     * Initialize a PlantController with specified height and width
-     *
-     * @param height      the height of the plant grid
-     * @param width       the width of the plant grid
-     * @param gridSpacing the spacing between nodes of the plant in world units
-     * @param world       world to assign physics objects to
-     * @param xOrigin     x origin of the plant in world units
-     * @param yOrigin     y origin of the plant in world units
+     * Glow texture for the bottom nodes.
      */
-    public PlantController(int width,
-                           int height,
-                           float gridSpacing,
-                           float xOrigin,
-                           float yOrigin,
-                           World world,
-                           ResourceController rc,
-                           Tilemap tm) {
-        plantGrid = new PlantNode[width][height];
-        this.world = world;
-        worldToPixelConversionRatio = 1;
-        this.xOrigin = xOrigin * worldToPixelConversionRatio;
-        this.yOrigin = yOrigin * worldToPixelConversionRatio;
-        this.width = width;
-        this.height = height;
-        maxPlantIndex = new Vector2(-1, -1);
-        this.gridSpacing = gridSpacing * worldToPixelConversionRatio;
-        this.xSpacing = (float) (Math.sqrt(
-                (this.gridSpacing * this.gridSpacing) -
-                        ((this.gridSpacing / 2f) * (this.gridSpacing / 2f))));
-        this.resourceController = rc;
-        tilemap = tm;
+    private Texture glowTexture;
+
+    /**
+     * Branch direction from a node.
+     */
+    public enum BranchDirection {LEFT, MIDDLE, RIGHT}
+
+    /**
+     * Initializes a PlantController referencing the given resource controller.
+     *
+     * @param rc the resource controller reference.
+     */
+    public PlantController(ResourceController rc) {
+        resourceController = rc;
         removedHazards = new ObjectSet<>();
-        branchChoice = new Random();
-        this.soundController = SoundController.getInstance();
+        maxPlantIndex = new IntVector2();
+        branchChoice = RandomController.generator;
+        soundController = SoundController.getInstance();
     }
 
-    private FilmStrip getcurrentBranch() {
+    /**
+     * @return a random branch filmstrip.
+     */
+    private FilmStrip getRandomBranchFilmstrip() {
         int num = branchChoice.nextInt(3);
         if (num == 0) {
             return firstBranchTexture;
@@ -159,276 +190,154 @@ public class PlantController {
         }
     }
 
-    public Leaf.leafType getLevelLeaf(String l) {
-        switch (l) {
-            case "gameplay:lvl1":
-                return Leaf.leafType.NORMAL;
-            case "gameplay:lvl2":
-                return Leaf.leafType.NORMAL1;
-            case "gameplay:lvl3":
-                return Leaf.leafType.NORMAL2;
-        }
-        return null;
+    /**
+     * Resets the PlantController, creating a centered grid of nodes
+     * stretching across the world.
+     *
+     * @param wld the box2d world.
+     * @param tmp the tilemap parameters.
+     */
+    public void reset(World wld, Tilemap.TilemapParams tmp) {
+        branchLength = tmp.tileHeight();
+        width = Math.round(tmp.tilemapWidth() * (float) Math.sqrt(3));
+        height = Math.round(tmp.worldHeight() / branchLength) + HEIGHT_BUFFER;
+        float plantWidth =
+                branchLength * (float) Math.sqrt(3) * (width - 1) / 2;
+        xOrigin = tmp.worldWidth() / 2 - plantWidth / 2;
+        yOrigin = 0;
+        tilemapParams = tmp;
+        removedHazards.clear();
+        if (ghostBranch != null) ghostBranch.markRemoved(true);
+        if (ghostLeaf != null) ghostLeaf.markRemoved(true);
+        ghostBranch = new Branch(0, 0, 0, Branch.BranchType.NORMAL, tmp, 1);
+        ghostLeaf = new Leaf(0, 0, 1, 1, Leaf.leafType.NORMAL, tmp, 0.75f);
+        plantGrid = new PlantNode[width][height];
+        maxPlantIndex.set(-1, -1);
+        horizontalSpacing = (float) Math.sqrt(3) * branchLength / 2f;
+        initializePlantGrid(wld);
     }
 
-    public void reset(int width,
-                      int height,
-                      float gridSpacing,
-                      float xOrigin,
-                      float yOrigin,
-                      World world,
-                      Tilemap tm) {
-        plantGrid = new PlantNode[width][height];
-        this.world = world;
-        this.xOrigin = xOrigin * worldToPixelConversionRatio;
-        this.yOrigin = yOrigin * worldToPixelConversionRatio;
-        this.width = width;
-        this.height = height;
-        maxPlantIndex = new Vector2(-1, -1);
-        this.gridSpacing = gridSpacing * worldToPixelConversionRatio;
-        this.xSpacing = (float) (Math.sqrt(
-                (this.gridSpacing * this.gridSpacing) -
-                        ((this.gridSpacing / 2f) * (this.gridSpacing / 2f))));
-        tilemap = tm;
+    /**
+     * Initializes the <code>plantGrid</code> attribute with a 2D array of
+     * nodes, with the correct spacing and offset to create an isometric grid.
+     *
+     * @param wld the world to query to set enabled/disabled status for nodes.
+     */
+    private void initializePlantGrid(World wld) {
         for (int x = 0; x < width; x++) {
             for (int y = 0; y < height; y++) {
                 float yOffset = 0;
-                if (x % 2 == 1) yOffset = this.gridSpacing / 2f;
-                float xCoord = (x * this.xSpacing) + this.xOrigin;
-                float yCoord = this.yOrigin + yOffset + (y * this.gridSpacing);
+                if (x % 2 == 1) yOffset = branchLength / 2f;
+                float xCoord = (x * horizontalSpacing) + xOrigin;
+                float yCoord = yOrigin + yOffset + (y * branchLength);
                 float margin = 0.1f;
                 final boolean[] hasBody = {false};
-                world.QueryAABB(new QueryCallback() {
-                                    @Override
-                                    public boolean reportFixture(Fixture fixture) {
-                                        if (fixture.getBody().getUserData() instanceof Tile)
-                                            hasBody[0] = true;
-                                        return false;
-                                    }
-                                },
-                                xCoord - margin,
-                                yCoord - margin,
-                                xCoord + margin,
-                                yCoord + margin);
+                wld.QueryAABB(new QueryCallback() {
+                                  @Override
+                                  public boolean reportFixture(Fixture fixture) {
+                                      if (fixture.getBody().getUserData() instanceof Tile)
+                                          hasBody[0] = true;
+                                      return false;
+                                  }
+                              },
+                              xCoord - margin,
+                              yCoord - margin,
+                              xCoord + margin,
+                              yCoord + margin);
                 if (y == 0 && yOffset == 0) {
-                    world.QueryAABB(new QueryCallback() {
-                                        @Override
-                                        public boolean reportFixture(Fixture fixture) {
-                                            if (fixture.getBody().getUserData() instanceof Tile)
-                                                hasBody[0] = true;
-                                            return false;
-                                        }
-                                    },
-                                    xCoord - margin,
-                                    yCoord + 2 * margin,
-                                    xCoord + margin,
-                                    yCoord + 4 * margin);
+                    wld.QueryAABB(new QueryCallback() {
+                                      @Override
+                                      public boolean reportFixture(Fixture fixture) {
+                                          if (fixture.getBody().getUserData() instanceof Tile)
+                                              hasBody[0] = true;
+                                          return false;
+                                      }
+                                  },
+                                  xCoord - margin,
+                                  yCoord + 2 * margin,
+                                  xCoord + margin,
+                                  yCoord + 4 * margin);
                 }
                 plantGrid[x][y] = new PlantNode(xCoord,
                                                 yCoord,
-                                                this.worldToPixelConversionRatio,
                                                 yOffset != 0,
                                                 !hasBody[0],
-                                                tilemap);
+                                                tilemapParams);
             }
         }
-        removedHazards = new ObjectSet<>();
     }
 
     /**
-     * grows a branch at the desired position
+     * Grows a branch at the desired coordinates. Finds the nearest node to
+     * the given coordinates, and determines the best direction given the
+     * position of the given coordinates with respect to that node.
      *
-     * @param x the x coordinate of the node to grow the branch at
-     * @param y the y coordinate of the node to grow the branch at
+     * @param x the x-coordinate to grow the branch at.
+     * @param y the y-coordinate to grow the branch at.
      */
     public Branch growBranch(float x, float y) {
-        int xIndex = worldCoordToIndex(x, y)[0];
-        int yIndex = worldCoordToIndex(x, y)[1];
-        branchDirection direction = worldToBranch(x, y);
-        if (direction == null) return null;
+        IntVector2 nodeIndex = coordToIndex(x, y);
+        int xIndex = nodeIndex.x;
+        int yIndex = nodeIndex.y;
+        BranchDirection direction = worldToBranch(x, y);
         if (!resourceController.canGrowBranch()) {
             resourceController.setNotEnough(true);
-            SoundController.getInstance().playSound(errorSound);
+        }
+        if (direction == null || !resourceController.canGrowBranch() ||
+                !canBuildTowards(xIndex, yIndex, direction) ||
+                !plantGrid[xIndex][yIndex].isEnabled()) {
+            soundController.playSound(errorSound);
             return null;
         }
-        boolean isAtEnds = (xIndex == 0 && direction == branchDirection.LEFT) ||
-                (xIndex == plantGrid.length - 1 &&
-                        direction == branchDirection.RIGHT);
-        int yIndexOffset = plantGrid[xIndex][yIndex].isOffset() ? 1 : 0;
-        boolean canBuildTowards = (direction == branchDirection.LEFT &&
-                inBounds(xIndex - 1, yIndex + yIndexOffset) &&
-                plantGrid[xIndex - 1][yIndex + yIndexOffset].isEnabled() ||
-                direction == branchDirection.RIGHT &&
-                        inBounds(xIndex + 1, yIndex + yIndexOffset) &&
-                        plantGrid[xIndex + 1][yIndex +
-                                yIndexOffset].isEnabled() ||
-                direction == branchDirection.MIDDLE &&
-                        inBounds(xIndex, yIndex + 1) &&
-                        plantGrid[xIndex][yIndex + 1].isEnabled());
-        if (isAtEnds || !canBuildTowards ||
-                !plantGrid[xIndex][yIndex].isEnabled()) return null;
         return plantGrid[xIndex][yIndex].makeBranch(direction,
-                                                    Branch.branchType.NORMAL,
-                                                    world);
+                                                    Branch.BranchType.NORMAL);
     }
 
     /**
-     * Converts a world coordinate to the corresponding node index in the plant
+     * Returns whether the player can build towards the given direction from
+     * the given node.
      *
-     * @param xArg x coordinate to be converted
-     * @param yArg y coordinate to be converted
-     * @return (x, y) index of the corresponding node
+     * @param xIndex    x-index of the node.
+     * @param yIndex    y-index of the node.
+     * @param direction direction to check towards.
      */
-    public int[] worldCoordToIndex(float xArg, float yArg) {
-        return screenCoordToIndex(xArg * worldToPixelConversionRatio,
-                                  yArg * worldToPixelConversionRatio);
-    }
-
-    /**
-     * returns a branch at the given screen coords
-     *
-     * @param x the x coordinate of the node to grow the branch at
-     * @param y the y coordinate of the node to grow the branch at
-     */
-    public branchDirection worldToBranch(float x, float y) {
-        // Convert screen coordinates to grid indices
-        int xIndex = worldCoordToIndex(x, y)[0];
-        int yIndex = worldCoordToIndex(x, y)[1];
-        if (!inBounds(xIndex, yIndex)) return null;
-
-        // Convert indices back to world coordinates to find the center of the cell
-        Vector2 cellCenter = indexToWorldCoord(xIndex, yIndex);
-
-        // Calculate angle from the center of the node to the click position
-        float angle = (float) Math.atan2(y - cellCenter.y, x - cellCenter.x);
-
-        // Normalize angle into a range from 0 to 2*PI
-        angle = (angle + (float) (2 * Math.PI)) % (float) (2 * Math.PI);
-        if (angle >= Math.PI) return null;
-
-        // Divide the space around the node into six segments (each segment is 60 degrees)
-        branchDirection direction = getBranchDirection(angle);
-
-        // Grow branch
-        if (!branchExists(xIndex, yIndex, direction) &&
-                canGrowAtIndex(xIndex, yIndex)) return direction;
-        return null;
-    }
-
-    public boolean inBounds(int x, int y) {
-        return x >= 0 && y >= 0 && x < width && y < height;
-    }
-
-    /**
-     * Converts a screen coordinate to the corresponding node index in the plant
-     *
-     * @param xArg x coordinate to be converted
-     * @param yArg y coordinate to be converted
-     * @return (x, y) index of the corresponding node
-     */
-    public int[] screenCoordToIndex(float xArg, float yArg) {
-        int xIndex = Math.round((xArg - xOrigin) / xSpacing);
-        int yIndex = (int) (
-                (yArg - yOrigin - (gridSpacing * .5f * (xIndex % 2))) /
-                        gridSpacing);
-        return new int[]{xIndex, yIndex};
-    }
-
-    /**
-     * returns the world coordinates of the node at the specified index
-     *
-     * @param xArg x index
-     * @param yArg y index
-     * @return vector of world coordinates
-     */
-    public Vector2 indexToWorldCoord(int xArg, int yArg) {
-        PlantNode n = plantGrid[xArg][yArg];
-        return new Vector2(n.x / worldToPixelConversionRatio,
-                           n.y / worldToPixelConversionRatio);
-    }
-
-    private branchDirection getBranchDirection(float angle) {
-        branchDirection direction;
-        if (angle < Math.PI / 3) {
-            direction = branchDirection.RIGHT;
-        } else if (angle < 2 * Math.PI / 3) {
-            direction = branchDirection.MIDDLE;
-        } else if (angle < Math.PI) {
-            direction = branchDirection.LEFT;
+    private boolean canBuildTowards(int xIndex,
+                                    int yIndex,
+                                    BranchDirection direction) {
+        int yIndexOffset = plantGrid[xIndex][yIndex].isOffset() ? 1 : 0;
+        switch (direction) {
+            case LEFT:
+                return inBounds(xIndex - 1, yIndex + yIndexOffset) &&
+                        isNodeEnabled(xIndex - 1, yIndex + yIndexOffset);
+            case RIGHT:
+                return inBounds(xIndex + 1, yIndex + yIndexOffset) &&
+                        isNodeEnabled(xIndex + 1, yIndex + yIndexOffset);
+            case MIDDLE:
+                return inBounds(xIndex, yIndex + 1) &&
+                        isNodeEnabled(xIndex, yIndex + 1);
         }
-        // For branches under the node
-        else if (angle < 4 * Math.PI / 3) {
-            direction = branchDirection.RIGHT;
-        } else if (angle < 5 * Math.PI / 3) {
-            direction = branchDirection.MIDDLE;
-        } else {
-            direction = branchDirection.LEFT;
-        }
-        return direction;
+        return false;
     }
 
     /**
-     * returns whether or not a branch exists at the given x and y, in the given direction
+     * Returns whether the given node is enabled.
      *
-     * @param xArg      x coordinate of the queried node
-     * @param yArg      y coordinate of the queried node
-     * @param direction direction of the queried node
-     * @return boolean value of whether or not a branch exists here
+     * @param xIndex x-index of the node.
+     * @param yIndex y-index of the node.
      */
-    public boolean branchExists(int xArg, int yArg, branchDirection direction) {
-        try {
-            return plantGrid[xArg][yArg].hasBranchInDirection(direction);
-        } catch (ArrayIndexOutOfBoundsException ign) {
-            return false;
-        }
-    }
-
-    /**
-     * Returns whether or not a node can be grown at the given index
-     *
-     * @param xIndex x Index of the checked node
-     * @param yIndex y Index of the checked node
-     * @return if the checked node can be grown at
-     */
-    public boolean canGrowAtIndex(int xIndex, int yIndex) {
-        boolean lowerNode = xIndex % 2 == 0;
-        //If this is a node at the base of the plant, return true
-        if (yIndex == 0 && lowerNode) return true;
-        int yOff = 0;
-        if (lowerNode) yOff = 1;
-
-        boolean below = false;
-        if (inBounds(xIndex, yIndex - 1))
-            below = plantGrid[xIndex][yIndex - 1].hasBranchInDirection(
-                    branchDirection.MIDDLE);
-        boolean downLeft = false;
-        if (inBounds(xIndex - 1, yIndex - yOff))
-            downLeft = plantGrid[xIndex - 1][yIndex -
-                    yOff].hasBranchInDirection(branchDirection.RIGHT);
-        boolean downRight = false;
-        if (inBounds(xIndex + 1, yIndex - yOff))
-            downRight = plantGrid[xIndex + 1][yIndex -
-                    yOff].hasBranchInDirection(branchDirection.LEFT);
-        return below || downLeft || downRight;
-    }
-
-    public boolean hasLeaf(float x, float y) {
-        int xIndex = screenCoordToIndex(x, y)[0];
-        int yIndex = screenCoordToIndex(x, y)[1];
+    public boolean isNodeEnabled(int xIndex, int yIndex) {
         if (!inBounds(xIndex, yIndex)) return false;
-        return hasLeaf(xIndex, yIndex);
+        return plantGrid[xIndex][yIndex].isEnabled();
     }
 
-    public boolean hasLeaf(int xIndex, int yIndex) {
-        return plantGrid[xIndex][yIndex].hasLeaf();
-    }
-
-    public Hazard getHazard(int xIndex, int yIndex) {
-        return plantGrid[xIndex][yIndex].getHazard();
-    }
-
+    /**
+     * Sets the hazard at the given node to the one given.
+     *
+     * @param xIndex x-index of the node.
+     * @param yIndex y-index of the node.
+     * @param h      hazard.
+     */
     public void setHazard(int xIndex, int yIndex, Hazard h) {
-
         plantGrid[xIndex][yIndex].setHazard(h);
     }
 
@@ -436,233 +345,371 @@ public class PlantController {
         plantGrid[xIndex][yIndex].removeHazard();
     }
 
+    /**
+     * Returns whether the given node has a hazard.
+     *
+     * @param xIndex x-index of the node.
+     * @param yIndex y-index of the node.
+     */
     public boolean hasHazard(int xIndex, int yIndex) {
         return plantGrid[xIndex][yIndex].hasHazard();
     }
 
     /**
-     * upgrades the leaf at the target node
+     * Upgrades the branch at the target node.
      *
-     * @param x         screen x coord of the target node
-     * @param y         screem y coord of the target node
-     * @param direction direction of the target branch to upgrade
-     * @param type      type of branch to upgrade to
-     * @return the new branch
+     * @param x         x-coordinate of the target node.
+     * @param y         y-coord of the target node.
+     * @param direction direction of the target branch to upgrade.
+     * @param type      type of branch to upgrade to.
+     * @return the new branch.
      */
-
     public Branch upgradeBranch(float x,
                                 float y,
-                                branchDirection direction,
-                                Branch.branchType type) {
-        int xIndex = screenCoordToIndex(x * worldToPixelConversionRatio,
-                                        y * worldToPixelConversionRatio)[0];
-        int yIndex = screenCoordToIndex(x * worldToPixelConversionRatio,
-                                        y * worldToPixelConversionRatio)[1];
+                                BranchDirection direction,
+                                Branch.BranchType type) {
+        IntVector2 nodeIndex = coordToIndex(x, y);
+        int xIndex = nodeIndex.x;
+        int yIndex = nodeIndex.y;
         if (resourceController.canUpgrade()) {
             resourceController.decrementUpgrade();
             soundController.playSound(upgradeSound);
             plantGrid[xIndex][yIndex].unmakeBranch(direction);
-            return plantGrid[xIndex][yIndex].makeBranch(direction, type, world);
+            return plantGrid[xIndex][yIndex].makeBranch(direction, type);
         }
         return null;
     }
 
     /**
-     * upgrades the leaf at the target node if there is already one; otherwise makes a normal leaf
+     * Converts the given coordinates to the corresponding node indices in the
+     * plant.
      *
-     * @param x  screen x coord of the target node
-     * @param y  screen y coord of the target node
-     * @param lt type of Leaf to upgrade to
-     * @return the new Leaf object
+     * @param x x-coordinate to be converted.
+     * @param y y-coordinate to be converted.
      */
-    public Leaf makeLeaf(float x, float y, Leaf.leafType lt, float width) {
-        int xIndex = screenCoordToIndex(x, y)[0];
-        int yIndex = screenCoordToIndex(x, y)[1];
-        if (!inBounds(xIndex, yIndex)) return null;
+    public IntVector2 coordToIndex(float x, float y) {
+        int xIndex = Math.round((x - xOrigin) / horizontalSpacing);
+        int yIndex = (int) (
+                (y - yOrigin - (branchLength * .5f * (xIndex % 2))) /
+                        branchLength);
+        return cacheIntVector.set(xIndex, yIndex);
+    }
+
+    /**
+     * Grows a leaf at the specified node, or tries to upgrade if a leaf
+     * already exists.
+     *
+     * @param x     x-coordinate of the node.
+     * @param y     y-coordinate of the node.
+     * @param lt    type of leaf to grow.
+     * @param width width of the leaf
+     * @return the grown leaf object, null if it could not be grown.
+     */
+    public Leaf growLeaf(float x, float y, Leaf.leafType lt, float width) {
+        IntVector2 nodeIndex = coordToIndex(x, y);
+        int xIndex = nodeIndex.x;
+        int yIndex = nodeIndex.y;
+        Leaf l;
         if (plantGrid[xIndex][yIndex].hasLeaf() &&
                 plantGrid[xIndex][yIndex].getLeafType() !=
                         Leaf.leafType.BOUNCY) {
-            if (!resourceController.canUpgrade()) {
-                resourceController.setNotEnough(true);
-                SoundController.getInstance().playSound(errorSound);
-                return null;
-            }
-            plantGrid[xIndex][yIndex].unmakeLeaf();
-            resourceController.decrementUpgrade();
-            soundController.playSound(upgradeSound);
-            Leaf l = plantGrid[xIndex][yIndex].makeLeaf(Leaf.leafType.BOUNCY,
-                                                        width);
-            if (l != null && l.getY() > getMaxPlantHeight()) {
-                maxPlantIndex.set(xIndex, yIndex);
-            }
-            return l;
+            l = growBouncyLeaf(xIndex, yIndex, width);
         } else {
-            Leaf l = growLeaf(x, y, lt, width);
-            if (l != null) {
-                soundController.playSound(leafSound);
-            }
-            return l;
+            l = growNormalLeaf(xIndex, yIndex, lt, width);
         }
+        if (l != null && l.getY() > getMaxPlantHeight())
+            maxPlantIndex.set(xIndex, yIndex);
+        return l;
     }
 
-    public boolean hasLeaf(Vector2 mousePos) {
-        float x = mousePos.x;
-        float y = mousePos.y;
-        int xIndex = screenCoordToIndex(x, y)[0];
-        int yIndex = screenCoordToIndex(x, y)[1];
-        return hasLeaf(xIndex, yIndex);
+    /**
+     * Grows a bouncy leaf at the specified node.
+     *
+     * @param xIndex x-index of the node.
+     * @param yIndex y-index of the node.
+     * @param width  width of the leaf.
+     * @return the grown leaf object, null if it could not be grown.
+     */
+    private Leaf growBouncyLeaf(int xIndex, int yIndex, float width) {
+        if (!resourceController.canUpgrade()) {
+            resourceController.setNotEnough(true);
+            soundController.playSound(errorSound);
+            return null;
+        }
+        plantGrid[xIndex][yIndex].unmakeLeaf();
+        resourceController.decrementUpgrade();
+        soundController.playSound(upgradeSound);
+        return plantGrid[xIndex][yIndex].makeLeaf(Leaf.leafType.BOUNCY, width);
     }
 
+    /**
+     * Grows a normal leaf at the specified node.
+     *
+     * @param x     x-index of the node.
+     * @param y     y-index of the node.
+     * @param lt    type of leaf to grow.
+     * @param width width of the leaf.
+     * @return the grown leaf object, null if it could not be grown.
+     */
+    private Leaf growNormalLeaf(int xIndex,
+                                int yIndex,
+                                Leaf.leafType type,
+                                float width) {
+        if (!resourceController.canGrowLeaf()) {
+            resourceController.setNotEnough(true);
+        }
+        if (!inBounds(xIndex, yIndex) || !resourceController.canGrowLeaf() ||
+                plantGrid[xIndex][yIndex].hasLeaf() ||
+                (yIndex == 0 && !plantGrid[xIndex][yIndex].isOffset()) ||
+                !canGrowAtIndex(xIndex, yIndex)) {
+            soundController.playSound(errorSound);
+            return null;
+        }
+        soundController.playSound(leafSound);
+        return plantGrid[xIndex][yIndex].makeLeaf(type, width);
+
+    }
+
+    /**
+     * @return the maximum y-coordinate that the plant currently reaches.
+     */
     public float getMaxPlantHeight() {
-        if (getMaxLeafXIndex() != -1 &&
-                inBounds(getMaxLeafXIndex(), getMaxLeafYIndex())) {
-            return plantGrid[getMaxLeafXIndex()][getMaxLeafYIndex()].y;
+        if (getMaxPlantXIndex() != -1 &&
+                inBounds(getMaxPlantXIndex(), getMaxPlantYIndex())) {
+            return plantGrid[getMaxPlantXIndex()][getMaxPlantYIndex()].y;
         }
         return 0;
     }
 
     /**
-     * grow a leaf at the specified node
+     * Returns whether the given node is in bounds on the plant grid.
+     * <p>
+     * <b>This method should be called and its return value checked before
+     * performing any operations on plant nodes within any exposed methods. It
+     * should not be called on private methods as the condition should be
+     * checked before calling them.</b>
      *
-     * @param x    screen x coord of the target node
-     * @param y    screen y coord of the target node
-     * @param type type of leaf to grow
-     * @return the grown leaf object
+     * @param xIndex x-index of the node.
+     * @param yIndex y-index of the node.
      */
+    public boolean inBounds(int xIndex, int yIndex) {
+        return xIndex >= 0 && yIndex >= 0 && xIndex < width && yIndex < height;
+    }
 
-    public Leaf growLeaf(float x, float y, Leaf.leafType type, float width) {
-        int xIndex = screenCoordToIndex(x, y)[0];
-        int yIndex = screenCoordToIndex(x, y)[1];
+    /**
+     * Returns whether or not a node can be grown at the given index.
+     *
+     * @param xIndex x-index of the node.
+     * @param yIndex y-Index of the node.
+     */
+    public boolean canGrowAtIndex(int xIndex, int yIndex) {
         boolean lowerNode = xIndex % 2 == 0;
-        if (!inBounds(xIndex, yIndex)) return null;
-        if (!resourceController.canGrowLeaf()) {
-            resourceController.setNotEnough(true);
-            SoundController.getInstance().playSound(errorSound);
-            return null;
-        }
-        if (!plantGrid[xIndex][yIndex].hasLeaf() &&
-                (yIndex > 0 || !lowerNode) &&
-                resourceController.canGrowLeaf()) {
-            Leaf l = plantGrid[xIndex][yIndex].makeLeaf(type, width);
-            if (l != null && l.getY() > getMaxPlantHeight()) {
-                maxPlantIndex.set(xIndex, yIndex);
-            }
-            return l;
-        }
-        return null;
-    }
+        //If this is a node at the base of the plant, return true
+        if (yIndex == 0 && lowerNode) return true;
+        //If this node is disabled, then we cannot grow at it
+        if (!plantGrid[xIndex][yIndex].isEnabled()) return false;
+        int yOff = 0;
+        if (lowerNode) yOff = 1;
 
-    public int getMaxLeafXIndex() {
-        return (int) maxPlantIndex.x;
-    }
-
-    public int getMaxLeafYIndex() {
-        return (int) maxPlantIndex.y;
+        boolean below = false;
+        if (inBounds(xIndex, yIndex - 1))
+            below = plantGrid[xIndex][yIndex - 1].hasBranchInDirection(
+                    BranchDirection.MIDDLE);
+        boolean downLeft = false;
+        if (inBounds(xIndex - 1, yIndex - yOff))
+            downLeft = plantGrid[xIndex - 1][yIndex -
+                    yOff].hasBranchInDirection(BranchDirection.RIGHT);
+        boolean downRight = false;
+        if (inBounds(xIndex + 1, yIndex - yOff))
+            downRight = plantGrid[xIndex + 1][yIndex -
+                    yOff].hasBranchInDirection(BranchDirection.LEFT);
+        return below || downLeft || downRight;
     }
 
     /**
-     * destroys a branch at the desired position
+     * @return the x-index of the highest plant position.
+     */
+    public int getMaxPlantXIndex() {
+        return maxPlantIndex.x;
+    }
+
+    /**
+     * @return the y-index of the highest plant position.
+     */
+    public int getMaxPlantYIndex() {
+        return maxPlantIndex.y;
+    }
+
+    /**
+     * Returns whether there is a leaf at the closest node to the given
+     * position.
      *
-     * @param x         the x coordinate of the node to destroy the branch at
-     * @param y         the y coordinate of the node to destroy the branch at
-     * @param direction the direction in which to destroy the branch
+     * @param pos position vector to check.
      */
-    public void destroyBranch(int x, int y, branchDirection direction) {
-        if (plantGrid[x][y].hasBranchInDirection(direction)) {
-            plantGrid[x][y].unmakeBranch(direction);
-            plantCoyoteTimeRemaining = plantCoyoteTime;
-            destructionQueue.addLast(new int[]{x, y});
-        }
+    public boolean hasLeaf(Vector2 pos) {
+        float x = pos.x;
+        float y = pos.y;
+        IntVector2 n = coordToIndex(x, y);
+        return hasLeaf(n.x, n.y);
     }
 
     /**
-     * method to destroy branches no longer attatched to the plant,
-     * should be called every frame
+     * Returns whether the given node has a leaf.
+     *
+     * @param xIndex x-index of the node.
+     * @param yIndex y-index of the node.
      */
-    public ObjectSet<Bug> propagateDestruction() {
-        removedHazards.clear();
-        if (plantCoyoteTimeRemaining == 0 && !destructionQueue.isEmpty()) {
-            int[] currentNode = destructionQueue.removeFirst();
+    public boolean hasLeaf(int xIndex, int yIndex) {
+        return plantGrid[xIndex][yIndex].hasLeaf();
+    }
 
-            int xIndex = currentNode[0];
-            int yIndex = currentNode[1];
-            boolean lowerNode = xIndex % 2 == 0;
-            for (int i = -1; i < 2; i++) {
-                int yOff = 0;
-                if (!lowerNode || i == 0) yOff = 1;
-                if (yIndex + yOff < height && xIndex + i >= 0 &&
-                        xIndex + i < width &&
-                        !canGrowAtIndex(xIndex + i, yIndex + yOff) &&
-                        (plantGrid[xIndex + i][yIndex + yOff].hasBranch() ||
-                                plantGrid[xIndex + i][yIndex +
-                                        yOff].hasLeaf())) {
-                    destroyAll(xIndex + i, yIndex + yOff);
-                }
-            }
-            plantCoyoteTimeRemaining = plantCoyoteTime;
-        } else {
-            plantCoyoteTimeRemaining--;
+    /**
+     * Propagates any destruction queued in the destruction queue using the
+     * coyote time constants. This method should be called every frame.
+     *
+     * @param dt delta time.
+     * @return a set of bugs whose leaves were destroyed.
+     */
+    public ObjectSet<Bug> propagateDestruction(float dt) {
+        plantCoyoteTimeRemaining -= dt;
+        removedHazards.clear();
+        if (destructionQueue.isEmpty()) return removedHazards;
+        if (plantCoyoteTimeRemaining > 0) return removedHazards;
+        currentQueue.clear();
+        destructionQueue.forEach(v -> currentQueue.addLast(v));
+        for (IntVector2 n : currentQueue) {
+            Bug b = destroyAt(n.x, n.y);
+            if (b != null) removedHazards.add(b);
+            destructionQueue.removeValue(n, true);
         }
         return removedHazards;
     }
 
     /**
-     * destroys all branches and leaves attatched to specified node
+     * Queues destruction of the plant upwards from a certain node, populating
+     * the destruction queue so that the unsupported section of the plant
+     * going upwards will be destroyed progressively using the coyote time
+     * constants. Does <b>not</b> recalculate the maximum plant index; this
+     * should be done separately after calling this method externally by
+     * calling {@link #recalculateMaxPlantIndex()}.
      *
-     * @param xArg x index of the node to be accessed
-     * @param yArg y index of the node to be accessed
+     * @param xIndex the x-index of the node.
+     * @param yIndex the y-index of the node.
+     * @return a bug if its leaf was destroyed, null otherwise.
      */
-    public void destroyAll(int xArg, int yArg) {
-        PlantNode nodeToDestroy = plantGrid[xArg][yArg];
-        if (plantGrid[xArg][yArg].hasHazard()) {
-            Hazard h = getHazard(xArg, yArg);
-            if (h instanceof Bug) {
-                removedHazards.add((Bug) h);
+    public Bug destroyAt(int xIndex, int yIndex) {
+        Bug b = null;
+        if (!inBounds(xIndex, yIndex) || nodeIsEmpty(xIndex, yIndex)) return b;
+        PlantNode n = plantGrid[xIndex][yIndex];
+        if (n.getHazard() instanceof Bug bug) b = bug;
+        n.unmakeLeaf();
+        for (BranchDirection d : BranchDirection.values()) {
+            if (n.hasBranchInDirection(d)) {
+                n.unmakeBranch(d);
+                IntVector2 next = getNodeTowards(xIndex, yIndex, d);
+                if (!canGrowAtIndex(next.x, next.y)) {
+                    destructionQueue.addLast(new IntVector2(next.x, next.y));
+                    plantCoyoteTimeRemaining = PLANT_COYOTE_TIME;
+                }
             }
         }
-        nodeToDestroy.unmakeLeaf();
         soundController.playSound(destroySound);
-        if (!canGrowAtIndex(xArg, yArg) ||
-                nodeToDestroy.getBranchType(branchDirection.LEFT) ==
-                        Branch.branchType.NORMAL)
-            nodeToDestroy.unmakeBranch(branchDirection.LEFT);
-        else nodeToDestroy.setBranchType(branchDirection.LEFT,
-                                         Branch.branchType.NORMAL);
-        if (!canGrowAtIndex(xArg, yArg) ||
-                nodeToDestroy.getBranchType(branchDirection.MIDDLE) ==
-                        Branch.branchType.NORMAL)
-            nodeToDestroy.unmakeBranch(branchDirection.MIDDLE);
-        else nodeToDestroy.setBranchType(branchDirection.MIDDLE,
-                                         Branch.branchType.NORMAL);
-        if (!canGrowAtIndex(xArg, yArg) ||
-                nodeToDestroy.getBranchType(branchDirection.RIGHT) ==
-                        Branch.branchType.NORMAL)
-            nodeToDestroy.unmakeBranch(branchDirection.RIGHT);
-        else nodeToDestroy.setBranchType(branchDirection.RIGHT,
-                                         Branch.branchType.NORMAL);
-        calculateMaxLeafIndex();
-        plantCoyoteTimeRemaining = plantCoyoteTime;
-        destructionQueue.addLast(new int[]{xArg, yArg});
+        return b;
     }
 
-    public void calculateMaxLeafIndex() {
-        for (int y = height - 1; y >= 0; y--) {
-            for (int x = 1; x < width; x += 2) {
-                if (plantGrid[x][y].hasLeaf()) {
-                    maxPlantIndex.set(x, y);
-                    return;
-                }
-            }
-            for (int x = 0; x < width; x += 2) {
-                if (plantGrid[x][y].hasLeaf()) {
-                    maxPlantIndex.set(x, y);
-                    return;
-                }
+    /**
+     * Returns whether the node at the given indices has no branches nor a leaf.
+     *
+     * @param xIndex x-index of the node to check.
+     * @param yIndex y-index of the node to check.
+     */
+    public boolean nodeIsEmpty(int xIndex, int yIndex) {
+        return plantGrid[xIndex][yIndex].isEmpty();
+    }
+
+    /**
+     * Returns the indices of the node directly adjacent to the given one in
+     * the given direction.
+     *
+     * @param xIndex    x-index of the node.
+     * @param yIndex    y-index of the node.
+     * @param direction direction.
+     */
+    private IntVector2 getNodeTowards(int xIndex,
+                                      int yIndex,
+                                      BranchDirection direction) {
+        int yIndexOffset = plantGrid[xIndex][yIndex].isOffset() ? 1 : 0;
+        switch (direction) {
+            case LEFT:
+                return cacheIntVector.set(xIndex - 1, yIndex + yIndexOffset);
+            case RIGHT:
+                return cacheIntVector.set(xIndex + 1, yIndex + yIndexOffset);
+            case MIDDLE:
+                return cacheIntVector.set(xIndex, yIndex + 1);
+        }
+        return null;
+    }
+
+    /**
+     * Recursively recalculates the maximum plant index values. Should be
+     * called once after any destruction operations. <b>Should not under any
+     * circumstances be called every frame.</b>
+     */
+    public void recalculateMaxPlantIndex() {
+        cacheIntVector.set(0, 0);
+        for (int xIndex = 0; xIndex < width; xIndex++) {
+            IntVector2 candidate = calculateHighestFromNode(xIndex, 0);
+            if (plantGrid[candidate.x][candidate.y].y >
+                    plantGrid[maxPlantIndex.x][maxPlantIndex.y].y)
+                cacheIntVector.set(candidate);
+        }
+        maxPlantIndex = new IntVector2(cacheIntVector);
+    }
+
+    /**
+     * Recursively calculates the higest plant indices from the given node.
+     *
+     * @param xIndex x-index of the node.
+     * @param yIndex y-index of the node.
+     * @return the highest plant indices from the given node.
+     */
+    private IntVector2 calculateHighestFromNode(int xIndex, int yIndex) {
+        PlantNode n = plantGrid[xIndex][yIndex];
+        for (BranchDirection d : BranchDirection.values()) {
+            if (n.hasBranchInDirection(d)) {
+                IntVector2 next = getNodeTowards(xIndex, yIndex, d);
+                IntVector2 highestOnBranch = calculateHighestFromNode(next.x,
+                                                                      next.y);
+                nextNodes.push(new IntVector2(highestOnBranch));
             }
         }
-        maxPlantIndex.set(-1, -1);
+        IntVector2 highest = new IntVector2(xIndex, yIndex);
+        for (IntVector2 next : nextNodes) {
+            if (plantGrid[next.x][next.y].y > plantGrid[highest.x][highest.y].y)
+                highest = next;
+        }
+        nextNodes.clear();
+        return highest;
     }
 
+    /**
+     * @return a list of valid plant x-coordinates towards the top of the
+     * level, using the buffer specified as a constant. To be used for sun
+     * spawning.
+     */
+    public PooledList<Float> getPlantXPositions() {
+        PooledList<Float> xPositions = new PooledList<>();
+        for (int xIndex = 0; xIndex < width; xIndex++) {
+            // The -1 is here to access the top row (index is len - 1)
+            if (plantGrid[xIndex][height - 1 - SUN_SPAWN_BUFFER].isEnabled())
+                xPositions.push(plantGrid[xIndex][0].x);
+        }
+        return xPositions;
+    }
+
+    /**
+     * @return the deductions to the timer associated to bugs biting on leaves.
+     */
     public int countTimerDeductions() {
         int count = 0;
         for (int x = 0; x < width; x++) {
@@ -676,6 +723,11 @@ public class PlantController {
         return count;
     }
 
+    /**
+     * Removes the given hazard from any nodes where it is present.
+     *
+     * @param h hazard to remove.
+     */
     public void removeHazardFromNodes(Hazard h) {
         for (int x = 0; x < width; x++) {
             for (int y = 0; y < height; y++) {
@@ -691,6 +743,11 @@ public class PlantController {
         }
     }
 
+    /**
+     * Removes bugs from dead leaves.
+     *
+     * @return a set of any removed bugs.
+     */
     public ObjectSet<Bug> removeDeadLeafBugs() {
         removedHazards.clear();
         for (int x = 0; x < width; x++) {
@@ -698,7 +755,7 @@ public class PlantController {
                 if (plantGrid[x][y].hasLeaf() &&
                         plantGrid[x][y].getLeaf().fullyEaten()) {
                     Hazard h = plantGrid[x][y].getHazard();
-                    if (h instanceof Bug){
+                    if (h instanceof Bug) {
                         removedHazards.add((Bug) h);
                         plantGrid[x][y].removeHazard();
                         plantGrid[x][y].unmakeLeaf();
@@ -710,138 +767,200 @@ public class PlantController {
     }
 
     /**
-     * draws the branch that the mouse hovers over
+     * Draws a ghost branch preview at the closest growable node in the
+     * best direction given a world position. Does not do anything if no good
+     * node candidates or directions exist.
      *
-     * @param canvas the canvas to draw to
-     * @param x      mouse x position
-     * @param y      mouse y position
+     * @param canvas the game canvas.
+     * @param x      x-coordinate.
+     * @param y      y-coordinate.
      */
     public void drawGhostBranch(GameCanvas canvas, float x, float y) {
-        int xIndex = worldCoordToIndex(x, y)[0];
-        int yIndex = worldCoordToIndex(x, y)[1];
-        branchDirection direction = worldToBranch(x, y);
+        IntVector2 nodeIndex = coordToIndex(x, y);
+        int xIndex = nodeIndex.x;
+        int yIndex = nodeIndex.y;
+        BranchDirection direction = worldToBranch(x, y);
+        // Checks!
+        if (!inBounds(xIndex, yIndex)) return;
         if (direction == null) return;
-        boolean isAtEnds = (xIndex == 0 && direction == branchDirection.LEFT) ||
-                (xIndex == plantGrid.length - 1 &&
-                        direction == branchDirection.RIGHT);
-        int yIndexOffset = plantGrid[xIndex][yIndex].isOffset() ? 1 : 0;
-        boolean canBuildTowards = (direction == branchDirection.LEFT &&
-                inBounds(xIndex - 1, yIndex + yIndexOffset) &&
-                plantGrid[xIndex - 1][yIndex + yIndexOffset].isEnabled() ||
-                direction == branchDirection.RIGHT &&
-                        inBounds(xIndex + 1, yIndex + yIndexOffset) &&
-                        plantGrid[xIndex + 1][yIndex +
-                                yIndexOffset].isEnabled() ||
-                direction == branchDirection.MIDDLE &&
-                        inBounds(xIndex, yIndex + 1) &&
-                        plantGrid[xIndex][yIndex + 1].isEnabled());
-        if (direction != null && !isAtEnds && canBuildTowards &&
-                plantGrid[xIndex][yIndex].isEnabled()) {
-            float angle;
-            switch (direction) {
-                case MIDDLE:
-                    angle = 0;
-                    break;
-                case LEFT:
-                    angle = (float) Math.PI / 3;
-                    break;
-                case RIGHT:
-                    angle = (float) -Math.PI / 3;
-                    break;
-                default:
-                    angle = 0;
-            }
-            Branch branch = new Branch(plantGrid[xIndex][yIndex].getX(),
-                                       plantGrid[xIndex][yIndex].getY(),
-                                       angle,
-                                       Branch.branchType.NORMAL,
-                                       tilemap,
-                                       1);
-            branch.setFilmStrip(branchTexture);
-            branch.drawGhost(canvas);
+        if (plantGrid[xIndex][yIndex].hasBranchInDirection(direction)) return;
+        if (!canBuildTowards(xIndex, yIndex, direction)) return;
+        if (!canGrowAtIndex(xIndex, yIndex)) return;
+        if (!resourceController.canGrowBranch()) return;
+        // End checks
+        float angle;
+        switch (direction) {
+            case MIDDLE:
+                angle = 0;
+                break;
+            case LEFT:
+                angle = (float) Math.PI / 3;
+                break;
+            case RIGHT:
+                angle = (float) -Math.PI / 3;
+                break;
+            default:
+                angle = 0;
         }
+        ghostBranch.setX(plantGrid[xIndex][yIndex].getX());
+        ghostBranch.setY(plantGrid[xIndex][yIndex].getY());
+        ghostBranch.setAngle(angle);
+        ghostBranch.setFilmStrip(branchTexture);
+        ghostBranch.drawGhost(canvas);
+
     }
 
     /**
-     * draws the leaf that the mouse hovers over
+     * Converts a position to a branch direction.
      *
-     * @param canvas the canvas to draw to
-     * @param x      mouse x position
-     * @param y      mouse y position
+     * @param x the x-coordinate.
+     * @param y the y-coordinate.
+     * @return the best branch direction, or null if the position is out of
+     * bounds.
+     */
+    public BranchDirection worldToBranch(float x, float y) {
+        // Convert screen coordinates to grid indices
+        IntVector2 nodeIndex = coordToIndex(x, y);
+        int xIndex = nodeIndex.x;
+        int yIndex = nodeIndex.y;
+        if (!isNodeEnabled(xIndex, yIndex)) return null;
+
+        // Convert indices back to world coordinates to find the center of the cell
+        Vector2 cellCenter = indexToWorldCoord(xIndex, yIndex);
+
+        // Calculate angle from the center of the node to the click position
+        float angle = (float) Math.atan2(y - cellCenter.y, x - cellCenter.x);
+
+        // Normalize angle into a range from 0 to 2*PI
+        angle = (angle + (float) (2 * Math.PI)) % (float) (2 * Math.PI);
+        if (angle >= Math.PI) return null;
+
+        // Divide the space around the node into six segments (each segment is 60 degrees)
+        BranchDirection direction = getBranchDirection(angle);
+
+        // Grow branch
+        if (!branchExists(xIndex, yIndex, direction) &&
+                canGrowAtIndex(xIndex, yIndex)) return direction;
+        return null;
+    }
+
+    /**
+     * Returns the world coordinates of the node at the specified index.
+     *
+     * @param xIndex x-index of the node.
+     * @param yIndex y-index of the node.
+     */
+    public Vector2 indexToWorldCoord(int xIndex, int yIndex) {
+        PlantNode n = plantGrid[xIndex][yIndex];
+        return cacheVector.set(n.x, n.y);
+    }
+
+    /**
+     * Returns the best branch direction given an angle.
+     *
+     * @param angle the angle to check.
+     */
+    private BranchDirection getBranchDirection(float angle) {
+        BranchDirection direction;
+        if (angle < Math.PI / 3) {
+            direction = BranchDirection.RIGHT;
+        } else if (angle < 2 * Math.PI / 3) {
+            direction = BranchDirection.MIDDLE;
+        } else if (angle < Math.PI) {
+            direction = BranchDirection.LEFT;
+        }
+        // For branches under the node
+        else if (angle < 4 * Math.PI / 3) {
+            direction = BranchDirection.RIGHT;
+        } else if (angle < 5 * Math.PI / 3) {
+            direction = BranchDirection.MIDDLE;
+        } else {
+            direction = BranchDirection.LEFT;
+        }
+        return direction;
+    }
+
+    /**
+     * Returns whether or not a branch exists at the given x and y, in the
+     * given direction.
+     *
+     * @param xIndex    x-index of the queried node.
+     * @param yIndex    y-inxed of the queried node.
+     * @param direction direction of the queried node.
+     */
+    public boolean branchExists(int xIndex,
+                                int yIndex,
+                                BranchDirection direction) {
+        return (inBounds(xIndex, yIndex) &&
+                plantGrid[xIndex][yIndex].hasBranchInDirection(direction));
+    }
+
+    /**
+     * Draws a ghost leaf preview at the closest growable node given a world
+     * position. Does not do anything if no good node candidates exist.
+     *
+     * @param canvas the game canvas.
+     * @param x      x-coordinate.
+     * @param y      y-coordinate.
      */
     public void drawGhostLeaf(GameCanvas canvas,
                               Leaf.leafType type,
                               float leafWidth,
                               float x,
                               float y) {
-        int xIndex = screenCoordToIndex(x, y)[0];
-        int yIndex = screenCoordToIndex(x, y)[1];
-        boolean lowerNode = xIndex % 2 == 0;
+        IntVector2 nodeIndex = coordToIndex(x, y);
+        int xIndex = nodeIndex.x;
+        int yIndex = nodeIndex.y;
+        // Checks!
         if (!inBounds(xIndex, yIndex)) return;
-
-        if (!plantGrid[xIndex][yIndex].hasLeaf() &&
-                (yIndex > 0 || !lowerNode)) {
-            float xl = plantGrid[xIndex][yIndex].getX();
-            float yl = plantGrid[xIndex][yIndex].getY();
-            if (screenCoordToIndex(xl, yl)[1] > 0 &&
-                    plantGrid[xIndex][yIndex].hasBranch() ||
-                    leafGrowableAt(xl, yl + 0.5f)) {
-
-                Leaf leaf = new Leaf(xl,
-                                     yl,
-                                     leafWidth,
-                                     PlantNode.LEAF_HEIGHT,
-                                     type,
-                                     tilemap,
-                                     0.75f);
-
-                switch (type) {
-                    case NORMAL:
-                        leaf.setFilmStrip(leafTexture);
-                        break;
-                    case BOUNCY:
-                        leaf.setFilmStrip(bouncyLeafTexture);
-                        break;
-                    case NORMAL1:
-                        leaf.setFilmStrip(leafTextureOne);
-                        break;
-                    case NORMAL2:
-                        leaf.setFilmStrip(leafTextureTwo);
-                        break;
-                }
-                leaf.drawGhost(canvas);
-            }
-
+        if (plantGrid[xIndex][yIndex].hasLeaf()) return;
+        if (yIndex <= 0 && !plantGrid[xIndex][yIndex].isOffset()) return;
+        if (!canGrowAtIndex(xIndex, yIndex)) return;
+        if (!resourceController.canGrowLeaf()) return;
+        // End checks
+        float xl = plantGrid[xIndex][yIndex].getX();
+        float yl = plantGrid[xIndex][yIndex].getY();
+        ghostLeaf.setPosition(xl, yl);
+        ghostLeaf.setDimension(leafWidth, PlantNode.LEAF_HEIGHT);
+        ghostLeaf.setType(type);
+        switch (type) {
+            case NORMAL:
+                ghostLeaf.setFilmStrip(leafTexture);
+                break;
+            case BOUNCY:
+                ghostLeaf.setFilmStrip(bouncyLeafTexture);
+                break;
+            case NORMAL1:
+                ghostLeaf.setFilmStrip(leafTextureOne);
+                break;
+            case NORMAL2:
+                ghostLeaf.setFilmStrip(leafTextureTwo);
+                break;
         }
-    }
-
-    public boolean leafGrowableAt(float xArg, float yArg) {
-        return canGrowAt(xArg, yArg) && resourceController.canGrowLeaf();
+        ghostLeaf.drawGhost(canvas);
     }
 
     /**
-     * Returns whether or not a node can be grown at the given world units
+     * Returns whether or not a node can be grown at the given position.
      *
-     * @param xArg x coordinate of the node in world units
-     * @param yArg y coordinate of the node in world units
-     * @return whether or not a node can be grown at
+     * @param x x-coordinate of the node.
+     * @param y y-coordinate of the node.
      */
-    public boolean canGrowAt(float xArg, float yArg) {
-        int xIndex = worldCoordToIndex(xArg, yArg)[0];
-        int yIndex = worldCoordToIndex(xArg, yArg)[1];
+    public boolean canGrowAt(float x, float y) {
+        IntVector2 nodeIndex = coordToIndex(x, y);
+        int xIndex = nodeIndex.x;
+        int yIndex = nodeIndex.y;
         return canGrowAtIndex(xIndex, yIndex);
     }
 
     /**
-     * draws the glow to the canvas
+     * Draws glow dots at the enabled bottom nodes.
      *
-     * @param canvas the canvas to draw to
+     * @param canvas the canvas.
      */
     public void drawGlow(GameCanvas canvas) {
-        float width = tilemap.getTileWidth();
-        float height = tilemap.getTileHeight();
-        float sclX = width / glowTexture.getWidth();
-        float sclY = height / glowTexture.getHeight();
+        float sclX = tilemapParams.tileWidth() / glowTexture.getWidth();
+        float sclY = tilemapParams.tileHeight() / glowTexture.getHeight();
         for (PlantNode[] col : plantGrid) {
             if (!col[0].isOffset() && col[0].isEnabled()) {
                 canvas.draw(glowTexture,
@@ -858,32 +977,31 @@ public class PlantController {
     }
 
     /**
-     * returns the number of nodes wide the plant is
+     * @return the width of the plant grid.
      */
     public int getWidth() {
         return width;
     }
 
     /**
-     * returns the number of nodes tall the plant is
+     * @return the height of the plant grid.
      */
     public int getHeight() {
         return height;
     }
 
     /**
-     * @return the ResourceController
+     * @return the reference to the resource controller.
      */
     public ResourceController getResourceController() {
         return resourceController;
     }
 
     /**
-     * sets the texture to use when drawing nodes
+     * Gathers all the plant-related assets.
      */
+    //TODO are any unused?
     public void gatherAssets(AssetDirectory directory) {
-
-        nodeTexture = directory.getEntry("gameplay:node", Texture.class);
         branchTexture = new FilmStrip(directory.getEntry("gameplay:branch",
                                                          Texture.class),
                                       1,
@@ -934,7 +1052,6 @@ public class PlantController {
         SoundEffect upgrade = directory.getEntry("upgradeleaf",
                                                  SoundEffect.class);
         upgradeSound = soundController.addSoundEffect(upgrade);
-        //SharedAssetContainer.getInstance().addSound("upgradeleaf", upgradeSound);
         destroySound = soundController.addSoundEffect(directory.getEntry(
                 "destroyplant2",
                 SoundEffect.class));
@@ -947,258 +1064,228 @@ public class PlantController {
     }
 
     /**
-     * returns if the node at the specified x and y has no branches or leaf
+     * Returns the type of branch at the given indices and direction, null if
+     * no branch.
      *
-     * @param xArg x coord of the node to be accessed
-     * @param yArg y coord of the node to be accessed
-     * @return if the node has no branches or leaf
+     * @param xIndex x-index of the node to check.
+     * @param yIndex y-index of the node to check.
      */
-    public boolean nodeIsEmpty(int xArg, int yArg) {
-        return plantGrid[xArg][yArg].isEmpty();
-    }
-
-    //    /**
-    //     * Converts grid indices to screen coordinates.
-    //     *
-    //     * @param xIndex The x index in the grid.
-    //     * @param yIndex The y index in the grid.
-    //     * @return A Vector2 object representing the screen coordinates.
-    //     */
-    //    public Vector2 indexToScreenCoord(int xIndex, int yIndex) {
-    //        float screenX = xOrigin + xIndex * xSpacing;
-    //        float screenY = yOrigin + yIndex * gridSpacing;
-    //        screenY += gridSpacing * .5f * (xIndex % 2);
-    //        return new Vector2(screenX, screenY);
-    //    }
-
-    /**
-     * returns type of branch at given indicies and direction
-     *
-     * @param xArg x index of the branch to check
-     * @param yArg y index of the branch to check
-     * @return the type of the checked branch
-     */
-    public Branch.branchType getBranchType(int xArg,
-                                           int yArg,
-                                           branchDirection direction) {
-        return plantGrid[xArg][yArg].getBranchType(direction);
+    public Branch.BranchType getBranchType(int xIndex,
+                                           int yIndex,
+                                           BranchDirection direction) {
+        return plantGrid[xIndex][yIndex].getBranchType(direction);
     }
 
     /**
-     * returns type of leaf at given indicies
+     * Returns the type of leaf at the given indices, null if no leaf.
      *
-     * @param xArg x index of the branch to check
-     * @param yArg y index of the branch to check
-     * @return the type of the checked branch
+     * @param xIndex x-index of the node to check.
+     * @param yIndex y-index of the node to check.
      */
-    public Leaf.leafType getLeafType(int xArg, int yArg) {
-        return plantGrid[xArg][yArg].getLeafType();
+    public Leaf.leafType getLeafType(int xIndex, int yIndex) {
+        return plantGrid[xIndex][yIndex].getLeafType();
     }
 
-    public boolean isNodeEnabled(int xIndex, int yIndex) {
-        if (!inBounds(xIndex, yIndex)) return false;
-        return plantGrid[xIndex][yIndex].isEnabled();
-    }
-
+    /**
+     * Returns whether the given column of the plant grid is offset.
+     *
+     * @param col the column to check.
+     */
     public boolean isColumnOffset(int col) {
         return plantGrid[col][0].isOffset();
     }
 
     /**
-     * enum containing directions in which a plant can grow from a node
-     */
-    public enum branchDirection {LEFT, MIDDLE, RIGHT}
-
-    /**
-     * representation of a node in the plantGrid
+     * Node in the plant grid.
      */
     public class PlantNode {
 
         /**
-         * height of the leaf at this node
+         * Leaf height.
          */
         public static final float LEAF_HEIGHT = 0.1f;
         /**
-         * width of the leaf at this node
+         * Leaf width.
          */
         public final float leafWidth = 1.5f;
         /**
-         * x coordinate of this node
+         * x-coordinate of this node.
          */
         private final float x;
         /**
-         * y coordinate of this node
+         * y-coordinate of this node.
          */
         private final float y;
         /**
-         * conversion ration for converting between world coords and pixels
+         * Tilemap parameters.
          */
-        private final float worldToPixelConversionRatio;
-        private final Tilemap tilemap;
+        private final Tilemap.TilemapParams tilemapParams;
+        /**
+         * Whether this node is vertically offset.
+         */
         private final boolean isOffset;
+        /**
+         * Whether this node is enabled.
+         */
         private final boolean enabled;
         /**
-         * whether there is a branch in the leftmost slot of this node
+         * The branch facing left at this node, null if none.
          */
         private Branch left;
         /**
-         * whether there is a branch in the middle slot of this node
+         * The branch facing upward at this node, null if none.
          */
         private Branch middle;
         /**
-         * whether there is a branch in the rightmost slot of this node
+         * The branch facing right at this node, null if none.
          */
         private Branch right;
         /**
-         * the leaf for this node
+         * The leaf at this node, null if none.
          */
         private Leaf leaf;
         /**
-         * The hazard at this node, if there is one
+         * The hazard at this node, null if none.
          */
         private Hazard hazard;
 
         /**
-         * initialize a new PlantNode object
+         * Initializes a new PlantNode object with its coordinates, whether
+         * it is vertically offset, whether it is enabled, and a record of
+         * tilemap parameters.
          *
-         * @param x x coordinate of the node
-         * @param y y coordinate of the node
+         * @param x     x-coordinate of the node.
+         * @param y     y-coordinate of the node.
+         * @param isOff whether this node is vertically offset.
+         * @param on    whether this node is enabled.
+         * @param tmp   record of tilemap parameters.
          */
         public PlantNode(float x,
                          float y,
-                         float worldToPixelConversionRatio,
                          boolean isOff,
                          boolean on,
-                         Tilemap tm) {
+                         Tilemap.TilemapParams tmp) {
             this.x = x;
             this.y = y;
-            this.worldToPixelConversionRatio = worldToPixelConversionRatio;
             isOffset = isOff;
             enabled = on;
-            tilemap = tm;
+            tilemapParams = tmp;
         }
 
         /**
-         * make a branch in the desired direction, of the desired type
+         * Makes and returns a branch in the given direction, of the given
+         * type, at this node.
          *
-         * @param direction direction branch is facing
-         * @param type      type of branch to create
-         *                  //         * @param texture   texture the branch should use
-         * @param world     world to assign the branch to
+         * @param direction branch direction.
+         * @param type      branch type.
          */
-        public Branch makeBranch(branchDirection direction,
-                                 Branch.branchType type,
-                                 World world) {
+        public Branch makeBranch(BranchDirection direction,
+                                 Branch.BranchType type) {
             float pi = (float) Math.PI;
             Branch newBranch = null;
-            int[] indices = worldCoordToIndex(x, y);
-            int xIndex = indices[0];
-            int yIndex = indices[1];
+            IntVector2 nodeIndex = coordToIndex(x, y);
+            int xIndex = nodeIndex.x;
+            int yIndex = nodeIndex.y;
             int yIndexOffset = isOffset() ? 1 : 0;
             float maxY;
             switch (direction) {
                 case LEFT:
-                    left = new Branch(x, y, pi / 3, type, tilemap, 1);
+                    left = new Branch(x, y, pi / 3, type, tilemapParams, 1);
                     newBranch = left;
                     maxY = plantGrid[xIndex - 1][yIndex + yIndexOffset].y;
                     if (maxY > getMaxPlantHeight())
                         maxPlantIndex.set(xIndex - 1, yIndex + yIndexOffset);
                     break;
                 case MIDDLE:
-                    middle = new Branch(x, y, 0, type, tilemap, 1);
+                    middle = new Branch(x, y, 0, type, tilemapParams, 1);
                     newBranch = middle;
                     maxY = plantGrid[xIndex][yIndex + 1].y;
                     if (maxY > getMaxPlantHeight())
                         maxPlantIndex.set(xIndex, yIndex + 1);
                     break;
                 case RIGHT:
-                    right = new Branch(x, y, -pi / 3, type, tilemap, 1);
+                    right = new Branch(x, y, -pi / 3, type, tilemapParams, 1);
                     newBranch = right;
                     maxY = plantGrid[xIndex + 1][yIndex + yIndexOffset].y;
                     if (maxY > getMaxPlantHeight())
                         maxPlantIndex.set(xIndex + 1, yIndex + yIndexOffset);
                     break;
             }
-            if (newBranch != null) {
-                switch (type) {
-                    case NORMAL:
-                        newBranch.setFilmStrip(getcurrentBranch());
-                        break;
-                    case REINFORCED:
-                        newBranch.setTexture(enBranchTextureUp);
-                        break;
-                }
+            switch (type) {
+                case NORMAL:
+                    newBranch.setFilmStrip(getRandomBranchFilmstrip());
+                    break;
+                case REINFORCED:
+                    newBranch.setTexture(enBranchTextureUp);
+                    break;
             }
-
             resourceController.decrementGrowBranch();
             return newBranch;
 
         }
 
+        /**
+         * @return whether this node is vertically offset.
+         */
         public boolean isOffset() {
             return isOffset;
         }
 
+        /**
+         * @return whether this node is enabled.
+         */
         public boolean isEnabled() {
             return enabled;
         }
 
         /**
-         * make a leaf of the desired type
+         * Makes and returns a leaf of the given type at this node.
          *
-         * @param type type of leaf to create
+         * @param type type of leaf.
          */
         public Leaf makeLeaf(Leaf.leafType type, float width) {
-            if (screenCoordToIndex(x, y)[1] > 0 && !hasLeaf() && hasBranch() ||
-                    leafGrowableAt(x, y + 0.5f)) {
-                if (type == Leaf.leafType.BOUNCY) width = leafWidth;
-                leaf = new Leaf(x / worldToPixelConversionRatio,
-                                y / worldToPixelConversionRatio,
-                                width,
-                                LEAF_HEIGHT,
-                                type,
-                                tilemap,
-                                0.75f);
-                switch (type) {
-                    case NORMAL:
-                        leaf.setFilmStrip(leafTexture);
-                        break;
-                    case BOUNCY:
-                        leaf.setBounceTexture(bounceTexture);
-                        leaf.setUpgradeTexture(bouncyLeafTexture);
-                        //leaf.setFilmStrip
-                        // (bouncyLeafTexture);
-                        break;
-                    case NORMAL1:
-                        leaf.setFilmStrip(leafTextureOne);
-                        break;
-                    case NORMAL2:
-                        leaf.setFilmStrip(leafTextureTwo);
-                        break;
-                }
-                resourceController.decrementGrowLeaf();
-                return leaf;
+            if (type == Leaf.leafType.BOUNCY) width = leafWidth;
+            leaf = new Leaf(x,
+                            y,
+                            width,
+                            LEAF_HEIGHT,
+                            type,
+                            tilemapParams,
+                            0.75f);
+            switch (type) {
+                case NORMAL:
+                    leaf.setFilmStrip(leafTexture);
+                    break;
+                case BOUNCY:
+                    leaf.setBounceTexture(bounceTexture);
+                    leaf.setUpgradeTexture(bouncyLeafTexture);
+                    break;
+                case NORMAL1:
+                    leaf.setFilmStrip(leafTextureOne);
+                    break;
+                case NORMAL2:
+                    leaf.setFilmStrip(leafTextureTwo);
+                    break;
             }
-            return null;
-        }
-
-        public boolean hasLeaf() {
-            return leaf != null;
-        }
-
-        public boolean hasBranch() {
-            return hasBranchInDirection(branchDirection.LEFT) ||
-                    hasBranchInDirection(branchDirection.RIGHT) ||
-                    hasBranchInDirection(branchDirection.MIDDLE);
+            resourceController.decrementGrowLeaf();
+            return leaf;
         }
 
         /**
-         * if this node has a branch in the given direction
-         *
-         * @param direction the direction to check for a branch in
-         * @return whether the branch in this direction is not destroyed
+         * @return whether this node has a branch.
          */
-        public boolean hasBranchInDirection(branchDirection direction) {
+        public boolean hasBranch() {
+            return hasBranchInDirection(BranchDirection.LEFT) ||
+                    hasBranchInDirection(BranchDirection.RIGHT) ||
+                    hasBranchInDirection(BranchDirection.MIDDLE);
+        }
+
+        /**
+         * Returns whether this node has a branch in the given direction.
+         *
+         * @param direction direction to check for a branch towards.
+         */
+        public boolean hasBranchInDirection(BranchDirection direction) {
             switch (direction) {
                 case MIDDLE:
                     return middle != null && !middle.isRemoved();
@@ -1212,9 +1299,65 @@ public class PlantController {
         }
 
         /**
-         * destroy target branch
+         * Returns the branch at the given direction.
+         *
+         * @param direction direction to check for.
          */
-        public void unmakeBranch(branchDirection direction) {
+        public Branch getBranch(BranchDirection direction) {
+            switch (direction) {
+                case MIDDLE:
+                    return middle;
+                case LEFT:
+                    return left;
+                case RIGHT:
+                    return right;
+                default:
+                    return null;
+            }
+        }
+
+        /**
+         * @return the leaf of this node, null if no leaf.
+         */
+        public Leaf getLeaf() {
+            return leaf;
+        }
+
+        /**
+         * Returns the x-coordinate of this node's position.
+         */
+        public float getX() {
+            return x;
+        }
+
+        /**
+         * Returns the y-coordinate of this node's position.
+         */
+        public float getY() {
+            return y;
+        }
+
+        /**
+         * Resets this node, removing any branches, leaves or hazards.
+         */
+        public void reset() {
+            if (middle != null) {
+                unmakeBranch(BranchDirection.MIDDLE);
+            }
+            if (left != null) {
+                unmakeBranch(BranchDirection.LEFT);
+            }
+            if (right != null) {
+                unmakeBranch(BranchDirection.RIGHT);
+            }
+            unmakeLeaf();
+            removeHazard();
+        }
+
+        /**
+         * Removes any branches from this node.
+         */
+        public void unmakeBranch(BranchDirection direction) {
             switch (direction) {
                 case MIDDLE:
                     if (middle != null) {
@@ -1237,6 +1380,9 @@ public class PlantController {
             }
         }
 
+        /**
+         * Removes any leaf from this node.
+         */
         public void unmakeLeaf() {
             if (leaf != null) {
                 leaf.markRemoved(true);
@@ -1245,116 +1391,76 @@ public class PlantController {
         }
 
         /**
-         * get the branch at a given direction
-         *
-         * @param direction whether getBranch returns the left, middle, or right branch
+         * Removes any hazards from this node.
          */
-        public Branch getBranch(branchDirection direction) {
-            switch (direction) {
-                case MIDDLE:
-                    return middle;
-                case LEFT:
-                    return left;
-                case RIGHT:
-                    return right;
-                default:
-                    return null;
-            }
-        }
-
-        /**
-         * returns the leaf of this node
-         *
-         * @return the leaf of this node
-         */
-        public Leaf getLeaf() {
-            return leaf;
-        }
-
-        /**
-         * returns the x position of this node
-         */
-        public float getX() {
-            return x;
-        }
-
-        /**
-         * returns the y position of this node
-         */
-        public float getY() {
-            return y;
-        }
-
-        public void reset() {
-            if (middle != null) {
-                middle.markRemoved(true);
-            }
-            if (left != null) {
-                left.markRemoved(true);
-            }
-            if (right != null) {
-                right.markRemoved(true);
-            }
-            middle = null;
-            left = null;
-            right = null;
-            leaf = null;
-            hazard = null;
-        }
-
-        public Hazard getHazard() {
-            return hazard;
-        }
-
-        public void setHazard(Hazard h) {
-            hazard = h;
-            if (h != null && leaf != null &&
-                    h.getType() == Model.ModelType.BUG &&
-                    leaf.getLeafType() != Leaf.leafType.BOUNCY) {
-                leaf.setBeingEaten(true);
-            }
-        }
-
         public void removeHazard() {
+            if (hazard != null) hazard.markRemoved(true);
             hazard = null;
             if (leaf != null) {
                 leaf.setBeingEaten(false);
             }
         }
 
+        /**
+         * @return this node's hazard, null if none.
+         */
+        public Hazard getHazard() {
+            return hazard;
+        }
+
+        /**
+         * Sets this node's hazard to the one given.
+         *
+         * @param h hazard.
+         */
+        public void setHazard(Hazard h) {
+            hazard = h;
+            if (leaf != null && h.getType() == Model.ModelType.BUG &&
+                    leaf.getLeafType() != Leaf.leafType.BOUNCY) {
+                leaf.setBeingEaten(true);
+            }
+        }
+
+        /**
+         * @return whether this node has a hazard.
+         */
         public boolean hasHazard() {
             return hazard != null;
         }
 
         /**
-         * returns whether this branch is empty or not
-         *
-         * @return if the branch is empty
+         * @return whether this node is empty.
          */
         public boolean isEmpty() {
-            return !(hasBranchInDirection(branchDirection.LEFT) ||
-                    hasBranchInDirection(branchDirection.RIGHT) ||
-                    hasBranchInDirection(branchDirection.MIDDLE) || hasLeaf());
+            return !(hasBranchInDirection(BranchDirection.LEFT) ||
+                    hasBranchInDirection(BranchDirection.RIGHT) ||
+                    hasBranchInDirection(BranchDirection.MIDDLE) || hasLeaf());
         }
 
         /**
-         * returns the type of branch in the given direction
-         *
-         * @param direction the slot to check
-         * @return the type of branch in the given slot
+         * @return whether this node has a leaf.
          */
-        public Branch.branchType getBranchType(branchDirection direction) {
+        public boolean hasLeaf() {
+            return leaf != null;
+        }
+
+        /**
+         * Returns the type of branch in the given direction, null if no branch.
+         *
+         * @param direction the direction of the branch.
+         */
+        public Branch.BranchType getBranchType(BranchDirection direction) {
             switch (direction) {
                 case LEFT:
-                    if (hasBranchInDirection(branchDirection.LEFT))
+                    if (hasBranchInDirection(BranchDirection.LEFT))
                         return left.getBranchType();
                     else return null;
                 case RIGHT:
-                    if (hasBranchInDirection(branchDirection.RIGHT))
+                    if (hasBranchInDirection(BranchDirection.RIGHT))
                         return right.getBranchType();
                     else return null;
                 case MIDDLE:
-                    if (hasBranchInDirection(branchDirection.MIDDLE))
+                    if (hasBranchInDirection(BranchDirection.MIDDLE))
                         return middle.getBranchType();
                     else return null;
             }
@@ -1363,39 +1469,38 @@ public class PlantController {
         }
 
         /**
-         * sets the type of the branch in the given direction and resets its texture
+         * Sets the type of the branch in the given direction and resets its
+         * texture.
          *
-         * @param direction the slot to set
-         * @param btype     the branch type to set the given slot to
+         * @param direction the direction of the branch.
+         * @param btype     the branch type.
          */
-        public void setBranchType(branchDirection direction,
-                                  Branch.branchType btype) {
+        public void setBranchType(BranchDirection direction,
+                                  Branch.BranchType btype) {
             switch (direction) {
                 case LEFT:
-                    if (hasBranchInDirection(branchDirection.LEFT)) {
+                    if (hasBranchInDirection(BranchDirection.LEFT)) {
                         left.setBranchType(btype);
-                        left.setFilmStrip(getcurrentBranch());
+                        left.setFilmStrip(getRandomBranchFilmstrip());
                     }
                     break;
                 case RIGHT:
-                    if (hasBranchInDirection(branchDirection.RIGHT)) {
+                    if (hasBranchInDirection(BranchDirection.RIGHT)) {
                         right.setBranchType(btype);
-                        right.setFilmStrip(getcurrentBranch());
+                        right.setFilmStrip(getRandomBranchFilmstrip());
                     }
                     break;
                 case MIDDLE:
-                    if (hasBranchInDirection(branchDirection.MIDDLE)) {
+                    if (hasBranchInDirection(BranchDirection.MIDDLE)) {
                         middle.setBranchType(btype);
-                        middle.setFilmStrip(getcurrentBranch());
+                        middle.setFilmStrip(getRandomBranchFilmstrip());
                     }
                     break;
             }
         }
 
         /**
-         * returns the type of leaf at this node, null if no leaf
-         *
-         * @return
+         * @return the type of leaf at this node, null if no leaf.
          */
         public Leaf.leafType getLeafType() {
             if (hasLeaf()) return leaf.getLeafType();

@@ -18,9 +18,9 @@ public abstract class Resource extends CircleObject {
                     float y,
                     float w,
                     float h,
-                    Tilemap tm,
+                    Tilemap.TilemapParams tmp,
                     float texScl) {
-        super(x, y, RESOURCE_RADIUS, tm, texScl);
+        super(x, y, RESOURCE_RADIUS, tmp, texScl);
         width = w;
         height = h;
         zIndex = 3;

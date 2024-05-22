@@ -209,7 +209,7 @@ public class Tilemap {
                     boolean collideTop = tileJson.get("properties")
                             .get(0)
                             .getBoolean("value");
-                    Tile tile = new Tile(this,
+                    Tile tile = new Tile(getTilemapParams(),
                                          new Vector2(x0, y0),
                                          collideTop,
                                          tx);
@@ -286,7 +286,7 @@ public class Tilemap {
                                             tileWidth,
                                             tileHeight,
                                             waterFilmstrip,
-                                            this,
+                                            this.getTilemapParams(),
                                             1);
                         ctrl.addObject(w);
                     }
@@ -327,7 +327,10 @@ public class Tilemap {
                             "tilesets").get(i).getInt("firstgid"));
                     Texture tx = new Texture(
                             "gameplay/tiles/" + tileJson.getString("image"));
-                    Tile tile = new Tile(this, new Vector2(x0, y0), false, tx);
+                    Tile tile = new Tile(getTilemapParams(),
+                                         new Vector2(x0, y0),
+                                         false,
+                                         tx);
                     if (tileJson.get("properties")
                             .get(0)
                             .getString("value")
@@ -344,6 +347,15 @@ public class Tilemap {
                 }
             }
         }
+    }
+
+    public TilemapParams getTilemapParams() {
+        return new TilemapParams(tileWidth,
+                                 tileHeight,
+                                 tilemapWidth,
+                                 tilemapHeight,
+                                 worldWidth,
+                                 worldHeight);
     }
 
     /**
@@ -378,6 +390,12 @@ public class Tilemap {
 
     public PooledList<Float> getBugYVals() {
         return bugYVals;
+    }
+
+    public record TilemapParams(float tileWidth, float tileHeight,
+                                float tilemapWidth, float tilemapHeight,
+                                float worldWidth, float worldHeight) {
+
     }
 
 }

@@ -60,14 +60,14 @@ public class SunController {
             if (timer >= currentDelay) {
                 generateDelay();
                 return new Sun(xGeneration,
-                        yGeneration,
-                        tm.getTileWidth() * 0.5f,
-                        tm.getTileHeight() * 0.5f,
-                        sunCircle,
-                        sunRay,
-                        sunSwirl,
-                        tm,
-                        1);
+                               yGeneration,
+                               tm.getTileWidth() * 0.5f,
+                               tm.getTileHeight() * 0.5f,
+                               sunCircle,
+                               sunRay,
+                               sunSwirl,
+                               tm.getTilemapParams(),
+                               1);
             }
         }
         return null;

@@ -22,12 +22,12 @@ public abstract class Hazard extends BoxObject {
     /**
      * Creates a hazard object.
      */
-    public Hazard(Tilemap tm,
+    public Hazard(Tilemap.TilemapParams tmp,
                   float texScl,
                   Vector2 pos,
                   Vector2 location,
                   int timer) {
-        super(pos.x, pos.y, 0.2f, 0.1f, tm, texScl);
+        super(pos.x, pos.y, 0.2f, 0.1f, tmp, texScl);
         this.location = location;
         this.timer = timer;
         maxTimer = timer;
@@ -99,8 +99,8 @@ public abstract class Hazard extends BoxObject {
      *               //     * @param y      The y position at which to draw.
      */
     public void draw(GameCanvas canvas) {
-        float width = tilemap.getTileWidth() * textureSclInTiles;
-        float height = tilemap.getTileHeight() * textureSclInTiles;
+        float width = tilemapParams.tileWidth() * textureSclInTiles;
+        float height = tilemapParams.tileHeight() * textureSclInTiles;
         float sclX = width / texture.getRegionWidth();
         float sclY = height / texture.getRegionHeight();
 
@@ -125,4 +125,5 @@ public abstract class Hazard extends BoxObject {
     public TextureRegion previousTex() {
         return prevTexture;
     }
+
 }

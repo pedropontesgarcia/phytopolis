@@ -21,7 +21,6 @@ import com.syndic8.phytopolis.util.menu.Menu;
 import com.syndic8.phytopolis.util.menu.MenuContainer;
 import com.syndic8.phytopolis.util.menu.MenuItem;
 import edu.cornell.gdiac.audio.AudioEngine;
-import org.w3c.dom.Text;
 
 import java.util.Arrays;
 
@@ -40,6 +39,8 @@ public class LevelSelectMode extends FadingScreen implements Screen {
     private final float fadeTime = 0.3f;
     private final SoundController soundController;
     private final levelState[] levelStates;
+    private final Stage stage;
+    private final TextButton best;
     private FileHandle saveFile;
     private JsonValue saveJson;
     private int lastBeaten;
@@ -69,8 +70,8 @@ public class LevelSelectMode extends FadingScreen implements Screen {
     private Texture easytext;
     private Texture hardtext;
     private MenuItem arrowItem;
-    private TextButton best;
-    private final Stage stage;
+
+    public enum levelState {LOCKED, UNLOCKED, BEATEN}
 
     public LevelSelectMode(GameCanvas c) {
         canvas = c;
@@ -91,7 +92,6 @@ public class LevelSelectMode extends FadingScreen implements Screen {
         labelStyle.font = font;
         best = new TextButton("BEST:\n", labelStyle);
         stage.addActor(best);
-        //TODO remove this code for showcase/release
         Arrays.fill(levelStates, levelState.LOCKED);
     }
 
@@ -377,13 +377,17 @@ public class LevelSelectMode extends FadingScreen implements Screen {
                         0,
                         canvas.getWidth(),
                         canvas.getHeight());
-            if (i - iOff == selectedPot && levelStates[i] != levelState.LOCKED) {
+            if (i - iOff == selectedPot &&
+                    levelStates[i] != levelState.LOCKED) {
                 canvas.end();
                 float time = saveJson.getFloat("bestTime" + (i + 1));
-                String timeText = "BEST\n" + (time == -1 ? "XX:XX.XXX" : String.format("%02d:%02d.%03d",
-                        (int) (time / 60),
-                        (int) (time % 60),
-                        (int) ((time % 60 - (int) (time % 60)) * 1000)));
+                String timeText = "BEST\n" + (time == -1 ?
+                        "XX:XX.XXX" :
+                        String.format("%02d:%02d.%03d",
+                                      (int) (time / 60),
+                                      (int) (time % 60),
+                                      (int) ((time % 60 - (int) (time % 60)) *
+                                              1000)));
                 best.setStyle(best.getStyle());
                 float x, y;
                 switch (selectedPot % 6) {
@@ -527,7 +531,5 @@ public class LevelSelectMode extends FadingScreen implements Screen {
     public String getLevel() {
         return level;
     }
-
-    public enum levelState {LOCKED, UNLOCKED, BEATEN}
 
 }

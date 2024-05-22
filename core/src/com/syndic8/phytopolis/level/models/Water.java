@@ -8,11 +8,11 @@ import com.syndic8.phytopolis.util.Tilemap;
 
 public class Water extends Resource {
 
-    private static final int REGEN_DELAY = 5;
+    private static final float REGEN_DELAY = 0.1f;
     private static final int MAX_REGEN = 100;
     private final FilmStrip waterFilmstrip;
     private int currRegen;
-    private int currDelay;
+    private float currDelay;
     private float animFrame;
 
     public Water(float x,
@@ -20,9 +20,9 @@ public class Water extends Resource {
                  float w,
                  float h,
                  FilmStrip wf,
-                 Tilemap tm,
+                 Tilemap.TilemapParams tmp,
                  float texScl) {
-        super(x, y, w, h, tm, texScl);
+        super(x, y, w, h, tmp, texScl);
         currRegen = MAX_REGEN;
         currDelay = 0;
         bodyinfo.type = BodyDef.BodyType.StaticBody;
@@ -36,9 +36,9 @@ public class Water extends Resource {
         currDelay = 0;
     }
 
-    public void regenerate() {
+    public void regenerate(float dt) {
         if (currRegen < MAX_REGEN) {
-            currDelay++;
+            currDelay += dt;
             if (currDelay >= REGEN_DELAY) {
                 currDelay -= REGEN_DELAY;
                 currRegen++;

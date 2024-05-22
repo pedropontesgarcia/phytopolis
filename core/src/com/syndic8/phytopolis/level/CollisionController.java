@@ -5,9 +5,7 @@ import com.badlogic.gdx.utils.ObjectSet;
 import com.syndic8.phytopolis.GameplayMode;
 import com.syndic8.phytopolis.InputController;
 import com.syndic8.phytopolis.SoundController;
-import com.syndic8.phytopolis.assets.AssetDirectory;
 import com.syndic8.phytopolis.level.models.*;
-import edu.cornell.gdiac.audio.SoundEffect;
 
 import static com.syndic8.phytopolis.level.PlantController.PlantNode.LEAF_HEIGHT;
 
@@ -320,7 +318,8 @@ public class CollisionController implements ContactListener {
             worldController.addObject(new Indicator(s.getX(),
                                                     s.getY(),
                                                     worldController.getSunIndicatorTexture(),
-                                                    worldController.getTilemap()));
+                                                    worldController.getTilemap()
+                                                            .getTilemapParams()));
             uiController.addTime();
             SoundController.getInstance().playSound(sunSound);
         }
@@ -342,7 +341,8 @@ public class CollisionController implements ContactListener {
                 worldController.addObject(new Indicator(w.getX(),
                                                         w.getY(),
                                                         worldController.getWaterIndicatorTexture(),
-                                                        worldController.getTilemap(),
+                                                        worldController.getTilemap()
+                                                                .getTilemapParams(),
                                                         0.75f));
             }
         }
@@ -389,20 +389,21 @@ public class CollisionController implements ContactListener {
 
     }
 
-//    public void gatherAssets(AssetDirectory directory){
-//        sunSound = SoundController.getInstance().addSoundEffect(directory.getEntry("suncollectsound", SoundEffect.class));
-//        waterCollectSound = SoundController.getInstance().addSoundEffect(directory.getEntry("watercollectsound", SoundEffect.class));
-//        bugStompSound = SoundController.getInstance().addSoundEffect(directory.getEntry("bugstomp", SoundEffect.class));
-//    }
-    public void setSunSound(int i){
+    //    public void gatherAssets(AssetDirectory directory){
+    //        sunSound = SoundController.getInstance().addSoundEffect(directory.getEntry("suncollectsound", SoundEffect.class));
+    //        waterCollectSound = SoundController.getInstance().addSoundEffect(directory.getEntry("watercollectsound", SoundEffect.class));
+    //        bugStompSound = SoundController.getInstance().addSoundEffect(directory.getEntry("bugstomp", SoundEffect.class));
+    //    }
+    public void setSunSound(int i) {
         sunSound = i;
     }
-    public void setWaterCollectSound(int i){
+
+    public void setWaterCollectSound(int i) {
         waterCollectSound = i;
     }
-    public void setBugStompSound(int i){
+
+    public void setBugStompSound(int i) {
         bugStompSound = i;
     }
-
 
 }

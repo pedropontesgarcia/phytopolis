@@ -98,8 +98,11 @@ public abstract class GameObject extends Model {
      * @param x Initial x position in world coordinates
      * @param y Initial y position in world coordinates
      */
-    protected GameObject(float x, float y, Tilemap tm, float texScl) {
-        super(x, y, tm, texScl);
+    protected GameObject(float x,
+                         float y,
+                         Tilemap.TilemapParams tmp,
+                         float texScl) {
+        super(x, y, tmp, texScl);
 
         // Allocate the body information
         bodyinfo = new BodyDef();
@@ -140,13 +143,7 @@ public abstract class GameObject extends Model {
     }
 
     /**
-     * Returns the body type for Box2D physics
-     * <p>
-     * If you want to lock a body in place (e.g. a platform) set this value to STATIC.
-     * KINEMATIC allows the object to move (and some limited collisions), but ignores
-     * external forces (e.g. gravity). DYNAMIC makes this is a full-blown physics object.
-     *
-     * @return the body type for Box2D physics
+     * Sets the body type for Box2D physics.
      */
     public void setBodyType(BodyType value) {
         if (body != null) {
@@ -263,13 +260,20 @@ public abstract class GameObject extends Model {
     }
 
     /**
+     * Create new fixtures for this body, defining the shape
+     * <p>
+     * This is the primary method to override for custom physics objects
+     */
+    protected abstract void createFixtures();
+
+    /**
      * Draws the physics object.
      *
      * @param canvas Drawing context
      */
     public void draw(GameCanvas canvas) {
-        float width = tilemap.getTileWidth() * textureSclInTiles;
-        float height = tilemap.getTileHeight() * textureSclInTiles;
+        float width = tilemapParams.tileWidth() * textureSclInTiles;
+        float height = tilemapParams.tileHeight() * textureSclInTiles;
         float sclX = width / texture.getRegionWidth();
         float sclY = height / texture.getRegionHeight();
         if (texture != null) {
@@ -785,6 +789,8 @@ public abstract class GameObject extends Model {
         return fixture.restitution;
     }
 
+    /// MassData Methods
+
     /**
      * Sets the restitution of this body
      * <p>
@@ -804,8 +810,6 @@ public abstract class GameObject extends Model {
             }
         }
     }
-
-    /// MassData Methods
 
     /**
      * Returns true if this object is a sensor.
@@ -851,19 +855,6 @@ public abstract class GameObject extends Model {
      */
     public Filter getFilterData() {
         return fixture.filter;
-    }    /**
-     * Returns the center of mass of this body
-     * <p>
-     * This method does NOT return a reference to the centroid position. Changes to this
-     * vector will not affect the body.  However, it returns the same vector each time
-     * its is called, and so cannot be used as an allocator.
-     *
-     * @return the center of mass for this physics body
-     */
-    public Vector2 getCentroid() {
-        return (body != null ?
-                body.getLocalCenter() :
-                centroidCache.set(massdata.center));
     }
 
     /**
@@ -894,6 +885,75 @@ public abstract class GameObject extends Model {
                 f.setFilterData(value);
             }
         }
+    }
+
+    /**
+     * Resets this body to use the mass computed from the its shape and density
+     */
+    public void resetMass() {
+        masseffect = false;
+        if (body != null) {
+            body.resetMassData();
+        }
+    }    /**
+     * Returns the center of mass of this body
+     * <p>
+     * This method does NOT return a reference to the centroid position. Changes to this
+     * vector will not affect the body.  However, it returns the same vector each time
+     * its is called, and so cannot be used as an allocator.
+     *
+     * @return the center of mass for this physics body
+     */
+    public Vector2 getCentroid() {
+        return (body != null ?
+                body.getLocalCenter() :
+                centroidCache.set(massdata.center));
+    }
+
+    /**
+     * Sets whether the shape information must be updated.
+     * <p>
+     * Attributes tied to the geometry (and not just forces/position) must wait for
+     * collisions to complete before they are reset.  Shapes (and their properties)
+     * are reset in the update method.
+     *
+     * @param value whether the shape information must be updated.
+     */
+    public void markDirty(boolean value) {
+        isDirty = value;
+    }
+
+    /**
+     * Returns the Box2D body for this object.
+     * <p>
+     * You use this body to add joints and apply forces.
+     *
+     * @return the Box2D body for this object.
+     */
+    public Body getBody() {
+        return body;
+    }
+
+    /**
+     * Returns the physics object tag.
+     * <p>
+     * A tag is a string attached to an object, in order to identify it in debugging.
+     *
+     * @return the physics object tag.
+     */
+    public String getName() {
+        return nametag;
+    }
+
+    /**
+     * Sets the physics object tag.
+     * <p>
+     * A tag is a string attached to an object, in order to identify it in debugging.
+     *
+     * @param value the physics object tag
+     */
+    public void setName(String value) {
+        nametag = value;
     }    /**
      * Sets the center of mass for this physics body
      * <p>
@@ -911,118 +971,6 @@ public abstract class GameObject extends Model {
         if (body != null) {
             body.setMassData(massdata); // Protected accessor?
         }
-    }
-
-    /**
-     * Resets this body to use the mass computed from the its shape and density
-     */
-    public void resetMass() {
-        masseffect = false;
-        if (body != null) {
-            body.resetMassData();
-        }
-    }    /**
-     * Returns the rotational inertia of this body
-     * <p>
-     * For static bodies, the mass and rotational inertia are set to zero. When
-     * a body has fixed rotation, its rotational inertia is zero.
-     *
-     * @return the rotational inertia of this body
-     */
-    public float getInertia() {
-        return (body != null ? body.getInertia() : massdata.I);
-    }
-
-    /**
-     * Sets whether the shape information must be updated.
-     * <p>
-     * Attributes tied to the geometry (and not just forces/position) must wait for
-     * collisions to complete before they are reset.  Shapes (and their properties)
-     * are reset in the update method.
-     *
-     * @param value whether the shape information must be updated.
-     */
-    public void markDirty(boolean value) {
-        isDirty = value;
-    }    /**
-     * Sets the rotational inertia of this body
-     * <p>
-     * For static bodies, the mass and rotational inertia are set to zero. When
-     * a body has fixed rotation, its rotational inertia is zero.
-     *
-     * @param value the rotational inertia of this body
-     */
-    public void setInertia(float value) {
-        if (!masseffect) {
-            masseffect = true;
-            massdata.center.set(getCentroid());
-            massdata.mass = getMass();
-        }
-        massdata.I = value;
-        if (body != null) {
-            body.setMassData(massdata); // Protected accessor?
-        }
-    }
-
-    /**
-     * Returns the Box2D body for this object.
-     * <p>
-     * You use this body to add joints and apply forces.
-     *
-     * @return the Box2D body for this object.
-     */
-    public Body getBody() {
-        return body;
-    }    /**
-     * Returns the mass of this body
-     * <p>
-     * The value is usually in kilograms.
-     *
-     * @return the mass of this body
-     */
-    public float getMass() {
-        return (body != null ? body.getMass() : massdata.mass);
-    }
-
-    /// Garbage Collection Methods
-
-    /**
-     * Returns the physics object tag.
-     * <p>
-     * A tag is a string attached to an object, in order to identify it in debugging.
-     *
-     * @return the physics object tag.
-     */
-    public String getName() {
-        return nametag;
-    }    /**
-     * Sets the mass of this body
-     * <p>
-     * The value is usually in kilograms.
-     *
-     * @param value the mass of this body
-     */
-    public void setMass(float value) {
-        if (!masseffect) {
-            masseffect = true;
-            massdata.center.set(getCentroid());
-            massdata.I = getInertia();
-        }
-        massdata.mass = value;
-        if (body != null) {
-            body.setMassData(massdata); // Protected accessor?
-        }
-    }
-
-    /**
-     * Sets the physics object tag.
-     * <p>
-     * A tag is a string attached to an object, in order to identify it in debugging.
-     *
-     * @param value the physics object tag
-     */
-    public void setName(String value) {
-        nametag = value;
     }
 
     /**
@@ -1049,15 +997,6 @@ public abstract class GameObject extends Model {
         bodyinfo.active = false;
         return false;
     }
-
-    /// DRAWING METHODS
-
-    /**
-     * Create new fixtures for this body, defining the shape
-     * <p>
-     * This is the primary method to override for custom physics objects
-     */
-    protected abstract void createFixtures();
 
     /**
      * Destroys the physics Body(s) of this object if applicable,
@@ -1102,20 +1041,78 @@ public abstract class GameObject extends Model {
      * <p>
      * This is the primary method to override for custom physics objects.
      */
-    protected abstract void releaseFixtures();
+    protected abstract void releaseFixtures();    /**
+     * Returns the rotational inertia of this body
+     * <p>
+     * For static bodies, the mass and rotational inertia are set to zero. When
+     * a body has fixed rotation, its rotational inertia is zero.
+     *
+     * @return the rotational inertia of this body
+     */
+    public float getInertia() {
+        return (body != null ? body.getInertia() : massdata.I);
+    }
 
 
 
 
+
+
+
+    /**
+     * Sets the rotational inertia of this body
+     * <p>
+     * For static bodies, the mass and rotational inertia are set to zero. When
+     * a body has fixed rotation, its rotational inertia is zero.
+     *
+     * @param value the rotational inertia of this body
+     */
+    public void setInertia(float value) {
+        if (!masseffect) {
+            masseffect = true;
+            massdata.center.set(getCentroid());
+            massdata.mass = getMass();
+        }
+        massdata.I = value;
+        if (body != null) {
+            body.setMassData(massdata); // Protected accessor?
+        }
+    }
+
+    /**
+     * Returns the mass of this body
+     * <p>
+     * The value is usually in kilograms.
+     *
+     * @return the mass of this body
+     */
+    public float getMass() {
+        return (body != null ? body.getMass() : massdata.mass);
+    }
+
+    /// Garbage Collection Methods
+
+    /**
+     * Sets the mass of this body
+     * <p>
+     * The value is usually in kilograms.
+     *
+     * @param value the mass of this body
+     */
+    public void setMass(float value) {
+        if (!masseffect) {
+            masseffect = true;
+            massdata.center.set(getCentroid());
+            massdata.I = getInertia();
+        }
+        massdata.mass = value;
+        if (body != null) {
+            body.setMassData(massdata); // Protected accessor?
+        }
+    }
+
+    /// DRAWING METHODS
 
     /// Abstract Methods
-
-
-
-
-
-
-
-
 
 }

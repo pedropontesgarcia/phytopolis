@@ -15,6 +15,7 @@ import com.syndic8.phytopolis.GameCanvas;
 import com.syndic8.phytopolis.InputController;
 import com.syndic8.phytopolis.assets.AssetDirectory;
 import com.syndic8.phytopolis.level.models.Player;
+import com.syndic8.phytopolis.math.IntVector2;
 import com.syndic8.phytopolis.util.FilmStrip;
 import com.syndic8.phytopolis.util.SharedAssetContainer;
 import com.syndic8.phytopolis.util.Tilemap;
@@ -253,10 +254,10 @@ public class UIController {
         if (!Float.isNaN(unprojMousePos.x)) { // make sure we aren't tabbed out
 
             float distance = unprojMousePos.dst(avatarX, avatarY);
-            int[] indices = pc.worldCoordToIndex(unprojMousePos.x,
-                                                 unprojMousePos.y + 0.5f *
-                                                         tm.getTileHeight());
-            boolean enabled = pc.isNodeEnabled(indices[0], indices[1]);
+            IntVector2 node = pc.coordToIndex(unprojMousePos.x,
+                                              unprojMousePos.y + 0.5f *
+                                                      tm.getTileHeight());
+            boolean enabled = pc.isNodeEnabled(node.x, node.y);
             if (distance > tm.getTileHeight() * RANGE_SCALE || !enabled) {
                 Gdx.graphics.setCursor(normalCursor);
             } else {

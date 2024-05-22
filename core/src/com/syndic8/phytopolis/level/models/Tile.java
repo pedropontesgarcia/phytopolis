@@ -15,16 +15,19 @@ public class Tile extends Model {
     private final float height;
     private PolygonObject collider;
 
-    public Tile(Tilemap tm, Vector2 pos, boolean collideTop, Texture tx) {
-        super(pos.x, pos.y, tm, 1);
+    public Tile(Tilemap.TilemapParams tmp,
+                Vector2 pos,
+                boolean collideTop,
+                Texture tx) {
+        super(pos.x, pos.y, tmp, 1);
         type = (collideTop ? ModelType.TILE_FULL : ModelType.TILE_NOTOP);
         texture = tx;
-        width = tm.getTileWidth();
-        height = tm.getTileHeight();
+        width = tmp.tileWidth();
+        height = tmp.tileHeight();
     }
 
     public void addCollider(float[] pts) {
-        collider = new PolygonObject(pts, 0, 0, tilemap, 1);
+        collider = new PolygonObject(pts, 0, 0, tilemapParams, 1);
         collider.setBodyType(BodyDef.BodyType.StaticBody);
         collider.setDensity(0);
         collider.setFriction(0);
@@ -55,10 +58,10 @@ public class Tile extends Model {
                     height);
     }
 
-//    @Override
-//    public void drawDebug(GameCanvas canvas) {
-//
-//    }
+    //    @Override
+    //    public void drawDebug(GameCanvas canvas) {
+    //
+    //    }
 
     public PolygonObject getCollider() {
         return collider;

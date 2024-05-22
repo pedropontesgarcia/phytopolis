@@ -13,15 +13,19 @@ public class Indicator extends Model {
     private final Color color;
     private float tmr;
 
-    public Indicator(float x, float y, Texture tx, Tilemap tilemap) {
-        super(x, y, tilemap, 1.5f);
+    public Indicator(float x, float y, Texture tx, Tilemap.TilemapParams tmp) {
+        super(x, y, tmp, 1.5f);
         texture = tx;
         tmr = 0;
         color = new Color(Color.WHITE);
     }
 
-    public Indicator(float x, float y, Texture tx, Tilemap tilemap, float scl) {
-        super(x, y, tilemap, 1.5f * scl);
+    public Indicator(float x,
+                     float y,
+                     Texture tx,
+                     Tilemap.TilemapParams tmp,
+                     float scl) {
+        super(x, y, tmp, 1.5f * scl);
         texture = tx;
         tmr = 0;
         color = new Color(Color.WHITE);
@@ -50,8 +54,8 @@ public class Indicator extends Model {
     @Override
     public void draw(GameCanvas canvas) {
         color.set(1, 1, 1, 1f - tmr / LIFESPAN);
-        float width = tilemap.getTileWidth() * textureSclInTiles;
-        float height = tilemap.getTileHeight() * textureSclInTiles;
+        float width = tilemapParams.tileWidth() * textureSclInTiles;
+        float height = tilemapParams.tileHeight() * textureSclInTiles;
         float sclX = width / texture.getWidth();
         float sclY = height / texture.getHeight();
         canvas.draw(texture,

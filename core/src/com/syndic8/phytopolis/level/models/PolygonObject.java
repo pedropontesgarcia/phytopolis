@@ -89,8 +89,10 @@ public class PolygonObject extends GameObject {
      *
      * @param points The polygon vertices
      */
-    public PolygonObject(float[] points, Tilemap tm, float texScl) {
-        this(points, 0, 0, tm, texScl);
+    public PolygonObject(float[] points,
+                         Tilemap.TilemapParams tmp,
+                         float texScl) {
+        this(points, 0, 0, tmp, texScl);
     }
 
     /**
@@ -108,9 +110,9 @@ public class PolygonObject extends GameObject {
     public PolygonObject(float[] points,
                          float x,
                          float y,
-                         Tilemap tm,
+                         Tilemap.TilemapParams tmp,
                          float texScl) {
-        super(x, y, tm, texScl);
+        super(x, y, tmp, texScl);
         assert points.length % 2 == 0;
 
         // Compute the bounds.
@@ -393,19 +395,6 @@ public class PolygonObject extends GameObject {
     }
 
     /**
-     * Release the fixtures for this body, reseting the shape
-     * <p>
-     * This is the primary method to override for custom physics objects
-     */
-    protected void releaseFixtures() {
-        if (geoms[0] != null) {
-            for (Fixture fix : geoms) {
-                body.destroyFixture(fix);
-            }
-        }
-    }
-
-    /**
      * Draws the physics object.
      *
      * @param canvas Drawing context
@@ -421,6 +410,19 @@ public class PolygonObject extends GameObject {
                         getAngle(),
                         1,
                         1);
+        }
+    }
+
+    /**
+     * Release the fixtures for this body, reseting the shape
+     * <p>
+     * This is the primary method to override for custom physics objects
+     */
+    protected void releaseFixtures() {
+        if (geoms[0] != null) {
+            for (Fixture fix : geoms) {
+                body.destroyFixture(fix);
+            }
         }
     }
 

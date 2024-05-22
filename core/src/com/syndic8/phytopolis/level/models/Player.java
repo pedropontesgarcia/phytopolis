@@ -118,14 +118,14 @@ public class Player extends CapsuleObject {
                   FilmStrip jump,
                   FilmStrip jog,
                   FilmStrip idle,
-                  Tilemap tm,
+                  Tilemap.TilemapParams tmp,
                   float texScl) {
         // The shrink factors fit the image to a tigher hitbox
         super(data.get("pos").getFloat(0),
               data.get("pos").getFloat(1),
               width * data.get("shrink").getFloat(0),
               height * data.get("shrink").getFloat(1),
-              tm,
+              tmp,
               texScl);
         setDensity(data.getFloat("density", 0));
         setFriction(data.getFloat("friction",
@@ -300,8 +300,8 @@ public class Player extends CapsuleObject {
     public void draw(GameCanvas canvas) {
         float effect = faceRight ? 1.0f : -1.0f;
 
-        float width = tilemap.getTileWidth() * textureSclInTiles;
-        float height = tilemap.getTileHeight() * textureSclInTiles;
+        float width = tilemapParams.tileWidth() * textureSclInTiles;
+        float height = tilemapParams.tileHeight() * textureSclInTiles;
         float sclX = width / texture.getRegionWidth();
         float sclY = height / texture.getRegionHeight();
 
