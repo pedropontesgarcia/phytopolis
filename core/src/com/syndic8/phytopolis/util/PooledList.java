@@ -251,7 +251,6 @@
       *
       * @param index   the position to add the element
       * @param element the element to add
-      * @return whether the addition succeeeded
       */
      // Inserts the specified element at the specified position in this list (optional operation).
      public void add(int index, E element) {
