@@ -21,11 +21,7 @@ Download the [latest release](https://github.coecis.cornell.edu/pp457/phytopolis
 
 ## Roadmap
 
-- **Level design:** Finalize remaining levels to complete the game's progression.
-- **Sound effects:** Include more audio effects to enhance gameplay experience.
-- **Visual improvements:** Introduce a more varied tile set and enhance visual feedback for player and environment interactions.
-- **Tutorial:** Implement tutorial cues in the initial levels to guide players.
-- **Additional features:** Incorporate bug nests and decay zones for added complexity and challenge.
+- We are currently preparing a Steam release after a few minor fixes are completed.
 
 ## Authorship
 
