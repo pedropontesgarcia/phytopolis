@@ -21,6 +21,9 @@ import edu.cornell.gdiac.audio.SoundEffect;
 
 import java.util.Random;
 
+/**
+ * Subcontroller for the plant grid and its nodes.
+ */
 public class PlantController {
 
     /**
@@ -80,7 +83,7 @@ public class PlantController {
     private final IntVector2 cacheIntVector = new IntVector2();
 
     // Begin leaf textures
-    public FilmStrip bounceTexture;
+    protected FilmStrip bounceTexture;
     protected FilmStrip leafTexture;
     protected FilmStrip bouncyLeafTexture;
     protected FilmStrip leafTextureOne;
@@ -445,15 +448,15 @@ public class PlantController {
     /**
      * Grows a normal leaf at the specified node.
      *
-     * @param x     x-index of the node.
-     * @param y     y-index of the node.
-     * @param lt    type of leaf to grow.
-     * @param width width of the leaf.
+     * @param xIndex x-index of the node.
+     * @param yIndex y-index of the node.
+     * @param lt     type of leaf to grow.
+     * @param width  width of the leaf.
      * @return the grown leaf object, null if it could not be grown.
      */
     private Leaf growNormalLeaf(int xIndex,
                                 int yIndex,
-                                Leaf.leafType type,
+                                Leaf.leafType lt,
                                 float width) {
         if (!resourceController.canGrowLeaf()) {
             resourceController.setNotEnough(true);
@@ -466,7 +469,7 @@ public class PlantController {
             return null;
         }
         soundController.playSound(leafSound);
-        return plantGrid[xIndex][yIndex].makeLeaf(type, width);
+        return plantGrid[xIndex][yIndex].makeLeaf(lt, width);
 
     }
 
@@ -765,7 +768,6 @@ public class PlantController {
                         plantGrid[x][y].getLeaf().fullyEaten()) {
                     Hazard h = plantGrid[x][y].getHazard();
                     if (h instanceof Bug b) {
-                        System.out.println("Bug removed!");
                         removedHazards.add(b);
                         plantGrid[x][y].removeHazard();
                         plantGrid[x][y].unmakeLeaf();
@@ -1334,14 +1336,14 @@ public class PlantController {
         }
 
         /**
-         * Returns the x-coordinate of this node's position.
+         * @return the x-coordinate of this node's position.
          */
         public float getX() {
             return x;
         }
 
         /**
-         * Returns the y-coordinate of this node's position.
+         * @return the y-coordinate of this node's position.
          */
         public float getY() {
             return y;
